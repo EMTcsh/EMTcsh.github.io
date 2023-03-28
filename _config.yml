@@ -18,7 +18,7 @@ minimal_mistakes_skin    :  "air" #"default", "aqua", "contrast", "dark", "dirt"
 locale                   : "en-US"
 title                    : "Mountain Rescue Education"
 title_separator          : "-"
-subtitle                 : Emergency Medical Rescue Team
+subtitle                 : "Emergency Medical Rescue Team"
 name                     : "Paramedic Choi.SungHyun"
 description              : "Rescue Medical Education Website."
 url                      : "https://EMTcsh.github.io"
