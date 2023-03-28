@@ -18,7 +18,7 @@ minimal_mistakes_skin    : "default" # "air", "aqua", "contrast", "dark", "dirt"
 locale                   : "en-US"
 title                    : "Mountain Rescue Medical Education"
 title_separator          : "-"
-subtitle                 : # site tagline that appears below site title in masthead
+subtitle                 : Emergency Medical Education
 name                     : "Paramedic Choi.SungHyun"
 description              : "Rescue Medical Education Website."
 url                      : "https://EMTcsh.github.io"
