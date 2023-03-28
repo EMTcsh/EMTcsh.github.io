@@ -12,13 +12,13 @@
 
 # theme                  : "minimal-mistakes-jekyll"
 # remote_theme           : "mmistakes/minimal-mistakes"
-minimal_mistakes_skin    : "default" # "air", "aqua", "contrast", "dark", "dirt", "neon", "mint", "plum", "sunrise"
+minimal_mistakes_skin    :  "air" #"default", "aqua", "contrast", "dark", "dirt", "neon", "mint", "plum", "sunrise"
 
 # Site Settings
 locale                   : "en-US"
-title                    : "Mountain Rescue Medical Education"
+title                    : "Mountain Rescue Education"
 title_separator          : "-"
-subtitle                 : Emergency Medical Education
+subtitle                 : Emergency Medical Rescue Team
 name                     : "Paramedic Choi.SungHyun"
 description              : "Rescue Medical Education Website."
 url                      : "https://EMTcsh.github.io"
