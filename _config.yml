@@ -107,7 +107,7 @@ author:
   name             : "Choi SungHyun"
   avatar           : # path of avatar image, e.g. "/assets/images/bio-photo.jpg"
   bio              : "I am a **Paramedic**." 
-                   : "Emergnecy Medical Technician."
+  bio              : "Emergnecy Medical Technician."
   location         : "GwanJu. Korea."
   email            :
   links:
