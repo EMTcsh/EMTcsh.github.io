@@ -10,7 +10,7 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 60vh;
+            height: 100vh; /* Changed to 100vh to use the full viewport height */
             margin: 0;
             background-color: #f0f0f0;
         }
@@ -71,6 +71,8 @@
             margin-top: 30px;
             border-top: 1px solid #ddd;
             padding-top: 10px;
+            max-height: 200px; /* Fixed height for scroll area */
+            overflow-y: auto; /* Enable vertical scrolling */
         }
         .board-item {
             border-bottom: 1px solid #ddd;
@@ -89,42 +91,60 @@
     <div class="container">
         <h1>그라스고우 혼수 척도 계산기</h1>
         
-        <div class="form-group">
-            <label for="name">요구조자 이름</label>
-            <input type="text" id="name" placeholder="이름을 입력하세요">
-        </div>
-        
-        <div class="form-group">
-            <label for="eye">눈 반응 (Eye Opening)</label>
-            <select id="eye">
-                <option value="4">4점: 스스로 눈을 뜸</option>
-                <option value="3">3점: 자극에 반응하여 눈을 뜸</option>
-                <option value="2">2점: 통증 자극에 반응하여 눈을 뜸</option>
-                <option value="1">1점: 눈을 뜨지 않음</option>
-            </select>
-        </div>
-        <div class="form-group">
-            <label for="verbal">언어 반응 (Verbal Response)</label>
-            <select id="verbal">
-                <option value="5">5점: 대화가 가능하고 혼동되지 않음</option>
-                <option value="4">4점: 혼동된 대답</option>
-                <option value="3">3점: 단어는 말하지만 의미가 없음</option>
-                <option value="2">2점: 소리만 내고 의미가 없음</option>
-                <option value="1">1점: 반응이 없음</option>
-            </select>
-        </div>
-        <div class="form-group">
-            <label for="motor">운동 반응 (Motor Response)</label>
-            <select id="motor">
-                <option value="6">6점: 명령에 따라 움직임</option>
-                <option value="5">5점: 통증 자극에 적절히 반응하여 팔을 움직임</option>
-                <option value="4">4점: 통증 자극에 비정상적인 반응</option>
-                <option value="3">3점: 통증 자극에 굳어짐 (비정상적인 신전)</option>
-                <option value="2">2점: 통증 자극에 굳어지며 비정상적인 굴곡</option>
-                <option value="1">1점: 반응이 없음</option>
-            </select>
-        </div>
-        <button onclick="calculateGCS()">계산하기</button>
+        <form id="gcsForm" onsubmit="return calculateGCS()">
+            <div class="form-group">
+                <label for="name">요구조자 이름</label>
+                <input type="text" id="name" placeholder="이름을 입력하세요" aria-label="요구조자 이름">
+            </div>
+            
+            <div class="form-group">
+                <label for="age">나이</label>
+                <input type="number" id="age" placeholder="나이를 입력하세요" aria-label="나이">
+            </div>
+            
+            <div class="form-group">
+                <label for="gender">성별</label>
+                <select id="gender" aria-label="성별">
+                    <option value="">선택하세요</option>
+                    <option value="male">남성</option>
+                    <option value="female">여성</option>
+                    <option value="other">기타</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="eye">눈 반응 (Eye Opening)</label>
+                <select id="eye" aria-label="눈 반응">
+                    <option value="4">4점: 스스로 눈을 뜸</option>
+                    <option value="3">3점: 자극에 반응하여 눈을 뜸</option>
+                    <option value="2">2점: 통증 자극에 반응하여 눈을 뜸</option>
+                    <option value="1">1점: 눈을 뜨지 않음</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="verbal">언어 반응 (Verbal Response)</label>
+                <select id="verbal" aria-label="언어 반응">
+                    <option value="5">5점: 대화가 가능하고 혼동되지 않음</option>
+                    <option value="4">4점: 혼동된 대답</option>
+                    <option value="3">3점: 단어는 말하지만 의미가 없음</option>
+                    <option value="2">2점: 소리만 내고 의미가 없음</option>
+                    <option value="1">1점: 반응이 없음</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="motor">운동 반응 (Motor Response)</label>
+                <select id="motor" aria-label="운동 반응">
+                    <option value="6">6점: 명령에 따라 움직임</option>
+                    <option value="5">5점: 통증 자극에 적절히 반응하여 팔을 움직임</option>
+                    <option value="4">4점: 통증 자극에 비정상적인 반응</option>
+                    <option value="3">3점: 통증 자극에 굳어짐 (비정상적인 신전)</option>
+                    <option value="2">2점: 통증 자극에 굳어지며 비정상적인 굴곡</option>
+                    <option value="1">1점: 반응이 없음</option>
+                </select>
+            </div>
+            <button type="submit">계산하기</button>
+            <button type="button" onclick="resetForm()">초기화</button>
+        </form>
         <div class="result" id="result"></div>
         <div class="footer" id="footer"></div>
         
@@ -136,24 +156,32 @@
     <script>
         function calculateGCS() {
             const name = document.getElementById('name').value.trim();
+            const age = document.getElementById('age').value.trim();
+            const gender = document.getElementById('gender').value;
             const eye = parseInt(document.getElementById('eye').value, 10);
             const verbal = parseInt(document.getElementById('verbal').value, 10);
             const motor = parseInt(document.getElementById('motor').value, 10);
             const total = eye + verbal + motor;
+
             const resultText = `총 GCS 점수: ${total}`;
-            const footerText = name ? `요구조자: ${name}` : '요구조자: 이름이 입력되지 않았습니다';
-            
+            const footerText = name ? 
+                `요구조자: ${name}, 나이: ${age}, 성별: ${gender || '미선택'}` : 
+                '요구조자: 이름이 입력되지 않았습니다';
+
             document.getElementById('result').innerText = resultText;
             document.getElementById('footer').innerText = footerText;
 
             if (name) {
-                addToBoard(name, total);
+                addToBoard(name, age, gender, total);
             } else {
                 alert('요구조자 이름을 입력하세요.');
+                return false; // Prevent form submission
             }
+
+            return false; // Prevent form submission
         }
 
-        function addToBoard(name, total) {
+        function addToBoard(name, age, gender, total) {
             const board = document.getElementById('board');
             const boardItem = document.createElement('div');
             boardItem.className = 'board-item';
@@ -166,10 +194,16 @@
             const timestamp = `${now.getFullYear()}-${now.getMonth() + 1}-${now.getDate()} ${hours}:${minutes}:${seconds}`;
 
             boardItem.innerHTML = `
-                <div>요구조자: ${name} - 총 GCS 점수: ${total}</div>
+                <div>요구조자: ${name} - 나이: ${age}, 성별: ${gender || '미선택'} - 총 GCS 점수: ${total}</div>
                 <div class="timestamp">시간: ${timestamp}</div>
             `;
             board.appendChild(boardItem);
+        }
+
+        function resetForm() {
+            document.getElementById('gcsForm').reset();
+            document.getElementById('result').innerText = '';
+            document.getElementById('footer').innerText = '';
         }
     </script>
 </body>
