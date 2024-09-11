@@ -10,7 +10,7 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 50vh;
+            height: 100vh;
             margin: 0;
             background-color: #f0f0f0;
         }
@@ -19,6 +19,7 @@
             padding: 20px;
             border-radius: 10px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 300px;
         }
         h1 {
             font-size: 24px;
@@ -37,10 +38,29 @@
             border: 1px solid #ddd;
             border-radius: 5px;
         }
+        button {
+            width: 100%;
+            padding: 10px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
         .result {
             margin-top: 20px;
             font-size: 18px;
             font-weight: bold;
+        }
+        .footer {
+            margin-top: 20px;
+            font-size: 14px;
+            color: #555;
+            text-align: center;
         }
     </style>
 </head>
@@ -79,6 +99,22 @@
         </div>
         <button onclick="calculateGCS()">계산하기</button>
         <div class="result" id="result"></div>
+        <div class="footer">
+            작성자: [당신의 이름]
+        </div>
+    </div>
+    <script>
+        function calculateGCS() {
+            const eye = parseInt(document.getElementById('eye').value, 10);
+            const verbal = parseInt(document.getElementById('verbal').value, 10);
+            const motor = parseInt(document.getElementById('motor').value, 10);
+            const total = eye + verbal + motor;
+            document.getElementById('result').innerText = `총 GCS 점수: ${total}`;
+        }
+    </script>
+</body>
+</html>
+
     </div>
     <script>
         function calculateGCS() {
