@@ -3,4 +3,97 @@ layout: home
 author_profile: true
 title:  "산악구조대 응급처치 교육자료실."
 ---
-블로그 재작중
+Paramedic GCS
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>그라스고우 혼수 척도 계산기</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+        }
+        .container {
+            background: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .result {
+            margin-top: 20px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>그라스고우 혼수 척도 계산기</h1>
+        <div class="form-group">
+            <label for="eye">눈 반응 (Eye Opening)</label>
+            <select id="eye">
+                <option value="4">4점: 스스로 눈을 뜸</option>
+                <option value="3">3점: 자극에 반응하여 눈을 뜸</option>
+                <option value="2">2점: 통증 자극에 반응하여 눈을 뜸</option>
+                <option value="1">1점: 눈을 뜨지 않음</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="verbal">언어 반응 (Verbal Response)</label>
+            <select id="verbal">
+                <option value="5">5점: 대화가 가능하고 혼동되지 않음</option>
+                <option value="4">4점: 혼동된 대답</option>
+                <option value="3">3점: 단어는 말하지만 의미가 없음</option>
+                <option value="2">2점: 소리만 내고 의미가 없음</option>
+                <option value="1">1점: 반응이 없음</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="motor">운동 반응 (Motor Response)</label>
+            <select id="motor">
+                <option value="6">6점: 명령에 따라 움직임</option>
+                <option value="5">5점: 통증 자극에 적절히 반응하여 팔을 움직임</option>
+                <option value="4">4점: 통증 자극에 비정상적인 반응</option>
+                <option value="3">3점: 통증 자극에 굳어짐 (비정상적인 신전)</option>
+                <option value="2">2점: 통증 자극에 굳어지며 비정상적인 굴곡</option>
+                <option value="1">1점: 반응이 없음</option>
+            </select>
+        </div>
+        <button onclick="calculateGCS()">계산하기</button>
+        <div class="result" id="result"></div>
+    </div>
+    <script>
+        function calculateGCS() {
+            const eye = parseInt(document.getElementById('eye').value, 10);
+            const verbal = parseInt(document.getElementById('verbal').value, 10);
+            const motor = parseInt(document.getElementById('motor').value, 10);
+            const total = eye + verbal + motor;
+            document.getElementById('result').innerText = `총 GCS 점수: ${total}`;
+        }
+    </script>
+</body>
+</html>
