@@ -10,7 +10,7 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 60vh;
+            height: 100vh;
             margin: 0;
             background-color: #f0f0f0;
         }
@@ -19,7 +19,7 @@
             padding: 20px;
             border-radius: 10px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            width: 400px; /* Width of the container */
+            width: 500px; /* Adjusted width for container */
         }
         h1 {
             font-size: 24px;
@@ -33,23 +33,23 @@
             margin-bottom: 5px;
         }
         select, input {
-            width: 100%;
-            padding: 12px; /* Adjusted padding */
+            width: calc(100% - 22px);
+            padding: 12px;
             border: 1px solid #ddd;
             border-radius: 5px;
             box-sizing: border-box;
         }
         input {
-            height: 45px; /* Adjusted height for input field */
+            height: 45px;
         }
         button {
             width: 100%;
-            padding: 12px; /* Adjusted padding */
+            padding: 12px;
             background-color: #007bff;
             color: #fff;
             border: none;
             border-radius: 5px;
-            font-size: 18px; /* Adjusted font size */
+            font-size: 18px;
             cursor: pointer;
             margin-top: 10px;
         }
@@ -67,6 +67,22 @@
             color: #555;
             text-align: center;
         }
+        .board {
+            margin-top: 30px;
+            border-top: 1px solid #ddd;
+            padding-top: 10px;
+        }
+        .board-item {
+            border-bottom: 1px solid #ddd;
+            padding: 10px 0;
+        }
+        .board-item:last-child {
+            border-bottom: none;
+        }
+        .board-item .timestamp {
+            font-size: 12px;
+            color: #888;
+        }
     </style>
 </head>
 <body>
@@ -74,7 +90,7 @@
         <h1>그라스고우 혼수 척도 계산기</h1>
         
         <div class="form-group">
-            <label for="name">응급구조사 이름</label>
+            <label for="name">작성자 이름</label>
             <input type="text" id="name" placeholder="이름을 입력하세요">
         </div>
         
@@ -110,10 +126,13 @@
         </div>
         <button onclick="calculateGCS()">계산하기</button>
         <div class="result" id="result"></div>
-        <div class="footer" id="footer">
-            <!-- 이름이 여기 표시됩니다 -->
+        <div class="footer" id="footer"></div>
+        
+        <div class="board" id="board">
+            <h2>게시판</h2>
         </div>
     </div>
+
     <script>
         function calculateGCS() {
             const name = document.getElementById('name').value.trim();
@@ -126,6 +145,31 @@
             
             document.getElementById('result').innerText = resultText;
             document.getElementById('footer').innerText = footerText;
+
+            if (name) {
+                addToBoard(name, total);
+            } else {
+                alert('작성자 이름을 입력하세요.');
+            }
+        }
+
+        function addToBoard(name, total) {
+            const board = document.getElementById('board');
+            const boardItem = document.createElement('div');
+            boardItem.className = 'board-item';
+
+            // Get current time
+            const now = new Date();
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const seconds = String(now.getSeconds()).padStart(2, '0');
+            const timestamp = `${now.getFullYear()}-${now.getMonth() + 1}-${now.getDate()} ${hours}:${minutes}:${seconds}`;
+
+            boardItem.innerHTML = `
+                <div>작성자: ${name} - 총 GCS 점수: ${total}</div>
+                <div class="timestamp">시간: ${timestamp}</div>
+            `;
+            board.appendChild(boardItem);
         }
     </script>
 </body>
