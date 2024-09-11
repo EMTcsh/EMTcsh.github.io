@@ -10,7 +10,7 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 80vh;
+            height: 100vh;
             margin: 0;
             background-color: #f0f0f0;
         }
@@ -33,10 +33,14 @@
             margin-bottom: 5px;
         }
         select, input {
-            width: 100%;
+            width: calc(100% - 22px); /* Adjusted width to account for padding and border */
             padding: 10px;
             border: 1px solid #ddd;
             border-radius: 5px;
+            box-sizing: border-box;
+        }
+        input {
+            height: 40px; /* Adjusted height for the input field */
         }
         button {
             width: 100%;
