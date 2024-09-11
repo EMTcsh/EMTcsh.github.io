@@ -141,7 +141,7 @@
             const motor = parseInt(document.getElementById('motor').value, 10);
             const total = eye + verbal + motor;
             const resultText = `총 GCS 점수: ${total}`;
-            const footerText = name ? `작성자: ${name}` : '작성자: 이름이 입력되지 않았습니다';
+            const footerText = name ? `요구조자: ${name}` : '요구조자: 이름이 입력되지 않았습니다';
             
             document.getElementById('result').innerText = resultText;
             document.getElementById('footer').innerText = footerText;
@@ -149,7 +149,7 @@
             if (name) {
                 addToBoard(name, total);
             } else {
-                alert('작성자 이름을 입력하세요.');
+                alert('요구조자 이름을 입력하세요.');
             }
         }
 
