@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>응급상황 분류 체계</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 20px;
+        }
+        .triage-level {
+            border: 1px solid #ddd;
+            margin: 20px 0;
+            padding: 20px;
+            border-radius: 5px;
+        }
+        .level-1 { background-color: #ff6666; }
+        .level-2 { background-color: #ffcc66; }
+        .level-3 { background-color: #ffff66; }
+        .level-4 { background-color: #ccff66; }
+        .level-5 { background-color: #66ff66; }
+        h2 {
+            margin-top: 0;
+        }
+        ul {
+            list-style-type: disc;
+            padding-left: 20px;
+        }
+        ul li {
+            cursor: pointer;
+            color: blue;
+            text-decoration: underline;
+        }
+        .symptom-info {
+            display: none;
+            margin-top: 10px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+        }
+        .emergency-level {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+    </style>
+    <script>
+        function showInfo(id) {
+            // 모든 증상 정보를 숨김
+            const allInfos = document.querySelectorAll('.symptom-info');
+            allInfos.forEach(info => info.style.display = 'none');
+            // 선택한 증상 정보 표시
+            const info = document.getElementById(id);
+            if (info) {
+                info.style.display = 'block';
+            }
+        }
+    </script>
+</head>
+<body>
+    <h1>응급상황 분류 체계</h1>
+    <!-- 1단계 - 최우선 응급 -->
+    <div class="triage-level level-1">
+        <h2>1단계 - 최우선 응급 (Critical)</h2>
+        <p>즉각적인 생명을 위협하는 상태로 즉각적인 처치가 필요합니다.</p>
+        <h3>예시 증상:</h3>
+        <ul>
+            <li onclick="showInfo('info1')">심정지 또는 무의식 상태</li>
+            <li onclick="showInfo('info2')">심한 출혈</li>
+            <li onclick="showInfo('info3')">심한 호흡곤란</li>
+            <li onclick="showInfo('info4')">중증 화상</li>
+        </ul>
+        <div id="info1" class="symptom-info">
+            <p class="emergency-level">응급 등급: 1단계 (최우선 응급)</p>
+            <p>환자가 호흡이 없고 맥박이 느껴지지 않을 경우 즉각적인 심폐소생술이 필요합니다.</p>
+        </div>
+        <div id="info2" class="symptom-info">
+            <p class="emergency-level">응급 등급: 1단계 (최우선 응급)</p>
+            <p>절단, 대량의 외상성 출혈로 인해 쇼크가 발생할 수 있으므로 즉각적인 지혈과 수액 공급이 필요합니다.</p>
+        </div>
+        <div id="info3" class="symptom-info">
+            <p class="emergency-level">응급 등급: 1단계 (최우선 응급)</p>
+            <p>산소 공급이 즉시 필요하며, 기도 확보를 위한 응급 처치가 요구됩니다.</p>
+        </div>
+        <div id="info4" class="symptom-info">
+            <p class="emergency-level">응급 등급: 1단계 (최우선 응급)</p>
+            <p>화상 면적이 크거나 깊다면 응급처치와 함께 화상센터로의 이송이 필요합니다.</p>
+        </div>
+    </div>
+    <!-- 2단계 - 응급 -->
+    <div class="triage-level level-2">
+        <h2>2단계 - 응급 (Emergent)</h2>
+        <p>심각한 상태로 빠른 처치가 요구됩니다. 일반적으로 10분 이내에 치료가 시작되어야 합니다.</p>
+        <h3>예시 증상:</h3>
+        <ul>
+            <li onclick="showInfo('info5')">심한 흉통</li>
+            <li onclick="showInfo('info6')">고열(40도 이상)과 발작</li>
+            <li onclick="showInfo('info7')">중등도의 출혈</li>
+            <li onclick="showInfo('info8')">의식 혼미 또는 혼돈</li>
+        </ul>
+        <div id="info5" class="symptom-info">
+            <p class="emergency-level">응급 등급: 2단계 (응급)</p>
+            <p>협심증 또는 심근경색일 수 있으므로 심전도 및 혈액검사를 통한 진단이 필요합니다.</p>
+        </div>
+        <div id="info6" class="symptom-info">
+            <p class="emergency-level">응급 등급: 2단계 (응급)</p>
+            <p>심각한 감염이나 열성 경련일 수 있으며, 빠른 해열 및 항경련제 투여가 필요합니다.</p>
+        </div>
+        <div id="info7" class="symptom-info">
+            <p class="emergency-level">응급 등급: 2단계 (응급)</p>
+            <p>압박 지혈로 출혈을 막아야 하며, 필요시 지혈대 사용과 수혈이 고려됩니다.</p>
+        </div>
+        <div id="info8" class="symptom-info">
+            <p class="emergency-level">응급 등급: 2단계 (응급)</p>
+            <p>뇌졸중, 당뇨병성 혼수, 저혈당 쇼크 등을 의심할 수 있으며, 신경학적 평가와 포도당 검사가 필요합니다.</p>
+        </div>
+    </div>
+    <!-- 3단계 - 중증 비응급 -->
+    <div class="triage-level level-3">
+        <h2>3단계 - 중증 비응급 (Urgent)</h2>
+        <p>빠른 진단과 처치가 필요하지만, 생명에 즉각적인 위협은 없는 상태입니다.</p>
+        <h3>예시 증상:</h3>
+        <ul>
+            <li onclick="showInfo('info9')">복통과 구토</li>
+            <li onclick="showInfo('info10')">현기증과 약한 탈수</li>
+            <li onclick="showInfo('info11')">중등도의 골절</li>
+        </ul>
+        <div id="info9" class="symptom-info">
+            <p class="emergency-level">응급 등급: 3단계 (중증 비응급)</p>
+            <p>위장관 질환이나 신장 결석을 의심할 수 있으며, 진통제와 검사가 필요할 수 있습니다.</p>
+        </div>
+        <div id="info10" class="symptom-info">
+            <p class="emergency-level">응급 등급: 3단계 (중증 비응급)</p>
+            <p>수분 공급과 휴식이 필요하며, 탈수 상태가 심각하지 않은 경우 경구 수분 보충이 권장됩니다.</p>
+        </div>
+        <div id="info11" class="symptom-info">
+            <p class="emergency-level">응급 등급: 3단계 (중증 비응급)</p>
+            <p>골절 부위를 고정하고 진통제를 투여하며, 엑스레이 검사 후 석고붕대나 수술이 필요할 수 있습니다.</p>
+        </div>
+    </div>
+<!-- 4단계 - 비응급 -->
+    <div class="triage-level level-4">
+        <h2>4단계 - 비응급 (Less Urgent)</h2>
+        <p>응급 상황은 아니지만, 불편함이 있어 진료가 필요한 상태입니다.</p>
+        <h3>예시 증상:</h3>
+        <ul>
+            <li onclick="showInfo('info12')">경미한 염좌</li>
+            <li onclick="showInfo('info13')">경미한 열과 기침</li>
+            <li onclick="showInfo('info14')">경미한 피부 감염</li>
+            <li onclick="showInfo('info15')">가벼운 복통</li>
+        </ul>
+        <div id="info12" class="symptom-info">
+            <p class="emergency-level">응급 등급: 4단계 (비응급)</p>
+            <p>발목이나 손목의 염좌로 부종과 통증이 있지만 자가 진료나 응급처치가 가능하며, 병원 방문을 권장합니다.</p>
+        </div>
+        <div id="info13" class="symptom-info">
+            <p class="emergency-level">응급 등급: 4단계 (비응급)</p>
+            <p>일반 감기나 가벼운 상기도 감염의 증상으로, 자가 관리와 휴식으로 회복이 가능합니다.</p>
+        </div>
+        <div id="info14" class="symptom-info">
+            <p class="emergency-level">응급 등급: 4단계 (비응급)</p>
+            <p>작은 농양이나 벌레 물림으로 인한 가벼운 피부 감염. 항생제 연고 처치가 필요할 수 있습니다.</p>
+        </div>
+        <div id="info15" class="symptom-info">
+            <p class="emergency-level">응급 등급: 4단계 (비응급)</p>
+            <p>소화불량이나 가벼운 위장염 증상으로, 식이요법이나 약물 처방으로 호전될 수 있습니다.</p>
+        </div>
+    </div>
+    <!-- 5단계 - 경증 비응급 -->
+    <div class="triage-level level-5">
+        <h2>5단계 - 경증 비응급 (Non-Urgent)</h2>
+        <p>응급 상황이 아니며, 외래 진료로 해결 가능한 상태입니다.</p>
+        <h3>예시 증상:</h3>
+        <ul>
+            <li onclick="showInfo('info16')">가벼운 피부 발진</li>
+            <li onclick="showInfo('info17')">경미한 두통</li>
+            <li onclick="showInfo('info18')">일시적인 변비</li>
+            <li onclick="showInfo('info19')">작은 상처</li>
+        </ul>
+        <div id="info16" class="symptom-info">
+            <p class="emergency-level">응급 등급: 5단계 (경증 비응급)</p>
+            <p>원인 불명의 가벼운 피부 발진으로, 항히스타민제나 스테로이드 크림으로 치료 가능합니다.</p>
+        </div>
+        <div id="info17" class="symptom-info">
+            <p class="emergency-level">응급 등급: 5단계 (경증 비응급)</p>
+            <p>스트레스나 피로로 인한 경미한 두통으로, 휴식이나 진통제로 완화될 수 있습니다.</p>
+        </div>
+        <div id="info18" class="symptom-info">
+            <p class="emergency-level">응급 등급: 5단계 (경증 비응급)</p>
+            <p>일시적인 변비로 인해 불편할 수 있으며, 식이 섬유 섭취와 수분 보충으로 해결 가능합니다.</p>
+        </div>
+        <div id="info19" class="symptom-info">
+            <p class="emergency-level">응급 등급: 5단계 (경증 비응급)</p>
+            <p>작은 상처는 소독과 밴드 처치로 충분하며, 감염 위험이 없으면 외래 진료가 필요하지 않습니다.</p>
+        </div>
+    </div>
+</body>
+</html>
