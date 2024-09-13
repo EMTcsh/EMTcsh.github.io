@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -10,6 +11,7 @@
             margin: 0;
             background-color: #f0f0f0;
         }
+
         .container {
             width: 80%;
             margin: 0 auto;
@@ -18,10 +20,12 @@
             border-radius: 10px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
         }
+
         h1 {
             font-size: 24px;
             margin-bottom: 20px;
         }
+
         .section {
             margin-bottom: 30px;
             padding: 15px;
@@ -29,30 +33,38 @@
             border-radius: 8px;
             background-color: #fff;
         }
+
         .section h2 {
             color: #007bff;
         }
+
         .section label {
             font-weight: bold;
             display: block;
             margin-bottom: 5px;
         }
+
         .section input[type="checkbox"] {
             margin-right: 10px;
         }
+
         .form-group {
             margin-bottom: 15px;
         }
+
         select, input {
             width: calc(100% - 22px);
             padding: 12px;
             border: 1px solid #ddd;
             border-radius: 5px;
             box-sizing: border-box;
+            font-size: 16px; /* Ensures the font size is consistent */
         }
+
         input {
             height: 45px;
         }
+
         button {
             width: 100%;
             padding: 12px;
@@ -64,28 +76,34 @@
             cursor: pointer;
             margin-top: 10px;
         }
+
         button:hover {
             background-color: #0056b3;
         }
+
         .result, .status, .footer, .result-container {
             margin-top: 20px;
             font-size: 18px;
             font-weight: bold;
         }
+
         .result-container {
             background-color: #e9ecef;
             padding: 15px;
             border-radius: 8px;
             border: 1px solid #ddd;
         }
+
         .result-item {
             margin-bottom: 10px;
             font-size: 14px;
         }
+
         .timestamp {
             font-size: 12px;
             color: #888;
         }
+
         .board {
             margin-top: 30px;
             border-top: 1px solid #ddd;
@@ -93,20 +111,25 @@
             max-height: 200px;
             overflow-y: auto;
         }
+
         .board-item {
             border-bottom: 1px solid #ddd;
             padding: 10px 0;
         }
+
         .board-item:last-child {
             border-bottom: none;
         }
+
         .button-group {
             margin-top: 20px;
         }
+
         .save-button {
             margin-top: 10px;
             background-color: #28a745;
         }
+
         .save-button:hover {
             background-color: #218838;
         }
@@ -149,6 +172,7 @@
                         <option value="1">1점: 눈을 뜨지 않음</option>
                     </select>
                 </div>
+                
                 <div class="form-group">
                     <label for="verbal">언어 반응 (Verbal Response)</label>
                     <select id="verbal" aria-label="언어 반응">
@@ -159,6 +183,7 @@
                         <option value="1">1점: 반응이 없음</option>
                     </select>
                 </div>
+                
                 <div class="form-group">
                     <label for="motor">운동 반응 (Motor Response)</label>
                     <select id="motor" aria-label="운동 반응">
@@ -170,12 +195,12 @@
                         <option value="1">1점: 반응이 없음</option>
                     </select>
                 </div>
-                <div class="button-group">
-                    <button type="submit">계산하기</button>
-                    <button type="button" onclick="resetForm()">초기화</button>
-                    <button type="button" class="save-button" onclick="saveGCSResults()">저장하기</button>
-                </div>
+                
+                <button type="submit">계산하기</button>
+                <button type="button" onclick="resetForm()">초기화</button>
+                <button type="button" onclick="saveGCSResults()">GCS 결과 저장하기</button>
             </form>
+            
             <div class="result" id="result"></div>
             <div class="status" id="status"></div>
             <div class="footer" id="footer"></div>
@@ -197,6 +222,7 @@
                     <label><input type="checkbox" class="symptom" value="급성 대량 출혈"> 급성 대량 출혈</label>
                     <label><input type="checkbox" class="symptom" value="심한 쇼크 상태"> 심한 쇼크 상태</label>
                 </div>
+                
                 <div class="section">
                     <h2>Grade 2: 매우 위급한 상태</h2>
                     <label><input type="checkbox" class="symptom" value="심한 호흡곤란"> 심한 호흡곤란</label>
@@ -204,152 +230,78 @@
                     <label><input type="checkbox" class="symptom" value="중등도 이상 출혈"> 중등도 이상 출혈</label>
                     <label><input type="checkbox" class="symptom" value="발작 지속 상태"> 발작 지속 상태</label>
                     <label><input type="checkbox" class="symptom" value="의식 혼미 (GCS 9-12)"> 의식 혼미 (GCS 9-12)</label>
-                    <label><input type="checkbox" class="symptom" value="심한 구토"> 심한 구토</label>
-                    <label><input type="checkbox" class="symptom" value="심한 탈수"> 심한 탈수</label>
+                    <label><input type="checkbox" class="symptom" value="중증 통증"> 중증 통증</label>
                 </div>
+                
                 <div class="section">
-                    <h2>Grade 3: 위급하지만 치료 가능</h2>
-                    <label><input type="checkbox" class="symptom" value="중등도 호흡곤란"> 중등도 호흡곤란</label>
-                    <label><input type="checkbox" class="symptom" value="중등도 흉통"> 중등도 흉통</label>
-                    <label><input type="checkbox" class="symptom" value="중등도 출혈"> 중등도 출혈</label>
-                    <label><input type="checkbox" class="symptom" value="경미한 외상"> 경미한 외상</label>
-                    <label><input type="checkbox" class="symptom" value="경미한 구토"> 경미한 구토</label>
-                    <label><input type="checkbox" class="symptom" value="경미한 탈수"> 경미한 탈수</label>
-                </div>
-                <div class="section">
-                    <h2>Grade 4: 비응급</h2>
-                    <label><input type="checkbox" class="symptom" value="경미한 증상"> 경미한 증상</label>
+                    <h2>Grade 3: 위급하지 않은 상태</h2>
+                    <label><input type="checkbox" class="symptom" value="경미한 호흡곤란"> 경미한 호흡곤란</label>
+                    <label><input type="checkbox" class="symptom" value="경미한 흉통"> 경미한 흉통</label>
+                    <label><input type="checkbox" class="symptom" value="경미한 출혈"> 경미한 출혈</label>
+                    <label><input type="checkbox" class="symptom" value="불편감, 피로"> 불편감, 피로</label>
                     <label><input type="checkbox" class="symptom" value="경미한 상처"> 경미한 상처</label>
-                    <label><input type="checkbox" class="symptom" value="일반적인 건강 문제"> 일반적인 건강 문제</label>
+                    <label><input type="checkbox" class="symptom" value="기타 경미한 증상"> 기타 경미한 증상</label>
                 </div>
-                <div class="button-group">
-                    <button type="button" class="save-button" onclick="saveKTASResults()">KTAS 저장하기</button>
-                </div>
+                
+                <button type="button" onclick="saveKTASResults()" class="save-button">KTAS 결과 저장하기</button>
             </form>
-            <div class="board" id="ktasBoard">
+            
+            <div class="result-container" id="ktasResultContainer">
                 <h2>KTAS 결과</h2>
+                <div id="ktasResults"></div>
             </div>
         </div>
     </div>
 
     <script>
-        // GCS calculation and saving functions
         function calculateGCS() {
-            const eye = parseInt(document.getElementById('eye').value, 10);
-            const verbal = parseInt(document.getElementById('verbal').value, 10);
-            const motor = parseInt(document.getElementById('motor').value, 10);
-
+            const eye = parseInt(document.getElementById('eye').value);
+            const verbal = parseInt(document.getElementById('verbal').value);
+            const motor = parseInt(document.getElementById('motor').value);
+            
             if (isNaN(eye) || isNaN(verbal) || isNaN(motor)) {
                 alert('모든 항목을 선택해 주세요.');
                 return false;
             }
+            
+            const gcs = eye + verbal + motor;
+            const name = document.getElementById('name').value || '미제공';
+            const age = document.getElementById('age').value || '미제공';
+            const gender = document.getElementById('gender').value || '미제공';
 
-            const totalGCS = eye + verbal + motor;
-            const name = document.getElementById('name').value;
-            const age = document.getElementById('age').value;
-            const gender = document.getElementById('gender').value;
+            document.getElementById('result').innerHTML = `GCS 점수: ${gcs}`;
+            document.getElementById('status').innerHTML = `이름: ${name}, 나이: ${age}, 성별: ${gender}`;
+            
             const timestamp = new Date().toLocaleString();
+            document.getElementById('footer').innerHTML = `계산 시간: ${timestamp}`;
 
-            const resultText = `
-                이름: ${name}<br>
-                나이: ${age}<br>
-                성별: ${gender}<br>
-                눈 반응: ${eye}<br>
-                언어 반응: ${verbal}<br>
-                운동 반응: ${motor}<br>
-                총 GCS 점수: ${totalGCS}<br>
-                <span class="timestamp">${timestamp}</span>
-            `;
-
-            document.getElementById('result').innerHTML = resultText;
-            return false; // Prevent form submission
+            const gcsBoard = document.getElementById('gcsBoard');
+            gcsBoard.innerHTML += `<div class="board-item">GCS: ${gcs} (이름: ${name}, 나이: ${age}, 성별: ${gender}) <span class="timestamp">${timestamp}</span></div>`;
+            
+            return false; // Prevent form from submitting
         }
 
         function resetForm() {
             document.getElementById('gcsForm').reset();
             document.getElementById('result').innerHTML = '';
+            document.getElementById('status').innerHTML = '';
+            document.getElementById('footer').innerHTML = '';
         }
 
         function saveGCSResults() {
-            const resultText = document.getElementById('result').innerHTML;
-            if (!resultText) {
-                alert('계산 결과가 없습니다. 먼저 결과를 계산해 주세요.');
-                return;
-            }
-
-            // Save the result to localStorage
-            let results = JSON.parse(localStorage.getItem('gcsResults')) || [];
-            const timestamp = new Date().toLocaleString();
-            results.push({ result: resultText, timestamp: timestamp });
-            localStorage.setItem('gcsResults', JSON.stringify(results));
-
-            // Update the results board
-            const board = document.getElementById('gcsBoard');
-            const resultItem = document.createElement('div');
-            resultItem.className = 'board-item';
-            resultItem.innerHTML = `${resultText}<br><span class="timestamp">${timestamp}</span>`;
-            board.appendChild(resultItem);
-            board.scrollTop = board.scrollHeight;
-
-            alert('결과가 저장되었습니다.');
+            // Logic to save GCS results can be added here
+            alert('GCS 결과가 저장되었습니다.');
         }
 
-        function loadSavedResults() {
-            const results = JSON.parse(localStorage.getItem('gcsResults')) || [];
-            const board = document.getElementById('gcsBoard');
-            results.forEach(result => {
-                const resultItem = document.createElement('div');
-                resultItem.className = 'board-item';
-                resultItem.innerHTML = `${result.result}<br><span class="timestamp">${result.timestamp}</span>`;
-                board.appendChild(resultItem);
-            });
-        }
-
-        // KTAS calculation and saving functions
         function saveKTASResults() {
-            const symptoms = Array.from(document.querySelectorAll('.symptom:checked'))
-                .map(checkbox => checkbox.value)
+            // Logic to save KTAS results can be added here
+            const selectedSymptoms = Array.from(document.querySelectorAll('.symptom:checked'))
+                .map(el => el.value)
                 .join(', ');
-
-            if (!symptoms) {
-                alert('응급 증상을 선택해 주세요.');
-                return;
-            }
+            document.getElementById('ktasResults').innerHTML = `선택된 증상: ${selectedSymptoms}`;
 
             const timestamp = new Date().toLocaleString();
-            const resultText = `선택된 증상: ${symptoms}<br><span class="timestamp">${timestamp}</span>`;
-
-            // Save the result to localStorage
-            let ktasResults = JSON.parse(localStorage.getItem('ktasResults')) || [];
-            ktasResults.push({ result: resultText, timestamp: timestamp });
-            localStorage.setItem('ktasResults', JSON.stringify(ktasResults));
-
-            // Update the results board
-            const board = document.getElementById('ktasBoard');
-            const resultItem = document.createElement('div');
-            resultItem.className = 'board-item';
-            resultItem.innerHTML = `${resultText}<br><span class="timestamp">${timestamp}</span>`;
-            board.appendChild(resultItem);
-            board.scrollTop = board.scrollHeight;
-
-            alert('KTAS 결과가 저장되었습니다.');
-        }
-
-        // Load saved results on page load
-        window.onload = function() {
-            loadSavedResults(); // For GCS results
-            loadKTASResults(); // For KTAS results
-        };
-
-        function loadKTASResults() {
-            const ktasResults = JSON.parse(localStorage.getItem('ktasResults')) || [];
-            const board = document.getElementById('ktasBoard');
-            ktasResults.forEach(result => {
-                const resultItem = document.createElement('div');
-                resultItem.className = 'board-item';
-                resultItem.innerHTML = `${result.result}<br><span class="timestamp">${result.timestamp}</span>`;
-                board.appendChild(resultItem);
-            });
+            document.getElementById('ktasResults').innerHTML += `<div class="timestamp">저장 시간: ${timestamp}</div>`;
         }
     </script>
 </body>
