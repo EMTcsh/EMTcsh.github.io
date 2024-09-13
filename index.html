@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>응급환자 분류 도구 및 GCS 계산</title>
+    <title>응급환자 분류 및 GCS 계산기</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -139,8 +139,51 @@
 </head>
 <body>
     <div class="container">
-        <h1>응급환자 분류 및 GCS 계산</h1>
-        
+        <h1>응급환자 분류 도구 및 GCS 계산기</h1>
+
+        <!-- 응급환자 분류 도구 섹션 -->
+        <div class="section">
+            <h2>응급환자 분류 </h2>
+            <form id="ktasForm">
+                <div class="section">
+                    <h2>Grade 1: 생명이 위급한 상태</h2>
+                    <label><input type="checkbox" class="symptom" value="심정지"> 심정지</label>
+                    <label><input type="checkbox" class="symptom" value="무의식 상태 (GCS ≤ 8)"> 무의식 상태 (GCS ≤ 8)</label>
+                    <label><input type="checkbox" class="symptom" value="호흡 정지"> 호흡 정지</label>
+                    <label><input type="checkbox" class="symptom" value="중증 외상 (다발성 손상)"> 중증 외상 (다발성 손상)</label>
+                    <label><input type="checkbox" class="symptom" value="급성 대량 출혈"> 급성 대량 출혈</label>
+                    <label><input type="checkbox" class="symptom" value="심한 쇼크 상태"> 심한 쇼크 상태</label>
+                </div>
+                
+                <div class="section">
+                    <h2>Grade 2: 매우 위급한 상태</h2>
+                    <label><input type="checkbox" class="symptom" value="심한 호흡곤란"> 심한 호흡곤란</label>
+                    <label><input type="checkbox" class="symptom" value="심한 흉통 (심근경색 의심)"> 심한 흉통 (심근경색 의심)</label>
+                    <label><input type="checkbox" class="symptom" value="중등도 이상 출혈"> 중등도 이상 출혈</label>
+                    <label><input type="checkbox" class="symptom" value="발작 지속 상태"> 발작 지속 상태</label>
+                    <label><input type="checkbox" class="symptom" value="의식 혼미 (GCS 9-12)"> 의식 혼미 (GCS 9-12)</label>
+                    <label><input type="checkbox" class="symptom" value="중증 통증"> 중증 통증</label>
+                </div>
+                
+                <div class="section">
+                    <h2>Grade 3: 위급하지 않은 상태</h2>
+                    <label><input type="checkbox" class="symptom" value="경미한 호흡곤란"> 경미한 호흡곤란</label>
+                    <label><input type="checkbox" class="symptom" value="경미한 흉통"> 경미한 흉통</label>
+                    <label><input type="checkbox" class="symptom" value="경미한 출혈"> 경미한 출혈</label>
+                    <label><input type="checkbox" class="symptom" value="불편감, 피로"> 불편감, 피로</label>
+                    <label><input type="checkbox" class="symptom" value="경미한 상처"> 경미한 상처</label>
+                    <label><input type="checkbox" class="symptom" value="기타 경미한 증상"> 기타 경미한 증상</label>
+                </div>
+                
+                <button type="button" onclick="saveKTASResults()" class="save-button">결과 저장하기</button>
+            </form>
+            
+            <div class="result-container" id="ktasResultContainer">
+                <h2>응급환자 결과</h2>
+                <div id="ktasResults"></div>
+            </div>
+        </div>
+
         <!-- GCS 계산기 섹션 -->
         <div class="section">
             <h2>그라스고우 혼수 척도 계산기</h2>
@@ -185,7 +228,7 @@
                         <option value="1">1점: 반응이 없음</option>
                     </select>
                 </div>
-                
+
                 <div class="form-group">
                     <label for="motor">운동 반응 (Motor Response)</label>
                     <select id="motor" aria-label="운동 반응">
@@ -200,57 +243,13 @@
                 
                 <button type="submit">계산하기</button>
                 <button type="button" onclick="resetForm()">초기화</button>
-                <button type="button" onclick="saveGCSResults()">GCS 결과 저장하기</button>
             </form>
-            
+
             <div class="result" id="result"></div>
             <div class="status" id="status"></div>
             <div class="footer" id="footer"></div>
             <div class="board" id="gcsBoard">
                 <h2>GCS 결과</h2>
-            </div>
-        </div>
-
-        <!-- 응급환자 분류 도구 섹션 -->
-        <div class="section">
-            <h2>세분화된 응급환자 분류 도구</h2>
-            <form id="ktasForm">
-                <div class="section">
-                    <h2>Grade 1: 생명이 위급한 상태</h2>
-                    <label><input type="checkbox" class="symptom" value="심정지"> 심정지</label>
-                    <label><input type="checkbox" class="symptom" value="무의식 상태 (GCS ≤ 8)"> 무의식 상태 (GCS ≤ 8)</label>
-                    <label><input type="checkbox" class="symptom" value="호흡 정지"> 호흡 정지</label>
-                    <label><input type="checkbox" class="symptom" value="중증 외상 (다발성 손상)"> 중증 외상 (다발성 손상)</label>
-                    <label><input type="checkbox" class="symptom" value="급성 대량 출혈"> 급성 대량 출혈</label>
-                    <label><input type="checkbox" class="symptom" value="심한 쇼크 상태"> 심한 쇼크 상태</label>
-                </div>
-                
-                <div class="section">
-                    <h2>Grade 2: 매우 위급한 상태</h2>
-                    <label><input type="checkbox" class="symptom" value="심한 호흡곤란"> 심한 호흡곤란</label>
-                    <label><input type="checkbox" class="symptom" value="심한 흉통 (심근경색 의심)"> 심한 흉통 (심근경색 의심)</label>
-                    <label><input type="checkbox" class="symptom" value="중등도 이상 출혈"> 중등도 이상 출혈</label>
-                    <label><input type="checkbox" class="symptom" value="발작 지속 상태"> 발작 지속 상태</label>
-                    <label><input type="checkbox" class="symptom" value="의식 혼미 (GCS 9-12)"> 의식 혼미 (GCS 9-12)</label>
-                    <label><input type="checkbox" class="symptom" value="중증 통증"> 중증 통증</label>
-                </div>
-                
-                <div class="section">
-                    <h2>Grade 3: 위급하지 않은 상태</h2>
-                    <label><input type="checkbox" class="symptom" value="경미한 호흡곤란"> 경미한 호흡곤란</label>
-                    <label><input type="checkbox" class="symptom" value="경미한 흉통"> 경미한 흉통</label>
-                    <label><input type="checkbox" class="symptom" value="경미한 출혈"> 경미한 출혈</label>
-                    <label><input type="checkbox" class="symptom" value="불편감, 피로"> 불편감, 피로</label>
-                    <label><input type="checkbox" class="symptom" value="경미한 상처"> 경미한 상처</label>
-                    <label><input type="checkbox" class="symptom" value="기타 경미한 증상"> 기타 경미한 증상</label>
-                </div>
-                
-                <button type="button" onclick="saveKTASResults()" class="save-button">응급환자 결과 저장하기</button>
-            </form>
-            
-            <div class="result-container" id="ktasResultContainer">
-                <h2>응급환자 결과 저장</h2>
-                <div id="ktasResults"></div>
             </div>
         </div>
     </div>
@@ -308,3 +307,4 @@
     </script>
 </body>
 </html>
+
