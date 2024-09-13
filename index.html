@@ -3,34 +3,45 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>그라스고우 혼수 척도 계산기</title>
+    <title>응급환자 분류 도구 및 GCS 계산기</title>
     <style>
         body {
             font-family: Arial, sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh; /* Use full viewport height */
             margin: 0;
             background-color: #f0f0f0;
         }
         .container {
-            background: #fff;
+            width: 80%;
+            margin: 0 auto;
             padding: 20px;
+            background-color: #fff;
             border-radius: 10px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            width: 500px; /* Container width */
         }
         h1 {
             font-size: 24px;
             margin-bottom: 20px;
         }
-        .form-group {
-            margin-bottom: 15px;
+        .section {
+            margin-bottom: 30px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background-color: #fff;
         }
-        label {
+        .section h2 {
+            color: #007bff;
+        }
+        .section label {
+            font-weight: bold;
             display: block;
             margin-bottom: 5px;
+        }
+        .section input[type="checkbox"] {
+            margin-right: 10px;
+        }
+        .form-group {
+            margin-bottom: 15px;
         }
         select, input {
             width: calc(100% - 22px);
@@ -56,28 +67,31 @@
         button:hover {
             background-color: #0056b3;
         }
-        .result {
+        .result, .status, .footer, .result-container {
             margin-top: 20px;
             font-size: 18px;
             font-weight: bold;
         }
-        .status {
-            margin-top: 10px;
-            font-size: 16px;
-            font-weight: bold;
+        .result-container {
+            background-color: #e9ecef;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #ddd;
         }
-        .footer {
-            margin-top: 20px;
+        .result-item {
+            margin-bottom: 10px;
             font-size: 14px;
-            color: #555;
-            text-align: center;
+        }
+        .timestamp {
+            font-size: 12px;
+            color: #888;
         }
         .board {
             margin-top: 30px;
             border-top: 1px solid #ddd;
             padding-top: 10px;
-            max-height: 200px; /* Fixed height for scroll area */
-            overflow-y: auto; /* Enable vertical scrolling */
+            max-height: 200px;
+            overflow-y: auto;
         }
         .board-item {
             border-bottom: 1px solid #ddd;
@@ -86,280 +100,257 @@
         .board-item:last-child {
             border-bottom: none;
         }
-        .board-item .timestamp {
-            font-size: 12px;
-            color: #888;
+        .button-group {
+            margin-top: 20px;
+        }
+        .save-button {
+            margin-top: 10px;
+            background-color: #28a745;
+        }
+        .save-button:hover {
+            background-color: #218838;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>그라스고우 혼수 척도 계산기</h1>
+        <h1>응급환자 분류 도구 및 GCS 계산기</h1>
         
-        <form id="gcsForm" onsubmit="return calculateGCS()">
-            <div class="form-group">
-                <label for="name">요구조자 이름</label>
-                <input type="text" id="name" placeholder="이름을 입력하세요" aria-label="요구조자 이름">
+        <!-- GCS 계산기 섹션 -->
+        <div class="section">
+            <h2>그라스고우 혼수 척도 계산기</h2>
+            <form id="gcsForm" onsubmit="return calculateGCS()">
+                <div class="form-group">
+                    <label for="name">요구조자 이름</label>
+                    <input type="text" id="name" placeholder="이름을 입력하세요" aria-label="요구조자 이름">
+                </div>
+                
+                <div class="form-group">
+                    <label for="age">나이</label>
+                    <input type="number" id="age" placeholder="나이를 입력하세요" aria-label="나이">
+                </div>
+                
+                <div class="form-group">
+                    <label for="gender">성별</label>
+                    <select id="gender" aria-label="성별">
+                        <option value="">선택하세요</option>
+                        <option value="male">남성</option>
+                        <option value="female">여성</option>
+                        <option value="other">기타</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="eye">눈 반응 (Eye Opening)</label>
+                    <select id="eye" aria-label="눈 반응">
+                        <option value="4">4점: 스스로 눈을 뜸</option>
+                        <option value="3">3점: 자극에 반응하여 눈을 뜸</option>
+                        <option value="2">2점: 통증 자극에 반응하여 눈을 뜸</option>
+                        <option value="1">1점: 눈을 뜨지 않음</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="verbal">언어 반응 (Verbal Response)</label>
+                    <select id="verbal" aria-label="언어 반응">
+                        <option value="5">5점: 대화가 가능하고 혼동되지 않음</option>
+                        <option value="4">4점: 혼동된 대답</option>
+                        <option value="3">3점: 단어는 말하지만 의미가 없음</option>
+                        <option value="2">2점: 소리만 내고 의미가 없음</option>
+                        <option value="1">1점: 반응이 없음</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="motor">운동 반응 (Motor Response)</label>
+                    <select id="motor" aria-label="운동 반응">
+                        <option value="6">6점: 명령에 따라 움직임</option>
+                        <option value="5">5점: 통증 자극에 적절히 반응하여 팔을 움직임</option>
+                        <option value="4">4점: 통증 자극에 비정상적인 반응</option>
+                        <option value="3">3점: 통증 자극에 굳어짐 (비정상적인 신전)</option>
+                        <option value="2">2점: 통증 자극에 굳어지며 비정상적인 굴곡</option>
+                        <option value="1">1점: 반응이 없음</option>
+                    </select>
+                </div>
+                <div class="button-group">
+                    <button type="submit">계산하기</button>
+                    <button type="button" onclick="resetForm()">초기화</button>
+                    <button type="button" class="save-button" onclick="saveGCSResults()">저장하기</button>
+                </div>
+            </form>
+            <div class="result" id="result"></div>
+            <div class="status" id="status"></div>
+            <div class="footer" id="footer"></div>
+            <div class="board" id="gcsBoard">
+                <h2>GCS 결과</h2>
             </div>
-            
-            <div class="form-group">
-                <label for="age">나이</label>
-                <input type="number" id="age" placeholder="나이를 입력하세요" aria-label="나이">
+        </div>
+
+        <!-- KTAS 응급환자 분류 도구 섹션 -->
+        <div class="section">
+            <h2>세분화된 KTAS 응급환자 분류 도구</h2>
+            <form id="ktasForm">
+                <div class="section">
+                    <h2>Grade 1: 생명이 위급한 상태</h2>
+                    <label><input type="checkbox" class="symptom" value="심정지"> 심정지</label>
+                    <label><input type="checkbox" class="symptom" value="무의식 상태 (GCS ≤ 8)"> 무의식 상태 (GCS ≤ 8)</label>
+                    <label><input type="checkbox" class="symptom" value="호흡 정지"> 호흡 정지</label>
+                    <label><input type="checkbox" class="symptom" value="중증 외상 (다발성 손상)"> 중증 외상 (다발성 손상)</label>
+                    <label><input type="checkbox" class="symptom" value="급성 대량 출혈"> 급성 대량 출혈</label>
+                    <label><input type="checkbox" class="symptom" value="심한 쇼크 상태"> 심한 쇼크 상태</label>
+                </div>
+                <div class="section">
+                    <h2>Grade 2: 매우 위급한 상태</h2>
+                    <label><input type="checkbox" class="symptom" value="심한 호흡곤란"> 심한 호흡곤란</label>
+                    <label><input type="checkbox" class="symptom" value="심한 흉통 (심근경색 의심)"> 심한 흉통 (심근경색 의심)</label>
+                    <label><input type="checkbox" class="symptom" value="중등도 이상 출혈"> 중등도 이상 출혈</label>
+                    <label><input type="checkbox" class="symptom" value="발작 지속 상태"> 발작 지속 상태</label>
+                    <label><input type="checkbox" class="symptom" value="의식 혼미 (GCS 9-12)"> 의식 혼미 (GCS 9-12)</label>
+                    <label><input type="checkbox" class="symptom" value="심한 구토"> 심한 구토</label>
+                    <label><input type="checkbox" class="symptom" value="심한 탈수"> 심한 탈수</label>
+                </div>
+                <div class="section">
+                    <h2>Grade 3: 위급하지만 치료 가능</h2>
+                    <label><input type="checkbox" class="symptom" value="중등도 호흡곤란"> 중등도 호흡곤란</label>
+                    <label><input type="checkbox" class="symptom" value="중등도 흉통"> 중등도 흉통</label>
+                    <label><input type="checkbox" class="symptom" value="중등도 출혈"> 중등도 출혈</label>
+                    <label><input type="checkbox" class="symptom" value="경미한 외상"> 경미한 외상</label>
+                    <label><input type="checkbox" class="symptom" value="경미한 구토"> 경미한 구토</label>
+                    <label><input type="checkbox" class="symptom" value="경미한 탈수"> 경미한 탈수</label>
+                </div>
+                <div class="section">
+                    <h2>Grade 4: 비응급</h2>
+                    <label><input type="checkbox" class="symptom" value="경미한 증상"> 경미한 증상</label>
+                    <label><input type="checkbox" class="symptom" value="경미한 상처"> 경미한 상처</label>
+                    <label><input type="checkbox" class="symptom" value="일반적인 건강 문제"> 일반적인 건강 문제</label>
+                </div>
+                <div class="button-group">
+                    <button type="button" class="save-button" onclick="saveKTASResults()">KTAS 저장하기</button>
+                </div>
+            </form>
+            <div class="board" id="ktasBoard">
+                <h2>KTAS 결과</h2>
             </div>
-            
-            <div class="form-group">
-                <label for="gender">성별</label>
-                <select id="gender" aria-label="성별">
-                    <option value="">선택하세요</option>
-                    <option value="male">남성</option>
-                    <option value="female">여성</option>
-                    <option value="other">기타</option>
-                </select>
-            </div>
-            
-            <div class="form-group">
-                <label for="eye">눈 반응 (Eye Opening)</label>
-                <select id="eye" aria-label="눈 반응">
-                    <option value="4">4점: 스스로 눈을 뜸</option>
-                    <option value="3">3점: 자극에 반응하여 눈을 뜸</option>
-                    <option value="2">2점: 통증 자극에 반응하여 눈을 뜸</option>
-                    <option value="1">1점: 눈을 뜨지 않음</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label for="verbal">언어 반응 (Verbal Response)</label>
-                <select id="verbal" aria-label="언어 반응">
-                    <option value="5">5점: 대화가 가능하고 혼동되지 않음</option>
-                    <option value="4">4점: 혼동된 대답</option>
-                    <option value="3">3점: 단어는 말하지만 의미가 없음</option>
-                    <option value="2">2점: 소리만 내고 의미가 없음</option>
-                    <option value="1">1점: 반응이 없음</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label for="motor">운동 반응 (Motor Response)</label>
-                <select id="motor" aria-label="운동 반응">
-                    <option value="6">6점: 명령에 따라 움직임</option>
-                    <option value="5">5점: 통증 자극에 적절히 반응하여 팔을 움직임</option>
-                    <option value="4">4점: 통증 자극에 비정상적인 반응</option>
-                    <option value="3">3점: 통증 자극에 굳어짐 (비정상적인 신전)</option>
-                    <option value="2">2점: 통증 자극에 굳어지며 비정상적인 굴곡</option>
-                    <option value="1">1점: 반응이 없음</option>
-                </select>
-            </div>
-            <button type="submit">계산하기</button>
-            <button type="button" onclick="resetForm()">초기화</button>
-        </form>
-        <div class="result" id="result"></div>
-        <div class="status" id="status"></div>
-        <div class="footer" id="footer"></div>
-        
-        <div class="board" id="board">
-            <h2>GCS 결과</h2>
         </div>
     </div>
 
     <script>
+        // GCS calculation and saving functions
         function calculateGCS() {
-            const name = document.getElementById('name').value.trim();
-            const age = document.getElementById('age').value.trim();
-            const gender = document.getElementById('gender').value;
             const eye = parseInt(document.getElementById('eye').value, 10);
             const verbal = parseInt(document.getElementById('verbal').value, 10);
             const motor = parseInt(document.getElementById('motor').value, 10);
-            const total = eye + verbal + motor;
 
-            let statusText = '';
-
-            if (total >= 13) {
-                statusText = '경미한 손상';
-            } else if (total >= 9) {
-                statusText = '중등도 손상';
-            } else if (total >= 3) {
-                statusText = '중증 손상';
-            } else {
-                statusText = '혼수 상태';
+            if (isNaN(eye) || isNaN(verbal) || isNaN(motor)) {
+                alert('모든 항목을 선택해 주세요.');
+                return false;
             }
 
-            const resultText = `총 GCS 점수: ${total}`;
-            const footerText = name ? 
-                `요구조자: ${name}, 나이: ${age}, 성별: ${gender || '미선택'}` : 
-                '요구조자: 이름이 입력되지 않았습니다';
+            const totalGCS = eye + verbal + motor;
+            const name = document.getElementById('name').value;
+            const age = document.getElementById('age').value;
+            const gender = document.getElementById('gender').value;
+            const timestamp = new Date().toLocaleString();
 
-            document.getElementById('result').innerText = resultText;
-            document.getElementById('status').innerText = `상태: ${statusText}`;
-            document.getElementById('footer').innerText = footerText;
-
-            if (name) {
-                addToBoard(name, age, gender, total, statusText);
-            } else {
-                alert('요구조자 이름을 입력하세요.');
-                return false; // Prevent form submission
-            }
-
-            return false; // Prevent form submission
-        }
-
-        function addToBoard(name, age, gender, total, statusText) {
-            const board = document.getElementById('board');
-            const boardItem = document.createElement('div');
-            boardItem.className = 'board-item';
-
-            // Get current time
-            const now = new Date();
-            const hours = String(now.getHours()).padStart(2, '0');
-            const minutes = String(now.getMinutes()).padStart(2, '0');
-            const seconds = String(now.getSeconds()).padStart(2, '0');
-            const timestamp = `${now.getFullYear()}-${now.getMonth() + 1}-${now.getDate()} ${hours}:${minutes}:${seconds}`;
-
-            boardItem.innerHTML = `
-                <div>요구조자: ${name} - 나이: ${age}, 성별: ${gender || '미선택'} - 총 GCS 점수: ${total} (${statusText})</div>
-                <div class="timestamp">시간: ${timestamp}</div>
+            const resultText = `
+                이름: ${name}<br>
+                나이: ${age}<br>
+                성별: ${gender}<br>
+                눈 반응: ${eye}<br>
+                언어 반응: ${verbal}<br>
+                운동 반응: ${motor}<br>
+                총 GCS 점수: ${totalGCS}<br>
+                <span class="timestamp">${timestamp}</span>
             `;
-            board.appendChild(boardItem);
+
+            document.getElementById('result').innerHTML = resultText;
+            return false; // Prevent form submission
         }
 
         function resetForm() {
             document.getElementById('gcsForm').reset();
-            document.getElementById('result').innerText = '';
-            document.getElementById('status').innerText = '';
-            document.getElementById('footer').innerText = '';
+            document.getElementById('result').innerHTML = '';
+        }
+
+        function saveGCSResults() {
+            const resultText = document.getElementById('result').innerHTML;
+            if (!resultText) {
+                alert('계산 결과가 없습니다. 먼저 결과를 계산해 주세요.');
+                return;
+            }
+
+            // Save the result to localStorage
+            let results = JSON.parse(localStorage.getItem('gcsResults')) || [];
+            const timestamp = new Date().toLocaleString();
+            results.push({ result: resultText, timestamp: timestamp });
+            localStorage.setItem('gcsResults', JSON.stringify(results));
+
+            // Update the results board
+            const board = document.getElementById('gcsBoard');
+            const resultItem = document.createElement('div');
+            resultItem.className = 'board-item';
+            resultItem.innerHTML = `${resultText}<br><span class="timestamp">${timestamp}</span>`;
+            board.appendChild(resultItem);
+            board.scrollTop = board.scrollHeight;
+
+            alert('결과가 저장되었습니다.');
+        }
+
+        function loadSavedResults() {
+            const results = JSON.parse(localStorage.getItem('gcsResults')) || [];
+            const board = document.getElementById('gcsBoard');
+            results.forEach(result => {
+                const resultItem = document.createElement('div');
+                resultItem.className = 'board-item';
+                resultItem.innerHTML = `${result.result}<br><span class="timestamp">${result.timestamp}</span>`;
+                board.appendChild(resultItem);
+            });
+        }
+
+        // KTAS calculation and saving functions
+        function saveKTASResults() {
+            const symptoms = Array.from(document.querySelectorAll('.symptom:checked'))
+                .map(checkbox => checkbox.value)
+                .join(', ');
+
+            if (!symptoms) {
+                alert('응급 증상을 선택해 주세요.');
+                return;
+            }
+
+            const timestamp = new Date().toLocaleString();
+            const resultText = `선택된 증상: ${symptoms}<br><span class="timestamp">${timestamp}</span>`;
+
+            // Save the result to localStorage
+            let ktasResults = JSON.parse(localStorage.getItem('ktasResults')) || [];
+            ktasResults.push({ result: resultText, timestamp: timestamp });
+            localStorage.setItem('ktasResults', JSON.stringify(ktasResults));
+
+            // Update the results board
+            const board = document.getElementById('ktasBoard');
+            const resultItem = document.createElement('div');
+            resultItem.className = 'board-item';
+            resultItem.innerHTML = `${resultText}<br><span class="timestamp">${timestamp}</span>`;
+            board.appendChild(resultItem);
+            board.scrollTop = board.scrollHeight;
+
+            alert('KTAS 결과가 저장되었습니다.');
+        }
+
+        // Load saved results on page load
+        window.onload = function() {
+            loadSavedResults(); // For GCS results
+            loadKTASResults(); // For KTAS results
+        };
+
+        function loadKTASResults() {
+            const ktasResults = JSON.parse(localStorage.getItem('ktasResults')) || [];
+            const board = document.getElementById('ktasBoard');
+            ktasResults.forEach(result => {
+                const resultItem = document.createElement('div');
+                resultItem.className = 'board-item';
+                resultItem.innerHTML = `${result.result}<br><span class="timestamp">${result.timestamp}</span>`;
+                board.appendChild(resultItem);
+            });
         }
     </script>
-   </body>
-  </html>
-
-
-
-
-
-<html lang="ko">
-
-<head>
-
-    <meta charset="UTF-8">
-
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <title>세분화된 KTAS 응급환자 분류 도구</title>
-
-    <style>
-
-        body {
-
-            font-family: Arial, sans-serif;
-
-        }
-
-        .container {
-
-            width: 70%;
-
-            margin: 0 auto;
-
-            padding: 20px;
-
-            border: 1px solid #ccc;
-
-            border-radius: 8px;
-
-            background-color: #f9f9f9;
-
-        }
-
-        .section {
-
-            margin-bottom: 30px;
-
-            padding: 15px;
-
-            border: 1px solid #ddd;
-
-            border-radius: 8px;
-
-            background-color: #fff;
-
-        }
-
-        .section h2 {
-
-            color: #007bff;
-
-        }
-
-        .section label {
-
-            font-weight: bold;
-
-            display: block;
-
-            margin-bottom: 5px;
-
-        }
-
-        .section input[type="checkbox"] {
-
-            margin-right: 10px;
-
-        }
-
-        .submit-btn {
-
-            width: 100%;
-
-            padding: 10px;
-
-            background-color: #007bff;
-
-            color: white;
-
-            border: none;
-
-            border-radius: 4px;
-
-            cursor: pointer;
-
-            font-size: 16px;
-
-        }
-
-        .submit-btn:hover {
-
-            background-color: #0056b3;
-
-        }
-
-        .result-container {
-
-            margin-top: 30px;
-
-            padding: 15px;
-
-            border: 1px solid #ddd;
-
-            border-radius: 8px;
-
-            background-color: #e9ecef;
-
-        }
-
-        .result-container h2 {
-
-            color: #333;
-
-        }
-
-        .result-item {
-
-            margin-bottom: 10px;
-
-            font-size: 14px;
-
-        }
-
-    </style>
-
-</head>
-
-<body>
-
+</body>
+</html>
