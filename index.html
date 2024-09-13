@@ -135,17 +135,42 @@
         .save-button:hover {
             background-color: #218838;
         }
+
+        /* Specific styles for KTAS grades */
+        .grade-1 {
+            background-color: #f8d7da; /* Light red background */
+            border: 1px solid #f5c6cb; /* Red border */
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+
+        .grade-2 {
+            background-color: #fff3cd; /* Light yellow background */
+            border: 1px solid #ffeeba; /* Yellow border */
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+
+        .grade-3 {
+            background-color: #d4edda; /* Light green background */
+            border: 1px solid #c3e6cb; /* Green border */
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>응급환자 분류 도구 및 GCS 계산기</h1>
+        <h1>응급환자 분류 및 GCS 계산기</h1>
 
-        <!-- 응급환자 분류 도구 섹션 -->
+        <!-- 응급환자 분류  섹션 -->
         <div class="section">
             <h2>응급환자 분류 </h2>
             <form id="ktasForm">
-                <div class="section">
+                <div class="grade-1">
                     <h2>Grade 1: 생명이 위급한 상태</h2>
                     <label><input type="checkbox" class="symptom" value="심정지"> 심정지</label>
                     <label><input type="checkbox" class="symptom" value="무의식 상태 (GCS ≤ 8)"> 무의식 상태 (GCS ≤ 8)</label>
@@ -155,7 +180,7 @@
                     <label><input type="checkbox" class="symptom" value="심한 쇼크 상태"> 심한 쇼크 상태</label>
                 </div>
                 
-                <div class="section">
+                <div class="grade-2">
                     <h2>Grade 2: 매우 위급한 상태</h2>
                     <label><input type="checkbox" class="symptom" value="심한 호흡곤란"> 심한 호흡곤란</label>
                     <label><input type="checkbox" class="symptom" value="심한 흉통 (심근경색 의심)"> 심한 흉통 (심근경색 의심)</label>
@@ -165,7 +190,7 @@
                     <label><input type="checkbox" class="symptom" value="중증 통증"> 중증 통증</label>
                 </div>
                 
-                <div class="section">
+                <div class="grade-3">
                     <h2>Grade 3: 위급하지 않은 상태</h2>
                     <label><input type="checkbox" class="symptom" value="경미한 호흡곤란"> 경미한 호흡곤란</label>
                     <label><input type="checkbox" class="symptom" value="경미한 흉통"> 경미한 흉통</label>
@@ -174,12 +199,12 @@
                     <label><input type="checkbox" class="symptom" value="경미한 상처"> 경미한 상처</label>
                     <label><input type="checkbox" class="symptom" value="기타 경미한 증상"> 기타 경미한 증상</label>
                 </div>
-                
+
                 <button type="button" onclick="saveKTASResults()" class="save-button">결과 저장하기</button>
             </form>
             
             <div class="result-container" id="ktasResultContainer">
-                <h2>응급환자 결과</h2>
+                <h2>응급 결과</h2>
                 <div id="ktasResults"></div>
             </div>
         </div>
@@ -307,4 +332,3 @@
     </script>
 </body>
 </html>
-
