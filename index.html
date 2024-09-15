@@ -368,38 +368,45 @@
             return false;
         }
 
-        // Calculate GCS score and determine the state
-        function calculateGCS() {
-            const eye = parseInt(document.getElementById('eye').value, 10);
-            const verbal = parseInt(document.getElementById('verbal').value, 10);
-            const motor = parseInt(document.getElementById('motor').value, 10);
-            const total = eye + verbal + motor;
+   // Calculate GCS score and determine the state
+function calculateGCS() {
+    const name = document.getElementById('name').value;
+    const age = document.getElementById('age').value;
+    const eye = parseInt(document.getElementById('eye').value, 10);
+    const verbal = parseInt(document.getElementById('verbal').value, 10);
+    const motor = parseInt(document.getElementById('motor').value, 10);
+    const total = eye + verbal + motor;
 
-            let state = '';
-            if (total === 15) {
-                state = 'Alert - 정상';
-            } else if (total >= 13 && total <= 14) {
-                state = 'Drowsy - 경도외상';
-            } else if (total >= 8 && total <= 12) {
-                state = 'Stupor - 중증도외상';
-            } else if (total >= 4 && total <= 7) {
-                state = 'Semi-Coma - 중증외상';
-            } else if (total <= 3) {
-                state = 'Coma - 혼수';
-            }
+    let state = '';
+    if (total === 15) {
+        state = 'Alert - 정상';
+    } else if (total >= 13 && total <= 14) {
+        state = 'Drowsy - 경도외상';
+    } else if (total >= 8 && total <= 12) {
+        state = 'Stupor - 중증도외상';
+    } else if (total >= 4 && total <= 7) {
+        state = 'Semi-Coma - 중증외상';
+    } else if (total <= 3) {
+        state = 'Coma - 혼수';
+    }
 
-            const result = `<p>총 GCS 점수: ${total} (${state})</p>`;
+    // Prepare result string
+    const result = `
+        <p><strong>이름:</strong> ${name}</p>
+        <p><strong>나이:</strong> ${age}</p>
+        <p><strong>총 GCS 점수:</strong> ${total} (${state})</p>
+    `;
 
-            // Display the result in the GCS results container
-            document.getElementById('gcsResult').innerHTML = result;
+    // Display the result in the GCS results container
+    document.getElementById('gcsResult').innerHTML = result;
 
-            // Add timestamp
-            const timestamp = new Date().toLocaleString();
-            const savedData = document.getElementById('savedData');
-            savedData.innerHTML += `<div class="board-item"><strong>[GCS 점수]</strong><br>${result}<br><span class="timestamp">저장 시간: ${timestamp}</span></div>`;
+    // Add timestamp
+    const timestamp = new Date().toLocaleString();
+    const savedData = document.getElementById('savedData');
+    savedData.innerHTML += `<div class="board-item"><strong>[GCS 점수]</strong><br>${result}<br><span class="timestamp">저장 시간: ${timestamp}</span></div>`;
 
-            return false;
-        }
+    return false; // Prevent form submission
+}
 
         // Save trauma assessment results
         function saveTraumaAssessment() {
