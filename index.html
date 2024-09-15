@@ -222,7 +222,7 @@
             </form>
 
             <div class="result-container" id="ktasResultContainer">
-                <h2>결과과 확인</h2>
+                <h2>결과 확인</h2>
                 <div id="ktasResults"></div>
             </div>
         </div>
@@ -377,7 +377,7 @@
 
             let state = '';
             if (total === 15) {
-                state = 'Alert - 정상상';
+                state = 'Alert - 정상';
             } else if (total >= 13 && total <= 14) {
                 state = 'Drowsy - 경도외상';
             } else if (total >= 8 && total <= 12) {
@@ -385,7 +385,7 @@
             } else if (total >= 4 && total <= 7) {
                 state = 'Semi-Coma - 중증외상';
             } else if (total <= 3) {
-                state = 'Coma - 혼';
+                state = 'Coma - 혼수';
             }
 
             const result = `<p>총 GCS 점수: ${total} (${state})</p>`;
