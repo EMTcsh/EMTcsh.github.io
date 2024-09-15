@@ -324,7 +324,7 @@
             </form>
 
             <div class="result-container" id="traumaAssessmentResultContainer">
-                <h2>외상 환자 평가 결과</h2>
+                <h2>외상 평가</h2>
                 <div id="traumaAssessmentResults"></div>
             </div>
         </div>
@@ -340,7 +340,7 @@
         // Save KTAS results and classify the urgency
         function saveKTASResults() {
             const symptoms = document.querySelectorAll('.symptom:checked');
-            let results = '<h2>KTAS 평가 결과</h2>';
+            let results = '<h2>평가 결과</h2>';
             let isEmergency = false;
 
             symptoms.forEach(symptom => {
@@ -411,7 +411,7 @@
                 { id: 'exposure', label: 'Exposure (노출 및 환경)', detailsId: 'exposureDetails' },
             ];
 
-            let results = '<h2>외상 환자 평가 결과</h2>';
+            let results = '<h2>평가 기록</h2>';
             assessments.forEach(assessment => {
                 const isChecked = document.getElementById(assessment.id).checked;
                 const details = document.getElementById(assessment.detailsId).value.trim();
