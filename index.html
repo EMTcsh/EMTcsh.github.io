@@ -350,14 +350,14 @@
 
             symptoms.forEach(symptom => {
                 results += `<div class="result-item">${symptom.value}</div>`;
-                // Check if any Grade 1 or Grade 2 symptoms are selected
-                if (symptom.closest('.grade-1') || symptom.closest('.grade-2')) {
+                // Check if any Grade 1 or Grade  symptoms are selected
+                if (symptom.closest('.grade-1') || symptom.closest('.grade-')) {
                     isEmergency = true;
                 }
             });
 
             // Determine and display the emergency status
-            results += `<p><strong>상태: ${isEmergency ? '응급' : '비응급'}</strong></p>`;
+            results += `<p><strong>상태: ${isEmergency ? '응급' : '준응급'}</strong></p>`;
 
             // Add timestamp
             const timestamp = new Date().toLocaleString();
