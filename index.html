@@ -218,7 +218,7 @@
                     <label><input type="checkbox" class="symptom" value="기타 경미한 증상"> 기타 경미한 증상</label>
                 </div>
 
-                <button type="button" onclick="saveKTASResults()" class="save-button">저장</button>
+                <button type="button" onclick="saveKTASResults()">저장</button>
             </form>
 
             <div class="result-container" id="ktasResultContainer">
@@ -233,17 +233,17 @@
             <form id="gcsForm" onsubmit="return calculateGCS()">
                 <div class="form-group">
                     <label for="name">요구조자 이름</label>
-                    <input type="text" id="name" placeholder="이름을 입력하세요" aria-label="이름">
+                    <input type="text" id="name" placeholder="이름을 입력하세요" aria-label="이름" required>
                 </div>
 
                 <div class="form-group">
                     <label for="age">나이</label>
-                    <input type="number" id="age" placeholder="나이를 입력하세요" aria-label="나이">
+                    <input type="number" id="age" placeholder="나이를 입력하세요" aria-label="나이" required>
                 </div>
 
                 <div class="form-group">
                     <label for="gender">성별</label>
-                    <select id="gender">
+                    <select id="gender" required>
                         <option value="male">남성</option>
                         <option value="female">여성</option>
                     </select>
@@ -251,7 +251,7 @@
 
                 <div class="form-group">
                     <label for="eye">눈 반응 (E)</label>
-                    <select id="eye">
+                    <select id="eye" required>
                         <option value="4">자발적으로 열림</option>
                         <option value="3">소리 자극에 열림</option>
                         <option value="2">통증 자극에 열림</option>
@@ -261,7 +261,7 @@
 
                 <div class="form-group">
                     <label for="verbal">언어 반응 (V)</label>
-                    <select id="verbal">
+                    <select id="verbal" required>
                         <option value="5">정확한 대답</option>
                         <option value="4">혼잡한 대답</option>
                         <option value="3">혼미한 대답</option>
@@ -272,7 +272,7 @@
 
                 <div class="form-group">
                     <label for="motor">운동 반응 (M)</label>
-                    <select id="motor">
+                    <select id="motor" required>
                         <option value="6">명령 수행</option>
                         <option value="5">통증 자극에 국소화</option>
                         <option value="4">통증 자극에 굴곡</option>
@@ -285,7 +285,7 @@
                 <button type="submit">GCS 점수 계산</button>
             </form>
 
-            <div class="result-container">
+            <div class="result-container" id="gcsResultContainer">
                 <h2>GCS 점수</h2>
                 <div id="gcsResult"></div>
             </div>
@@ -323,7 +323,7 @@
                 <button type="button" onclick="saveTraumaAssessment()">저장</button>
             </form>
 
-            <div class="result-container">
+            <div class="result-container" id="traumaAssessmentResultContainer">
                 <h2>외상 환자 평가 결과</h2>
                 <div id="traumaAssessmentResults"></div>
             </div>
@@ -332,30 +332,76 @@
         <!-- 결과 및 저장된 데이터 섹션 -->
         <div class="section">
             <h2>저장된 데이터</h2>
-            <div id="savedData"></div>
+            <div id="savedData" class="board"></div>
         </div>
     </div>
 
     <script>
+        // Save KTAS results and classify the urgency
         function saveKTASResults() {
             const symptoms = document.querySelectorAll('.symptom:checked');
             let results = '<h2>KTAS 평가 결과</h2>';
+            let isEmergency = false;
+
             symptoms.forEach(symptom => {
                 results += `<div class="result-item">${symptom.value}</div>`;
+                // Check if any Grade 1 or Grade 2 symptoms are selected
+                if (symptom.closest('.grade-1') || symptom.closest('.grade-2')) {
+                    isEmergency = true;
+                }
             });
+
+            // Determine and display the emergency status
+            results += `<p><strong>상태: ${isEmergency ? '응급' : '비응급'}</strong></p>`;
+
+            // Add timestamp
+            const timestamp = new Date().toLocaleString();
+            const savedData = document.getElementById('savedData');
+            savedData.innerHTML += `<div class="board-item"><strong>[응급환자 분류]</strong><br>${results}<br><span class="timestamp">저장 시간: ${timestamp}</span></div>`;
+
+            // Display the results in the KTAS results container
             document.getElementById('ktasResults').innerHTML = results;
+
+            // Clear selected symptoms
+            document.querySelectorAll('.symptom').forEach(symptom => symptom.checked = false);
+
+            return false;
         }
 
+        // Calculate GCS score and determine the state
         function calculateGCS() {
             const eye = parseInt(document.getElementById('eye').value, 10);
             const verbal = parseInt(document.getElementById('verbal').value, 10);
             const motor = parseInt(document.getElementById('motor').value, 10);
             const total = eye + verbal + motor;
 
-            document.getElementById('gcsResult').innerHTML = `<p>총 GCS 점수: ${total}</p>`;
+            let state = '';
+            if (total === 15) {
+                state = 'Alert';
+            } else if (total >= 13 && total <= 14) {
+                state = 'Drowsy';
+            } else if (total >= 8 && total <= 12) {
+                state = 'Stupor';
+            } else if (total >= 4 && total <= 7) {
+                state = 'Semi-Coma';
+            } else if (total <= 3) {
+                state = 'Coma';
+            }
+
+            const result = `<p>총 GCS 점수: ${total} (${state})</p>`;
+
+            // Display the result in the GCS results container
+            document.getElementById('gcsResult').innerHTML = result;
+
+            // Add timestamp
+            const timestamp = new Date().toLocaleString();
+            const savedData = document.getElementById('savedData');
+            savedData.innerHTML += `<div class="board-item"><strong>[GCS 점수]</strong><br>${result}<br><span class="timestamp">저장 시간: ${timestamp}</span></div>`;
+
             return false;
         }
 
+        // Save trauma assessment results
         function saveTraumaAssessment() {
             const assessments = [
                 { id: 'airway', label: 'Airway (기도)', detailsId: 'airwayDetails' },
@@ -368,13 +414,24 @@
             let results = '<h2>외상 환자 평가 결과</h2>';
             assessments.forEach(assessment => {
                 const isChecked = document.getElementById(assessment.id).checked;
-                const details = document.getElementById(assessment.detailsId).value;
-                if (isChecked) {
+                const details = document.getElementById(assessment.detailsId).value.trim();
+                if (isChecked && details) {
                     results += `<div class="result-item"><strong>${assessment.label}:</strong> ${details}</div>`;
                 }
             });
 
+            // Display the result in the Trauma Assessment results container
             document.getElementById('traumaAssessmentResults').innerHTML = results;
+
+            // Add timestamp
+            const timestamp = new Date().toLocaleString();
+            const savedData = document.getElementById('savedData');
+            savedData.innerHTML += `<div class="board-item"><strong>[외상 환자 평가]</strong><br>${results}<br><span class="timestamp">저장 시간: ${timestamp}</span></div>`;
+
+            // Clear the form
+            document.getElementById('traumaAssessmentForm').reset();
+
+            return false;
         }
     </script>
 </body>
