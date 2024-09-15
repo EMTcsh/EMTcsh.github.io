@@ -297,27 +297,27 @@
             <form id="traumaAssessmentForm">
                 <div class="form-group">
                     <label><input type="checkbox" id="airway"> Airway (기도)</label>
-                    <textarea id="airwayDetails" placeholder="기도 확보 여부, 관리 조치에 대한 세부 사항을 입력하세요"></textarea>
+                    <textarea id="airwayDetails" placeholder="기도 확보 여부, 관리 조치에 대한 세부 사항 입력"></textarea>
                 </div>
 
                 <div class="form-group">
                     <label><input type="checkbox" id="breathing"> Breathing (호흡)</label>
-                    <textarea id="breathingDetails" placeholder="호흡 상태, 호흡수, 호흡 노력에 대한 세부 사항을 입력하세요"></textarea>
+                    <textarea id="breathingDetails" placeholder="호흡 상태, 호흡수, 호흡 노력에 대한 세부 사항 입력"></textarea>
                 </div>
 
                 <div class="form-group">
                     <label><input type="checkbox" id="circulation"> Circulation (순환)</label>
-                    <textarea id="circulationDetails" placeholder="순환 상태, 맥박, 혈압에 대한 세부 사항을 입력하세요"></textarea>
+                    <textarea id="circulationDetails" placeholder="순환 상태, 맥박, 혈압에 대한 세부 사항 입력"></textarea>
                 </div>
 
                 <div class="form-group">
                     <label><input type="checkbox" id="disability"> Disability (의식)</label>
-                    <textarea id="disabilityDetails" placeholder="의식 상태, GCS, 동공 반응에 대한 세부 사항을 입력하세요"></textarea>
+                    <textarea id="disabilityDetails" placeholder="의식 상태, GCS, 동공 반응에 대한 세부 사항 입력"></textarea>
                 </div>
 
                 <div class="form-group">
                     <label><input type="checkbox" id="exposure"> Exposure (노출 및 환경)</label>
-                    <textarea id="exposureDetails" placeholder="체온, 부상 부위, 환경 관리 조치에 대한 세부 사항을 입력하세요"></textarea>
+                    <textarea id="exposureDetails" placeholder="체온, 부상 부위, 환경 관리 조치에 대한 세부 사항 입력"></textarea>
                 </div>
 
                 <button type="button" onclick="saveTraumaAssessment()">저장</button>
@@ -411,7 +411,7 @@
                 { id: 'exposure', label: 'Exposure (노출 및 환경)', detailsId: 'exposureDetails' },
             ];
 
-            let results = '<h2>외상환자 평가 기록</h2>';
+            let results = '<h2>환자 평가 기록</h2>';
             assessments.forEach(assessment => {
                 const isChecked = document.getElementById(assessment.id).checked;
                 const details = document.getElementById(assessment.detailsId).value.trim();
@@ -426,7 +426,7 @@
             // Add timestamp
             const timestamp = new Date().toLocaleString();
             const savedData = document.getElementById('savedData');
-            savedData.innerHTML += `<div class="board-item"><strong>[외상 환자 평가]</strong><br>${results}<br><span class="timestamp">저장 시간: ${timestamp}</span></div>`;
+            savedData.innerHTML += `<div class="board-item"><strong>[환자 평가]</strong><br>${results}<br><span class="timestamp">저장 시간: ${timestamp}</span></div>`;
 
             // Clear the form
             document.getElementById('traumaAssessmentForm').reset();
