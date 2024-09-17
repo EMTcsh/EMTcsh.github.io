@@ -184,19 +184,14 @@
     <div class="container">
         <h1>응급환자 분류, GCS 점수계산, 환자 평가</h1>
 
-       <!-- 응급환자 분류 섹션 -->
-
+        <!-- 응급환자 분류 섹션 -->
         <div class="section">
-
             <h2>응급환자 분류</h2>
-
             <form id="ktasForm">
-                  <!-- 응급증상 -->
+                <!-- 응급증상 -->
                 <div class="grade-1">
-
                     <h2>Grade 1: 응급 증상</h2>
-                 
-  <label><input type="checkbox" class="symptom" value="신경학적 응급증상 - 급성의식장애, 급성신경학적 이상, 구토·의식장애 등의 증상이 있는 두부 손상"> 신경학적 응급증상 - 급성의식장애, 급성신경학적 이상, 구토·의식장애 등의 증상이 있는 두부 손상 (GCS ≤ 8)</label>
+                    <label><input type="checkbox" class="symptom" value="신경학적 응급증상 - 급성의식장애, 급성신경학적 이상, 구토·의식장애 등의 증상이 있는 두부 손상"> 신경학적 응급증상 - 급성의식장애, 급성신경학적 이상, 구토·의식장애 등의 증상이 있는 두부 손상 (GCS ≤ 8)</label>
                     <label><input type="checkbox" class="symptom" value="심혈관계 응급증상 - 심폐소생술이 필요한 증상, 급성호흡곤란, 심장질환으로 인한 급성 흉통, 심계항진, 박동이상 및 쇼크"> 심혈관계 응급증상 - 심폐소생술이 필요한 증상, 급성호흡곤란, 심장질환으로 인한 급성 흉통, 심계항진, 박동이상 및 쇼크</label>
                     <label><input type="checkbox" class="symptom" value="중독 및 대사장애 - 심한 탈수, 약물·알콜 또는 기타 물질의 과다복용이나 중독, 급성대사장애(간부전·신부전·당뇨병 등)"> 중독 및 대사장애 - 심한 탈수, 약물·알콜 또는 기타 물질의 과다복용이나 중독, 급성대사장애(간부전·신부전·당뇨병 등)</label>
                     <label><input type="checkbox" class="symptom" value="외과적 응급증상 - 개복술을 요하는 급성복증(급성복막염·장폐색증·급성췌장염 등 중한 경우), 광범위한 화상(외부신체 표면적의 18% 이상), 관통상, 개방성·다발성 골절 또는 대퇴부 척추의 골절, 사지를 절단할 우려가 있는 혈관 손상, 전신마취하에 응급수술을 요하는 중상, 다발성 외상"> 외과적 응급증상 - 개복술을 요하는 급성복증(급성복막염·장폐색증·급성췌장염 등 중한 경우), 광범위한 화상(외부신체 표면적의 18% 이상), <br> 관통상, 개방성·다발성 골절 또는 대퇴부 척추의 골절, 사지를 절단 우려가 있는 혈관 손상, 전신마취하에 응급수술을 요하는 중상, 다발성 외상</label>
@@ -204,246 +199,227 @@
                     <label><input type="checkbox" class="symptom" value="안과적 응급증상 - 화학물질에 의한 눈의 손상, 급성 시력 손실"> 안과적 응급증상 - 화학물질에 의한 눈의 손상, 급성 시력 손실</label>
                     <label><input type="checkbox" class="symptom" value="알러지 - 얼굴 부종을 동반한 알러지 반응"> 알러지 - 얼굴 부종을 동반한 알러지 반응</label>
                     <label><input type="checkbox" class="symptom" value="소아과적 응급증상 - 소아경련성 장애"> 소아과적 응급증상 - 소아경련성 장애</label>
-                    <label><input type="checkbox" class="symptom" value="정신과적 응급증상 - 자신 또는 다른 사람을 해할 우려가 있는 정신장애"> 정신과적 응급증상 - 자신 또는 다른 사람을 해할 우려가 있는 정신장애</label>
+                    <label><input type="checkbox" class="symptom" value="정신과적 응급증상 - 자살 시도, 자해 및 타해 위험이 있는 경우"> 정신과적 응급증상 - 자살 시도, 자해 및 타해 위험이 있는 경우</label>
                 </div>
 
-                 <!-- 준응급증상 -->
                 <div class="grade-2">
-
-                    <h2>Grade 2: 응급에 준하는 증상</h2>
-
-                    <label><input type="checkbox" class="symptom" value="신경학적 준응급증상 - 의식장애, 현훈"> 신경학적 준응급증상 - 의식장애, 현훈 (GCS 9-12)</label>
-                    <label><input type="checkbox" class="symptom" value="심혈관계 준응급증상 - 호흡곤란, 과호흡"> 심혈관계 준응급증상 - 호흡곤란, 과호흡</label>
-                    <label><input type="checkbox" class="symptom" value="외과적 준응급증상 - 화상, 급성복증을 포함한 배의 전반적인 이상증상, 골절·외상 또는 탈골, 그 밖에 응급수술을 요하는 증상, 배뇨장애"> 외과적 준응급증상 - 화상, 급성복증을 포함한 배의 전반적인 이상증상, 골절·외상 또는 탈골, 그 밖에 응급수술을 요하는 증상, 배뇨장애</label>
-                    <label><input type="checkbox" class="symptom" value="출혈 - 혈관손상"> 출혈 - 혈관손상</label>
-                    <label><input type="checkbox" class="symptom" value="소아과적 준응급증상 - 소아 경련, 38℃ 이상인 소아 고열(공휴일·야간 등 의료서비스가 제공되기 어려운 때에 8세 이하의 소아에게 나타나는 증상)"> 소아과적 준응급증상 - 소아 경련, 38℃ 이상인 소아 고열(공휴일·야간 등 의료서비스가 제공되기 어려운 때에 8세 이하의 소아에게 나타나는 증상)</label>
-                    <label><input type="checkbox" class="symptom" value="산부인과적 준응급증상 - 분만 또는 성폭력으로 인하여 산부인과적 검사 또는 처치가 필요한 증상"> 산부인과적 준응급증상 - 분만 또는 성폭력으로 인하여 산부인과적 검사 또는 처치가 필요한 증상</label>
-                    <label><input type="checkbox" class="symptom" value="이물에 의한 응급증상 - 귀·눈·코·항문 등에 이물이 들어가 제거술이 필요한 환자"> 이물에 의한 응급증상 - 귀·눈·코·항문 등에 이물이 들어가 제거술이 필요한 환자</label>
-
+                    <h2>Grade 2: 준응급 증상</h2>
+                    <label><input type="checkbox" class="symptom" value="급성 증상 - 급성 두통, 급성 복통, 급성 관절통"> 급성 증상 - 급성 두통, 급성 복통, 급성 관절통</label>
+                    <label><input type="checkbox" class="symptom" value="소화기계 증상 - 급성설사 및 구토, 급성변비"> 소화기계 증상 - 급성설사 및 구토, 급성변비</label>
+                    <label><input type="checkbox" class="symptom" value="호흡기계 증상 - 급성 기침, 호흡곤란"> 호흡기계 증상 - 급성 기침, 호흡곤란</label>
+                    <label><input type="checkbox" class="symptom" value="비뇨기계 증상 - 급성 배뇨통, 급성 배뇨장애"> 비뇨기계 증상 - 급성 배뇨통, 급성 배뇨장애</label>
+                    <label><input type="checkbox" class="symptom" value="피부 증상 - 발진, 두드러기"> 피부 증상 - 발진, 두드러기</label>
                 </div>
 
-                
                 <button type="button" onclick="saveKTASResults()">저장</button>
             </form>
-
-            <div class="result-container" id="ktasResultContainer">
-                <h2>저장 확인</h2>
-                <div id="ktasResults"></div>
-            </div>
         </div>
 
-        <!-- GCS 계산기 섹션 -->
+        <!-- GCS 점수 계산 섹션 -->
         <div class="section">
-            <h2>GCS 혼수척도 계산</h2>
-            <form id="gcsForm" onsubmit="return calculateGCS()">
+            <h2>GCS 점수 계산</h2>
+            <form id="gcsForm">
                 <div class="form-group">
-                    <label for="name">이름</label>
-                    <input type="text" id="name" placeholder="이름을 입력하세요" aria-label="이름" required>
-                </div>
-
-                <div class="form-group">
-                    <label for="age">나이</label>
-                    <input type="number" id="age" placeholder="나이를 입력하세요" aria-label="나이" required>
-                </div>
-
-                <div class="form-group">
-                    <label for="gender">성별</label>
-                    <select id="gender" required>
-                        <option value="male">남성</option>
-                        <option value="female">여성</option>
+                    <label for="eye">눈 반응 (Eye Opening Response):</label>
+                    <select id="eye" name="eye">
+                        <option value="4">자발적 (4)</option>
+                        <option value="3">음성 자극에 반응 (3)</option>
+                        <option value="2">통증 자극에 반응 (2)</option>
+                        <option value="1">반응 없음 (1)</option>
                     </select>
                 </div>
 
                 <div class="form-group">
-                    <label for="eye">눈 반응 (E)</label>
-                    <select id="eye" required>
-                        <option value="4">자발적으로 열림</option>
-                        <option value="3">소리 자극에 열림</option>
-                        <option value="2">통증 자극에 열림</option>
-                        <option value="1">전혀 열림 안함</option>
+                    <label for="verbal">언어 반응 (Verbal Response):</label>
+                    <select id="verbal" name="verbal">
+                        <option value="5">자발적 (5)</option>
+                        <option value="4">혼돈된 대화 (4)</option>
+                        <option value="3">단어 없이 (3)</option>
+                        <option value="2">발음 불가능 (2)</option>
+                        <option value="1">반응 없음 (1)</option>
                     </select>
                 </div>
 
                 <div class="form-group">
-                    <label for="verbal">언어 반응 (V)</label>
-                    <select id="verbal" required>
-                        <option value="5">정확한 대답</option>
-                        <option value="4">혼잡한 대답</option>
-                        <option value="3">혼미한 대답</option>
-                        <option value="2">모호한 대답</option>
-                        <option value="1">응답 없음</option>
+                    <label for="motor">운동 반응 (Motor Response):</label>
+                    <select id="motor" name="motor">
+                        <option value="6">자발적 (6)</option>
+                        <option value="5">지시대로 (5)</option>
+                        <option value="4">고통에 대해 국소적 반응 (4)</option>
+                        <option value="3">팔을 굽히는 반응 (3)</option>
+                        <option value="2">팔을 펴는 반응 (2)</option>
+                        <option value="1">반응 없음 (1)</option>
                     </select>
                 </div>
 
-                <div class="form-group">
-                    <label for="motor">운동 반응 (M)</label>
-                    <select id="motor" required>
-                        <option value="6">명령 수행</option>
-                        <option value="5">통증 자극에 국소화</option>
-                        <option value="4">통증 자극에 굴곡</option>
-                        <option value="3">통증 자극에 구부리기</option>
-                        <option value="2">경련</option>
-                        <option value="1">운동 없음</option>
-                    </select>
-                </div>
-
-                <button type="submit">계산</button>
+                <button type="button" onclick="calculateGCS()">GCS 점수 계산</button>
             </form>
-
-            <div class="result-container" id="gcsResultContainer">
-                <h2>GCS 점수</h2>
-                <div id="gcsResult"></div>
-            </div>
         </div>
 
-        <!-- 환자 평가 섹션 -->
+        <!-- 환자 평가 (ABCDE) 섹션 -->
         <div class="section">
             <h2>환자 평가 (ABCDE)</h2>
             <form id="traumaAssessmentForm">
                 <div class="form-group">
-                    <label><input type="checkbox" id="airway"> Airway (기도)</label>
-                    <textarea id="airwayDetails" placeholder="기도 확보 여부, 관리 조치에 대한 세부 사항 입력"></textarea>
+                    <label for="airway">기도 (Airway):</label>
+                    <textarea id="airway" name="airway"></textarea>
                 </div>
 
                 <div class="form-group">
-                    <label><input type="checkbox" id="breathing"> Breathing (호흡)</label>
-                    <textarea id="breathingDetails" placeholder="호흡 상태, 호흡수, 호흡 노력에 대한 세부 사항 입력"></textarea>
+                    <label for="breathing">호흡 (Breathing):</label>
+                    <textarea id="breathing" name="breathing"></textarea>
                 </div>
 
                 <div class="form-group">
-                    <label><input type="checkbox" id="circulation"> Circulation (순환)</label>
-                    <textarea id="circulationDetails" placeholder="순환 상태, 맥박, 혈압에 대한 세부 사항 입력"></textarea>
+                    <label for="circulation">순환 (Circulation):</label>
+                    <textarea id="circulation" name="circulation"></textarea>
                 </div>
 
                 <div class="form-group">
-                    <label><input type="checkbox" id="disability"> Disability (의식)</label>
-                    <textarea id="disabilityDetails" placeholder="의식 상태, GCS, 동공 반응에 대한 세부 사항 입력"></textarea>
+                    <label for="disability">장애 (Disability):</label>
+                    <textarea id="disability" name="disability"></textarea>
                 </div>
 
                 <div class="form-group">
-                    <label><input type="checkbox" id="exposure"> Exposure (노출 및 환경)</label>
-                    <textarea id="exposureDetails" placeholder="체온, 부상 부위, 환경 관리 조치에 대한 세부 사항 입력"></textarea>
+                    <label for="exposure">노출 (Exposure):</label>
+                    <textarea id="exposure" name="exposure"></textarea>
                 </div>
 
                 <button type="button" onclick="saveTraumaAssessment()">저장</button>
             </form>
-
-            <div class="result-container" id="traumaAssessmentResultContainer">
-                <h2>저장 확인</h2>
-                <div id="traumaAssessmentResults"></div>
-            </div>
         </div>
 
-        <!-- 결과 및 저장된 데이터 섹션 -->
+        <!-- AMPLE 및 생체징후 입력 섹션 -->
         <div class="section">
+            <h2>AMPLE 및 생체징후</h2>
+            <form id="ampleForm">
+                <div class="form-group">
+                    <label for="ample">주된 병력 (AMPLE):</label>
+                    <textarea id="ample" name="ample"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="allergy">알레르기:</label>
+                    <input type="text" id="allergy" name="allergy">
+                </div>
+
+                <div class="form-group">
+                    <label for="medications">약물:</label>
+                    <input type="text" id="medications" name="medications">
+                </div>
+
+                <div class="form-group">
+                    <label for="pain">통증:</label>
+                    <input type="text" id="pain" name="pain">
+                </div>
+
+                <div class="form-group">
+                    <label for="lastMeal">마지막 식사 시간:</label>
+                    <input type="text" id="lastMeal" name="lastMeal">
+                </div>
+
+                <div class="form-group">
+                    <label for="bloodPressure">혈압:</label>
+                    <input type="text" id="bloodPressure" name="bloodPressure" placeholder="예: 120/80 mmHg">
+                </div>
+
+                <div class="form-group">
+                    <label for="pulse">맥박:</label>
+                    <input type="text" id="pulse" name="pulse" placeholder="예: 72 bpm">
+                </div>
+
+                <div class="form-group">
+                    <label for="respiration">호흡수:</label>
+                    <input type="text" id="respiration" name="respiration" placeholder="예: 16 breaths/min">
+                </div>
+
+                <div class="form-group">
+                    <label for="temperature">체온:</label>
+                    <input type="text" id="temperature" name="temperature" placeholder="예: 36.6 °C">
+                </div>
+
+                <button type="button" onclick="saveAMPLEData()">저장</button>
+            </form>
+        </div>
+
+        <!-- 저장된 데이터 표시 -->
+        <div id="savedData" class="result-container">
             <h2>저장된 데이터</h2>
-            <div id="savedData" class="board"></div>
+            <div id="savedResults"></div>
         </div>
     </div>
 
     <script>
-        // Save KTAS results and classify the urgency
         function saveKTASResults() {
-            const symptoms = document.querySelectorAll('.symptom:checked');
-            let results = '<h2>응급환자 분류 결과</h2>';
-            let isEmergency = false;
+            const symptoms = Array.from(document.querySelectorAll('.symptom'))
+                .filter(checkbox => checkbox.checked)
+                .map(checkbox => checkbox.value)
+                .join(', ');
 
-            symptoms.forEach(symptom => {
-                results += `<div class="result-item">${symptom.value}</div>`;
-                // Check if any Grade 1 or Grade  symptoms are selected
-                if (symptom.closest('.grade-1') || symptom.closest('.grade-')) {
-                    isEmergency = true;
-                }
-            });
-
-            // Determine and display the emergency status
-            results += `<p><strong>상태: ${isEmergency ? '응급' : '준응급'}</strong></p>`;
-
-            // Add timestamp
-            const timestamp = new Date().toLocaleString();
-            const savedData = document.getElementById('savedData');
-            savedData.innerHTML += `<div class="board-item"><strong>[응급환자 분류]</strong><br>${results}<br><span class="timestamp">저장 시간: ${timestamp}</span></div>`;
-
-            // Display the results in the KTAS results container
-            document.getElementById('ktasResults').innerHTML = results;
-
-            // Clear selected symptoms
-            document.querySelectorAll('.symptom').forEach(symptom => symptom.checked = false);
-
-            return false;
+            const resultContainer = document.createElement('div');
+            resultContainer.classList.add('result-item');
+            resultContainer.innerHTML = `<div><strong>응급환자 분류 결과:</strong> ${symptoms}</div>
+                                         <div class="timestamp">${new Date().toLocaleString()}</div>`;
+            document.getElementById('savedResults').appendChild(resultContainer);
         }
 
-   // Calculate GCS score and determine the state
-function calculateGCS() {
-    const name = document.getElementById('name').value;
-    const age = document.getElementById('age').value;
-    const eye = parseInt(document.getElementById('eye').value, 10);
-    const verbal = parseInt(document.getElementById('verbal').value, 10);
-    const motor = parseInt(document.getElementById('motor').value, 10);
-    const total = eye + verbal + motor;
+        function calculateGCS() {
+            const eye = parseInt(document.getElementById('eye').value, 10);
+            const verbal = parseInt(document.getElementById('verbal').value, 10);
+            const motor = parseInt(document.getElementById('motor').value, 10);
+            const gcsScore = eye + verbal + motor;
 
-    let state = '';
-    if (total === 15) {
-        state = 'Alert - 정상';
-    } else if (total >= 13 && total <= 14) {
-        state = 'Drowsy - 경도외상';
-    } else if (total >= 8 && total <= 12) {
-        state = 'Stupor - 중증도외상';
-    } else if (total >= 4 && total <= 7) {
-        state = 'Semi-Coma - 중증외상';
-    } else if (total <= 3) {
-        state = 'Coma - 혼수';
-    }
+            const resultContainer = document.createElement('div');
+            resultContainer.classList.add('result-item');
+            resultContainer.innerHTML = `<div><strong>GCS 점수:</strong> ${gcsScore} (눈 반응: ${eye}, 언어 반응: ${verbal}, 운동 반응: ${motor})</div>
+                                         <div class="timestamp">${new Date().toLocaleString()}</div>`;
+            document.getElementById('savedResults').appendChild(resultContainer);
+        }
 
-    // Prepare result string
-    const result = `
-        <p><strong>이름:</strong> ${name}</p>
-        <p><strong>나이:</strong> ${age}</p>
-        <p><strong>총 GCS 점수:</strong> ${total} (${state})</p>
-    `;
-
-    // Display the result in the GCS results container
-    document.getElementById('gcsResult').innerHTML = result;
-
-    // Add timestamp
-    const timestamp = new Date().toLocaleString();
-    const savedData = document.getElementById('savedData');
-    savedData.innerHTML += `<div class="board-item"><strong>[GCS 점수]</strong><br>${result}<br><span class="timestamp">저장 시간: ${timestamp}</span></div>`;
-
-    return false; // Prevent form submission
-}
-
-        // Save trauma assessment results
         function saveTraumaAssessment() {
-            const assessments = [
-                { id: 'airway', label: 'Airway (기도)', detailsId: 'airwayDetails' },
-                { id: 'breathing', label: 'Breathing (호흡)', detailsId: 'breathingDetails' },
-                { id: 'circulation', label: 'Circulation (순환)', detailsId: 'circulationDetails' },
-                { id: 'disability', label: 'Disability (의식)', detailsId: 'disabilityDetails' },
-                { id: 'exposure', label: 'Exposure (노출 및 환경)', detailsId: 'exposureDetails' },
-            ];
+            const airway = document.getElementById('airway').value;
+            const breathing = document.getElementById('breathing').value;
+            const circulation = document.getElementById('circulation').value;
+            const disability = document.getElementById('disability').value;
+            const exposure = document.getElementById('exposure').value;
 
-            let results = '<h2>환자 평가 기록</h2>';
-            assessments.forEach(assessment => {
-                const isChecked = document.getElementById(assessment.id).checked;
-                const details = document.getElementById(assessment.detailsId).value.trim();
-                if (isChecked && details) {
-                    results += `<div class="result-item"><strong>${assessment.label}:</strong> ${details}</div>`;
-                }
-            });
+            const resultContainer = document.createElement('div');
+            resultContainer.classList.add('result-item');
+            resultContainer.innerHTML = `<div><strong>환자 평가 (ABCDE):</strong></div>
+                                         <div><strong>기도:</strong> ${airway}</div>
+                                         <div><strong>호흡:</strong> ${breathing}</div>
+                                         <div><strong>순환:</strong> ${circulation}</div>
+                                         <div><strong>장애:</strong> ${disability}</div>
+                                         <div><strong>노출:</strong> ${exposure}</div>
+                                         <div class="timestamp">${new Date().toLocaleString()}</div>`;
+            document.getElementById('savedResults').appendChild(resultContainer);
+        }
 
-            // Display the result in the Trauma Assessment results container
-            document.getElementById('traumaAssessmentResults').innerHTML = results;
+        function saveAMPLEData() {
+            const ample = document.getElementById('ample').value;
+            const allergy = document.getElementById('allergy').value;
+            const medications = document.getElementById('medications').value;
+            const pain = document.getElementById('pain').value;
+            const lastMeal = document.getElementById('lastMeal').value;
+            const bloodPressure = document.getElementById('bloodPressure').value;
+            const pulse = document.getElementById('pulse').value;
+            const respiration = document.getElementById('respiration').value;
+            const temperature = document.getElementById('temperature').value;
 
-            // Add timestamp
-            const timestamp = new Date().toLocaleString();
-            const savedData = document.getElementById('savedData');
-            savedData.innerHTML += `<div class="board-item"><strong>[환자 평가]</strong><br>${results}<br><span class="timestamp">저장 시간: ${timestamp}</span></div>`;
-
-            // Clear the form
-            document.getElementById('traumaAssessmentForm').reset();
-
-            return false;
+            const resultContainer = document.createElement('div');
+            resultContainer.classList.add('result-item');
+            resultContainer.innerHTML = `<div><strong>AMPLE 및 생체징후:</strong></div>
+                                         <div><strong>주된 병력:</strong> ${ample}</div>
+                                         <div><strong>알레르기:</strong> ${allergy}</div>
+                                         <div><strong>약물:</strong> ${medications}</div>
+                                         <div><strong>통증:</strong> ${pain}</div>
+                                         <div><strong>마지막 식사 시간:</strong> ${lastMeal}</div>
+                                         <div><strong>혈압:</strong> ${bloodPressure}</div>
+                                         <div><strong>맥박:</strong> ${pulse}</div>
+                                         <div><strong>호흡수:</strong> ${respiration}</div>
+                                         <div><strong>체온:</strong> ${temperature}</div>
+                                         <div class="timestamp">${new Date().toLocaleString()}</div>`;
+            document.getElementById('savedResults').appendChild(resultContainer);
         }
     </script>
 </body>
