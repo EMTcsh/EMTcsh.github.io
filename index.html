@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>응급환자 분류, GCS 점수계산, 환자 평가</title>
+    <title>응급환자 분류, GCS 점수계산, 환자 평가, AMPLE, 확력력징후</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -182,7 +182,7 @@
 
 <body>
     <div class="container">
-        <h1>응급환자 분류, GCS 점수계산, 환자 평가</h1>
+        <h1>응급환자 분류, GCS 점수계산, 환자 평가, AMPLE, 활력력징후</h1>
 
         <!-- 응급환자 분류 섹션 -->
         <div class="section">
@@ -261,7 +261,7 @@
             <h2>환자 평가 (ABCDE)</h2>
             <form id="traumaAssessmentForm">
                 <div class="form-group">
-                     <label for="patientName">환자 이름</label>
+                     <label for="patientName">이름</label>
                     <input type="text" id="patientName" required>
                 </div>
 
@@ -313,7 +313,7 @@
             <h2>AMPLE 및 생체징후</h2>
             <form id="ampleForm">
                <div class="form-group">
-                    <label for="patientName">환자 이름</label>
+                    <label for="patientName">이름</label>
                     <input type="text" id="patientName" required>
                 </div>
 
@@ -333,7 +333,7 @@
                 </div>
               
                 <div class="form-group">
-                    <label for="ample">주된 병력 (AMPLE):</label>
+                    <label for="ample">CC 주호소(AMPLE):</label>
                     <textarea id="ample" name="ample"></textarea>
                 </div>
 
@@ -434,21 +434,7 @@
             document.getElementById('savedResults').appendChild(resultContainer);
         }
 
-        function saveAMPLEData() {
-            const ample = document.getElementById('ample').value;
-            const allergy = document.getElementById('allergy').value;
-            const medications = document.getElementById('medications').value;
-            const pain = document.getElementById('pain').value;
-            const lastMeal = document.getElementById('lastMeal').value;
-            const bloodPressure = document.getElementById('bloodPressure').value;
-            const pulse = document.getElementById('pulse').value;
-            const respiration = document.getElementById('respiration').value;
-            const temperature = document.getElementById('temperature').value;
-
-            const resultContainer = document.createElement('div');
-            resultContainer.classList.add('result-item');
-            resultContainer.innerHTML = `<div><strong>AMPLE 및 생체징후:</strong></div>
-                                         <div><strong>주된 병력:</strong> ${ample}</div>
+        function s소:</strong> ${ample}</div>
                                          <div><strong>알레르기:</strong> ${allergy}</div>
                                          <div><strong>약물:</strong> ${medications}</div>
                                          <div><strong>통증:</strong> ${pain}</div>
