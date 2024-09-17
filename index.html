@@ -261,28 +261,47 @@
             <h2>환자 평가 (ABCDE)</h2>
             <form id="traumaAssessmentForm">
                 <div class="form-group">
-                    <label for="airway">기도 (Airway):</label>
-                    <textarea id="airway" name="airway"></textarea>
+                     <label for="patientName">환자 이름</label>
+                    <input type="text" id="patientName" required>
                 </div>
 
                 <div class="form-group">
-                    <label for="breathing">호흡 (Breathing):</label>
-                    <textarea id="breathing" name="breathing"></textarea>
+                    <label for="patientAge">연령</label>
+                    <input type="number" id="patientAge" required>
                 </div>
 
                 <div class="form-group">
-                    <label for="circulation">순환 (Circulation):</label>
-                    <textarea id="circulation" name="circulation"></textarea>
+                    <label for="patientGender">성별</label>
+                    <select id="patientGender" required>
+                        <option value="">선택</option>
+                        <option value="남성">남성</option>
+                        <option value="여성">여성</option>
+                        <option value="기타">기타</option>
+                    </select>
+                </div>
+              
+                    <label for="airway"> Airway (기도)</label>
+                    <textarea id="airwayDetails" placeholder="기도 확보 여부, 관리 조치에 대한 세부 사항 입력"></textarea>
                 </div>
 
                 <div class="form-group">
-                    <label for="disability">장애 (Disability):</label>
-                    <textarea id="disability" name="disability"></textarea>
+                    <label for="breathing"> Breathing (호흡)</label>
+                    <textarea id="breathingDetails" placeholder="호흡 상태, 호흡수, 호흡 노력에 대한 세부 사항 입력"></textarea>
                 </div>
 
                 <div class="form-group">
-                    <label for="exposure">노출 (Exposure):</label>
-                    <textarea id="exposure" name="exposure"></textarea>
+                    <label for="circulation"> Circulation (순환)</label>
+                    <textarea id="circulationDetails" placeholder="순환 상태, 맥박, 혈압에 대한 세부 사항 입력"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="disability"> Disability (의식)</label>
+                    <textarea id="disabilityDetails" placeholder="의식 상태, GCS, 동공 반응에 대한 세부 사항 입력"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="exposure"> Exposure (노출 및 환경)</label>
+                    <textarea id="exposureDetails" placeholder="체온, 부상 부위, 환경 관리 조치에 대한 세부 사항 입력"></textarea>
                 </div>
 
                 <button type="button" onclick="saveTraumaAssessment()">저장</button>
@@ -293,6 +312,26 @@
         <div class="section">
             <h2>AMPLE 및 생체징후</h2>
             <form id="ampleForm">
+               <div class="form-group">
+                    <label for="patientName">환자 이름</label>
+                    <input type="text" id="patientName" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="patientAge">연령</label>
+                    <input type="number" id="patientAge" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="patientGender">성별</label>
+                    <select id="patientGender" required>
+                        <option value="">선택</option>
+                        <option value="남성">남성</option>
+                        <option value="여성">여성</option>
+                        <option value="기타">기타</option>
+                    </select>
+                </div>
+              
                 <div class="form-group">
                     <label for="ample">주된 병력 (AMPLE):</label>
                     <textarea id="ample" name="ample"></textarea>
