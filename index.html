@@ -463,30 +463,40 @@ function calculateGCS() {
 }
 
     // Save trauma assessment data
-    function saveTraumaAssessment() {
-        const airway = document.getElementById('airwayDetails').value;
-        const breathing = document.getElementById('breathingDetails').value;
-        const circulation = document.getElementById('circulationDetails').value;
-        const disability = document.getElementById('disabilityDetails').value;
-        const exposure = document.getElementById('exposureDetails').value;
-        
-        const currentDate = new Date();
-        const timestamp = currentDate.toLocaleString();
+function saveTraumaAssessment() {
+    const airway = document.getElementById('airwayDetails').value;
+    const breathing = document.getElementById('breathingDetails').value;
+    const circulation = document.getElementById('circulationDetails').value;
+    const disability = document.getElementById('disabilityDetails').value;
+    const exposure = document.getElementById('exposureDetails').value;
 
-        const assessmentHTML = `
-            <div class="board-item">
-                <strong>${timestamp}</strong>
-                <p><strong>기도:</strong> ${airway}</p>
-                <p><strong>호흡:</strong> ${breathing}</p>
-                <p><strong>순환:</strong> ${circulation}</p>
-                <p><strong>의식:</strong> ${disability}</p>
-                <p><strong>노출:</strong> ${exposure}</p>
-            </div>
-        `;
-        
-        document.getElementById('traumaAssessmentResults').innerHTML += assessmentHTML;
-        document.getElementById('traumaAssessmentForm').reset(); // Reset form fields
-    }
+    const currentDate = new Date();
+    const timestamp = currentDate.toLocaleString();
+
+    const assessmentHTML = `
+        <div class="board-item">
+            <strong>[환자 평가]</strong>
+            <strong>${timestamp}</strong>
+            <p><strong>기도:</strong> ${airway}</p>
+            <p><strong>호흡:</strong> ${breathing}</p>
+            <p><strong>순환:</strong> ${circulation}</p>
+            <p><strong>의식:</strong> ${disability}</p>
+            <p><strong>노출:</strong> ${exposure}</p>
+        </div>
+    `;
+
+    document.getElementById('traumaAssessmentResults').innerHTML += assessmentHTML;
+    document.getElementById('traumaAssessmentForm').reset(); // Reset form fields
+    
+    // Append assessment data to the saved data section
+    document.getElementById('savedData').innerHTML += assessmentHTML;
+
+    // Also display in trauma assessment results
+    document.getElementById('traumaAssessmentResults').innerHTML += assessmentHTML;
+
+    // Reset form fields
+    document.getElementById('traumaAssessmentForm').reset(); 
+}
 
     // Save AMPLE data
     function saveAMPLEData() {
