@@ -114,7 +114,7 @@
             margin-top: 30px;
             border-top: 1px solid #ddd;
             padding-top: 10px;
-            max-height: 200px;
+            max-height: 800px;
             overflow-y: auto;
         }
 
@@ -232,119 +232,176 @@
             </div>
         </div>
 
-        <!-- GCS 계산기 섹션 -->
-        <div class="section">
-            <h2>GCS 혼수척도 계산</h2>
-            <form id="gcsForm" onsubmit="return calculateGCS()">
-                <div class="form-group">
-                    <label for="name">이름</label>
-                    <input type="text" id="name" placeholder="이름을 입력하세요" aria-label="이름" required>
-                </div>
-
-                <div class="form-group">
-                    <label for="age">나이</label>
-                    <input type="number" id="age" placeholder="나이를 입력하세요" aria-label="나이" required>
-                </div>
-
-                <div class="form-group">
-                    <label for="gender">성별</label>
-                    <select id="gender" required>
-                        <option value="male">남성</option>
-                        <option value="female">여성</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label for="eye">눈 반응 (E)</label>
-                    <select id="eye" required>
-                        <option value="4">자발적으로 열림</option>
-                        <option value="3">소리 자극에 열림</option>
-                        <option value="2">통증 자극에 열림</option>
-                        <option value="1">전혀 열림 안함</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label for="verbal">언어 반응 (V)</label>
-                    <select id="verbal" required>
-                        <option value="5">정확한 대답</option>
-                        <option value="4">혼잡한 대답</option>
-                        <option value="3">혼미한 대답</option>
-                        <option value="2">모호한 대답</option>
-                        <option value="1">응답 없음</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label for="motor">운동 반응 (M)</label>
-                    <select id="motor" required>
-                        <option value="6">명령 수행</option>
-                        <option value="5">통증 자극에 국소화</option>
-                        <option value="4">통증 자극에 굴곡</option>
-                        <option value="3">통증 자극에 구부리기</option>
-                        <option value="2">경련</option>
-                        <option value="1">운동 없음</option>
-                    </select>
-                </div>
-
-                <button type="submit">계산</button>
-            </form>
-
-            <div class="result-container" id="gcsResultContainer">
-                <h2>GCS 점수</h2>
-                <div id="gcsResult"></div>
-            </div>
+<!-- GCS 혼수척도 계산기 섹션 -->
+<div class="section">
+    <h2>GCS 혼수척도 계산</h2>
+    <form id="gcsForm" onsubmit="return calculateGCS()">
+        <div class="form-group">
+            <label for="name">이름</label>
+            <input type="text" id="name" placeholder="이름을 입력하세요" required>
         </div>
-
-        <!-- 환자 평가 섹션 -->
-        <div class="section">
-            <h2>환자 평가 (ABCDE)</h2>
-            <form id="traumaAssessmentForm">
-                <div class="form-group">
-                    <label><input type="checkbox" id="airway"> Airway (기도)</label>
-                    <textarea id="airwayDetails" placeholder="기도 확보 여부, 관리 조치에 대한 세부 사항 입력"></textarea>
-                </div>
-
-                <div class="form-group">
-                    <label><input type="checkbox" id="breathing"> Breathing (호흡)</label>
-                    <textarea id="breathingDetails" placeholder="호흡 상태, 호흡수, 호흡 노력에 대한 세부 사항 입력"></textarea>
-                </div>
-
-                <div class="form-group">
-                    <label><input type="checkbox" id="circulation"> Circulation (순환)</label>
-                    <textarea id="circulationDetails" placeholder="순환 상태, 맥박, 혈압에 대한 세부 사항 입력"></textarea>
-                </div>
-
-                <div class="form-group">
-                    <label><input type="checkbox" id="disability"> Disability (의식)</label>
-                    <textarea id="disabilityDetails" placeholder="의식 상태, GCS, 동공 반응에 대한 세부 사항 입력"></textarea>
-                </div>
-
-                <div class="form-group">
-                    <label><input type="checkbox" id="exposure"> Exposure (노출 및 환경)</label>
-                    <textarea id="exposureDetails" placeholder="체온, 부상 부위, 환경 관리 조치에 대한 세부 사항 입력"></textarea>
-                </div>
-
-                <button type="button" onclick="saveTraumaAssessment()">저장</button>
-            </form>
-
-            <div class="result-container" id="traumaAssessmentResultContainer">
-                <h2>저장 확인</h2>
-                <div id="traumaAssessmentResults"></div>
-            </div>
+        <div class="form-group">
+            <label for="age">나이</label>
+            <input type="number" id="age" placeholder="나이를 입력하세요" required>
         </div>
-
-        <!-- 결과 및 저장된 데이터 섹션 -->
-        <div class="section">
-            <h2>저장된 데이터</h2>
-            <div id="savedData" class="board"></div>
+        <div class="form-group">
+            <label for="gender">성별</label>
+            <select id="gender" required>
+                <option value="male">남성</option>
+                <option value="female">여성</option>
+            </select>
         </div>
+        <div class="form-group">
+            <label for="eye">눈 반응 (E)</label>
+            <select id="eye" required>
+                <option value="4">자발적으로 열림</option>
+                <option value="3">소리 자극에 열림</option>
+                <option value="2">통증 자극에 열림</option>
+                <option value="1">전혀 열림 안함</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="verbal">언어 반응 (V)</label>
+            <select id="verbal" required>
+                <option value="5">정확한 대답</option>
+                <option value="4">혼잡한 대답</option>
+                <option value="3">혼미한 대답</option>
+                <option value="2">모호한 대답</option>
+                <option value="1">응답 없음</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="motor">운동 반응 (M)</label>
+            <select id="motor" required>
+                <option value="6">명령 수행</option>
+                <option value="5">통증 자극에 국소화</option>
+                <option value="4">통증 자극에 굴곡</option>
+                <option value="3">통증 자극에 구부리기</option>
+                <option value="2">경련</option>
+                <option value="1">운동 없음</option>
+            </select>
+        </div>
+        <button type="submit">계산</button>
+    </form>
+    <div class="result-container" id="gcsResultContainer">
+        <h2>GCS 점수</h2>
+        <div id="gcsResult"></div>
     </div>
+</div>
 
-    <script>
-        // Save KTAS results and classify the urgency
-        function saveKTASResults() {
-            const symptoms = document.querySelectorAll('.symptom:checked');
+<!-- 환자 평가 섹션 -->
+<div class="section">
+    <h2>환자 평가 (ABCDE)</h2>
+    <form id="traumaAssessmentForm">
+        <div class="form-group">
+            <label>Airway (기도)</label>
+            <textarea id="airwayDetails" placeholder="기도 확보 여부, 관리 조치에 대한 세부 사항 입력"></textarea>
+        </div>
+        <div class="form-group">
+            <label>Breathing (호흡)</label>
+            <textarea id="breathingDetails" placeholder="호흡 상태, 호흡수, 호흡 노력에 대한 세부 사항 입력"></textarea>
+        </div>
+        <div class="form-group">
+            <label>Circulation (순환)</label>
+            <textarea id="circulationDetails" placeholder="순환 상태, 맥박, 혈압에 대한 세부 사항 입력"></textarea>
+        </div>
+        <div class="form-group">
+            <label>Disability (의식)</label>
+            <textarea id="disabilityDetails" placeholder="의식 상태, GCS, 동공 반응에 대한 세부 사항 입력"></textarea>
+        </div>
+        <div class="form-group">
+            <label>Exposure (노출 및 환경)</label>
+            <textarea id="exposureDetails" placeholder="체온, 부상 부위, 환경 관리 조치에 대한 세부 사항 입력"></textarea>
+        </div>
+        <button type="button" onclick="saveTraumaAssessment()">저장</button>
+    </form>
+    <div class="result" id="traumaAssessmentResults"></div>
+</div>
+
+<!-- AMPLE 및 생체징후 입력 섹션 -->
+<div class="section">
+    <h2>AMPLE 및 생체징후</h2>
+    <form id="ampleForm">
+        <div class="form-group">
+            <label for="patientName">이름</label>
+            <input type="text" id="patientName" required>
+        </div>
+        <div class="form-group">
+            <label for="patientAge">연령</label>
+            <input type="number" id="patientAge" required>
+        </div>
+        <div class="form-group">
+            <label for="patientGender">성별</label>
+            <select id="patientGender" required>
+                <option value="">선택</option>
+                <option value="남성">남성</option>
+                <option value="여성">여성</option>
+                <option value="기타">기타</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="CC">CC 주호소:</label>
+            <input type="text" id="CC" name="CC">
+        </div>
+        <div class="form-group">
+            <label for="allergy">A 알레르기:</label>
+            <input type="text" id="allergy" name="allergy">
+        </div>
+        <div class="form-group">
+            <label for="medications">M 약물:</label>
+            <input type="text" id="medications" name="medications">
+        </div>
+        <div class="form-group">
+            <label for="pain">P 통증:</label>
+            <input type="text" id="pain" name="pain">
+        </div>
+        <div class="form-group">
+            <label for="lastMeal">L 마지막 식사 시간:</label>
+            <input type="text" id="lastMeal" name="lastMeal">
+        </div>
+        <div class="form-group">
+            <label for="event">E 증상과 관련된 사건:</label>
+            <input type="text" id="event" name="event">
+        </div>
+        <div class="form-group">
+            <label for="bloodPressure">혈압:</label>
+            <input type="text" id="bloodPressure" name="bloodPressure" placeholder="예: 120/80 mmHg">
+        </div>
+        <div class="form-group">
+            <label for="pulse">맥박:</label>
+            <input type="text" id="pulse" name="pulse" placeholder="예: 72 bpm">
+        </div>
+        <div class="form-group">
+            <label for="respiration">호흡수:</label>
+            <input type="text" id="respiration" name="respiration" placeholder="예: 16 breaths/min">
+        </div>
+        <div class="form-group">
+            <label for="temperature">체온:</label>
+            <input type="text" id="temperature" name="temperature" placeholder="예: 36.6 °C">
+        </div>
+        <button type="button" onclick="saveAMPLEData()">저장</button>
+    </form>
+</div>
+
+<!-- 현재 시간 표시 섹션 -->
+<div class="section">
+    <h1>현재시간</h1>
+    <div class="result">
+        <div id="utcTime" class="time"></div>
+        <div id="kstTime" class="time"></div>
+    </div>
+</div>     
+
+<!-- 결과 및 기록된 데이터 섹션 -->
+<div class="section">
+    <h2>기록한 데이터</h2>
+    <div id="savedData" class="board"></div>
+</div>
+
+<script>
+    // Save KTAS results and classify the urgency
+          function saveKTASResults() {
+          const symptoms = document.querySelectorAll('.symptom:checked');
             let results = '<h2>응급환자 분류 결과</h2>';
             let isEmergency = false;
 
@@ -371,81 +428,115 @@
             document.querySelectorAll('.symptom').forEach(symptom => symptom.checked = false);
 
             return false;
+        }  
+  
+    // Calculate GCS score and determine the state
+    function calculateGCS() {
+        const name = document.getElementById('name').value;
+        const age = document.getElementById('age').value;
+        const gender = document.getElementById('gender').value;
+        const eye = parseInt(document.getElementById('eye').value);
+        const verbal = parseInt(document.getElementById('verbal').value);
+        const motor = parseInt(document.getElementById('motor').value);
+        const totalScore = eye + verbal + motor;
+            
+      let state;
+        if (totalScore >= 13) {
+            state = '가벼운 혼수';
+        } else if (totalScore >= 9) {
+            state = '중간 혼수';
+        } else {
+            state = '심각한 혼수';
         }
-
-   // Calculate GCS score and determine the state
-function calculateGCS() {
-    const name = document.getElementById('name').value;
-    const age = document.getElementById('age').value;
-    const eye = parseInt(document.getElementById('eye').value, 10);
-    const verbal = parseInt(document.getElementById('verbal').value, 10);
-    const motor = parseInt(document.getElementById('motor').value, 10);
-    const total = eye + verbal + motor;
-
-    let state = '';
-    if (total === 15) {
-        state = 'Alert - 정상';
-    } else if (total >= 13 && total <= 14) {
-        state = 'Drowsy - 경도외상';
-    } else if (total >= 8 && total <= 12) {
-        state = 'Stupor - 중증도외상';
-    } else if (total >= 4 && total <= 7) {
-        state = 'Semi-Coma - 중증외상';
-    } else if (total <= 3) {
-        state = 'Coma - 혼수';
+      
+        const resultHTML = `<p><strong>이름:</strong> ${name}, <strong>나이:</strong> ${age}, <strong>성별:</strong> ${gender}, <strong>GCS 점수:</strong> ${totalScore}, <strong>상태:</strong> ${state}</p>`;
+        
+        document.getElementById('gcsResult').innerHTML = resultHTML;
+        document.getElementById('gcsResultContainer').style.display = 'block';
+        
+        return false; // Prevent form submission
     }
 
-    // Prepare result string
-    const result = `
-        <p><strong>이름:</strong> ${name}</p>
-        <p><strong>나이:</strong> ${age}</p>
-        <p><strong>총 GCS 점수:</strong> ${total} (${state})</p>
-    `;
+    // Save trauma assessment data
+    function saveTraumaAssessment() {
+        const airway = document.getElementById('airwayDetails').value;
+        const breathing = document.getElementById('breathingDetails').value;
+        const circulation = document.getElementById('circulationDetails').value;
+        const disability = document.getElementById('disabilityDetails').value;
+        const exposure = document.getElementById('exposureDetails').value;
+        
+        const currentDate = new Date();
+        const timestamp = currentDate.toLocaleString();
 
-    // Display the result in the GCS results container
-    document.getElementById('gcsResult').innerHTML = result;
+        const assessmentHTML = `
+            <div class="board-item">
+                <strong>${timestamp}</strong>
+                <p><strong>기도:</strong> ${airway}</p>
+                <p><strong>호흡:</strong> ${breathing}</p>
+                <p><strong>순환:</strong> ${circulation}</p>
+                <p><strong>의식:</strong> ${disability}</p>
+                <p><strong>노출:</strong> ${exposure}</p>
+            </div>
+        `;
+        
+        document.getElementById('traumaAssessmentResults').innerHTML += assessmentHTML;
+        document.getElementById('traumaAssessmentForm').reset(); // Reset form fields
+    }
 
-    // Add timestamp
-    const timestamp = new Date().toLocaleString();
-    const savedData = document.getElementById('savedData');
-    savedData.innerHTML += `<div class="board-item"><strong>[GCS 점수]</strong><br>${result}<br><span class="timestamp">저장 시간: ${timestamp}</span></div>`;
+    // Save AMPLE data
+    function saveAMPLEData() {
+        const name = document.getElementById('patientName').value;
+        const age = document.getElementById('patientAge').value;
+        const gender = document.getElementById('patientGender').value;
+        const CC = document.getElementById('CC').value;
+        const allergy = document.getElementById('allergy').value;
+        const medications = document.getElementById('medications').value;
+        const pain = document.getElementById('pain').value;
+        const lastMeal = document.getElementById('lastMeal').value;
+        const event = document.getElementById('event').value;
+        const bloodPressure = document.getElementById('bloodPressure').value;
+        const pulse = document.getElementById('pulse').value;
+        const respiration = document.getElementById('respiration').value;
+        const temperature = document.getElementById('temperature').value;
 
-    return false; // Prevent form submission
-}
+        const currentDate = new Date();
+        const timestamp = currentDate.toLocaleString();
 
-        // Save trauma assessment results
-        function saveTraumaAssessment() {
-            const assessments = [
-                { id: 'airway', label: 'Airway (기도)', detailsId: 'airwayDetails' },
-                { id: 'breathing', label: 'Breathing (호흡)', detailsId: 'breathingDetails' },
-                { id: 'circulation', label: 'Circulation (순환)', detailsId: 'circulationDetails' },
-                { id: 'disability', label: 'Disability (의식)', detailsId: 'disabilityDetails' },
-                { id: 'exposure', label: 'Exposure (노출 및 환경)', detailsId: 'exposureDetails' },
-            ];
+        const ampleHTML = `
+            <div class="board-item">
+                <strong>${timestamp}</strong>
+                <p><strong>이름:</strong> ${name}, <strong>나이:</strong> ${age}, <strong>성별:</strong> ${gender}</p>
+                <p><strong>주호소:</strong> ${CC}</p>
+                <p><strong>알레르기:</strong> ${allergy}</p>
+                <p><strong>약물:</strong> ${medications}</p>
+                <p><strong>통증:</strong> ${pain}</p>
+                <p><strong>마지막 식사:</strong> ${lastMeal}</p>
+                <p><strong>사건:</strong> ${event}</p>
+                <p><strong>혈압:</strong> ${bloodPressure}</p>
+                <p><strong>맥박:</strong> ${pulse}</p>
+                <p><strong>호흡수:</strong> ${respiration}</p>
+                <p><strong>체온:</strong> ${temperature}</p>
+            </div>
+        `;
 
-            let results = '<h2>환자 평가 기록</h2>';
-            assessments.forEach(assessment => {
-                const isChecked = document.getElementById(assessment.id).checked;
-                const details = document.getElementById(assessment.detailsId).value.trim();
-                if (isChecked && details) {
-                    results += `<div class="result-item"><strong>${assessment.label}:</strong> ${details}</div>`;
-                }
-            });
+        document.getElementById('savedData').innerHTML += ampleHTML;
+        document.getElementById('ampleForm').reset(); // Reset form fields
+    }
 
-            // Display the result in the Trauma Assessment results container
-            document.getElementById('traumaAssessmentResults').innerHTML = results;
+    // Update time every second
+    function updateTime() {
+        const utc = new Date().toUTCString();
+        const kst = new Date(new Date().getTime() + 9 * 60 * 60 * 1000).toLocaleString(); // KST (UTC+9)
 
-            // Add timestamp
-            const timestamp = new Date().toLocaleString();
-            const savedData = document.getElementById('savedData');
-            savedData.innerHTML += `<div class="board-item"><strong>[환자 평가]</strong><br>${results}<br><span class="timestamp">저장 시간: ${timestamp}</span></div>`;
+        document.getElementById('utcTime').innerText = `UTC: ${utc}`;
+        document.getElementById('kstTime').innerText = `KST: ${kst}`;
+    }
 
-            // Clear the form
-            document.getElementById('traumaAssessmentForm').reset();
-
-            return false;
-        }
-    </script>
+    setInterval(updateTime, 1000);
+    updateTime(); // Initial call to display time immediately
+</script>
 </body>
+</html>
+
 
 </html>
