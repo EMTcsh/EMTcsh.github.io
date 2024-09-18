@@ -296,45 +296,55 @@
             </div>
         </div>
 
-        <!-- 환자 평가 섹션 -->
-        <div class="section">
-            <h2>환자 평가 (ABCDE)</h2>
-            <form id="traumaAssessmentForm">
-                <div class="form-group">
-                    <label><input type="checkbox" id="airway"> Airway (기도)</label>
-                    <textarea id="airwayDetails" placeholder="기도 확보 여부, 관리 조치에 대한 세부 사항 입력"></textarea>
-                </div>
+       <!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>환자 평가 및 기록</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .section { margin-bottom: 20px; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; }
+        textarea, input, select { width: 100%; padding: 8px; }
+        .result { margin-top: 20px; border: 1px solid #ccc; padding: 10px; }
+        .board-item { margin: 10px 0; }
+        .timestamp { font-size: 0.9em; color: gray; }
+    </style>
+</head>
+<body>
 
-                <div class="form-group">
-                    <label><input type="checkbox" id="breathing"> Breathing (호흡)</label>
-                    <textarea id="breathingDetails" placeholder="호흡 상태, 호흡수, 호흡 노력에 대한 세부 사항 입력"></textarea>
-                </div>
-
-                <div class="form-group">
-                    <label><input type="checkbox" id="circulation"> Circulation (순환)</label>
-                    <textarea id="circulationDetails" placeholder="순환 상태, 맥박, 혈압에 대한 세부 사항 입력"></textarea>
-                </div>
-
-                <div class="form-group">
-                    <label><input type="checkbox" id="disability"> Disability (의식)</label>
-                    <textarea id="disabilityDetails" placeholder="의식 상태, GCS, 동공 반응에 대한 세부 사항 입력"></textarea>
-                </div>
-
-                <div class="form-group">
-                    <label><input type="checkbox" id="exposure"> Exposure (노출 및 환경)</label>
-                    <textarea id="exposureDetails" placeholder="체온, 부상 부위, 환경 관리 조치에 대한 세부 사항 입력"></textarea>
-                </div>
-
-                <button type="button" onclick="saveTraumaAssessment()">저장</button>
-            </form>
-
-            <div class="result-container" id="traumaAssessmentResultContainer">
-                <h2>저장 확인</h2>
-                <div id="traumaAssessmentResults"></div>
-            </div>
+<!-- 환자 평가 섹션 -->
+<div class="section">
+    <h2>환자 평가 (ABCDE)</h2>
+    <form id="traumaAssessmentForm">
+        <div class="form-group">
+            <label>Airway (기도)</label>
+            <textarea id="airwayDetails" placeholder="기도 확보 여부, 관리 조치에 대한 세부 사항 입력"></textarea>
         </div>
+        <div class="form-group">
+            <label>Breathing (호흡)</label>
+            <textarea id="breathingDetails" placeholder="호흡 상태, 호흡수, 호흡 노력에 대한 세부 사항 입력"></textarea>
+        </div>
+        <div class="form-group">
+            <label>Circulation (순환)</label>
+            <textarea id="circulationDetails" placeholder="순환 상태, 맥박, 혈압에 대한 세부 사항 입력"></textarea>
+        </div>
+        <div class="form-group">
+            <label>Disability (의식)</label>
+            <textarea id="disabilityDetails" placeholder="의식 상태, GCS, 동공 반응에 대한 세부 사항 입력"></textarea>
+        </div>
+        <div class="form-group">
+            <label>Exposure (노출 및 환경)</label>
+            <textarea id="exposureDetails" placeholder="체온, 부상 부위, 환경 관리 조치에 대한 세부 사항 입력"></textarea>
+        </div>
+        <button type="button" onclick="saveTraumaAssessment()">저장</button>
+    </form>
+    <div class="result" id="traumaAssessmentResults"></div>
+</div>
 
-       <!-- AMPLE 및 생체징후 입력 섹션 -->
+<!-- AMPLE 및 생체징후 입력 섹션 -->
 <div class="section">
     <h2>AMPLE 및 생체징후</h2>
     <form id="ampleForm">
@@ -342,12 +352,10 @@
             <label for="patientName">이름</label>
             <input type="text" id="patientName" required>
         </div>
-
         <div class="form-group">
             <label for="patientAge">연령</label>
             <input type="number" id="patientAge" required>
         </div>
-
         <div class="form-group">
             <label for="patientGender">성별</label>
             <select id="patientGender" required>
@@ -357,341 +365,165 @@
                 <option value="기타">기타</option>
             </select>
         </div>
-
         <div class="form-group">
             <label for="CC">CC 주호소:</label>
             <input type="text" id="CC" name="CC">
         </div>
-
         <div class="form-group">
             <label for="allergy">A 알레르기:</label>
             <input type="text" id="allergy" name="allergy">
         </div>
-
         <div class="form-group">
             <label for="medications">M 약물:</label>
             <input type="text" id="medications" name="medications">
         </div>
-
         <div class="form-group">
             <label for="pain">P 통증:</label>
             <input type="text" id="pain" name="pain">
         </div>
-
         <div class="form-group">
             <label for="lastMeal">L 마지막 식사 시간:</label>
             <input type="text" id="lastMeal" name="lastMeal">
         </div>
-
-       <div class="form-group">
+        <div class="form-group">
             <label for="event">E 증상과 관련된 사건:</label>
             <input type="text" id="event" name="event">
         </div>
-
         <div class="form-group">
             <label for="bloodPressure">혈압:</label>
             <input type="text" id="bloodPressure" name="bloodPressure" placeholder="예: 120/80 mmHg">
         </div>
-
         <div class="form-group">
             <label for="pulse">맥박:</label>
             <input type="text" id="pulse" name="pulse" placeholder="예: 72 bpm">
         </div>
-
         <div class="form-group">
             <label for="respiration">호흡수:</label>
             <input type="text" id="respiration" name="respiration" placeholder="예: 16 breaths/min">
         </div>
-        
-<!DOCTYPE Time html>
         <div class="form-group">
             <label for="temperature">체온:</label>
             <input type="text" id="temperature" name="temperature" placeholder="예: 36.6 °C">
         </div>
-
         <button type="button" onclick="saveAMPLEData()">저장</button>
     </form>
 </div>
-        
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title> UTC to KST Time</title>
-</head>
 
-  <body>
-    <div class="container">
-        <h1> 현재시간 Time </h1>
-        <div class="result">
-            <div id="utcTime" class="time"></div>
-            <div id="kstTime" class="time"></div>
-        </div>
+<!-- 현재 시간 표시 섹션 -->
+<div class="section">
+    <h1>현재시간</h1>
+    <div class="result">
+        <div id="utcTime" class="time"></div>
+        <div id="kstTime" class="time"></div>
     </div>
+</div>
 
-    <script>
-        function updateTimes() {
-            const now = new Date();
-            
-            // Display current UTC time
-            const utcOptions = {
-                year: 'numeric',
-                month: '2-digit',
-                day: '2-digit',
-                hour: '2-digit',
-                minute: '2-digit',
-                second: '2-digit',
-                timeZone: 'UTC',
-                hour12: false
-            };
-            const utcFormatted = new Intl.DateTimeFormat('en-GB', utcOptions).format(now);
-            
-            // Convert to KST
-            const kstOffset = 9 * 60; // KST is UTC+9 hours
-            const kstDate = new Date(now.getTime() + kstOffset * 60 * 1000);
-            const kstFormatted = new Intl.DateTimeFormat('ko-KR', {
-                ...utcOptions,
-                timeZone: 'Asia/Seoul'
-            }).format(kstDate);
+<!-- 결과 및 기록된 데이터 섹션 -->
+<div class="section">
+    <h2>기록한 데이터</h2>
+    <div id="savedData" class="board"></div>
+</div>
 
-            // Update the page
-            document.getElementById('utcTime').innerText = `UTC Time: ${utcFormatted}`;
-            document.getElementById('kstTime').innerText = `KST Time: ${kstFormatted}`;
-        }
-
-        // Update times every second
-        setInterval(updateTimes, 1000);
+<script>
+    // 현재 시간 업데이트
+    function updateTimes() {
+        const now = new Date();
         
-        // Initial call to display the times immediately
-        updateTimes();
-    </script>
-</body>
-</html>
+        // 현재 UTC 시간 표시
+        const utcOptions = {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit',
+            timeZone: 'UTC',
+            hour12: false
+        };
+        const utcFormatted = new Intl.DateTimeFormat('en-GB', utcOptions).format(now);
         
-        <!-- 결과 및 기록된 데이터 섹션 -->
-        <div class="section">
-            <h2>기록한 데이터</h2>
-            <div id="savedData" class="board"></div>
-        </div>
-    </div>
+        // KST로 변환
+        const kstOptions = {
+            ...utcOptions,
+            timeZone: 'Asia/Seoul'
+        };
+        const kstFormatted = new Intl.DateTimeFormat('ko-KR', kstOptions).format(now);
 
-    <script>
-        // Save KTAS results and classify the urgency
-        function saveKTASResults() {
-            const symptoms = document.querySelectorAll('.symptom:checked');
-            let results = '<h2>응급환자 분류 결과</h2>';
-            let isEmergency = false;
-
-            symptoms.forEach(symptom => {
-                results += `<div class="result-item">${symptom.value}</div>`;
-                // Check if any Grade 1 or Grade  symptoms are selected
-                if (symptom.closest('.grade-1') || symptom.closest('.grade-')) {
-                    isEmergency = true;
-                }
-            });
-
-            // Determine and display the emergency status
-            results += `<p><strong>상태: ${isEmergency ? '응급' : '준응급'}</strong></p>`;
-
-            // Add timestamp
-            const timestamp = new Date().toLocaleString();
-            const savedData = document.getElementById('savedData');
-            savedData.innerHTML += `<div class="board-item"><strong>[응급환자 분류]</strong><br>${results}<br><span class="timestamp">저장 시간: ${timestamp}</span></div>`;
-
-            // Display the results in the KTAS results container
-            document.getElementById('ktasResults').innerHTML = results;
-
-            // Clear selected symptoms
-            document.querySelectorAll('.symptom').forEach(symptom => symptom.checked = false);
-
-            return false;
-        }
-
-   // Calculate GCS score and determine the state
-function calculateGCS() {
-    const name = document.getElementById('name').value;
-    const age = document.getElementById('age').value;
-    const eye = parseInt(document.getElementById('eye').value, 10);
-    const verbal = parseInt(document.getElementById('verbal').value, 10);
-    const motor = parseInt(document.getElementById('motor').value, 10);
-    const total = eye + verbal + motor;
-
-    let state = '';
-    if (total === 15) {
-        state = 'Alert - 정상';
-    } else if (total >= 13 && total <= 14) {
-        state = 'Drowsy - 경도외상';
-    } else if (total >= 8 && total <= 12) {
-        state = 'Stupor - 중증도외상';
-    } else if (total >= 4 && total <= 7) {
-        state = 'Semi-Coma - 중증외상';
-    } else if (total <= 3) {
-        state = 'Coma - 혼수';
+        // 페이지 업데이트
+        document.getElementById('utcTime').innerText = `UTC Time: ${utcFormatted}`;
+        document.getElementById('kstTime').innerText = `KST Time: ${kstFormatted}`;
     }
 
-    // Prepare result string
-    const result = `
-        <p><strong>이름:</strong> ${name}</p>
-        <p><strong>나이:</strong> ${age}</p>
-        <p><strong>총 GCS 점수:</strong> ${total} (${state})</p>
-    `;
+    // 매 초마다 시간 업데이트
+    setInterval(updateTimes, 1000);
+    updateTimes();
 
-    // Display the result in the GCS results container
-    document.getElementById('gcsResult').innerHTML = result;
+    // 저장된 데이터 처리
+    function saveTraumaAssessment() {
+        const assessments = [
+            { label: 'Airway (기도)', detailsId: 'airwayDetails' },
+            { label: 'Breathing (호흡)', detailsId: 'breathingDetails' },
+            { label: 'Circulation (순환)', detailsId: 'circulationDetails' },
+            { label: 'Disability (의식)', detailsId: 'disabilityDetails' },
+            { label: 'Exposure (노출 및 환경)', detailsId: 'exposureDetails' },
+        ];
 
-    // Add timestamp
-    const timestamp = new Date().toLocaleString();
-    const savedData = document.getElementById('savedData');
-    savedData.innerHTML += `<div class="board-item"><strong>[GCS 점수]</strong><br>${result}<br><span class="timestamp">저장 시간: ${timestamp}</span></div>`;
+        let results = '<h2>환자 평가 기록</h2>';
+        assessments.forEach(assessment => {
+            const details = document.getElementById(assessment.detailsId).value.trim();
+            if (details) {
+                results += `<div class="result-item"><strong>${assessment.label}:</strong> ${details}</div>`;
+            }
+        });
 
-    return false; // Prevent form submission
-}
+        // 결과를 저장하고 시간 추가
+        const timestamp = new Date().toLocaleString();
+        document.getElementById('savedData').innerHTML += `<div class="board-item"><strong>[환자 평가]</strong><br>${results}<br><span class="timestamp">저장 시간: ${timestamp}</span></div>`;
 
- // Save KTAS results and classify the urgency
-function saveKTASResults() {
-    const symptoms = document.querySelectorAll('.symptom:checked');
-    let results = '<h2>응급환자 분류 결과</h2>';
-    let isEmergency = false;
-
-    symptoms.forEach(symptom => {
-        results += `<div class="result-item">${symptom.value}</div>`;
-        // Check if any Grade 1 or Grade 2 symptoms are selected
-        if (symptom.closest('.grade-1')) {
-            isEmergency = true;
-        }
-    });
-
-    // Determine and display the emergency status
-    results += `<p><strong>상태: ${isEmergency ? '응급' : '준응급'}</strong></p>`;
-
-    // Add timestamp
-    const timestamp = new Date().toLocaleString();
-    const savedData = document.getElementById('savedData');
-    savedData.innerHTML += `<div class="board-item"><strong>[응급환자 분류]</strong><br>${results}<br><span class="timestamp">저장 시간: ${timestamp}</span></div>`;
-
-    // Display the results in the KTAS results container
-    document.getElementById('ktasResults').innerHTML = results;
-
-    // Clear selected symptoms
-    document.querySelectorAll('.symptom').forEach(symptom => symptom.checked = false);
-
-    return false;
-}
-
-// Calculate GCS score and determine the state
-function calculateGCS() {
-    const name = document.getElementById('name').value;
-    const age = document.getElementById('age').value;
-    const eye = parseInt(document.getElementById('eye').value, 10);
-    const verbal = parseInt(document.getElementById('verbal').value, 10);
-    const motor = parseInt(document.getElementById('motor').value, 10);
-    const total = eye + verbal + motor;
-
-    let state = '';
-    if (total === 15) {
-        state = 'Alert - 정상';
-    } else if (total >= 13 && total <= 14) {
-        state = 'Drowsy - 경도외상';
-    } else if (total >= 8 && total <= 12) {
-        state = 'Stupor - 중증도외상';
-    } else if (total >= 4 && total <= 7) {
-        state = 'Semi-Coma - 중증외상';
-    } else if (total <= 3) {
-        state = 'Coma - 혼수';
+        // 폼 초기화
+        document.getElementById('traumaAssessmentForm').reset();
+        document.getElementById('traumaAssessmentResults').innerHTML = results;
     }
 
-    // Prepare result string
-    const result = `
-        <p><strong>이름:</strong> ${name}</p>
-        <p><strong>나이:</strong> ${age}</p>
-        <p><strong>총 GCS 점수:</strong> ${total} (${state})</p>
-    `;
+    // AMPLE 데이터 저장
+    function saveAMPLEData() {
+        const patientName = document.getElementById('patientName').value.trim();
+        const patientAge = document.getElementById('patientAge').value.trim();
+        const patientGender = document.getElementById('patientGender').value.trim();
+        const CC = document.getElementById('CC').value.trim();
+        const allergy = document.getElementById('allergy').value.trim();
+        const medications = document.getElementById('medications').value.trim();
+        const pain = document.getElementById('pain').value.trim();
+        const lastMeal = document.getElementById('lastMeal').value.trim();
+        const event = document.getElementById('event').value.trim();
+        const bloodPressure = document.getElementById('bloodPressure').value.trim();
+        const pulse = document.getElementById('pulse').value.trim();
+        const respiration = document.getElementById('respiration').value.trim();
+        const temperature = document.getElementById('temperature').value.trim();
 
-    // Display the result in the GCS results container
-    document.getElementById('gcsResult').innerHTML = result;
+        let results = '<h2>AMPLE/생체징후</h2>';
+        results += `<p><strong>이름:</strong> ${patientName}</p>`;
+        results += `<p><strong>연령:</strong> ${patientAge}</p>`;
+        results += `<p><strong>성별:</strong> ${patientGender}</p>`;
+        results += `<p><strong>CC 주호소:</strong> ${CC}</p>`;
+        results += `<p><strong>A 알레르기:</strong> ${allergy}</p>`;
+        results += `<p><strong>M 약물:</strong> ${medications}</p>`;
+        results += `<p><strong>P 통증:</strong> ${pain}</p>`;
+        results += `<p><strong>L 마지막 식사 시간:</strong> ${lastMeal}</p>`;
+        results += `<p><strong>E 증상과 관련된 사건:</strong> ${event}</p>`;
+        results += `<p><strong>혈압:</strong> ${bloodPressure}</p>`;
+        results += `<p><strong>맥박:</strong> ${pulse}</p>`;
+        results += `<p><strong>호흡수:</strong> ${respiration}</p>`;
+        results += `<p><strong>체온:</strong> ${temperature}</p>`;
 
-    // Add timestamp
-    const timestamp = new Date().toLocaleString();
-    const savedData = document.getElementById('savedData');
-    savedData.innerHTML += `<div class="board-item"><strong>[GCS 점수]</strong><br>${result}<br><span class="timestamp">저장 시간: ${timestamp}</span></div>`;
+        // 결과를 저장하고 시간 추가
+        const timestamp = new Date().toLocaleString();
+        document.getElementById('savedData').innerHTML += `<div class="board-item"><strong>[AMPLE 및 생체징후]</strong><br>${results}<br><span class="timestamp">저장 시간: ${timestamp}</span></div>`;
 
-    return false; // Prevent form submission
-}
+        // 폼 초기화
+        document.getElementById('ampleForm').reset();
+    }
+</script>
 
-// Save trauma assessment results
-function saveTraumaAssessment() {
-    const assessments = [
-        { id: 'airway', label: 'Airway (기도)', detailsId: 'airwayDetails' },
-        { id: 'breathing', label: 'Breathing (호흡)', detailsId: 'breathingDetails' },
-        { id: 'circulation', label: 'Circulation (순환)', detailsId: 'circulationDetails' },
-        { id: 'disability', label: 'Disability (의식)', detailsId: 'disabilityDetails' },
-        { id: 'exposure', label: 'Exposure (노출 및 환경)', detailsId: 'exposureDetails' },
-    ];
-
-    let results = '<h2>환자 평가 기록</h2>';
-    assessments.forEach(assessment => {
-        const isChecked = document.getElementById(assessment.id).checked;
-        const details = document.getElementById(assessment.detailsId).value.trim();
-        if (isChecked && details) {
-            results += `<div class="result-item"><strong>${assessment.label}:</strong> ${details}</div>`;
-        }
-    });
-
-    // Display the result in the Trauma Assessment results container
-    document.getElementById('traumaAssessmentResults').innerHTML = results;
-
-    // Add timestamp
-    const timestamp = new Date().toLocaleString();
-    const savedData = document.getElementById('savedData');
-    savedData.innerHTML += `<div class="board-item"><strong>[환자 평가]</strong><br>${results}<br><span class="timestamp">저장 시간: ${timestamp}</span></div>`;
-
-    // Clear the form
-    document.getElementById('traumaAssessmentForm').reset();
-
-    return false;
-}
-
-// Save AMPLE data and vital signs
-function saveAMPLEData() {
-    const patientName = document.getElementById('patientName').value.trim();
-    const patientAge = document.getElementById('patientAge').value.trim();
-    const patientGender = document.getElementById('patientGender').value.trim();
-    const CC = document.getElementById('CC').value.trim();
-    const allergy = document.getElementById('allergy').value.trim();
-    const medications = document.getElementById('medications').value.trim();
-    const pain = document.getElementById('pain').value.trim();
-    const lastMeal = document.getElementById('lastMeal').value.trim();
-    const event = document.getElementById('event').value.trim();
-    const bloodPressure = document.getElementById('bloodPressure').value.trim();
-    const pulse = document.getElementById('pulse').value.trim();
-    const respiration = document.getElementById('respiration').value.trim();
-    const temperature = document.getElementById('temperature').value.trim();
-
-    let results = '<h2>AMPLE/생체징후</h2>';
-    results += `<p><strong>이름:</strong> ${patientName}</p>`;
-    results += `<p><strong>연령:</strong> ${patientAge}</p>`;
-    results += `<p><strong>성별:</strong> ${patientGender}</p>`;
-    results += `<p><strong>CC 주호소:</strong> ${CC}</p>`;
-    results += `<p><strong>A 알레르기:</strong> ${allergy}</p>`;
-    results += `<p><strong>M 약물:</strong> ${medications}</p>`;
-    results += `<p><strong>P 통증:</strong> ${pain}</p>`;
-    results += `<p><strong>L 마지막 식사 시간:</strong> ${lastMeal}</p>`;
-    results += `<p><strong>E 증상과 관련된 사건:</strong> ${event}</p>`;
-    results += `<p><strong>혈압:</strong> ${bloodPressure}</p>`;
-    results += `<p><strong>맥박:</strong> ${pulse}</p>`;
-    results += `<p><strong>호흡수:</strong> ${respiration}</p>`;
-    results += `<p><strong>체온:</strong> ${temperature}</p>`;
-
-    // Display the result in the AMPLE data container
-    document.getElementById('savedData').innerHTML += `<div class="board-item"><strong>[AMPLE 및 생체징후]</strong><br>${results}<br><span class="timestamp">저장 시간: ${new Date().toLocaleString()}</span></div>`;
-
-    // Clear the form
-    document.getElementById('ampleForm').reset();
-
-    return false;
-}
-
-    </script>
 </body>
-
 </html>
