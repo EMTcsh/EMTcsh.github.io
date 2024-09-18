@@ -439,19 +439,16 @@
         const verbal = parseInt(document.getElementById('verbal').value);
         const motor = parseInt(document.getElementById('motor').value);
         const totalScore = eye + verbal + motor;
-
-        let state = '';
-    if (total === 15) {
-        state = 'Alert - 정상';
-    } else if (total >= 13 && total <= 14) {
-        state = 'Drowsy - 경도외상';
-    } else if (total >= 8 && total <= 12) {
-        state = 'Stupor - 중증도외상';
-    } else if (total >= 4 && total <= 7) {
-        state = 'Semi-Coma - 중증외상';
-    } else if (total <= 3) {
-        state = 'Coma - 혼수';
-
+            
+      let state;
+        if (totalScore >= 13) {
+            state = '가벼운 혼수';
+        } else if (totalScore >= 9) {
+            state = '중간 혼수';
+        } else {
+            state = '심각한 혼수';
+        }
+      
         const resultHTML = `<p><strong>이름:</strong> ${name}, <strong>나이:</strong> ${age}, <strong>성별:</strong> ${gender}, <strong>GCS 점수:</strong> ${totalScore}, <strong>상태:</strong> ${state}</p>`;
         
         document.getElementById('gcsResult').innerHTML = resultHTML;
