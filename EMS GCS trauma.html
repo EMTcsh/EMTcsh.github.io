@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>응급환자 분류, GCS 점수계산, 환자 평가</title>
+    <title>응급환자 분류, GCS, 환자평가, AMPLE/생체징후</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -234,7 +234,7 @@
 
 <!-- GCS 혼수척도 계산기 섹션 -->
 <div class="section">
-    <h2>GCS 혼수척도 계산</h2>
+    <h2>Glasgow Coma Scale</h2>
     <form id="gcsForm" onsubmit="return calculateGCS()">
         <div class="form-group">
             <label for="name">이름</label>
@@ -320,7 +320,7 @@
 
 <!-- AMPLE 및 생체징후 입력 섹션 -->
 <div class="section">
-    <h2>AMPLE 및 생체징후</h2>
+    <h2>AMPLE/생체징후</h2>
     <form id="ampleForm">
         <div class="form-group">
             <label for="patientName">이름</label>
@@ -385,7 +385,7 @@
 
 <!-- 현재 시간 표시 섹션 -->
 <div class="section">
-    <h1>현재시간</h1>
+    <h2>현재시간</h2>
     <div class="result">
         <div id="utcTime" class="time"></div>
         <div id="kstTime" class="time"></div>
@@ -441,15 +441,31 @@ function calculateGCS() {
     const totalScore = eye + verbal + motor;
     
     let state;
-    if (totalScore >= 13) {
-        state = '가벼운 혼수';
+    if (totalScore === 15) {
+        state = '정상';
+        alert('GCS 점수: 15점 - 정상입니다.');
+    } else if (totalScore >= 13) {
+        state = 'Drowsy (졸림)';
     } else if (totalScore >= 9) {
-        state = '중간 혼수';
+        state = 'Stupor (혼미)';
+    } else if (totalScore >= 4) {
+        state = 'Semicoma (반혼수)';
+    } else if (totalScore >= 3) {
+        state = 'Coma (혼수)';
     } else {
-        state = '심각한 혼수';
+        state = '심각한 상태입니다.';
+    }
+    
+    let injurySeverity;
+    if (totalScore >= 13) {
+        injurySeverity = '경미한 손상 (Mild Injury)';
+    } else if (totalScore >= 9) {
+        injurySeverity = '중등도 손상 (Moderate Injury)';
+    } else {
+        injurySeverity = '중증 손상 (Severe Injury)';
     }
   
-    const resultHTML = `<p><strong>이름:</strong> ${name}, <strong>나이:</strong> ${age}, <strong>성별:</strong> ${gender}, <strong>GCS 점수:</strong> ${totalScore}, <strong>상태:</strong> ${state}</p>`;
+    const resultHTML = `<p><strong>이름:</strong> ${name}, <strong>나이:</strong> ${age}, <strong>성별:</strong> ${gender}, <strong>GCS 점수:</strong> ${totalScore}, <strong>상태:</strong> ${state}, <strong>부상 정도:</strong> ${injurySeverity}</p>`;
     
     document.getElementById('gcsResult').innerHTML = resultHTML;
     document.getElementById('gcsResultContainer').style.display = 'block';
@@ -550,6 +566,4 @@ function saveTraumaAssessment() {
     updateTime(); // Initial call to display time immediately
 </script>
 </body>
-</html>
-
 </html>
