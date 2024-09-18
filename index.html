@@ -114,7 +114,7 @@
             margin-top: 30px;
             border-top: 1px solid #ddd;
             padding-top: 10px;
-            max-height: 200px;
+            max-height: 800px;
             overflow-y: auto;
         }
 
@@ -487,41 +487,111 @@ function calculateGCS() {
     return false; // Prevent form submission
 }
 
-        // Save trauma assessment results
-        function saveTraumaAssessment() {
-            const assessments = [
-                { id: 'airway', label: 'Airway (기도)', detailsId: 'airwayDetails' },
-                { id: 'breathing', label: 'Breathing (호흡)', detailsId: 'breathingDetails' },
-                { id: 'circulation', label: 'Circulation (순환)', detailsId: 'circulationDetails' },
-                { id: 'disability', label: 'Disability (의식)', detailsId: 'disabilityDetails' },
-                { id: 'exposure', label: 'Exposure (노출 및 환경)', detailsId: 'exposureDetails' },
-            ];
+ // Save KTAS results and classify the urgency
+function saveKTASResults() {
+    const symptoms = document.querySelectorAll('.symptom:checked');
+    let results = '<h2>응급환자 분류 결과</h2>';
+    let isEmergency = false;
 
-            let results = '<h2>환자 평가 기록</h2>';
-            assessments.forEach(assessment => {
-                const isChecked = document.getElementById(assessment.id).checked;
-                const details = document.getElementById(assessment.detailsId).value.trim();
-                if (isChecked && details) {
-                    results += `<div class="result-item"><strong>${assessment.label}:</strong> ${details}</div>`;
-                }
-            });
-
-
-            // Display the result in the Trauma Assessment results container
-            document.getElementById('traumaAssessmentResults').innerHTML = results;
-
-            // Add timestamp
-            const timestamp = new Date().toLocaleString();
-            const savedData = document.getElementById('savedData');
-            savedData.innerHTML += `<div class="board-item"><strong>[환자 평가]</strong><br>${results}<br><span class="timestamp">저장 시간: ${timestamp}</span></div>`;
-
-            // Clear the form
-            document.getElementById('traumaAssessmentForm').reset();
-
-            return false;
+    symptoms.forEach(symptom => {
+        results += `<div class="result-item">${symptom.value}</div>`;
+        // Check if any Grade 1 or Grade 2 symptoms are selected
+        if (symptom.closest('.grade-1')) {
+            isEmergency = true;
         }
-      
-      // Save AMPLE data and vital signs
+    });
+
+    // Determine and display the emergency status
+    results += `<p><strong>상태: ${isEmergency ? '응급' : '준응급'}</strong></p>`;
+
+    // Add timestamp
+    const timestamp = new Date().toLocaleString();
+    const savedData = document.getElementById('savedData');
+    savedData.innerHTML += `<div class="board-item"><strong>[응급환자 분류]</strong><br>${results}<br><span class="timestamp">저장 시간: ${timestamp}</span></div>`;
+
+    // Display the results in the KTAS results container
+    document.getElementById('ktasResults').innerHTML = results;
+
+    // Clear selected symptoms
+    document.querySelectorAll('.symptom').forEach(symptom => symptom.checked = false);
+
+    return false;
+}
+
+// Calculate GCS score and determine the state
+function calculateGCS() {
+    const name = document.getElementById('name').value;
+    const age = document.getElementById('age').value;
+    const eye = parseInt(document.getElementById('eye').value, 10);
+    const verbal = parseInt(document.getElementById('verbal').value, 10);
+    const motor = parseInt(document.getElementById('motor').value, 10);
+    const total = eye + verbal + motor;
+
+    let state = '';
+    if (total === 15) {
+        state = 'Alert - 정상';
+    } else if (total >= 13 && total <= 14) {
+        state = 'Drowsy - 경도외상';
+    } else if (total >= 8 && total <= 12) {
+        state = 'Stupor - 중증도외상';
+    } else if (total >= 4 && total <= 7) {
+        state = 'Semi-Coma - 중증외상';
+    } else if (total <= 3) {
+        state = 'Coma - 혼수';
+    }
+
+    // Prepare result string
+    const result = `
+        <p><strong>이름:</strong> ${name}</p>
+        <p><strong>나이:</strong> ${age}</p>
+        <p><strong>총 GCS 점수:</strong> ${total} (${state})</p>
+    `;
+
+    // Display the result in the GCS results container
+    document.getElementById('gcsResult').innerHTML = result;
+
+    // Add timestamp
+    const timestamp = new Date().toLocaleString();
+    const savedData = document.getElementById('savedData');
+    savedData.innerHTML += `<div class="board-item"><strong>[GCS 점수]</strong><br>${result}<br><span class="timestamp">저장 시간: ${timestamp}</span></div>`;
+
+    return false; // Prevent form submission
+}
+
+// Save trauma assessment results
+function saveTraumaAssessment() {
+    const assessments = [
+        { id: 'airway', label: 'Airway (기도)', detailsId: 'airwayDetails' },
+        { id: 'breathing', label: 'Breathing (호흡)', detailsId: 'breathingDetails' },
+        { id: 'circulation', label: 'Circulation (순환)', detailsId: 'circulationDetails' },
+        { id: 'disability', label: 'Disability (의식)', detailsId: 'disabilityDetails' },
+        { id: 'exposure', label: 'Exposure (노출 및 환경)', detailsId: 'exposureDetails' },
+    ];
+
+    let results = '<h2>환자 평가 기록</h2>';
+    assessments.forEach(assessment => {
+        const isChecked = document.getElementById(assessment.id).checked;
+        const details = document.getElementById(assessment.detailsId).value.trim();
+        if (isChecked && details) {
+            results += `<div class="result-item"><strong>${assessment.label}:</strong> ${details}</div>`;
+        }
+    });
+
+    // Display the result in the Trauma Assessment results container
+    document.getElementById('traumaAssessmentResults').innerHTML = results;
+
+    // Add timestamp
+    const timestamp = new Date().toLocaleString();
+    const savedData = document.getElementById('savedData');
+    savedData.innerHTML += `<div class="board-item"><strong>[환자 평가]</strong><br>${results}<br><span class="timestamp">저장 시간: ${timestamp}</span></div>`;
+
+    // Clear the form
+    document.getElementById('traumaAssessmentForm').reset();
+
+    return false;
+}
+
+// Save AMPLE data and vital signs
 function saveAMPLEData() {
     const patientName = document.getElementById('patientName').value.trim();
     const patientAge = document.getElementById('patientAge').value.trim();
@@ -551,16 +621,12 @@ function saveAMPLEData() {
     results += `<p><strong>체온:</strong> ${temperature}</p>`;
 
     // Display the result in the AMPLE data container
-    document.getElementById('savedData').innerHTML += `
-        <div class="board-item">
-            <strong>[AMPLE 및 생체징후]</strong><br>
-            ${results}<br>
-            <span class="timestamp">저장 시간: ${new Date().toLocaleString()}</span>
-        </div>
-    `;
+    document.getElementById('savedData').innerHTML += `<div class="board-item"><strong>[AMPLE 및 생체징후]</strong><br>${results}<br><span class="timestamp">저장 시간: ${new Date().toLocaleString()}</span></div>`;
 
     // Clear the form
     document.getElementById('ampleForm').reset();
+
+    return false;
 }
     </script>
 </body>
