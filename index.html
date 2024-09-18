@@ -360,7 +360,7 @@
 
         <div class="form-group">
             <label for="CC">CC 주호소:</label>
-            <input type="text" id=" CC" name="CC">
+            <input type="text" id="CC" name="CC">
         </div>
 
         <div class="form-group">
@@ -383,7 +383,7 @@
             <input type="text" id="lastMeal" name="lastMeal">
         </div>
 
-<div class="form-group">
+       <div class="form-group">
             <label for="event">E 증상과 관련된 사건:</label>
             <input type="text" id="event" name="event">
         </div>
@@ -661,13 +661,13 @@ function saveAMPLEData() {
     const medications = document.getElementById('medications').value.trim();
     const pain = document.getElementById('pain').value.trim();
     const lastMeal = document.getElementById('lastMeal').value.trim();
-    const event = document.getElementById('event'). value.trim();
+    const event = document.getElementById('event').value.trim();
     const bloodPressure = document.getElementById('bloodPressure').value.trim();
     const pulse = document.getElementById('pulse').value.trim();
     const respiration = document.getElementById('respiration').value.trim();
     const temperature = document.getElementById('temperature').value.trim();
 
-    let results = '<h2>AMPLE 및 생체징후 기록</h2>';
+    let results = '<h2>저장 확인</h2>';
     results += `<p><strong>이름:</strong> ${patientName}</p>`;
     results += `<p><strong>연령:</strong> ${patientAge}</p>`;
     results += `<p><strong>성별:</strong> ${patientGender}</p>`;
@@ -676,7 +676,7 @@ function saveAMPLEData() {
     results += `<p><strong>M 약물:</strong> ${medications}</p>`;
     results += `<p><strong>P 통증:</strong> ${pain}</p>`;
     results += `<p><strong>L 마지막 식사 시간:</strong> ${lastMeal}</p>`;
-    reaults += `<p><strong>E 증상과 관련된 사건:</strong> ${event}</p>`;
+    results += `<p><strong>E 증상과 관련된 사건:</strong> ${event}</p>`;
     results += `<p><strong>혈압:</strong> ${bloodPressure}</p>`;
     results += `<p><strong>맥박:</strong> ${pulse}</p>`;
     results += `<p><strong>호흡수:</strong> ${respiration}</p>`;
@@ -690,6 +690,7 @@ function saveAMPLEData() {
 
     return false;
 }
+
     </script>
 </body>
 
