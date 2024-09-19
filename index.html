@@ -648,5 +648,38 @@ function saveTraumaAssessment() {
     setInterval(updateTime, 1000);
     updateTime(); // Initial call to display time immediately
 </script>
+     
+<!-- Add this section in your existing HTML where you want the download button -->
+<div class="section">
+    <h2>데이터 다운로드</h2>
+    <button type="button" onclick="downloadData()">기록한 데이터 다운로드</button>
+</div>
+
+<!-- Existing savedData section -->
+
+<script>
+    // Existing code...
+
+    // Function to download saved data as a text file
+    function downloadData() {
+        // Retrieve the text content from the savedData div
+        const savedDataText = document.getElementById('savedData').innerText;
+        
+        // Create a blob with the saved data
+        const blob = new Blob([savedDataText], { type: 'text/plain' });
+        const url = URL.createObjectURL(blob);
+        
+        // Create a link element to download the file
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'saved_data.txt'; // Specify the file name
+        document.body.appendChild(a);
+        a.click(); // Programmatically click the link to trigger the download
+        document.body.removeChild(a); // Clean up
+        URL.revokeObjectURL(url); // Release the blob URL
+    }
+</script>
+
+
 </body>
 </html>
