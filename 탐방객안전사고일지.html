@@ -15,13 +15,21 @@
             text-align: center;
             margin-bottom: 20px;
             color: #4CAF50;
-            font-size: 24px; /* 제목 크기 조정 */
+            font-size: 24px;
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
         form {
             background: white;
             padding: 20px;
             border-radius: 8px;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 800px;
+            margin-bottom: 20px;
         }
         table {
             width: 100%;
@@ -67,10 +75,37 @@
             background-color: white;
             border-radius: 8px;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            display: none;
+            width: 100%;
+            max-width: 800px;
         }
         #savedData h2 {
             text-align: center;
             color: #4CAF50;
+        }
+        .divider {
+            width: 100%;
+            height: 2px;
+            background-color: #4CAF50;
+            margin: 20px 0;
+            position: relative;
+        }
+        .divider:before {
+            content: '';
+            position: absolute;
+            top: -10px;
+            left: 14%;
+            width: 72%;
+            height: 20px;
+            background-color: #f4f4f4;
+            z-index: 1;
+        }
+        .time-input {
+            display: flex;
+            align-items: center;
+        }
+        .time-input input {
+            flex-grow: 1;
         }
     </style>
 </head>
@@ -78,131 +113,143 @@
 
 <h1>탐방객 안전사고 처리 현황</h1>
 
-<form id="incidentForm">
-    <table>
-        <tr>
-            <th>사고일시</th>
-            <td><input type="datetime-local" name="사고일시" required></td>
-        </tr>
-        <tr>
-            <th>사고발생상황 접수 경로</th>
-            <td>
-                <select name="접수경로" required>
-                    <option value="119상황전파">119상황전파</option>
-                    <option value="사무소전화접수">사무소전화접수</option>
-                    <option value="현장접수">현장접수</option>
-                </select>
-            </td>
-        </tr>
-        <tr>
-            <th>출동시간</th>
-            <td><input type="text" name="출동시간" placeholder="HH:MM" required></td>
-        </tr>
-        <tr>
-            <th>도착시간</th>
-            <td><input type="text" name="도착시간" placeholder="HH:MM" required></td>
-        </tr>
-        <tr>
-            <th>완료시간</th>
-            <td><input type="text" name="완료시간" placeholder="HH:MM" required></td>
-        </tr>
-        <tr>
-            <th>출동거리</th>
-            <td><input type="text" name="출동거리" required></td>
-        </tr>
-        <tr>
-            <th>사고장소</th>
-            <td><input type="text" name="사고장소" required></td>
-        </tr>
-        <tr>
-            <th>위도</th>
-            <td><input type="text" name="위도" required></td>
-        </tr>
-        <tr>
-            <th>경도</th>
-            <td><input type="text" name="경도" required></td>
-        </tr>
-        <tr>
-            <th>장소구분</th>
-            <td><input type="text" name="장소구분" required></td>
-        </tr>
-        <tr>
-            <th>신고자 인적사항</th>
-            <td>
-                성명: <input type="text" name="신고자성명" required><br>
-                성별: <select name="신고자성별" required>
-                    <option value="남">남</option>
-                    <option value="여">여</option>
-                </select><br>
-                연락처: <input type="text" name="신고자연락처" required>
-            </td>
-        </tr>
-        <tr>
-            <th>사고자 인적사항</th>
-            <td>
-                성명: <input type="text" name="사고자성명" required><br>
-                성별: <select name="사고자성별" required>
-                    <option value="남">남</option>
-                    <option value="여">여</option>
-                </select><br>
-                생년월일: <input type="date" name="사고자생년월일" required><br>
-                연락처: <input type="text" name="사고자연락처" required><br>
-                주소: <input type="text" name="사고자주소" required>
-            </td>
-        </tr>
-        <tr>
-            <th>사고원인</th>
-            <td><input type="text" name="사고원인" required></td>
-        </tr>
-        <tr>
-            <th>부상유형</th>
-            <td><input type="text" name="부상유형" required></td>
-        </tr>
-        <tr>
-            <th>사고경위</th>
-            <td><textarea name="사고경위" rows="4" required></textarea></td>
-        </tr>
-        <tr>
-            <th>조치내용(시간대별)</th>
-            <td><textarea name="조치내용" rows="4" required></textarea></td>
-        </tr>
-        <tr>
-            <th>동원인원</th>
-            <td><input type="text" name="동원인원" required></td>
-        </tr>
-        <tr>
-            <th>동원장비</th>
-            <td><input type="text" name="동원장비" required></td>
-        </tr>
-        <tr>
-            <th>병원이송 여부</th>
-            <td>
-                <select name="병원이송여부" required>
-                    <option value="예">예</option>
-                    <option value="아니오">아니오</option>
-                </select>
-            </td>
-        </tr>
-        <tr>
-            <th>음주 여부</th>
-            <td>
-                <select name="음주여부" required>
-                    <option value="예">아니오</option>
-                    <option value="아니오">예</option>
-                </select>
-            </td>
-        </tr>
-        <tr>
-            <th>특이사항</th>
-            <td><textarea name="특이사항" rows="4"></textarea></td>
-        </tr>
-    </table>
-    <button type="submit">저장</button>
-</form>
+<div class="container">
+    <form id="incidentForm">
+        <table>
+            <tr>
+                <th>사고일시</th>
+                <td><input type="datetime-local" name="사고일시" required></td>
+            </tr>
+            <tr>
+                <th>사고발생상황 접수 경로</th>
+                <td>
+                    <select name="접수경로" required>
+                        <option value="119상황전파">119상황전파</option>
+                        <option value="사무소전화접수">사무소전화접수</option>
+                        <option value="현장접수">현장접수</option>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <th>출동시간</th>
+                <td class="time-input">
+                    <input type="text" name="출동시간" placeholder="HH:MM" pattern="^(2[0-3]|[01]?[0-9]):[0-5][0-9]$" required>
+                </td>
+            </tr>
+            <tr>
+                <th>도착시간</th>
+                <td class="time-input">
+                    <input type="text" name="도착시간" placeholder="HH:MM" pattern="^(2[0-3]|[01]?[0-9]):[0-5][0-9]$" required>
+                </td>
+            </tr>
+            <tr>
+                <th>완료시간</th>
+                <td class="time-input">
+                    <input type="text" name="완료시간" placeholder="HH:MM" pattern="^(2[0-3]|[01]?[0-9]):[0-5][0-9]$" required>
+                </td>
+            </tr>
+            <tr>
+                <th>출동거리</th>
+                <td><input type="text" name="출동거리" required></td>
+            </tr>
+            <tr>
+                <th>사고장소</th>
+                <td><input type="text" name="사고장소" required></td>
+            </tr>
+            <tr>
+                <th>위도</th>
+                <td><input type="text" name="위도" required></td>
+            </tr>
+            <tr>
+                <th>경도</th>
+                <td><input type="text" name="경도" required></td>
+            </tr>
+            <tr>
+                <th>장소구분</th>
+                <td><input type="text" name="장소구분" required></td>
+            </tr>
+            <tr>
+                <th>신고자 인적사항</th>
+                <td>
+                    성명: <input type="text" name="신고자성명" required><br>
+                    성별: <select name="신고자성별" required>
+                        <option value="남">남</option>
+                        <option value="여">여</option>
+                        <option value="미상">미상</option>
+                    </select><br>
+                    연락처: <input type="text" name="신고자연락처" required>
+                </td>
+            </tr>
+            <tr>
+                <th>사고자 인적사항</th>
+                <td>
+                    성명: <input type="text" name="사고자성명" required><br>
+                    성별: <select name="사고자성별" required>
+                        <option value="남">남</option>
+                        <option value="여">여</option>
+                        <option value="미상">미상</option>
+                    </select><br>
+                    생년월일: <input type="date" name="사고자생년월일" required><br>
+                    연락처: <input type="text" name="사고자연락처" required><br>
+                    주소: <input type="text" name="사고자주소" required>
+                </td>
+            </tr>
+            <tr>
+                <th>사고원인</th>
+                <td><input type="text" name="사고원인" required></td>
+            </tr>
+            <tr>
+                <th>부상유형</th>
+                <td><input type="text" name="부상유형" required></td>
+            </tr>
+            <tr>
+                <th>사고경위</th>
+                <td><textarea name="사고경위" rows="4" required></textarea></td>
+            </tr>
+            <tr>
+                <th>조치내용(시간대별)</th>
+                <td><textarea name="조치내용" rows="4" required></textarea></td>
+            </tr>
+            <tr>
+                <th>동원인원</th>
+                <td><input type="text" name="동원인원" required></td>
+            </tr>
+            <tr>
+                <th>동원장비</th>
+                <td><input type="text" name="동원장비" required></td>
+            </tr>
+            <tr>
+                <th>병원이송 여부</th>
+                <td>
+                    <select name="병원이송여부" required>
+                        <option value="예">예</option>
+                        <option value="아니오">아니오</option>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <th>음주 여부</th>
+                <td>
+                    <select name="음주여부" required>
+                        <option value="예">아니오</option>
+                        <option value="아니오">예</option>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <th>특이사항</th>
+                <td><textarea name="특이사항" rows="4"></textarea></td>
+            </tr>
+        </table>
+        <button type="submit">저장</button>
+    </form>
 
-<div id="savedData" style="display:none;">
-    <h2>저장된 내용</h2>
-    <div id="dataDisplay"></div>
+    <div class="divider"></div>
+
+    <div id="savedData">
+        <h2>저장된 내용</h2>
+        <div id="dataDisplay"></div>
+    </div>
 </div>
 
 <script>
