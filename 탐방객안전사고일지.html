@@ -241,7 +241,7 @@
                 <td><textarea name="특이사항" rows="4"></textarea></td>
             </tr>
         </table>
-        <button type="submit">저장</button>
+        <button type="submit">제출 및 저장</button>
     </form>
 
     <div class="divider"></div>
@@ -249,6 +249,7 @@
     <div id="savedData">
         <h2>저장된 내용</h2>
         <div id="dataDisplay"></div>
+        <a id="downloadLink" style="display:none;">다운로드</a>
     </div>
 </div>
 
@@ -258,13 +259,27 @@
         
         const formData = new FormData(event.target);
         let dataDisplay = "<ul>";
+        let textContent = "";
+        
         for (let [key, value] of formData.entries()) {
             dataDisplay += `<li><strong>${key}:</strong> ${value}</li>`;
+            textContent += `${key}: ${value}\n`;
         }
+        
         dataDisplay += "</ul>";
         
         document.getElementById('dataDisplay').innerHTML = dataDisplay;
         document.getElementById('savedData').style.display = 'block';
+        
+        // Blob을 사용하여 파일로 저장
+        const blob = new Blob([textContent], { type: 'text/plain' });
+        const url = URL.createObjectURL(blob);
+        
+        const downloadLink = document.getElementById('downloadLink');
+        downloadLink.href = url;
+        downloadLink.download = 'incident_report.txt';
+        downloadLink.innerText = '다운로드하기';
+        downloadLink.style.display = 'block';
     };
 </script>
 
