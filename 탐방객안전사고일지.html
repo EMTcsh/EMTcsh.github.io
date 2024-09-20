@@ -83,29 +83,9 @@
             text-align: center;
             color: #4CAF50;
         }
-        .divider {
-            width: 100%;
-            height: 2px;
-            background-color: #4CAF50;
-            margin: 20px 0;
-            position: relative;
-        }
-        .divider:before {
-            content: '';
-            position: absolute;
-            top: -10px;
-            left: 14%;
-            width: 72%;
-            height: 20px;
-            background-color: #f4f4f4;
-            z-index: 1;
-        }
-        .time-input {
-            display: flex;
-            align-items: center;
-        }
-        .time-input input {
-            flex-grow: 1;
+        .highlight {
+            font-weight: bold;
+            color: #d9534f; /* 강조 색상 */
         }
     </style>
 </head>
@@ -118,12 +98,12 @@
         <table>
             <tr>
                 <th>사고일시</th>
-                <td><input type="datetime-local" name="사고일시" required></td>
+                <td><input type="datetime-local" name="사고일시"></td>
             </tr>
             <tr>
-                <th>사고발생상황 접수 경로</th>
+                <th>사고발생 접수경로</th>
                 <td>
-                    <select name="접수경로" required>
+                    <select name="접수경로">
                         <option value="119상황전파">119상황전파</option>
                         <option value="사무소전화접수">사무소전화접수</option>
                         <option value="현장접수">현장접수</option>
@@ -132,107 +112,101 @@
             </tr>
             <tr>
                 <th>출동시간</th>
-                <td class="time-input">
-                    <input type="text" name="출동시간" placeholder="HH:MM" pattern="^(2[0-3]|[01]?[0-9]):[0-5][0-9]$" required>
-                </td>
+                <td><input type="text" name="출동시간" placeholder="HH:MM" pattern="^(2[0-3]|[01]?[0-9]):[0-5][0-9]$"></td>
             </tr>
             <tr>
                 <th>도착시간</th>
-                <td class="time-input">
-                    <input type="text" name="도착시간" placeholder="HH:MM" pattern="^(2[0-3]|[01]?[0-9]):[0-5][0-9]$" required>
-                </td>
+                <td><input type="text" name="도착시간" placeholder="HH:MM" pattern="^(2[0-3]|[01]?[0-9]):[0-5][0-9]$"></td>
             </tr>
             <tr>
                 <th>완료시간</th>
-                <td class="time-input">
-                    <input type="text" name="완료시간" placeholder="HH:MM" pattern="^(2[0-3]|[01]?[0-9]):[0-5][0-9]$" required>
-                </td>
+                <td><input type="text" name="완료시간" placeholder="HH:MM" pattern="^(2[0-3]|[01]?[0-9]):[0-5][0-9]$"></td>
             </tr>
             <tr>
                 <th>출동거리</th>
-                <td><input type="text" name="출동거리" required></td>
+                <td><input type="text" name="출동거리"></td>
             </tr>
             <tr>
                 <th>사고장소</th>
-                <td><input type="text" name="사고장소" required></td>
+                <td><input type="text" name="사고장소"></td>
             </tr>
             <tr>
                 <th>위도</th>
-                <td><input type="text" name="위도" required></td>
+                <td><input type="text" name="위도"></td>
             </tr>
             <tr>
                 <th>경도</th>
-                <td><input type="text" name="경도" required></td>
+                <td><input type="text" name="경도"></td>
             </tr>
             <tr>
                 <th>장소구분</th>
-                <td><input type="text" name="장소구분" required></td>
+                <td><input type="text" name="장소구분"></td>
             </tr>
             <tr>
                 <th>신고자 인적사항</th>
                 <td>
-                    성명: <input type="text" name="신고자성명" required><br>
-                    성별: <select name="신고자성별" required>
+                    성명: <input type="text" name="신고자성명"><br>
+                    성별: <select name="신고자성별">
                         <option value="남">남</option>
                         <option value="여">여</option>
                         <option value="미상">미상</option>
                     </select><br>
-                    연락처: <input type="text" name="신고자연락처" required>
+                    연락처: <input type="text" name="신고자연락처">
                 </td>
             </tr>
             <tr>
                 <th>사고자 인적사항</th>
                 <td>
-                    성명: <input type="text" name="사고자성명" required><br>
-                    성별: <select name="사고자성별" required>
+                    성명: <input type="text" name="사고자성명"><br>
+                    성별: <select name="사고자성별">
                         <option value="남">남</option>
                         <option value="여">여</option>
                         <option value="미상">미상</option>
                     </select><br>
-                    생년월일: <input type="date" name="사고자생년월일" required><br>
-                    연락처: <input type="text" name="사고자연락처" required><br>
-                    주소: <input type="text" name="사고자주소" required>
+                    생년월일: <input type="date" name="사고자생년월일"><br>
+                    연락처: <input type="text" name="사고자연락처"><br>
+                    주소: <input type="text" name="사고자주소">
                 </td>
             </tr>
             <tr>
                 <th>사고원인</th>
-                <td><input type="text" name="사고원인" required></td>
+                <td><input type="text" name="사고원인"></td>
             </tr>
             <tr>
                 <th>부상유형</th>
-                <td><input type="text" name="부상유형" required></td>
+                <td><input type="text" name="부상유형"></td>
             </tr>
             <tr>
                 <th>사고경위</th>
-                <td><textarea name="사고경위" rows="4" required></textarea></td>
+                <td><textarea name="사고경위" rows="4"></textarea></td>
             </tr>
             <tr>
                 <th>조치내용(시간대별)</th>
-                <td><textarea name="조치내용" rows="4" required></textarea></td>
+                <td><textarea name="조치내용" rows="4"></textarea></td>
             </tr>
             <tr>
                 <th>동원인원</th>
-                <td><input type="text" name="동원인원" required></td>
+                <td><input type="text" name="동원인원"></td>
             </tr>
             <tr>
                 <th>동원장비</th>
-                <td><input type="text" name="동원장비" required></td>
+                <td><input type="text" name="동원장비"></td>
             </tr>
             <tr>
-                <th>병원이송 여부</th>
+                <th>병원이송</th>
                 <td>
-                    <select name="병원이송여부" required>
+                    <select name="병원이송여부">
                         <option value="예">예</option>
                         <option value="아니오">아니오</option>
                     </select>
                 </td>
             </tr>
             <tr>
-                <th>음주 여부</th>
+                <th>음주여부</th>
                 <td>
-                    <select name="음주여부" required>
-                        <option value="예">아니오</option>
-                        <option value="아니오">예</option>
+                    <select name="음주여부">
+                        <option value="아니오">아니오</option>
+                        <option value="예">예</option>
                     </select>
                 </td>
             </tr>
@@ -244,43 +218,60 @@
         <button type="submit">제출 및 저장</button>
     </form>
 
-    <div class="divider"></div>
-
     <div id="savedData">
-        <h2>탐방객 안전사고 처리 현황 저장 내용</h2>
-        <div id="dataDisplay"></div>
-        <a id="downloadLink" style="display:none;">다운로드</a>
+        <h2>탐방객 안전사고 처리 현황 저장 데이터</h2>
+        <div id="dataContent"></div>
+        <br>
+        <a id="downloadExcel" style="display: none;">엑셀 파일 다운로드</a>
+        <a id="downloadText" style="display: none;">텍스트 파일 다운로드</a><br>
+        <h5> Beta Ver.0.9.20 </h5>
+        <h4> [공지] 페이지 새로고침 하면 저장 데이터는 없어집니다. 서버 저장 안됨. 개인 폰 및 컴퓨터에 저장 바람니다. </h4>
     </div>
 </div>
 
 <script>
-    document.getElementById('incidentForm').onsubmit = function(event) {
-        event.preventDefault(); // 기본 제출 동작 방지
+    document.getElementById('incidentForm').addEventListener('submit', function(event) {
+        event.preventDefault();
         
         const formData = new FormData(event.target);
-        let dataDisplay = "<ul>";
-        let textContent = "";
+        const data = {};
+        formData.forEach((value, key) => {
+            data[key] = value;
+        });
         
-        for (let [key, value] of formData.entries()) {
-            dataDisplay += `<li><strong>${key}:</strong> ${value}</li>`;
-            textContent += `${key}: ${value}\n`;
+        // Display the saved data without {}
+        const savedDataDiv = document.getElementById('savedData');
+        const dataContent = document.getElementById('dataContent');
+        let dataHtml = '';
+        
+        for (const [key, value] of Object.entries(data)) {
+            if (["사고일시", "출동시간", "도착시간", "완료시간", "위도", "경도", "사고장소", "부상유형", "사고경위", "병원이송여부"].includes(key)) {
+                dataHtml += `<strong class="highlight">${key}:</strong> ${value || '없음'}<br>`;
+            } else {
+                dataHtml += `${key}: ${value || '없음'}<br>`;
+            }
         }
         
-        dataDisplay += "</ul>";
-        
-        document.getElementById('dataDisplay').innerHTML = dataDisplay;
-        document.getElementById('savedData').style.display = 'block';
-        
-        // Blob을 사용하여 파일로 저장
-        const blob = new Blob([textContent], { type: 'text/plain' });
-        const url = URL.createObjectURL(blob);
-        
-        const downloadLink = document.getElementById('downloadLink');
-        downloadLink.href = url;
-        downloadLink.download = 'incident_report.txt';
-        downloadLink.innerText = '다운로드하기';
-        downloadLink.style.display = 'block';
-    };
+        dataContent.innerHTML = dataHtml;
+        savedDataDiv.style.display = 'block';
+
+        // Prepare text file
+        const textFile = new Blob([Object.entries(data).map(([key, value]) => `${key}: ${value || '없음'}`).join('\n')], { type: 'text/plain' });
+        const textUrl = URL.createObjectURL(textFile);
+        const downloadTextLink = document.getElementById('downloadText');
+        downloadTextLink.href = textUrl;
+        downloadTextLink.download = 'incident_data.txt';
+        downloadTextLink.style.display = 'block';
+
+        // Prepare CSV file
+        const csvData = Object.entries(data).map(([key, value]) => `${key},${value || '없음'}`).join('\n');
+        const csvFile = new Blob([csvData], { type: 'text/csv' });
+        const csvUrl = URL.createObjectURL(csvFile);
+        const downloadExcelLink = document.getElementById('downloadExcel');
+        downloadExcelLink.href = csvUrl;
+        downloadExcelLink.download = 'incident_data.csv';
+        downloadExcelLink.style.display = 'block';
+    });
 </script>
 
 </body>
