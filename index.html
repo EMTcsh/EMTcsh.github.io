@@ -464,6 +464,7 @@
         </div>
         <button type="button" onclick="saveAMPLEData()">저장</button>
     </form>
+   <div class="result" id="ampleResults"> </div>
 </div>
 
 <!-- 공지사항 표시 섹션 -->
@@ -490,36 +491,39 @@
 </div>
 
 <script>
-    // Save KTAS results and classify the urgency
-          function saveKTASResults() {
-          const symptoms = document.querySelectorAll('.symptom:checked');
-            let results = '<h2></h2>';
+  // Save KTAS results and classify the urgency
+        function saveKTASResults() {
+            const symptoms = document.querySelectorAll('.symptom:checked');
+            let results = '';
             let isEmergency = false;
 
             symptoms.forEach(symptom => {
                 results += `<div class="result-item">${symptom.value}</div>`;
-                // Check if any Grade 1 or Grade  symptoms are selected
-                if (symptom.closest('.grade-1') || symptom.closest('.grade-')) {
+                // Check if any Grade 1 or Grade 2 symptoms are selected
+                if (symptom.closest('.grade-1')) {
                     isEmergency = true;
                 }
             });
 
-            // Determine and display the emergency status
-            results += `<p><strong>상태: ${isEmergency ? '응급' : '준응급'}</strong></p>`;
+            // Only display results if there are selected symptoms
+            if (results) {
+                results += `<p><strong>상태: ${isEmergency ? '응급' : '준응급'}</strong></p>`;
 
-            // Add timestamp
-            const timestamp = new Date().toLocaleString();
-            const savedData = document.getElementById('savedData');
-            savedData.innerHTML += `<div class="board-item"><strong>[응급환자 분류]</strong><br>${results}<br><span class="timestamp">저장 시간: ${timestamp}</span></div>`;
+                // Add timestamp
+                const timestamp = new Date().toLocaleString();
+                const savedData = document.getElementById('savedData');
+                savedData.innerHTML += `<div class="board-item"><strong>[응급환자 분류]</strong><br>${results}<br><span class="timestamp">저장 시간: ${timestamp}</span></div>`;
 
-            // Display the results in the KTAS results container
-            document.getElementById('ktasResults').innerHTML = results;
+                // Display the results in the KTAS results container
+                document.getElementById('ktasResults').innerHTML = results;
+            } else {
+                document.getElementById('ktasResults').innerHTML = ''; // Clear if no symptoms are selected
+            }
 
             // Clear selected symptoms
             document.querySelectorAll('.symptom').forEach(symptom => symptom.checked = false);
+        }
 
-            return false;
-        }  
   
     // Calculate GCS score and determine the state
 function calculateGCS() {
@@ -641,7 +645,7 @@ function saveTraumaAssessment() {
             </div>
         `;
 
-        // Append AMPLE data to the saved data section
+            // Append AMPLE data to the saved data section
         document.getElementById('savedData').innerHTML += ampleHTML;
 
         // Also display in AMPLE results
@@ -650,8 +654,10 @@ function saveTraumaAssessment() {
         // Reset form fields
         document.getElementById('ampleForm').reset();
     }
-      
 
+</script>
+      
+<script>
     // Existing code...
 
     // Function to download saved data as a text file
