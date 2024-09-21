@@ -641,13 +641,17 @@ function saveTraumaAssessment() {
             </div>
         `;
 
+        // Append AMPLE data to the saved data section
         document.getElementById('savedData').innerHTML += ampleHTML;
-        document.getElementById('ampleForm').reset(); // Reset form fields
-    }
 
-</script>
+        // Also display in AMPLE results
+        document.getElementById('ampleResults').innerHTML += ampleHTML;
+
+        // Reset form fields
+        document.getElementById('ampleForm').reset();
+    }
       
-<script>
+
     // Existing code...
 
     // Function to download saved data as a text file
