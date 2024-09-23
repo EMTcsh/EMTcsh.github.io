@@ -183,7 +183,20 @@
 <body>
     <div class="container">
         <h1>응급환자 분류, GCS 점수계산, 환자 평가, AMPLE/생체징후</h1>
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>증상에 따른 중증도/긴급도 분류 KTAS의 5단계</title>
+</head>
+<body>
 
+<h1></h1>
+
+<p>증상에 따른 중증도/긴급도 분류: <a href="https://emtcsh.github.io/KTAS.html" target="_blank">KTAS의 5단계로 이동하기</a></p>
+<p>이 페이지를 새 탭에서 열려면 위 링크를 클릭하세요.</p>
+  
        <!-- 응급환자 분류 섹션 -->
 
         <div class="section">
@@ -590,22 +603,55 @@ function saveTraumaAssessment() {
 </body>
 </html>
 
-
 <!DOCTYPE html>
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>증상에 따른 중증도/긴급도 분류 KTAS의 5단계</title>
+    <title>나이 계산기</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        input, button {
+            padding: 10px;
+            margin-top: 10px;
+        }
+    </style>
 </head>
 <body>
+    <h1>나이 계산기</h1>
+    <label for="birthdate">생년월일을 입력하세요 (YYYY-MM-DD):</label>
+    <input type="date" id="birthdate">
+    <button onclick="calculateAge()">나이 계산</button>
+    <p id="result"></p>
 
-<h1></h1>
+    <script>
+        function calculateAge() {
+            const birthdateInput = document.getElementById('birthdate').value;
+            const birthdate = new Date(birthdateInput);
+            const today = new Date();
 
-<p>증상에 따른 중증도/긴급도 분류 KTAS의 5단계: <a href="https://emtcsh.github.io/KTAS.html" target="_blank">KTAS의 5단계로 이동하기</a></p>
-<p>나이 계산기: <a href="https://PROcsh.github.io/age.html" target="_blank">나이 계산기로 이동하기</a></p>
-<p>이 페이지를 새 탭에서 열려면 위 링크를 클릭하세요.</p>
+            if (!birthdateInput) {
+                document.getElementById('result').innerText = '생년월일을 입력하세요.';
+                return;
+            }
 
+            let age = today.getFullYear() - birthdate.getFullYear();
+            const monthDifference = today.getMonth() - birthdate.getMonth();
+
+            // 생일이 지나지 않았다면 나이를 하나 줄임
+            if (monthDifference < 0 || (monthDifference === 0 && today.getDate() < birthdate.getDate())) {
+                age--;
+            }
+
+            document.getElementById('result').innerText = `당신의 나이는 ${age}세입니다.`;
+        }
+    </script>
+</body>
+</html>
+ <br>
 <!-- 공지사항 표시 섹션 -->
 <div class="section">
     <h2>공지사항</h2>
