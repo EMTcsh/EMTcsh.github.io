@@ -123,29 +123,31 @@
 <div id="results" class="result"></div>
 
 <script>
-    function showResults() {
-        const resultsDiv = document.getElementById('results');
-        resultsDiv.innerHTML = '<h2>선택한 증상:</h2>';
-        
-        // KTAS 단계와 증상 저장
-        for (let i = 1; i <= 5; i++) {
-            const checkboxes = document.querySelectorAll(`input[name="symptom${i}"]:checked`);
-            if (checkboxes.length > 0) {
-                resultsDiv.innerHTML += `<h3>KTAS ${i} 단계</h3>`;
-                resultsDiv.innerHTML += `<p>대기실에서 재평가: ${getEvaluationTime(i)}</p>`;
-                resultsDiv.innerHTML += `<p>순위: ${i}순위</p>`;
-                checkboxes.forEach((checkbox) => {
-                    resultsDiv.innerHTML += `<p>${checkbox.value}</p>`;
-                });          
-            }
-        }
+   function showResults() {
+    const resultsDiv = document.getElementById('results');
+    resultsDiv.innerHTML = '<h2>선택한 증상:</h2>';
+    
+    const currentTime = new Date().toLocaleString(); // 현재 시간
+    resultsDiv.innerHTML += `<p>저장 시간: ${currentTime}</p>`; // 현재 시간 추가
 
-        if (resultsDiv.innerHTML === '<h2>선택한 증상:</h2>') {
-            resultsDiv.innerHTML += '<p>선택된 증상이 없습니다.</p>';
+    for (let i = 1; i <= 5; i++) {
+        const checkboxes = document.querySelectorAll(`input[name="symptom${i}"]:checked`);
+        if (checkboxes.length > 0) {
+            resultsDiv.innerHTML += `<h3>KTAS ${i} 단계</h3>`;
+            resultsDiv.innerHTML += `<p>대기실에서 재평가: ${getEvaluationTime(i)}</p>`;
+            resultsDiv.innerHTML += `<p>순위: ${i}순위</p>`;
+            checkboxes.forEach((checkbox) => {
+                resultsDiv.innerHTML += `<p>${checkbox.value}</p>`;
+            });
         }
-
-        resultsDiv.style.display = 'block';
     }
+
+    if (resultsDiv.innerHTML === '<h2>선택한 증상:</h2>') {
+        resultsDiv.innerHTML += '<p>선택된 증상이 없습니다.</p>';
+    }
+
+    resultsDiv.style.display = 'block';
+}
 
     function getEvaluationTime(level) {
         switch (level) {
