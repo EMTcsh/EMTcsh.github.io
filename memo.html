@@ -20,6 +20,7 @@
             color: white;
             border: none;
             cursor: pointer;
+            margin-right: 5px;
         }
     </style>
 </head>
@@ -29,14 +30,18 @@
     <textarea id="memo" placeholder="여기에 메모를 입력하세요..."></textarea><br>
     <button onclick="saveMemo()">저장</button>
     <button onclick="clearMemo()">지우기</button>
+    <button onclick="downloadMemos()">다운로드</button>
     
     <h2>저장된 메모</h2>
     <div id="savedMemos"></div>
 
     <script>
+        const memos = [];
+
         function saveMemo() {
             const memo = document.getElementById('memo').value;
             if (memo) {
+                memos.push(memo);
                 const savedMemosDiv = document.getElementById('savedMemos');
                 const memoElement = document.createElement('div');
                 memoElement.textContent = memo;
@@ -49,6 +54,18 @@
 
         function clearMemo() {
             document.getElementById('memo').value = '';
+        }
+
+        function downloadMemos() {
+            const blob = new Blob([memos.join('\n')], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'memos.txt';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url); // 메모리 해제
         }
     </script>
 
