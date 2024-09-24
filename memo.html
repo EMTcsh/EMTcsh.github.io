@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>메모장</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+        #memo {
+            width: 100%;
+            height: 200px;
+            margin-bottom: 10px;
+        }
+        button {
+            padding: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>메모장</h1>
+    <textarea id="memo" placeholder="여기에 메모를 입력하세요..."></textarea><br>
+    <button onclick="saveMemo()">저장</button>
+    <button onclick="clearMemo()">지우기</button>
+    
+    <h2>저장된 메모</h2>
+    <div id="savedMemos"></div>
+
+    <script>
+        function saveMemo() {
+            const memo = document.getElementById('memo').value;
+            if (memo) {
+                const savedMemosDiv = document.getElementById('savedMemos');
+                const memoElement = document.createElement('div');
+                memoElement.textContent = memo;
+                savedMemosDiv.appendChild(memoElement);
+                document.getElementById('memo').value = ''; // 메모 입력창 비우기
+            } else {
+                alert('메모를 입력해주세요.');
+            }
+        }
+
+        function clearMemo() {
+            document.getElementById('memo').value = '';
+        }
+    </script>
+
+</body>
+</html>
