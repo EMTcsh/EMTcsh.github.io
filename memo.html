@@ -26,16 +26,23 @@
             color: white;
             border: none;
             cursor: pointer;
-            margin: 0 5px; /* 버튼 간격 조정 */
+            margin: 0 5px;
             font-size: 16px;
             display: flex;
             align-items: center;
-            justify-content: center; /* 중앙 정렬 */
+            justify-content: center;
         }
         .button img {
-            width: 20px; /* 아이콘 크기 조정 */
-            height: 20px; /* 아이콘 크기 조정 */
+            width: 20px;
+            height: 20px;
             margin-right: 5px;
+        }
+        #savedMemos div {
+            border: 1px solid #ddd;
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 5px;
+            background-color: #f9f9f9;
         }
     </style>
 </head>
@@ -65,10 +72,12 @@
         function saveMemo() {
             const memo = document.getElementById('memo').value;
             if (memo) {
-                memos.push(memo);
+                const timestamp = new Date().toLocaleString(); // 현재 시간
+                const memoWithTimestamp = `${timestamp}: ${memo}`;
+                memos.push(memoWithTimestamp);
                 const savedMemosDiv = document.getElementById('savedMemos');
                 const memoElement = document.createElement('div');
-                memoElement.textContent = memo;
+                memoElement.textContent = memoWithTimestamp;
                 savedMemosDiv.appendChild(memoElement);
                 document.getElementById('memo').value = ''; // 메모 입력창 비우기
             } else {
@@ -89,7 +98,7 @@
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
-            URL.revokeObjectURL(url); // 메모리 해제
+            URL.revokeObjectURL(url);
         }
     </script>
 
