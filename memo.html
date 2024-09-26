@@ -83,12 +83,11 @@
     <!-- 내위치 표시 섹션 -->
     <h4> 🚩 Map </h4>
     <button id="getLocation">내 위치 확인</button>
+  
     <!-- 위치 표시 -->
     <div id="locationDisplay">위도: , 경도: </div>
     <div id="map"></div>
-    
-    
-    
+  
     <script>
         const memos = [];
 
@@ -138,6 +137,9 @@
 
             // Update the location display
             document.getElementById('locationDisplay').textContent = `위도: ${lat}, 경도: ${lon}`;
+
+            // Insert latitude and longitude into the memo input
+            document.getElementById('memo').value = `지도 좌표: ${lat}, ${lon}`;
 
             const mapOptions = {
                 center: new naver.maps.LatLng(lat, lon),
