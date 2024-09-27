@@ -270,9 +270,6 @@
             bounds.extend(new naver.maps.LatLng(latitude, longitude));
             bounds.extend(otherPosition);
             mapComparison.fitBounds(bounds);
-
-            // 내 위치 정보 표시
-            document.getElementById('myLocationInfo').textContent = `내 위치: 위도 ${latitude}, 경도 ${longitude}`;
         } else {
             alert("모든 위치 정보를 올바르게 입력해주세요.");
         }
