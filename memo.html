@@ -209,8 +209,8 @@
         const northIndex = yStr.charAt(0); 
 
         // 8자리 숫자 포맷팅
-        const eastNumber = xStr.slice(0, 4).padStart(7, '0');
-        const northNumber = yStr.slice(4, 8).padStart(13, '0');
+        const eastNumber = xStr.slice(0, 4).padStart(1, '0');
+        const northNumber = yStr.slice(0, 4).padStart(1, '0');
 
         return `${HAN_E[eastIndex]} ${HAN_N[northIndex]} ${eastNumber} ${northNumber}`;
     }
