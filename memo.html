@@ -3,12 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>📌 구조·구급 Time Recording</title>
-    <script type="text/javascript" src="https://openapi.map.naver.com/openapi/v3/maps.js?ncpClientId=g2u4orbiqf"></script> <!-- Replace YOUR_CLIENT_ID with your Naver API client ID -->
+    <title>구조·구급 Time Recording 및 위치 비교</title>
+    <script type="text/javascript" src="https://openapi.map.naver.com/openapi/v3/maps.js?ncpClientId=g2u4orbiqf"></script> <!-- 네이버 지도 API -->
     <style>
         body {
             font-family: Arial, sans-serif;
             padding: 20px;
+        }
+        h2, h3 {
+            text-align: center;
         }
         #memo {
             width: 100%;
@@ -45,12 +48,12 @@
             border-radius: 5px;
             background-color: #f9f9f9;
         }
-        #map {
+        #map, .map {
             height: 400px;
             width: 100%;
             margin-top: 20px;
         }
-        #locationDisplay, #dmsCoordinates {
+        #locationDisplay, #dmsCoordinates, .info {
             margin-top: 10px;
             font-weight: bold;
         }
@@ -58,11 +61,10 @@
 </head>
 <body>
 
-<h2>🆘 구조·구급 Time Recording</h2><br>
+<h2>🆘 구조·구급 Time Recording</h2>
 <h4>📕 Memo Record</h4>
-<div id="savedMemos"></div><br>
-
-<textarea id="memo" placeholder="여기에 메모를 입력하세요..."></textarea><br>
+<div id="savedMemos"></div>
+<textarea id="memo" placeholder="여기에 메모를 입력하세요..."></textarea>
 <div class="button-container">
     <button class="button" onclick="saveMemo()">
         <img src="https://img.icons8.com/ios-filled/50/ffffff/save.png" alt="저장"> Memo 추가
@@ -77,15 +79,26 @@
 
 <h4>🚩 Map</h4>
 <button id="getLocation">내 위치 확인</button>
-<br><br>
 <div id="locationDisplay">위도: , 경도: </div>
 <div id="dmsCoordinates">도분초: </div>
-<div id="map"></div> <!-- Map Container -->
+<div id="map"></div> <!-- 지도 컨테이너 -->
+
+<!-- 상대방 위치 비교 -->
+<h3>📍 상대 위치 기록 및 비교</h3>
+<label for="otherLatitude">상대방 위도:</label>
+<input type="text" id="otherLatitude" placeholder="상대방 위도를 입력하세요" required>
+<label for="otherLongitude">상대방 경도:</label>
+<input type="text" id="otherLongitude" placeholder="상대방 경도를 입력하세요" required>
+<button class="button" onclick="showLocations()">위치 비교 및 지도 보기</button>
+<div id="myLocation" class="info">내 위치: </div>
+<div id="distanceInfo" class="info"></div>
+<div id="mapComparison" class="map"></div> <!-- 상대 위치 지도 컨테이너 -->
 
 <script>
     let latitude, longitude;
     const memos = [];
 
+    // 메모 추가
     function saveMemo() {
         const memo = document.getElementById('memo').value;
         if (memo) {
@@ -102,6 +115,7 @@
         }
     }
 
+    // 메모 다운로드
     function downloadMemos() {
         const blob = new Blob([memos.join('\n')], { type: 'text/plain' });
         const url = URL.createObjectURL(blob);
@@ -114,30 +128,28 @@
         URL.revokeObjectURL(url);
     }
 
+    // 메모 공유
     function shareMemos() {
-    if (navigator.share) {
-        const memoText = memos.join('\n');
-        const mapLinkNaver = `https://map.naver.com/v5/?c=${latitude}&lng=${longitude},15,0,0,0`;
-        const mapLinkGoogle = `https://www.google.com/maps?q=${latitude},${longitude}`;
+        if (navigator.share) {
+            const memoText = memos.join('\n');
+            const mapLinkNaver = `https://map.naver.com/v5/?c=${latitude},${longitude},15,0,0,0`;
+            const mapLinkGoogle = `https://www.google.com/maps?q=${latitude},${longitude}`;
+            const mapLinkKakao = `https://map.kakao.com/link/map/Location,${latitude},${longitude}`;
 
-const mapLinkKakao = `https://map.kakao.com/link/map/Location,${latitude},${longitude}`;
-        
-        const shareContent = `메모:\n${memoText}\n\n지도 좌표:\n위도: ${latitude}, 경도: ${longitude}\n\n지도 링크:
-\nNaver: ${mapLinkNaver}
-\nGoogle: ${mapLinkGoogle}
-\nKakao: ${mapLinkKakao}`;
+            const shareContent = `메모:\n${memoText}\n\n지도 좌표:\n위도: ${latitude}, 경도: ${longitude}\n\n지도 링크:\nNaver: ${mapLinkNaver}\nGoogle: ${mapLinkGoogle}\nKakao: ${mapLinkKakao}`;
 
-        navigator.share({
-            title: 'Memo 및 위치 공유',
-            text: shareContent
-        })
-        .then(() => console.log('메모가 공유되었습니다.'))
-        .catch(error => console.error('공유 오류:', error));
-    } else {
-        alert("이 브라우저는 공유 기능을 지원하지 않습니다.");
+            navigator.share({
+                title: 'Memo 및 위치 공유',
+                text: shareContent
+            })
+            .then(() => console.log('메모가 공유되었습니다.'))
+            .catch(error => console.error('공유 오류:', error));
+        } else {
+            alert("이 브라우저는 공유 기능을 지원하지 않습니다.");
+        }
     }
-}
 
+    // 현재 위치 가져오기
     document.getElementById('getLocation').addEventListener('click', function() {
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(showPosition, showError);
@@ -146,10 +158,10 @@ const mapLinkKakao = `https://map.kakao.com/link/map/Location,${latitude},${long
         }
     });
 
+    // 위치 표시
     function showPosition(position) {
         latitude = position.coords.latitude;
         longitude = position.coords.longitude;
-
         document.getElementById('locationDisplay').textContent = `위도: ${latitude}, 경도: ${longitude}`;
         document.getElementById('memo').value = `지도 좌표: ${latitude}, ${longitude}`;
 
@@ -168,8 +180,9 @@ const mapLinkKakao = `https://map.kakao.com/link/map/Location,${latitude},${long
         });
     }
 
+    // 위치 오류 처리
     function showError(error) {
-        switch(error.code) {
+        switch (error.code) {
             case error.PERMISSION_DENIED:
                 alert("사용자가 위치 정보를 허용하지 않았습니다.");
                 break;
@@ -185,6 +198,7 @@ const mapLinkKakao = `https://map.kakao.com/link/map/Location,${latitude},${long
         }
     }
 
+    // 도분초 좌표 변환
     function convertToDMS(lat, lon) {
         const latDeg = Math.floor(Math.abs(lat));
         const latMin = Math.floor((Math.abs(lat) - latDeg) * 60);
@@ -199,10 +213,55 @@ const mapLinkKakao = `https://map.kakao.com/link/map/Location,${latitude},${long
 
         return `${latDeg}° ${latMin}' ${latSec.toFixed(2)}" ${latDirection}, ${lonDeg}° ${lonMin}' ${lonSec.toFixed(2)}" ${lonDirection}`;
     }
-</script>
 
-<br>
-<h5>🐸 Beta Ver. 0.9.26. 국립공원 응급처치 연구회. E-mail: paramedic@knps.or.kr.</h5>
+    // 상대방 위치 비교
+    function showLocations() {
+        const otherLatitude = document.getElementById('otherLatitude').value;
+        const otherLongitude = document.getElementById('otherLongitude').value;
+
+        if (latitude && longitude && otherLatitude && otherLongitude) {
+            const mapOptions = {
+                center: new naver.maps.LatLng(latitude, longitude),
+                zoom: 10
+            };
+
+            const mapComparison = new naver.maps.Map('mapComparison', mapOptions);
+
+            // 내 위치 마커
+            new naver.maps.Marker({
+                position: new naver.maps.LatLng(latitude, longitude),
+                map: mapComparison,
+                title: "내 위치"
+            });
+
+            // 상대방 위치 마커
+            const otherPosition = new naver.maps.LatLng(otherLatitude, otherLongitude);
+            new naver.maps.Marker({
+                position: otherPosition,
+                map: mapComparison,
+                title: "상대방 위치"
+            });
+
+            // 거리 계산
+            const distance = naver.maps.geometry.spherical.computeDistanceBetween(
+                new naver.maps.LatLng(latitude, longitude),
+                otherPosition
+            );
+            document.getElementById('distanceInfo').textContent = `두 위치 간의 거리: ${(distance / 1000).toFixed(2)} km`;
+
+            // 지도 중앙에 두 위치 표시
+            const bounds = new naver.maps.LatLngBounds();
+            bounds.extend(new naver.maps.LatLng(latitude, longitude));
+            bounds.extend(otherPosition);
+            mapComparison.fitBounds(bounds);
+
+            // 내 위치 정보 표시
+            document.getElementById('myLocation').textContent = `내 위치: 위도 ${latitude}, 경도 ${longitude}`;
+        } else {
+            alert("모든 위치 정보를 입력해주세요.");
+        }
+    }
+</script>
 
 </body>
 </html>
