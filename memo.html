@@ -73,6 +73,9 @@
     <button class="button" onclick="downloadMemos()">
         <img src="https://img.icons8.com/ios-filled/50/ffffff/download.png" alt="다운로드"> Memo 저장
     </button>
+    <button class="button" onclick="shareMemos()">
+        <img src="https://img.icons8.com/ios-filled/50/ffffff/share.png" alt="공유"> Memo 공유
+    </button>
 </div>
 
 <h4> 🚩 Map </h4>
@@ -115,6 +118,20 @@
         a.click();
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
+    }
+
+    function shareMemos() {
+        if (navigator.share) {
+            const memoText = memos.join('\n');
+            navigator.share({
+                title: 'Memo 공유',
+                text: memoText
+            })
+            .then(() => console.log('메모가 공유되었습니다.'))
+            .catch(error => console.error('공유 오류:', error));
+        } else {
+            alert("이 브라우저는 공유 기능을 지원하지 않습니다.");
+        }
     }
 
     document.getElementById('getLocation').addEventListener('click', function() {
@@ -191,13 +208,11 @@
         const HAN_E = {
             "7": "가", "8": "나", "9": "다", "10": "라",
             "11": "마", "12": "바", "13": "사"
-          
         };
 
         const HAN_N = {
             "13": "가", "14": "나", "15": "다", "16": "라",
             "17": "마", "18": "바", "19": "사", "20": "아",
-            
         };
 
         // 더미 데이터 생성
