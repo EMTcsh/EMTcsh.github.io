@@ -49,7 +49,7 @@
             width: 100%;
             margin-top: 20px;
         }
-        #locationDisplay {
+        #locationDisplay, #dmsCoordinates {
             margin-top: 10px;
             font-weight: bold;
         }
@@ -58,124 +58,136 @@
 </head>
 <body>
     
-<!-- 메모내용 표시 섹션 -->
-    <h2> 🆘 구조·구급 Time Recording </h2> <br>
-    
-<!-- 메모 저장 표시 섹션 -->
-    <h4> 📕 Memo Record </h4>
-    <div id="savedMemos"></div>
-    <br>
+<h2> 🆘 구조·구급 Time Recording </h2> <br>
+<h4> 📕 Memo Record </h4>
+<div id="savedMemos"></div>
+<br>
 
-    <textarea id="memo" placeholder="여기에 메모를 입력하세요..."></textarea><br>
-    
-    <div class="button-container">
-        <button class="button" onclick="saveMemo()">
-            <img src="https://img.icons8.com/ios-filled/50/ffffff/save.png" alt="저장"> Memo 입력
-        </button>
-        <button class="button" onclick="clearMemo()">
-            <img src="https://img.icons8.com/ios-filled/50/ffffff/delete-sign.png" alt="지우기"> 지우기
-        </button>
-        <button class="button" onclick="downloadMemos()">
-            <img src="https://img.icons8.com/ios-filled/50/ffffff/download.png" alt="다운로드"> Memo 저장
-        </button>
-    </div>
+<textarea id="memo" placeholder="여기에 메모를 입력하세요..."></textarea><br>
+<div class="button-container">
+    <button class="button" onclick="saveMemo()">
+        <img src="https://img.icons8.com/ios-filled/50/ffffff/save.png" alt="저장"> Memo 입력
+    </button>
+    <button class="button" onclick="clearMemo()">
+        <img src="https://img.icons8.com/ios-filled/50/ffffff/delete-sign.png" alt="지우기"> 지우기
+    </button>
+    <button class="button" onclick="downloadMemos()">
+        <img src="https://img.icons8.com/ios-filled/50/ffffff/download.png" alt="다운로드"> Memo 저장
+    </button>
+</div>
 
-    <!-- 내위치 표시 섹션 -->
-    <h4> 🚩 Map </h4>
-    <button id="getLocation">내 위치 확인</button>
-  
-    <!-- 위치 표시 -->
-    <div id="locationDisplay">위도: , 경도: </div>
-    <div id="map"></div>
-  
-    <script>
-        const memos = [];
+<h4> 🚩 Map </h4>
+<button id="getLocation">내 위치 확인</button>
+<div id="locationDisplay">위도: , 경도: </div>
+<div id="dmsCoordinates">도분초: </div>
+<div id="map"></div>
 
-        function saveMemo() {
-            const memo = document.getElementById('memo').value;
-            if (memo) {
-                const timestamp = new Date().toLocaleString();
-                const memoWithTimestamp = `${timestamp}: ${memo}`;
-                memos.push(memoWithTimestamp);
-                const savedMemosDiv = document.getElementById('savedMemos');
-                const memoElement = document.createElement('div');
-                memoElement.textContent = memoWithTimestamp;
-                savedMemosDiv.appendChild(memoElement);
-                document.getElementById('memo').value = '';
-            } else {
-                alert('메모를 입력해주세요.');
-            }
-        }
+<script>
+    const memos = [];
 
-        function clearMemo() {
+    function saveMemo() {
+        const memo = document.getElementById('memo').value;
+        if (memo) {
+            const timestamp = new Date().toLocaleString();
+            const memoWithTimestamp = `${timestamp}: ${memo}`;
+            memos.push(memoWithTimestamp);
+            const savedMemosDiv = document.getElementById('savedMemos');
+            const memoElement = document.createElement('div');
+            memoElement.textContent = memoWithTimestamp;
+            savedMemosDiv.appendChild(memoElement);
             document.getElementById('memo').value = '';
+        } else {
+            alert('메모를 입력해주세요.');
         }
+    }
 
-        function downloadMemos() {
-            const blob = new Blob([memos.join('\n')], { type: 'text/plain' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'memos.txt';
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
+    function clearMemo() {
+        document.getElementById('memo').value = '';
+    }
+
+    function downloadMemos() {
+        const blob = new Blob([memos.join('\n')], { type: 'text/plain' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'memos.txt';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    }
+
+    document.getElementById('getLocation').addEventListener('click', function() {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(showPosition, showError);
+        } else {
+            alert("이 브라우저는 위치 정보를 지원하지 않습니다.");
         }
+    });
 
-        document.getElementById('getLocation').addEventListener('click', function() {
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(showPosition, showError);
-            } else {
-                alert("이 브라우저는 위치 정보를 지원하지 않습니다.");
-            }
+    function showPosition(position) {
+        const lat = position.coords.latitude;
+        const lon = position.coords.longitude;
+
+        // Update the location display
+        document.getElementById('locationDisplay').textContent = `위도: ${lat}, 경도: ${lon}`;
+
+        // Insert latitude and longitude into the memo input
+        document.getElementById('memo').value = `지도 좌표: ${lat}, ${lon}`;
+
+        // 도분초 변환
+        const dmsCoordinates = convertToDMS(lat, lon);
+        document.getElementById('dmsCoordinates').textContent = `도분초: ${dmsCoordinates}`;
+
+        const mapOptions = {
+            center: new naver.maps.LatLng(lat, lon),
+            zoom: 15
+        };
+
+        const map = new naver.maps.Map('map', mapOptions);
+        new naver.maps.Marker({
+            position: new naver.maps.LatLng(lat, lon),
+            map: map
         });
+    }
 
-        function showPosition(position) {
-            const lat = position.coords.latitude;
-            const lon = position.coords.longitude;
-
-            // Update the location display
-            document.getElementById('locationDisplay').textContent = `위도: ${lat}, 경도: ${lon}`;
-
-            // Insert latitude and longitude into the memo input
-            document.getElementById('memo').value = `지도 좌표: ${lat}, ${lon}`;
-
-            const mapOptions = {
-                center: new naver.maps.LatLng(lat, lon),
-                zoom: 15
-            };
-
-            const map = new naver.maps.Map('map', mapOptions);
-            new naver.maps.Marker({
-                position: new naver.maps.LatLng(lat, lon),
-                map: map
-            });
+    function showError(error) {
+        switch(error.code) {
+            case error.PERMISSION_DENIED:
+                alert("사용자가 위치 정보를 허용하지 않았습니다.");
+                break;
+            case error.POSITION_UNAVAILABLE:
+                alert("위치 정보를 사용할 수 없습니다.");
+                break;
+            case error.TIMEOUT:
+                alert("위치 정보 요청이 시간 초과되었습니다.");
+                break;
+            case error.UNKNOWN_ERROR:
+                alert("알 수 없는 오류가 발생했습니다.");
+                break;
         }
+    }
 
-        function showError(error) {
-            switch(error.code) {
-                case error.PERMISSION_DENIED:
-                    alert("사용자가 위치 정보를 허용하지 않았습니다.");
-                    break;
-                case error.POSITION_UNAVAILABLE:
-                    alert("위치 정보를 사용할 수 없습니다.");
-                    break;
-                case error.TIMEOUT:
-                    alert("위치 정보 요청이 시간 초과되었습니다.");
-                    break;
-                case error.UNKNOWN_ERROR:
-                    alert("알 수 없는 오류가 발생했습니다.");
-                    break;
-            }
-        }
-    </script>
+    // 위도와 경도를 도분초로 변환
+    function convertToDMS(lat, lon) {
+        const latDeg = Math.floor(Math.abs(lat));
+        const latMin = Math.floor((Math.abs(lat) - latDeg) * 60);
+        const latSec = ((Math.abs(lat) - latDeg) * 60 - latMin) * 60;
+
+        const lonDeg = Math.floor(Math.abs(lon));
+        const lonMin = Math.floor((Math.abs(lon) - lonDeg) * 60);
+        const lonSec = ((Math.abs(lon) - lonDeg) * 60 - lonMin) * 60;
+
+        const latDirection = lat >= 0 ? 'N' : 'S';
+        const lonDirection = lon >= 0 ? 'E' : 'W';
+
+        return `${latDeg}° ${latMin}' ${latSec.toFixed(2)}" ${latDirection}, ${lonDeg}° ${lonMin}' ${lonSec.toFixed(2)}" ${lonDirection}`;
+    }
+</script>
 
 <br>
 <h4> [알림] 페이지 새로고침 하면 Memo 지워짐. 지도 저장 안됨. Memo 내용은 저장 및 캡처. </h4>
 <h5> 🐸 Beta Ver. 0.9.26. 국립공원 응급처치 연구회. E-mail: paramedic@knps.or.kr. </h5>
 
-
 </body>
 </html>
-
