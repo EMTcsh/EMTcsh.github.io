@@ -117,7 +117,7 @@
     function shareMemos() {
     if (navigator.share) {
         const memoText = memos.join('\n');
-        const mapLinkNaver = `https://map.naver.com/v5/?c=14323519,4179425,15,0,0,0,dh&lat=${latitude}&lng=${longitude}`;
+        const mapLinkNaver = `https://map.naver.com/v5/?c=${latitude}&lng=${longitude}`;
         const mapLinkGoogle = `https://www.google.com/maps?q=${latitude},${longitude}`;
         
         const shareContent = `메모:\n${memoText}\n\n지도 좌표:\n위도: ${latitude}, 경도: ${longitude}\n\n지도 링크:\nNaver: ${mapLinkNaver}\nGoogle: ${mapLinkGoogle}`;
