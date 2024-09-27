@@ -49,19 +49,9 @@
             width: 100%;
             margin-top: 20px;
         }
-        #locationDisplay {
+        #locationDisplay, #dmsCoordinates {
             margin-top: 10px;
             font-weight: bold;
-        }
-        #pointNumber {
-            margin-top: 10px;
-            font-weight: bold;
-            color: #FF4500;
-        }
-        #dmsCoordinates {
-            margin-top: 10px;
-            font-weight: bold;
-            color: #007BFF;
         }
     </style>
     <script type="text/javascript" src="https://oapi.map.naver.com/openapi/v3/maps.js?ncpClientId=g2u4orbiqf"></script>
@@ -89,7 +79,6 @@
 <h4> 🚩 Map </h4>
 <button id="getLocation">내 위치 확인</button>
 <div id="locationDisplay">위도: , 경도: </div>
-<div id="pointNumber">국가지점번호: </div>
 <div id="dmsCoordinates">도분초: </div>
 <div id="map"></div>
 
@@ -142,14 +131,10 @@
 
         // Update the location display
         document.getElementById('locationDisplay').textContent = `위도: ${lat}, 경도: ${lon}`;
-        
+
         // Insert latitude and longitude into the memo input
         document.getElementById('memo').value = `지도 좌표: ${lat}, ${lon}`;
 
-        // UTM-K 변환 및 국가지점번호 계산
-        const pointNumber = calculateNationalPointNumber(lat, lon);
-        document.getElementById('pointNumber').textContent = `국가지점번호: ${pointNumber}`;
-        
         // 도분초 변환
         const dmsCoordinates = convertToDMS(lat, lon);
         document.getElementById('dmsCoordinates').textContent = `도분초: ${dmsCoordinates}`;
@@ -197,13 +182,6 @@
         const lonDirection = lon >= 0 ? 'E' : 'W';
 
         return `${latDeg}° ${latMin}' ${latSec.toFixed(2)}" ${latDirection}, ${lonDeg}° ${lonMin}' ${lonSec.toFixed(2)}" ${lonDirection}`;
-    }
-
-    // UTM-K 좌표를 국가지점번호로 변환
-    function calculateNationalPointNumber(lat, lon) {
-        // 여기에 국가지점번호 계산 로직을 추가하세요.
-        // 현재는 더미 데이터입니다.
-        return "가 12 34";
     }
 </script>
 
