@@ -117,10 +117,12 @@
     function shareMemos() {
     if (navigator.share) {
         const memoText = memos.join('\n');
-        const mapLinkNaver = `https://map.naver.com/v5/?c=${latitude}&lng=${longitude}`;
+        const mapLinkNaver = `https://map.naver.com/v5/?c=${latitude}&lng=${longitude},15,0,0,0`;
         const mapLinkGoogle = `https://www.google.com/maps?q=${latitude},${longitude}`;
+
+const mapLinkKakao = `https://map.kakao.com/link/map/Location,${latitude},${longitude}`;
         
-        const shareContent = `메모:\n${memoText}\n\n지도 좌표:\n위도: ${latitude}, 경도: ${longitude}\n\n지도 링크:\nNaver: ${mapLinkNaver}\nGoogle: ${mapLinkGoogle}`;
+        const shareContent = `메모:\n${memoText}\n\n지도 좌표:\n위도: ${latitude}, 경도: ${longitude}\n\n지도 링크:\nNaver: ${mapLinkNaver}\nGoogle: ${mapLinkGoogle}`: ${mapLinkNaver} \nKakao: ${mapLinkKakao}`;
 
         navigator.share({
             title: 'Memo 및 위치 공유',
