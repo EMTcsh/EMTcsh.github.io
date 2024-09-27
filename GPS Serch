@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>위치 비교 및 지도 보기</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+        h2 {
+            text-align: center;
+        }
+        label, input {
+            display: block;
+            margin-bottom: 10px;
+            width: 100%;
+        }
+        input {
+            padding: 10px;
+            font-size: 16px;
+        }
+        .map {
+            height: 400px;
+            width: 100%;
+            border: 1px solid #ddd;
+            margin-top: 20px;
+        }
+        .button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            display: block;
+            margin: 20px auto;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+<h2>📍 위치 비교 및 지도 보기</h2>
+
+<!-- 사용자 위치 입력 -->
+<h3>내 위치 입력</h3>
+<label for="myLatitude">내 위도:</label>
+<input type="text" id="myLatitude" placeholder="내 위도를 입력하세요" required>
+
+<label for="myLongitude">내 경도:</label>
+<input type="text" id="myLongitude" placeholder="내 경도를 입력하세요" required>
+
+<!-- 상대방 위치 입력 -->
+<h3>상대방 위치 입력</h3>
+<label for="otherLatitude">상대방 위도:</label>
+<input type="text" id="otherLatitude" placeholder="상대방 위도를 입력하세요" required>
+
+<label for="otherLongitude">상대방 경도:</label>
+<input type="text" id="otherLongitude" placeholder="상대방 경도를 입력하세요" required>
+
+<button class="button" onclick="showLocations()">위치 비교 및 지도 보기</button>
+
+<!-- 지도 영역 -->
+<div id="map" class="map"></div>
+
+<!-- 거리 및 좌표 정보 표시 -->
+<div id="distanceInfo" style="margin-top: 20px; font-weight: bold;"></div>
+
+<script>
+    function showLocations() {
+        const myLatitude = document.getElementById('myLatitude').value;
+        const myLongitude = document.getElementById('myLongitude').value;
+        const otherLatitude = document.getElementById('otherLatitude').value;
+        const otherLongitude = document.getElementById('otherLongitude').value;
+
+        if (myLatitude && myLongitude && otherLatitude && otherLongitude) {
+            // 네이버 지도 API 사용하여 지도 표시
+            const mapOptions = {
+                center: new naver.maps.LatLng(myLatitude, myLongitude),
+                zoom: 10
+            };
+
+            const map = new naver.maps.Map('map', mapOptions);
+
+            // 사용자 위치 마커
+            const myMarker = new naver.maps.Marker({
+                position: new naver.maps.LatLng(myLatitude, myLongitude),
+                map: map,
+                title: '내 위치'
+            });
+
+            // 상대방 위치 마커
+            const otherMarker = new naver.maps.Marker({
+                position: new naver.maps.LatLng(otherLatitude, otherLongitude),
+                map: map,
+                title: '상대방 위치'
+            });
+
+            // 두 지점 간 거리 계산 및 표시
+            const distance = calculateDistance(myLatitude, myLongitude, otherLatitude, otherLongitude);
+            document.getElementById('distanceInfo').textContent = `두 위치 간 거리: ${distance.toFixed(2)} km`;
+
+        } else {
+            alert('모든 좌표를 입력해주세요.');
+        }
+    }
+
+    // 위도와 경도를 이용한 두 지점 간 거리 계산 (Haversine formula)
+    function calculateDistance(lat1, lon1, lat2, lon2) {
+        const R = 6371; // 지구 반경 (km)
+        const dLat = deg2rad(lat2 - lat1);
+        const dLon = deg2rad(lon2 - lon1);
+        const a =
+            Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+            Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) *
+            Math.sin(dLon / 2) * Math.sin(dLon / 2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        return R * c; // 거리 반환 (km)
+    }
+
+    // 도(degree)를 라디안(radian)으로 변환하는 함수
+    function deg2rad(deg) {
+        return deg * (Math.PI / 180);
+    }
+</script>
+
+<script type="text/javascript" src="https://openapi.map.naver.com/openapi/v3/maps.js?ncpClientId=g2u4orbiqf"></script> <!-- 네이버 지도 API -->
+
+</body>
+</html>
