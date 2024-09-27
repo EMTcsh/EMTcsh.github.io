@@ -144,9 +144,6 @@
         const dmsCoordinates = convertToDMS(lat, lon);
         document.getElementById('dmsCoordinates').textContent = `도분초: ${dmsCoordinates}`;
 
-        const pointNumber = calculateNationalPointNumber(lon, lat);
-        document.getElementById('pointNumber').textContent = `국가지점번호: ${pointNumber}`;
-
         const mapOptions = {
             center: new naver.maps.LatLng(lat, lon),
             zoom: 15
@@ -189,29 +186,6 @@
         const lonDirection = lon >= 0 ? 'E' : 'W';
 
         return `${latDeg}° ${latMin}' ${latSec.toFixed(2)}" ${latDirection}, ${lonDeg}° ${lonMin}' ${lonSec.toFixed(2)}" ${lonDirection}`;
-    }
-
-    function calculateNationalPointNumber(x, y) {
-        const HAN_E = {
-            "7": "가", "8": "나", "9": "다", "10": "라",
-            "11": "마", "12": "바", "13": "사"
-        };
-
-        const HAN_N = {
-            "13": "가", "14": "나", "15": "다", "16": "라",
-            "17": "마", "18": "바", "19": "사", "20": "아"
-        };
-
-        const xStr = Math.round(x).toString();
-        const yStr = Math.round(y).toString();
-
-        const eastIndex = xStr.charAt(0); 
-        const northIndex = yStr.charAt(0); 
-
-        const eastNumber = xStr.slice(0, 4).padStart(4, '0');
-        const northNumber = yStr.slice(0, 4).padStart(4, '0');
-
-        return `${HAN_E[eastIndex]} ${HAN_N[northIndex]} ${eastNumber} ${northNumber}`;
     }
 </script>
 
