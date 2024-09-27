@@ -4,7 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title> 📌 구조·구급 Time Recording </title>
-    <style>
+    <script type="text/javascript" src="https://oapi.map.naver.com/openapi/v3/maps.js?ncpClientId=g2u4orbiqf"></script>
+</head>
+<style>
         body {
             font-family: Arial, sans-serif;
             padding: 20px;
@@ -49,25 +51,22 @@
             width: 100%;
             margin-top: 20px;
         }
-        #locationDisplay {
+        #locationDisplay, #dmsCoordinates {
             margin-top: 10px;
             font-weight: bold;
-        }
-        #pointNumber {
-            margin-top: 10px;
-            font-weight: bold;
-            color: #FF4500;
-        }
-        #dmsCoordinates {
-            margin-top: 10px;
-            font-weight: bold;
-            color: #007BFF;
         }
     </style>
+  
+ <!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title> 📌 구조·구급 Time Recording </title>
     <script type="text/javascript" src="https://oapi.map.naver.com/openapi/v3/maps.js?ncpClientId=g2u4orbiqf"></script>
 </head>
 <body>
-    
+
 <h2> 🆘 구조·구급 Time Recording </h2> <br>
 <h4> 📕 Memo Record </h4>
 <div id="savedMemos"></div>
@@ -88,10 +87,10 @@
 
 <h4> 🚩 Map </h4>
 <button id="getLocation">내 위치 확인</button>
-<div id="locationDisplay">위도: , 경도: </div>
+<div id="locationDisplay">위도: , 경도: </div><br>
 <div id="pointNumber">국가지점번호: </div>
 <div id="dmsCoordinates">도분초: </div>
-<div id="map"></div>
+<div id="map" style="height: 400px; width: 100%;"></div>
 
 <script>
     const memos = [];
@@ -142,17 +141,15 @@
 
         // Update the location display
         document.getElementById('locationDisplay').textContent = `위도: ${lat}, 경도: ${lon}`;
-        
-        // Insert latitude and longitude into the memo input
         document.getElementById('memo').value = `지도 좌표: ${lat}, ${lon}`;
 
-        // UTM-K 변환 및 국가지점번호 계산
-        const pointNumber = calculateNationalPointNumber(lat, lon);
-        document.getElementById('pointNumber').textContent = `국가지점번호: ${pointNumber}`;
-        
         // 도분초 변환
         const dmsCoordinates = convertToDMS(lat, lon);
         document.getElementById('dmsCoordinates').textContent = `도분초: ${dmsCoordinates}`;
+
+        // 국가지점번호 계산
+        const pointNumber = calculateNationalPointNumber(lon, lat);
+        document.getElementById('pointNumber').textContent = `국가지점번호: ${pointNumber}`;
 
         const mapOptions = {
             center: new naver.maps.LatLng(lat, lon),
@@ -200,10 +197,32 @@
     }
 
     // UTM-K 좌표를 국가지점번호로 변환
-    function calculateNationalPointNumber(lat, lon) {
-        // 여기에 국가지점번호 계산 로직을 추가하세요.
-        // 현재는 더미 데이터입니다.
-        return "가 12 34";
+    function calculateNationalPointNumber(x, y) {
+        const HAN_E = {
+            "0": "가", "1": "나", "2": "다", "3": "라",
+            "4": "마", "5": "바", "6": "사", "7": "아",
+            "8": "자", "9": "차", "10": "카"
+        };
+
+        const HAN_N = {
+            "0": "가", "1": "나", "2": "다", "3": "라",
+            "4": "마", "5": "바", "6": "사", "7": "아",
+            "8": "자", "9": "차", "10": "카"
+        };
+
+        // 더미 데이터 생성
+        const xStr = Math.round(x).toString();
+        const yStr = Math.round(y).toString();
+
+        // x와 y의 첫 자리를 사용
+        const eastIndex = xStr.charAt(0); 
+        const northIndex = yStr.charAt(0); 
+
+        // 4자리 숫자 포맷팅
+        const eastNumber = xStr.slice(1, 3).padStart(2, '0');
+        const northNumber = yStr.slice(1, 3).padStart(2, '0');
+
+        return `${HAN_E[eastIndex]} ${HAN_N[northIndex]} ${eastNumber} ${northNumber}`;
     }
 </script>
 
