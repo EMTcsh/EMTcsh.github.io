@@ -41,6 +41,13 @@
             height: 20px;
             margin-right: 5px;
         }
+        .coordinate-box {
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin-top: 10px;
+            background-color:    #f0f0f0;
+            border-radius: 5px;
+        }   
         #savedMemos div {
             border: 1px solid #ddd;
             padding: 10px;
@@ -57,6 +64,8 @@
             margin-top: 10px;
             font-weight: bold;
         }
+
+
     </style>
 </head>
 <body>
@@ -81,7 +90,8 @@
 <button id="getLocation">내 위치 확인</button>
 <div id="locationDisplay" required>위도: , 경도: </div>
 
-<input type="text" id="locationDisplay" required 위도:>
+<div class="coordinate-box" id="locationDisplay">위도: , 경도: </div>
+<div class="coordinate-box" id="dmsCoordinates">도분초: </div>
 
 <div id="dmsCoordinates">도분초: </div>
 <div id="map"></div> <!-- 지도 컨테이너 -->
