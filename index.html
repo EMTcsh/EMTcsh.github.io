@@ -1,663 +1,225 @@
 <!DOCTYPE html>
 <html lang="ko">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title> 📌 응급환자 분류, GCS, 환자평가, AMPLE/생체징후 </title>
-    <style>
+    <title> 📌 구조·구급 Time Recording </title>
+    <script type="text/javascript" src="https://oapi.map.naver.com/openapi/v3/maps.js?ncpClientId=g2u4orbiqf"></script>
+</head>
+<body>
+<style>
         body {
             font-family: Arial, sans-serif;
-            margin: 0;
             padding: 20px;
-            background-color: #f0f0f0;
         }
-
-        .container {
-            width: 80%;
-            margin: 0 auto;
-            padding: 20px;
-            background-color: #fff;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        #memo {
+            width: 100%;
+            height: 200px;
+            margin-bottom: 10px;
         }
-
-        h1,
-        h2 {
-            color: #0056b3;
+        .button-container {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
         }
-
-        .section {
-            margin-bottom: 30px;
-            padding: 15px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            background-color: #fff;
-        }
-
-        .section label {
-            font-weight: bold;
+        .button {
+            flex: 1;
+            padding: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+            margin: 0 5px;
+            font-size: 16px;
             display: flex;
             align-items: center;
-            margin-bottom: 5px;
+            justify-content: center;
         }
-
-        .section input[type="checkbox"] {
-            margin-right: 10px;
-            width: 25px;
-            height: 25px;
+        .button img {
+            width: 20px;
+            height: 20px;
+            margin-right: 5px;
         }
-
-        select,
-        input,
-        textarea {
-            width: calc(100% - 22px);
-            padding: 12px;
+        #savedMemos div {
             border: 1px solid #ddd;
+            padding: 10px;
+            margin: 5px 0;
             border-radius: 5px;
-            box-sizing: border-box;
-            font-size: 16px;
-        }
-
-        input,
-        textarea {
-            height: 45px;
-        }
-
-        textarea {
-            resize: vertical;
-        }
-
-        button {
-            width: 100%;
-            padding: 12px;
-            background-color: #007bff;
-            color: #fff;
-            border: none;
-            border-radius: 5px;
-            font-size: 18px;
-            cursor: pointer;
-            margin-top: 10px;
-        }
-
-        button:hover {
-            background-color: #0056b3;
-        }
-
-        .result,
-        .status,
-        .footer,
-        .result-container {
-            margin-top: 20px;
-            font-size: 18px;
-            font-weight: bold;
-        }
-
-        .result-container {
-            background-color: #e9ecef;
-            padding: 15px;
-            border-radius: 8px;
-            border: 1px solid #ddd;
-        }
-
-        .result-item {
-            margin-bottom: 10px;
-            font-size: 14px;
-        }
-
-        .timestamp {
-            font-size: 12px;
-            color: #888;
-        }
-
-        .board {
-            margin-top: 30px;
-            border-top: 1px solid #ddd;
-            padding-top: 10px;
-            max-height: 800px;
-            overflow-y: auto;
-        }
-
-        .board-item {
-            border-bottom: 1px solid #ddd;
-            padding: 10px 0;
-        }
-
-        .board-item:last-child {
-            border-bottom: none;
-        }
-
-        .grade-1 {
-            background-color: #f8d7da;
-            border: 1px solid #f5c6cb;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 15px;
-        }
-
-        .grade-2 {
-            background-color: #fff3cd;
-            border: 1px solid #ffeeba;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 15px;
-        }
-
-        .grade-3 {
-            background-color: #d4edda;
-            border: 1px solid #c3e6cb;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 15px;
-        }
-
-        .data-item {
-            margin-bottom: 10px;
-        }
-
-        #savedData {
-            margin-top: 20px;
-            padding: 15px;
-            border: 1px solid #ccc;
-            border-radius: 8px;
             background-color: #f9f9f9;
         }
-
-        .form-group {
-            margin-bottom: 15px;
+        #map {
+            height: 400px;
+            width: 100%;
+            margin-top: 20px;
         }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 5px;
+        #locationDisplay, #dmsCoordinates {
+            margin-top: 10px;
             font-weight: bold;
         }
-
-        .form-group input[type="text"],
-        .form-group textarea {
-            width: 100%;
-        }
-
-        .logo {
-            width: 100px; /* 원하는 너비로 조절 */
-            height: auto; /* 비율 유지 */
-            margin-right: 10px; /* 이미지와 텍스트 사이의 간격 조절 */
-        }
-        
     </style>
-</head>
-    
-<body>
-    <div class="container">
-        <h1><img src="https://emtcsh.github.io/EMTLOGO.png" alt="응급구조사 마크" class="logo"> <br> 응급구조사 응급환자 평가 도구</h1>
-        <h4>응급환자 평가 도구는 환자의 상태를 신속하게 평가하고 적절한 처치를 결정하는 데 중요한 역할을 합니다.</h4>
-
-<!DOCTYPE html>
-<html lang="ko">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>증상에 따른 중증도/긴급도 분류 KTAS의 5단계</title>
-</head>
-<body>
-
-<h1></h1>
-
-<p>증상에 따른 중증도/긴급도 분류: <a href="https://emtcsh.github.io/KTAS.html" target="_blank">KTAS의 5단계로 이동하기</a></p>
-<p>응급환자 평가 도구의 종류: <a href="https://emtcsh.github.io/EPATool" target="_blank">일반적으로 사용되는 평가 도구 및 지침으로 이동하기</a></p>
-<p>이 페이지를 새 탭에서 열려면 위 링크를 클릭하세요.</p>
   
-       <!-- 응급환자 분류 섹션 -->
+<h2> 🆘 구조·구급 Time Recording </h2> <br>
+<h4> 📕 Memo Record </h4>
+<div id="savedMemos"></div>
+<br>
 
-        <div class="section">
-
-            <h2>응급환자 분류</h2>
-
-            <form id="ktasForm">
-                  <!-- 응급증상 -->
-                <div class="grade-1">
-
-                    <h2>Grade 1: 응급 증상</h2>
-                 
-  <label><input type="checkbox" class="symptom" value="신경학적 응급증상 - 급성의식장애, 급성신경학적 이상, 구토·의식장애 등의 증상이 있는 두부 손상"> 신경학적 응급증상 - 급성의식장애, 급성신경학적 이상, 구토·의식장애 등의 증상이 있는 두부 손상 (GCS ≤ 8)</label>
-                    <label><input type="checkbox" class="symptom" value="심혈관계 응급증상 - 심폐소생술이 필요한 증상, 급성호흡곤란, 심장질환으로 인한 급성 흉통, 심계항진, 박동이상 및 쇼크"> 심혈관계 응급증상 - 심폐소생술이 필요한 증상, 급성호흡곤란, 심장질환으로 인한 급성 흉통, 심계항진, 박동이상 및 쇼크</label>
-                    <label><input type="checkbox" class="symptom" value="중독 및 대사장애 - 심한 탈수, 약물·알콜 또는 기타 물질의 과다복용이나 중독, 급성대사장애(간부전·신부전·당뇨병 등)"> 중독 및 대사장애 - 심한 탈수, 약물·알콜 또는 기타 물질의 과다복용이나 중독, 급성대사장애(간부전·신부전·당뇨병 등)</label>
-                    <label><input type="checkbox" class="symptom" value="외과적 응급증상 - 개복술을 요하는 급성복증(급성복막염·장폐색증·급성췌장염 등 중한 경우), 광범위한 화상(외부신체 표면적의 18% 이상), 관통상, 개방성·다발성 골절 또는 대퇴부 척추의 골절, 사지를 절단할 우려가 있는 혈관 손상, 전신마취하에 응급수술을 요하는 중상, 다발성 외상"> 외과적 응급증상 - 개복술을 요하는 급성복증(급성복막염·장폐색증·급성췌장염 등 중한 경우), 광범위한 화상(외부신체 표면적의 18% 이상), <br> 관통상, 개방성·다발성 골절 또는 대퇴부 척추의 골절, 사지를 절단 우려가 있는 혈관 손상, 전신마취하에 응급수술을 요하는 중상, 다발성 외상</label>
-                    <label><input type="checkbox" class="symptom" value="출혈 - 계속되는 각혈, 지혈이 안되는 출혈, 급성 위장관 출혈"> 출혈 - 계속되는 각혈, 지혈이 안되는 출혈, 급성 위장관 출혈</label>
-                    <label><input type="checkbox" class="symptom" value="안과적 응급증상 - 화학물질에 의한 눈의 손상, 급성 시력 손실"> 안과적 응급증상 - 화학물질에 의한 눈의 손상, 급성 시력 손실</label>
-                    <label><input type="checkbox" class="symptom" value="알러지 - 얼굴 부종을 동반한 알러지 반응"> 알러지 - 얼굴 부종을 동반한 알러지 반응</label>
-                    <label><input type="checkbox" class="symptom" value="소아과적 응급증상 - 소아경련성 장애"> 소아과적 응급증상 - 소아경련성 장애</label>
-                    <label><input type="checkbox" class="symptom" value="정신과적 응급증상 - 자신 또는 다른 사람을 해할 우려가 있는 정신장애"> 정신과적 응급증상 - 자신 또는 다른 사람을 해할 우려가 있는 정신장애</label>
-                </div>
-
-                 <!-- 준응급증상 -->
-                <div class="grade-2">
-
-                    <h2>Grade 2: 응급에 준하는 증상</h2>
-
-                    <label><input type="checkbox" class="symptom" value="신경학적 준응급증상 - 의식장애, 현훈"> 신경학적 준응급증상 - 의식장애, 현훈 (GCS 9-12)</label>
-                    <label><input type="checkbox" class="symptom" value="심혈관계 준응급증상 - 호흡곤란, 과호흡"> 심혈관계 준응급증상 - 호흡곤란, 과호흡</label>
-                    <label><input type="checkbox" class="symptom" value="외과적 준응급증상 - 화상, 급성복증을 포함한 배의 전반적인 이상증상, 골절·외상 또는 탈골, 그 밖에 응급수술을 요하는 증상, 배뇨장애"> 외과적 준응급증상 - 화상, 급성복증을 포함한 배의 전반적인 이상증상, 골절·외상 또는 탈골, 그 밖에 응급수술을 요하는 증상, 배뇨장애</label>
-                    <label><input type="checkbox" class="symptom" value="출혈 - 혈관손상"> 출혈 - 혈관손상</label>
-                    <label><input type="checkbox" class="symptom" value="소아과적 준응급증상 - 소아 경련, 38℃ 이상인 소아 고열(공휴일·야간 등 의료서비스가 제공되기 어려운 때에 8세 이하의 소아에게 나타나는 증상)"> 소아과적 준응급증상 - 소아 경련, 38℃ 이상인 소아 고열(공휴일·야간 등 의료서비스가 제공되기 어려운 때에 8세 이하의 소아에게 나타나는 증상)</label>
-                    <label><input type="checkbox" class="symptom" value="산부인과적 준응급증상 - 분만 또는 성폭력으로 인하여 산부인과적 검사 또는 처치가 필요한 증상"> 산부인과적 준응급증상 - 분만 또는 성폭력으로 인하여 산부인과적 검사 또는 처치가 필요한 증상</label>
-                    <label><input type="checkbox" class="symptom" value="이물에 의한 응급증상 - 귀·눈·코·항문 등에 이물이 들어가 제거술이 필요한 환자"> 이물에 의한 응급증상 - 귀·눈·코·항문 등에 이물이 들어가 제거술이 필요한 환자</label>
-
-                </div>
-
-                
-                <button type="button" onclick="saveKTASResults()">저장</button>
-            </form>
-
-            <div class="result-container" id="ktasResultContainer">
-                <h3>저장 확인</h3>
-                <div id="ktasResults"></div>
-            </div>
-        </div>
-
-<!-- GCS 혼수척도 계산기 섹션 -->
-<div class="section">
-    <h2>Glasgow Coma Scale</h2>
-    <form id="gcsForm" onsubmit="return calculateGCS()">
-        <div class="form-group">
-            <label for="name">이름</label>
-            <input type="text" id="name" placeholder="이름을 입력하세요" required>
-        </div>
-        <div class="form-group">
-            <label for="age">나이</label>
-            <input type="number" id="age" placeholder="나이를 입력하세요" required>
-        </div>
-        <div class="form-group">
-            <label for="gender">성별</label>
-            <select id="gender" required>
-                <option value="male">남성</option>
-                <option value="female">여성</option>
-                <option value="unknown">미상</option>
-            </select>
-        </div>
-        <div class="form-group">
-            <label for="eye">눈 반응 (E)</label>
-            <select id="eye" required>
-                <option value="4">자발적으로 열림</option>
-                <option value="3">소리 자극에 열림</option>
-                <option value="2">통증 자극에 열림</option>
-                <option value="1">전혀 열림 안함</option>
-            </select>
-        </div>
-        <div class="form-group">
-            <label for="verbal">언어 반응 (V)</label>
-            <select id="verbal" required>
-                <option value="5">정확한 대답</option>
-                <option value="4">혼잡한 대답</option>
-                <option value="3">혼미한 대답</option>
-                <option value="2">모호한 대답</option>
-                <option value="1">응답 없음</option>
-            </select>
-        </div>
-        <div class="form-group">
-            <label for="motor">운동 반응 (M)</label>
-            <select id="motor" required>
-                <option value="6">명령 수행</option>
-                <option value="5">통증 자극에 국소화</option>
-                <option value="4">통증 자극에 굴곡</option>
-                <option value="3">통증 자극에 구부리기</option>
-                <option value="2">경련</option>
-                <option value="1">운동 없음</option>
-            </select>
-        </div>
-        <button type="submit">계산</button>
-    </form>
-    <div class="result-container" id="gcsResultContainer">
-        <h3>Glasgow Coma Scale, GCS</h3>
-        <div id="gcsResult"></div>
-    </div>
+<textarea id="memo" placeholder="여기에 메모를 입력하세요..."></textarea><br>
+<div class="button-container">
+    <button class="button" onclick="saveMemo()">
+        <img src="https://img.icons8.com/ios-filled/50/ffffff/save.png" alt="저장"> Memo 입력
+    </button>
+    <button class="button" onclick="clearMemo()">
+        <img src="https://img.icons8.com/ios-filled/50/ffffff/delete-sign.png" alt="지우기"> 지우기
+    </button>
+    <button class="button" onclick="downloadMemos()">
+        <img src="https://img.icons8.com/ios-filled/50/ffffff/download.png" alt="다운로드"> Memo 저장
+    </button>
 </div>
 
-<!-- 환자 평가 섹션 -->
-<div class="section">
-    <h2>환자 평가 (ABCDE)</h2>
-    <form id="traumaAssessmentForm">
-        <div class="form-group">
-            <label>Airway (기도)</label>
-            <textarea id="airwayDetails" placeholder="기도 확보 여부, 관리 조치에 대한 세부 사항 입력"></textarea>
-        </div>
-        <div class="form-group">
-            <label>Breathing (호흡)</label>
-            <textarea id="breathingDetails" placeholder="호흡 상태, 호흡수, 호흡 노력에 대한 세부 사항 입력"></textarea>
-        </div>
-        <div class="form-group">
-            <label>Circulation (순환)</label>
-            <textarea id="circulationDetails" placeholder="순환 상태, 맥박, 혈압에 대한 세부 사항 입력"></textarea>
-        </div>
-        <div class="form-group">
-            <label>Disability (의식)</label>
-            <textarea id="disabilityDetails" placeholder="의식 상태, GCS, 동공 반응에 대한 세부 사항 입력"></textarea>
-        </div>
-        <div class="form-group">
-            <label>Exposure (노출 및 환경)</label>
-            <textarea id="exposureDetails" placeholder="체온, 부상 부위, 환경 관리 조치에 대한 세부 사항 입력"></textarea>
-        </div>
-        <button type="button" onclick="saveTraumaAssessment()">저장</button>
-    </form>
-    <div class="result" id="traumaAssessmentResults"></div>
-</div>
-
-<!-- AMPLE 및 생체징후 입력 섹션 -->
-<div class="section">
-    <h2>SAMPLE/생체징후</h2>
-    <form id="ampleForm">
-        <div class="form-group">
-            <label for="patientName">이름</label>
-            <input type="text" id="patientName" required>
-        </div>
-        <div class="form-group">
-            <label for="patientAge">나이</label>
-            <input type="number" id="patientAge" required>
-        </div>
-        <div class="form-group">
-            <label for="patientGender">성별</label>
-            <select id="patientGender" required>
-                <option value="">선택</option>
-                <option value="male">남성</option>
-                <option value="female">여성</option>
-                <option value="unknown">미상</option>
-            </select>
-        </div>
-        <div class="form-group">
-            <label for="CC">S 증상:</label>
-            <input type="text" id="CC" name="CC">
-        </div>
-        <div class="form-group">
-            <label for="allergy">A 알레르기:</label>
-            <input type="text" id="allergy" name="allergy">
-        </div>
-        <div class="form-group">
-            <label for="medications">M 약물:</label>
-            <input type="text" id="medications" name="medications">
-        </div>
-        <div class="form-group">
-            <label for="pain">P 통증:</label>
-            <input type="text" id="pain" name="pain">
-        </div>
-        <div class="form-group">
-            <label for="lastMeal">L 마지막 식사 시간:</label>
-            <input type="text" id="lastMeal" name="lastMeal">
-        </div>
-        <div class="form-group">
-            <label for="event">E 증상과 관련된 사건:</label>
-            <input type="text" id="event" name="event">
-        </div>
-        <div class="form-group">
-            <label for="bloodPressure">혈압:</label>
-            <input type="text" id="bloodPressure" name="bloodPressure" placeholder="예: 120/80 mmHg">
-        </div>
-        <div class="form-group">
-            <label for="pulse">맥박:</label>
-            <input type="text" id="pulse" name="pulse" placeholder="예: 72 bpm">
-        </div>
-        <div class="form-group">
-            <label for="respiration">호흡수:</label>
-            <input type="text" id="respiration" name="respiration" placeholder="예: 16 breaths/min">
-        </div>
-        <div class="form-group">
-            <label for="temperature">체온:</label>
-            <input type="text" id="temperature" name="temperature" placeholder="예: 36.6 °C">
-        </div>
-        <button type="button" onclick="saveAMPLEData()">저장</button>
-    </form>
-   <div class="result" id="ampleResults"> </div>
-</div>   
-
-<!-- 결과 및 기록된 데이터 섹션 -->
-<div class="section">
-    <h2>기록한 데이터</h2>
-    <div id="savedData" class="board"></div>
-</div>
+<h4> 🚩 Map </h4>
+<button id="getLocation">내 위치 확인</button>
+<div id="locationDisplay">위도: , 경도: </div>
+<div id="pointNumber">국가지점번호: </div>
+<div id="dmsCoordinates">도분초: </div>
+<div id="map" style="height: 400px; width: 100%;"></div>
 
 <script>
-  // Save KTAS results and classify the urgency
-        function saveKTASResults() {
-            const symptoms = document.querySelectorAll('.symptom:checked');
-            let results = '';
-            let isEmergency = false;
+    const memos = [];
 
-            symptoms.forEach(symptom => {
-                results += `<div class="result-item">${symptom.value}</div>`;
-                // Check if any Grade 1 or Grade 2 symptoms are selected
-                if (symptom.closest('.grade-1')) {
-                    isEmergency = true;
-                }
-            });
-
-            // Only display results if there are selected symptoms
-            if (results) {
-                results += `<p><strong>상태: ${isEmergency ? '응급' : '준응급'}</strong></p>`;
-
-                // Add timestamp
-                const timestamp = new Date().toLocaleString();
-                const savedData = document.getElementById('savedData');
-                savedData.innerHTML += `<div class="board-item"><strong>[응급환자 분류]</strong><br>${results}<br><span class="timestamp">저장 시간: ${timestamp}</span></div>`;
-
-                // Display the results in the KTAS results container
-                document.getElementById('ktasResults').innerHTML = results;
-            } else {
-                document.getElementById('ktasResults').innerHTML = ''; // Clear if no symptoms are selected
-            }
-
-            // Clear selected symptoms
-            document.querySelectorAll('.symptom').forEach(symptom => symptom.checked = false);
+    function saveMemo() {
+        const memo = document.getElementById('memo').value;
+        if (memo) {
+            const timestamp = new Date().toLocaleString();
+            const memoWithTimestamp = `${timestamp}: ${memo}`;
+            memos.push(memoWithTimestamp);
+            const savedMemosDiv = document.getElementById('savedMemos');
+            const memoElement = document.createElement('div');
+            memoElement.textContent = memoWithTimestamp;
+            savedMemosDiv.appendChild(memoElement);
+            document.getElementById('memo').value = '';
+        } else {
+            alert('메모를 입력해주세요.');
         }
-
-  
-    // Calculate GCS score and determine the state
-function calculateGCS() {
-    const name = document.getElementById('name').value;
-    const age = document.getElementById('age').value;
-    const gender = document.getElementById('gender').value;
-    const eye = parseInt(document.getElementById('eye').value);
-    const verbal = parseInt(document.getElementById('verbal').value);
-    const motor = parseInt(document.getElementById('motor').value);
-    const totalScore = eye + verbal + motor;
-    
-    let state;
-    if (totalScore === 15) {
-        state = '정상';
-        alert('GCS 점수: 15점 - 정상입니다.');
-    } else if (totalScore >= 13) {
-        state = 'Drowsy (졸림)';
-    } else if (totalScore >= 9) {
-        state = 'Stupor (혼미)';
-    } else if (totalScore >= 4) {
-        state = 'Semicoma (반혼수)';
-    } else if (totalScore >= 3) {
-        state = 'Coma (혼수)';
-    } else {
-        state = '심각한 상태입니다.';
-    }
-    
-    let injurySeverity;
-    if (totalScore >= 13) {
-        injurySeverity = '경미한 손상 (Mild Injury)';
-    } else if (totalScore >= 9) {
-        injurySeverity = '중등도 손상 (Moderate Injury)';
-    } else {
-        injurySeverity = '중증 손상 (Severe Injury)';
-    }
-  
-    const resultHTML = `<p><strong>이름:</strong> ${name}, <strong>나이:</strong> ${age}, <strong>성별:</strong> ${gender}, <strong>GCS 점수:</strong> ${totalScore}, <strong>상태:</strong> ${state}, <strong>부상 정도:</strong> ${injurySeverity}</p>`;
-    
-    document.getElementById('gcsResult').innerHTML = resultHTML;
-    document.getElementById('gcsResultContainer').style.display = 'block';
-
-    // Save GCS result to the saved data section
-    const timestamp = new Date().toLocaleString();
-    const savedData = document.getElementById('savedData');
-    savedData.innerHTML += `<div class="board-item"><strong>[GCS 결과]</strong><br>${resultHTML}<br><span class="timestamp">저장 시간: ${timestamp}</span></div>`;
-
-    return false; // Prevent form submission
-}
-
-    // Save trauma assessment data
-function saveTraumaAssessment() {
-    const airway = document.getElementById('airwayDetails').value;
-    const breathing = document.getElementById('breathingDetails').value;
-    const circulation = document.getElementById('circulationDetails').value;
-    const disability = document.getElementById('disabilityDetails').value;
-    const exposure = document.getElementById('exposureDetails').value;
-
-    const currentDate = new Date();
-    const timestamp = currentDate.toLocaleString();
-
-    const assessmentHTML = `
-        <div class="board-item">
-            <strong>[환자 평가]</strong>
-            <strong>${timestamp}</strong>
-            <p><strong>기도:</strong> ${airway}</p>
-            <p><strong>호흡:</strong> ${breathing}</p>
-            <p><strong>순환:</strong> ${circulation}</p>
-            <p><strong>의식:</strong> ${disability}</p>
-            <p><strong>노출:</strong> ${exposure}</p>
-        </div>
-    `;
-
-    document.getElementById('traumaAssessmentForm').reset(); // Reset form fields
-    
-    // Append assessment data to the saved data section
-    document.getElementById('savedData').innerHTML += assessmentHTML;
-
-    // Also display in trauma assessment results
-    document.getElementById('traumaAssessmentResults').innerHTML += assessmentHTML;
-
-    // Reset form fields
-    document.getElementById('traumaAssessmentForm').reset(); 
-}
-
-    // Save AMPLE data
-    function saveAMPLEData() {
-        const name = document.getElementById('patientName').value;
-        const age = document.getElementById('patientAge').value;
-        const gender = document.getElementById('patientGender').value;
-        const CC = document.getElementById('CC').value;
-        const allergy = document.getElementById('allergy').value;
-        const medications = document.getElementById('medications').value;
-        const pain = document.getElementById('pain').value;
-        const lastMeal = document.getElementById('lastMeal').value;
-        const event = document.getElementById('event').value;
-        const bloodPressure = document.getElementById('bloodPressure').value;
-        const pulse = document.getElementById('pulse').value;
-        const respiration = document.getElementById('respiration').value;
-        const temperature = document.getElementById('temperature').value;
-
-        const currentDate = new Date();
-        const timestamp = currentDate.toLocaleString();
-
-        const ampleHTML = `
-            <div class="board-item">
-                <strong>[AMPLE/생체징후]</strong>
-                <strong>${timestamp}</strong>
-                <p><strong>이름:</strong> ${name}, <strong>나이:</strong> ${age}, <strong>성별:</strong> ${gender}</p>
-                <p><strong>주호소:</strong> ${CC}</p>
-                <p><strong>알레르기:</strong> ${allergy}</p>
-                <p><strong>약물:</strong> ${medications}</p>
-                <p><strong>통증:</strong> ${pain}</p>
-                <p><strong>마지막 식사:</strong> ${lastMeal}</p>
-                <p><strong>사건:</strong> ${event}</p>
-                <p><strong>혈압:</strong> ${bloodPressure}</p>
-                <p><strong>맥박:</strong> ${pulse}</p>
-                <p><strong>호흡수:</strong> ${respiration}</p>
-                <p><strong>체온:</strong> ${temperature}</p>
-            </div>
-        `;
-
-            // Append AMPLE data to the saved data section
-        document.getElementById('savedData').innerHTML += ampleHTML;
-
-        // Also display in AMPLE results
-        document.getElementById('ampleResults').innerHTML += ampleHTML;
-
-        // Reset form fields
-        document.getElementById('ampleForm').reset();
     }
 
-</script>
-      
-<script>
-    // Existing code...
+    function clearMemo() {
+        document.getElementById('memo').value = '';
+    }
 
-    // Function to download saved data as a text file
-    function downloadData() {
-        // Retrieve the text content from the savedData div
-        const savedDataText = document.getElementById('savedData').innerText;
-        
-        // Create a blob with the saved data
-        const blob = new Blob([savedDataText], { type: 'text/plain' });
+    function downloadMemos() {
+        const blob = new Blob([memos.join('\n')], { type: 'text/plain' });
         const url = URL.createObjectURL(blob);
-        
-        // Create a link element to download the file
         const a = document.createElement('a');
         a.href = url;
-        a.download = 'saved_data.txt'; // Specify the file name
+        a.download = 'memos.txt';
         document.body.appendChild(a);
-        a.click(); // Programmatically click the link to trigger the download
-        document.body.removeChild(a); // Clean up
-        URL.revokeObjectURL(url); // Release the blob URL
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    }
+
+    document.getElementById('getLocation').addEventListener('click', function() {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(showPosition, showError);
+        } else {
+            alert("이 브라우저는 위치 정보를 지원하지 않습니다.");
+        }
+    });
+
+    function showPosition(position) {
+        const lat = position.coords.latitude;
+        const lon = position.coords.longitude;
+
+        // Update the location display
+        document.getElementById('locationDisplay').textContent = `위도: ${lat}, 경도: ${lon}`;
+        document.getElementById('memo').value = `지도 좌표: ${lat}, ${lon}`;
+
+        // 도분초 변환
+        const dmsCoordinates = convertToDMS(lat, lon);
+        document.getElementById('dmsCoordinates').textContent = `도분초: ${dmsCoordinates}`;
+
+        // 국가지점번호 계산
+        const pointNumber = calculateNationalPointNumber(lon, lat);
+        document.getElementById('pointNumber').textContent = `국가지점번호: ${pointNumber}`;
+
+        const mapOptions = {
+            center: new naver.maps.LatLng(lat, lon),
+            zoom: 15
+        };
+
+        const map = new naver.maps.Map('map', mapOptions);
+        new naver.maps.Marker({
+            position: new naver.maps.LatLng(lat, lon),
+            map: map
+        });
+    }
+
+    function showError(error) {
+        switch(error.code) {
+            case error.PERMISSION_DENIED:
+                alert("사용자가 위치 정보를 허용하지 않았습니다.");
+                break;
+            case error.POSITION_UNAVAILABLE:
+                alert("위치 정보를 사용할 수 없습니다.");
+                break;
+            case error.TIMEOUT:
+                alert("위치 정보 요청이 시간 초과되었습니다.");
+                break;
+            case error.UNKNOWN_ERROR:
+                alert("알 수 없는 오류가 발생했습니다.");
+                break;
+        }
+    }
+
+    // 위도와 경도를 도분초로 변환
+    function convertToDMS(lat, lon) {
+        const latDeg = Math.floor(Math.abs(lat));
+        const latMin = Math.floor((Math.abs(lat) - latDeg) * 60);
+        const latSec = ((Math.abs(lat) - latDeg) * 60 - latMin) * 60;
+
+        const lonDeg = Math.floor(Math.abs(lon));
+        const lonMin = Math.floor((Math.abs(lon) - lonDeg) * 60);
+        const lonSec = ((Math.abs(lon) - lonDeg) * 60 - lonMin) * 60;
+
+        const latDirection = lat >= 0 ? 'N' : 'S';
+        const lonDirection = lon >= 0 ? 'E' : 'W';
+
+        return `${latDeg}° ${latMin}' ${latSec.toFixed(2)}" ${latDirection}, ${lonDeg}° ${lonMin}' ${lonSec.toFixed(2)}" ${lonDirection}`;
+    }
+
+    // UTM-K 좌표를 국가지점번호로 변환
+    function calculateNationalPointNumber(x, y) {
+        const HAN_E = {
+            "0": "가", "1": "나", "2": "다", "3": "라",
+            "4": "마", "5": "바", "6": "사", "7": "아",
+            "8": "자", "9": "차", "10": "카"
+        };
+
+        const HAN_N = {
+            "0": "가", "1": "나", "2": "다", "3": "라",
+            "4": "마", "5": "바", "6": "사", "7": "아",
+            "8": "자", "9": "차", "10": "카"
+        };
+
+        // 더미 데이터 생성
+        const xStr = Math.round(x).toString();
+        const yStr = Math.round(y).toString();
+
+        // x와 y의 첫 자리를 사용
+        const eastIndex = xStr.charAt(0); 
+        const northIndex = yStr.charAt(0); 
+
+        // 8자리 숫자 포맷팅
+        const eastNumber = xStr.slice(1, 5).padStart(4, '0');
+        const northNumber = yStr.slice(1, 5).padStart(4, '0');
+
+        return `${HAN_E[eastIndex]} ${HAN_N[northIndex]} ${eastNumber} ${northNumber}`;
     }
 </script>
-      
-<!-- Add this section in your existing HTML where you want the download button -->
-<div class="section">
-    <h2>데이터 다운로드</h2>
-    <button type="button" onclick="downloadData()">기록한 데이터 다운로드</button>
-</div>
-    
-<!-- 나이 계산기 표시 섹션 -->
-<div class="section">
-    <h2>나이 계산기</h2>
-    <div class="age">
-        <h1></h1>
-        <label for="birthdate">생년월일을 입력하세요 (YYYY-MM-DD):</label>
-        <input type="date" id="birthdate">
-        <button onclick="calculateAge()">나이 계산</button>
-        <p id="result"></p>
-      
-        <script>
-            function calculateAge() {
-                const birthdateInput = document.getElementById('birthdate').value;
-                const birthdate = new Date(birthdateInput);
-                const today = new Date();
 
-                if (!birthdateInput) {
-                    document.getElementById('result').innerText = '생년월일을 입력하세요.';
-                    return;
-                }
+<br>
+<h4> [알림] 페이지 새로고침 하면 Memo 지워짐. 지도 저장 안됨. Memo 내용은 저장 및 캡처. </h4>
+<h5> 🐸 Beta Ver. 0.9.26. 국립공원 응급처치 연구회. E-mail: paramedic@knps.or.kr. </h5>
 
-                let age = today.getFullYear() - birthdate.getFullYear();
-                const monthDifference = today.getMonth() - birthdate.getMonth();
-
-                // 생일이 지나지 않았다면 나이를 하나 줄임
-                if (monthDifference < 0 || (monthDifference === 0 && today.getDate() < birthdate.getDate())) {
-                    age--;
-                }
-
-                document.getElementById('result').innerText = `당신의 나이는 ${age}세입니다.`;
-            }
-        </script>
-    </div>
-</div>
-
-<!-- 공지사항 표시 섹션 -->
-<div class="section">
-    <h2>공지사항</h2>
-    <div class="result">
-        <h4> - Glasgow Coma Scale 이름, 나이 입력 필수.
-        <br> - 페이지를 새로고침 하면 기록 데이터는 사라짐. 기록한 데이터는 개인 폰과 컴퓨터에 저장.
-        <br> - 응급환자의 신속한 평가와 기록 및 응급구조사의 현장 대응력 향상을 위하여 본 페이지를 만들었습니다.
-          <h4>
-          
-        <h5> 🐸 EMT Beta Ver. 0.9.23. Korea National Park Service Paramedic Lab. E-mail: paramedic@knps.or.kr.</h5>        
-        
-    </div>
-</div> 
-  
 </body>
 </html>
