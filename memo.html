@@ -145,7 +145,7 @@
     function shareMemos() {
         if (navigator.share) {
             const memoText = memos.join('\n');
-            const mapLinkNaver = `https://map.naver.com/v5/?c=${latitude},${longitude},15,0,0,0`;
+            
             const mapLinkGoogle = `https://www.google.com/maps?q=${latitude},${longitude}`;
             const mapLinkKakao = `https://map.kakao.com/link/map/Location,${latitude},${longitude}`;
 
