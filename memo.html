@@ -3,10 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title> 📌 구조·구급 Time Recording </title>
+    <title>📌 구조·구급 Time Recording</title>
     <script type="text/javascript" src="https://oapi.map.naver.com/openapi/v3/maps.js?ncpClientId=g2u4orbiqf"></script>
-</head>
-<style>
+    <style>
         body {
             font-family: Arial, sans-serif;
             padding: 20px;
@@ -56,11 +55,12 @@
             font-weight: bold;
         }
     </style>
+</head>
+<body>
 
-<h2> 🆘 구조·구급 Time Recording </h2> <br>
-<h4> 📕 Memo Record </h4>
-<div id="savedMemos"></div>
-<br>
+<h2>🆘 구조·구급 Time Recording</h2><br>
+<h4>📕 Memo Record</h4>
+<div id="savedMemos"></div><br>
 
 <textarea id="memo" placeholder="여기에 메모를 입력하세요..."></textarea><br>
 <div class="button-container">
@@ -75,12 +75,12 @@
     </button>
 </div>
 
-<h4> 🚩 Map </h4>
+<h4>🚩 Map</h4>
 <button id="getLocation">내 위치 확인</button>
 <div id="locationDisplay">위도: , 경도: </div><br>
 <div id="pointNumber">국가지점번호: </div>
 <div id="dmsCoordinates">도분초: </div>
-<div id="map" style="height: 400px; width: 100%;"></div>
+<div id="map"></div>
 
 <script>
     const memos = [];
@@ -99,10 +99,6 @@
         } else {
             alert('메모를 입력해주세요.');
         }
-    }
-
-    function clearMemo() {
-        document.getElementById('memo').value = '';
     }
 
     function downloadMemos() {
@@ -143,15 +139,12 @@
         const lat = position.coords.latitude;
         const lon = position.coords.longitude;
 
-        // Update the location display
         document.getElementById('locationDisplay').textContent = `위도: ${lat}, 경도: ${lon}`;
         document.getElementById('memo').value = `지도 좌표: ${lat}, ${lon}`;
 
-        // 도분초 변환
         const dmsCoordinates = convertToDMS(lat, lon);
         document.getElementById('dmsCoordinates').textContent = `도분초: ${dmsCoordinates}`;
 
-        // 국가지점번호 계산
         const pointNumber = calculateNationalPointNumber(lon, lat);
         document.getElementById('pointNumber').textContent = `국가지점번호: ${pointNumber}`;
 
@@ -184,7 +177,6 @@
         }
     }
 
-    // 위도와 경도를 도분초로 변환
     function convertToDMS(lat, lon) {
         const latDeg = Math.floor(Math.abs(lat));
         const latMin = Math.floor((Math.abs(lat) - latDeg) * 60);
@@ -200,12 +192,7 @@
         return `${latDeg}° ${latMin}' ${latSec.toFixed(2)}" ${latDirection}, ${lonDeg}° ${lonMin}' ${lonSec.toFixed(2)}" ${lonDirection}`;
     }
 
-    // UTM-K 좌표를 국가지점번호로 변환
     function calculateNationalPointNumber(x, y) {
-        if (!x || !y) {
-            return "좌표값 없음"; // 좌표가 없을 때 기본 메시지
-        }
-
         const HAN_E = {
             "7": "가", "8": "나", "9": "다", "10": "라",
             "11": "마", "12": "바", "13": "사"
@@ -213,30 +200,25 @@
 
         const HAN_N = {
             "13": "가", "14": "나", "15": "다", "16": "라",
-            "17": "마", "18": "바", "19": "사", "20": "아",
+            "17": "마", "18": "바", "19": "사", "20": "아"
         };
 
-        // x와 y 값이 1000 이상인지 확인, 그렇지 않으면 패딩 적용
-        const xStr = Math.round(x).toString().padStart(4, '0');
-        const yStr = Math.round(y).toString().padStart(4, '0');
+        const xStr = Math.round(x).toString();
+        const yStr = Math.round(y).toString();
 
-        // x와 y 값이 있는지 확인
-        if (xStr.charAt(0) in HAN_E && yStr.charAt(0) in HAN_N) {
-            const eastIndex = xStr.charAt(0); 
-            const northIndex = yStr.charAt(0); 
-            const eastNumber = xStr.slice(0, 4);
-            const northNumber = yStr.slice(0, 4);
-            return `${HAN_E[eastIndex]} ${HAN_N[northIndex]}
-return `${HAN_E[eastIndex]} ${HAN_N[northIndex]} ${eastNumber} ${northNumber}`;
-        } else {
-            return "유효하지 않은 좌표값";
-        }
+        const eastIndex = xStr.charAt(0); 
+        const northIndex = yStr.charAt(0); 
+
+        const eastNumber = xStr.slice(0, 4).padStart(4, '0');
+        const northNumber = yStr.slice(0, 4).padStart(4, '0');
+
+        return `${HAN_E[eastIndex]} ${HAN_N[northIndex]} ${eastNumber} ${northNumber}`;
     }
 </script>
 
 <br>
-<h4> [알림] 페이지 새로고침 하면 Memo 지워짐. 지도 저장 안됨. Memo 내용은 저장 및 캡처. </h4>
-<h5> 🐸 Beta Ver. 0.9.26. 국립공원 응급처치 연구회. E-mail: paramedic@knps.or.kr. </h5>
+<h4>[알림] 페이지 새로고침 하면 Memo 지워짐. 지도 저장 안됨. Memo 내용은 저장 및 캡처.</h4>
+<h5>🐸 Beta Ver. 0.9.26. 국립공원 응급처치 연구회. E-mail: paramedic@knps.or.kr.</h5>
 
 </body>
 </html>
