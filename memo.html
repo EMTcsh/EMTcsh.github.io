@@ -115,23 +115,23 @@
     }
 
     function shareMemos() {
-        if (navigator.share) {
-            const memoText = memos.join('\n');
-            const mapLinkNaver = `https://map.naver.com/v5/?c=14323519,4179425,15,0,0,0,dh&lat=${latitude}&lng=${longitude}`;
-            const mapLinkGoogle = `https://www.google.com/maps?q=${latitude},${longitude}`;
-            
-            const shareContent = `메모:\n${memoText}\n\n지도 링크:\nNaver: ${mapLinkNaver}\nGoogle: ${mapLinkGoogle}`;
+    if (navigator.share) {
+        const memoText = memos.join('\n');
+        const mapLinkNaver = `https://map.naver.com/v5/?c=14323519,4179425,15,0,0,0,dh&lat=${latitude}&lng=${longitude}`;
+        const mapLinkGoogle = `https://www.google.com/maps?q=${latitude},${longitude}`;
+        
+        const shareContent = `메모:\n${memoText}\n\n지도 좌표:\n위도: ${latitude}, 경도: ${longitude}\n\n지도 링크:\nNaver: ${mapLinkNaver}\nGoogle: ${mapLinkGoogle}`;
 
-            navigator.share({
-                title: 'Memo 및 위치 공유',
-                text: shareContent
-            })
-            .then(() => console.log('메모가 공유되었습니다.'))
-            .catch(error => console.error('공유 오류:', error));
-        } else {
-            alert("이 브라우저는 공유 기능을 지원하지 않습니다.");
-        }
+        navigator.share({
+            title: 'Memo 및 위치 공유',
+            text: shareContent
+        })
+        .then(() => console.log('메모가 공유되었습니다.'))
+        .catch(error => console.error('공유 오류:', error));
+    } else {
+        alert("이 브라우저는 공유 기능을 지원하지 않습니다.");
     }
+}
 
     document.getElementById('getLocation').addEventListener('click', function() {
         if (navigator.geolocation) {
