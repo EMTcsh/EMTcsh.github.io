@@ -229,10 +229,10 @@
 
     // 상대방 위치 비교
     function showLocations() {
-        const otherLatitude = document.getElementById('otherLatitude').value;
-        const otherLongitude = document.getElementById('otherLongitude').value;
+        const otherLatitude = parseFloat(document.getElementById('otherLatitude').value);
+        const otherLongitude = parseFloat(document.getElementById('otherLongitude').value);
 
-        if (latitude && longitude && otherLatitude && otherLongitude) {
+        if (latitude && longitude && !isNaN(otherLatitude) && !isNaN(otherLongitude)) {
             const mapOptions = {
                 center: new naver.maps.LatLng(latitude, longitude),
                 zoom: 10
@@ -260,6 +260,8 @@
                 new naver.maps.LatLng(latitude, longitude),
                 otherPosition
             );
+
+            // 거리 정보 표시
             document.getElementById('distanceInfo').textContent = `두 위치 간의 거리: ${(distance / 1000).toFixed(2)} km`;
 
             // 지도 중앙에 두 위치 표시
@@ -269,11 +271,12 @@
             mapComparison.fitBounds(bounds);
 
             // 내 위치 정보 표시
-            document.getElementById('myLocation').textContent = `내 위치: 위도 ${latitude}, 경도 ${longitude}`;
+            document.getElementById('myLocationInfo').textContent = `내 위치: 위도 ${latitude}, 경도 ${longitude}`;
         } else {
-            alert("모든 위치 정보를 입력해주세요.");
+            alert("모든 위치 정보를 올바르게 입력해주세요.");
         }
     }
+
 </script>
 
 <br>
