@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📌 구조·구급 Time Recording</title>
+    <script type="text/javascript" src="https://openapi.map.naver.com/openapi/v3/maps.js?ncpClientId=g2u4orbiqf"></script> <!-- Replace YOUR_CLIENT_ID with your Naver API client ID -->
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+        #memo {
+            width: 100%;
+            height: 200px;
+            margin-bottom: 10px;
+        }
+        .button-container {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+        .button {
+            flex: 1;
+            padding: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+            margin: 0 5px;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .button img {
+            width: 20px;
+            height: 20px;
+            margin-right: 5px;
+        }
+        #savedMemos div {
+            border: 1px solid #ddd;
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+        }
+        #map {
+            height: 400px;
+            width: 100%;
+            margin-top: 20px;
+        }
+        #locationDisplay, #dmsCoordinates {
+            margin-top: 10px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+<h2>🆘 구조·구급 Time Recording</h2><br>
+<h4>📕 Memo Record</h4>
+<div id="savedMemos"></div><br>
+
+<textarea id="memo" placeholder="여기에 메모를 입력하세요..."></textarea><br>
+<div class="button-container">
+    <button class="button" onclick="saveMemo()">
+        <img src="https://img.icons8.com/ios-filled/50/ffffff/save.png" alt="저장"> Memo 추가
+    </button>
+    <button class="button" onclick="downloadMemos()">
+        <img src="https://img.icons8.com/ios-filled/50/ffffff/download.png" alt="다운로드"> Memo 저장
+    </button>
+    <button class="button" onclick="shareMemos()">
+        <img src="https://img.icons8.com/ios-filled/50/ffffff/share.png" alt="공유"> Memo 공유
+    </button>
+</div>
+
+<h4>🚩 Map</h4>
+<button id="getLocation">내 위치 확인</button>
+<br><br>
+<div id="locationDisplay">위도: , 경도: </div>
+<div id="dmsCoordinates">도분초: </div>
+<div id="map"></div> <!-- Map Container -->
+
+<script>
+    let latitude, longitude;
+    const memos = [];
+
+    function saveMemo() {
+        const memo = document.getElementById('memo').value;
+        if (memo) {
+            const timestamp = new Date().toLocaleString();
+            const memoWithTimestamp = `${timestamp}: ${memo}`;
+            memos.push(memoWithTimestamp);
+            const savedMemosDiv = document.getElementById('savedMemos');
+            const memoElement = document.createElement('div');
+            memoElement.textContent = memoWithTimestamp;
+            savedMemosDiv.appendChild(memoElement);
+            document.getElementById('memo').value = '';
+        } else {
+            alert('메모를 입력해주세요.');
+        }
+    }
+
+    function downloadMemos() {
+        const blob = new Blob([memos.join('\n')], { type: 'text/plain' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'memos.txt';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    }
+
+    function shareMemos() {
+    if (navigator.share) {
+        const memoText = memos.join('\n');
+        const mapLinkNaver = `https://map.naver.com/v5/?c=${latitude}&lng=${longitude},15,0,0,0`;
+        const mapLinkGoogle = `https://www.google.com/maps?q=${latitude},${longitude}`;
+
+const mapLinkKakao = `https://map.kakao.com/link/map/Location,${latitude},${longitude}`;
+
+        const shareContent = `메모:\n${memoText}\n\n지도 좌표:\n위도: ${latitude}, 경도: ${longitude}\n\n지도 링크:
+\nNaver: ${mapLinkNaver}
+\nGoogle: ${mapLinkGoogle}
+\nKakao: ${mapLinkKakao}`;
+
+        navigator.share({
+            title: 'Memo 및 위치 공유',
+            text: shareContent
+        })
+        .then(() => console.log('메모가 공유되었습니다.'))
+        .catch(error => console.error('공유 오류:', error));
+    } else {
+        alert("이 브라우저는 공유 기능을 지원하지 않습니다.");
+    }
+}
+
+    document.getElementById('getLocation').addEventListener('click', function() {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(showPosition, showError);
+        } else {
+            alert("이 브라우저는 위치 정보를 지원하지 않습니다.");
+        }
+    });
+
+    function showPosition(position) {
+        latitude = position.coords.latitude;
+        longitude = position.coords.longitude;
+
+        document.getElementById('locationDisplay').textContent = `위도: ${latitude}, 경도: ${longitude}`;
+        document.getElementById('memo').value = `지도 좌표: ${latitude}, ${longitude}`;
+
+        const dmsCoordinates = convertToDMS(latitude, longitude);
+        document.getElementById('dmsCoordinates').textContent = `도분초: ${dmsCoordinates}`;
+
+        const mapOptions = {
+            center: new naver.maps.LatLng(latitude, longitude),
+            zoom: 15
+        };
+
+        const map = new naver.maps.Map('map', mapOptions);
+        new naver.maps.Marker({
+            position: new naver.maps.LatLng(latitude, longitude),
+            map: map
+        });
+    }
+
+    function showError(error) {
+        switch(error.code) {
+            case error.PERMISSION_DENIED:
+                alert("사용자가 위치 정보를 허용하지 않았습니다.");
+                break;
+            case error.POSITION_UNAVAILABLE:
+                alert("위치 정보를 사용할 수 없습니다.");
+                break;
+            case error.TIMEOUT:
+                alert("위치 정보 요청이 시간 초과되었습니다.");
+                break;
+            case error.UNKNOWN_ERROR:
+                alert("알 수 없는 오류가 발생했습니다.");
+                break;
+        }
+    }
+
+    function convertToDMS(lat, lon) {
+        const latDeg = Math.floor(Math.abs(lat));
+        const latMin = Math.floor((Math.abs(lat) - latDeg) * 60);
+        const latSec = ((Math.abs(lat) - latDeg) * 60 - latMin) * 60;
+
+        const lonDeg = Math.floor(Math.abs(lon));
+        const lonMin = Math.floor((Math.abs(lon) - lonDeg) * 60);
+        const lonSec = ((Math.abs(lon) - lonDeg) * 60 - lonMin) * 60;
+
+        const latDirection = lat >= 0 ? 'N' : 'S';
+        const lonDirection = lon >= 0 ? 'E' : 'W';
+
+        return `${latDeg}° ${latMin}' ${latSec.toFixed(2)}" ${latDirection}, ${lonDeg}° ${lonMin}' ${lonSec.toFixed(2)}" ${lonDirection}`;
+    }
+</script>
+
+<br>
+<h5>🐸 Beta Ver. 0.9.26. 국립공원 응급처치 연구회. E-mail: paramedic@knps.or.kr.</h5>
+
+</body>
+</html>
