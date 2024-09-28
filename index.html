@@ -197,6 +197,36 @@
     </div>
 </div>     
 
+              <!-- 나이 계산기 섹션 -->
+<h1>나이 계산기</h1>
+    <label for="birthdate">생년월일을 입력하세요 (YYYY-MM-DD):</label>
+    <input type="date" id="birthdate">
+    <button onclick="calculateAge()">나이 계산</button>
+    <p id="result"></p>
+
+    <script>
+        function calculateAge() {
+            const birthdateInput = document.getElementById('birthdate').value;
+            const birthdate = new Date(birthdateInput);
+            const today = new Date();
+
+            if (!birthdateInput) {
+                document.getElementById('result').innerText = '생년월일을 입력하세요.';
+                return;
+            }
+
+            let age = today.getFullYear() - birthdate.getFullYear();
+            const monthDifference = today.getMonth() - birthdate.getMonth();
+
+            // 생일이 지나지 않았다면 나이를 하나 줄임
+            if (monthDifference < 0 || (monthDifference === 0 && today.getDate() < birthdate.getDate())) {
+                age--;
+            }
+
+            document.getElementById('result').innerText = `당신의 나이는 ${age}세입니다.`;
+        }
+    </script>
+              
 <!-- GCS 혼수척도 계산기 섹션 -->
 <div class="section">
     <h2>Glasgow Coma Scale</h2>
