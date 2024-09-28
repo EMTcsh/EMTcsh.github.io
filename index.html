@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="ko">
 
@@ -190,7 +189,7 @@
     <h2></h2>
     <div class="result">
         <div class="footer"><p>© 2024 응급구조사 웹 애플리케이션.</p></div>
-        <h4> * 응급환자의 신속한 평가와 기록 및 응급구조사의 현장 대응력 향상을 위하여 본 페이지를 만들었습니다.
+        <h4> 응급환자의 신속한 평가와 기록 및 응급구조사의 현장 대응력 향상을 위하여 본 페이지를 만들었습니다.
           <h4>
         
         <h5> EMT Beta Ver. 0.9.28
@@ -369,7 +368,7 @@
       <!-- 생체징후 입력 섹션 -->
 <div class="section">
     <h2>환자평가 - 생체징후</h2>
-    <form id="ampleForm">
+    <form id="bprtForm">
         <div class="form-group">
             <label for="patientName">이름</label>
             <input type="text" id="patientName" required>
@@ -403,9 +402,9 @@
             <label for="temperature">체온:</label>
             <input type="text" id="temperature" name="temperature" placeholder="예: 36.6 °C">
         </div>
-        <button type="button" onclick="saveAMPLEData()">저장</button>
+        <button type="button" onclick="savebprtData()">저장</button>
     </form>
-   <div class="result" id="ampleResults"> </div>
+   <div class="result" id="bprtResults"> </div>
 </div>
 
 <!-- 결과 및 기록된 데이터 섹션 -->
@@ -415,42 +414,8 @@
 </div>
 
 <script>
-  // Save KTAS results and classify the urgency
-        function saveKTASResults() {
-            const symptoms = document.querySelectorAll('.symptom:checked');
-            let results = '';
-            let isEmergency = false;
-
-            symptoms.forEach(symptom => {
-                results += `<div class="result-item">${symptom.value}</div>`;
-                // Check if any Grade 1 or Grade 2 symptoms are selected
-                if (symptom.closest('.grade-1')) {
-                    isEmergency = true;
-                }
-            });
-
-            // Only display results if there are selected symptoms
-            if (results) {
-                results += `<p><strong>상태: ${isEmergency ? '응급' : '준응급'}</strong></p>`;
-
-                // Add timestamp
-                const timestamp = new Date().toLocaleString();
-                const savedData = document.getElementById('savedData');
-                savedData.innerHTML += `<div class="board-item"><strong>[응급환자 분류]</strong><br>${results}<br><span class="timestamp">저장 시간: ${timestamp}</span></div>`;
-
-                // Display the results in the KTAS results container
-                document.getElementById('ktasResults').innerHTML = results;
-            } else {
-                document.getElementById('ktasResults').innerHTML = ''; // Clear if no symptoms are selected
-            }
-
-            // Clear selected symptoms
-            document.querySelectorAll('.symptom').forEach(symptom => symptom.checked = false);
-        }
-
-
     // Calculate GCS score and determine the state
-function calculateGCS() {
+    function calculateGCS() {
     const name = document.getElementById('name').value;
     const age = document.getElementById('age').value;
     const gender = document.getElementById('gender').value;
@@ -498,7 +463,7 @@ function calculateGCS() {
 }
 
     // Save trauma assessment data
-function saveTraumaAssessment() {
+    function saveTraumaAssessment() {
     const airway = document.getElementById('airwayDetails').value;
     const breathing = document.getElementById('breathingDetails').value;
     const circulation = document.getElementById('circulationDetails').value;
@@ -533,7 +498,7 @@ function saveTraumaAssessment() {
 }
 
     // Save AMPLE data
-    function saveAMPLEData() {
+        function saveAMPLEData() {
         const name = document.getElementById('patientName').value;
         const age = document.getElementById('patientAge').value;
         const gender = document.getElementById('patientGender').value;
@@ -549,7 +514,7 @@ function saveTraumaAssessment() {
 
         const ampleHTML = `
             <div class="board-item">
-                <strong>[AMPLE/생체징후]</strong>
+                <strong>[AMPLE]</strong>
                 <strong>${timestamp}</strong>
                 <p><strong>이름:</strong> ${name}, <strong>나이:</strong> ${age}, <strong>성별:</strong> ${gender}</p>
                 <p><strong>주호소:</strong> ${CC}</p>
@@ -572,7 +537,7 @@ function saveTraumaAssessment() {
     }
   
   // Save bprt data
-    function savebprtData() {
+        function savebprtData() {
         const name = document.getElementById('patientName').value;
         const age = document.getElementById('patientAge').value;
         const gender = document.getElementById('patientGender').value;
@@ -585,8 +550,11 @@ function saveTraumaAssessment() {
         const currentDate = new Date();
         const timestamp = currentDate.toLocaleString();
 
-        const ampleHTML = `
-            <div class="board-item">                
+        const bprtHTML = `
+            <div class="board-item">
+                <strong>[BP.P.RR.T]</strong>
+                <strong>${timestamp}</strong>
+                <p><strong>이름:</strong> ${name}, <strong>나이:</strong> ${age}, <strong>성별:</strong> ${gender}</p>
                 <p><strong>혈압:</strong> ${bloodPressure}</p>
                 <p><strong>맥박:</strong> ${pulse}</p>
                 <p><strong>호흡수:</strong> ${respiration}</p>
