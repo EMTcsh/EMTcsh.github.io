@@ -453,7 +453,7 @@
     // Save GCS result to the saved data section
     const timestamp = new Date().toLocaleString();
     const savedData = document.getElementById('savedData');
-    savedData.innerHTML += `<div class="board-item"><strong>[GCS 결과]</strong><strong>${timestamp}</strong><br>${resultHTML}<br><span class="timestamp">저장 시간: ${timestamp}</span></div>`;
+    savedData.innerHTML += `<div class="board-item"><strong>[GCS 결과]</strong><strong>${timestamp}</strong><br>${resultHTML}<br></div>`;
 
     return false; // Prevent form submission
 }
