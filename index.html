@@ -453,7 +453,7 @@
     // Save GCS result to the saved data section
     const timestamp = new Date().toLocaleString();
     const savedData = document.getElementById('savedData');
-    savedData.innerHTML += `<div class="board-item"><strong>[GCS 결과]</strong><br>${resultHTML}<br><span class="timestamp">저장 시간: ${timestamp}</span></div>`;
+    savedData.innerHTML += `<div class="board-item"><strong>[GCS 결과]</strong><strong>${timestamp}</strong><br>${resultHTML}<br><span class="timestamp">저장 시간: ${timestamp}</span></div>`;
 
     return false; // Prevent form submission
 }
@@ -471,7 +471,7 @@
 
     const assessmentHTML = `
         <div class="board-item">
-            <strong>[환자 평가]</strong>
+            <strong>[ABCDE]</strong>
             <strong>${timestamp}</strong>
             <p><strong>기도:</strong> ${airway}</p>
             <p><strong>호흡:</strong> ${breathing}</p>
