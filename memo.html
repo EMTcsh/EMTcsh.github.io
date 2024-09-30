@@ -275,14 +275,14 @@
         }
     }
 
-</script>
-
-</script>
+    // 게시판
+<h2>Trello 보드</h2>
+<div id="trello" class="trello-container"></div>
 
 <script>
     const apiKey = '3984f54ae4b24083b67f4b92897e965b'; // API 키 입력
     const token = 'e5474a89cb8a51bdb8280339818e68d29c1212cc2ac7183d555568cde18453fd'; // API 토큰 입력
-    const boardId = 'emtcsh'; // 보드 ID 입력
+    const boardId = 'NnxpG8W0'; // 보드 ID 입력
 
     async function fetchTrelloData() {
         try {
@@ -295,8 +295,7 @@
     }
 
     function displayTrelloData(lists) {
-        const trelloContainer = document.createElement('div');
-        trelloContainer.className = 'trello-container';
+        const trelloContainer = document.getElementById('trello');
         
         lists.forEach(list => {
             const listDiv = document.createElement('div');
@@ -312,11 +311,8 @@
 
             trelloContainer.appendChild(listDiv);
         });
-
-        document.body.appendChild(trelloContainer);
     }
 
-    // 페이지 로드 시 데이터 가져오기
     document.addEventListener('DOMContentLoaded', fetchTrelloData);
 </script>
     
