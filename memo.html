@@ -274,17 +274,7 @@
             alert("모든 위치 정보를 올바르게 입력해주세요.");
         }
     }
-
-    // 게시판
-
-<h2>공개 게시판</h2>
-<textarea id="postContent" placeholder="게시물을 작성하세요..."></textarea>
-<button onclick="addPost()">게시물 추가</button>
-
-<div id="postList"></div>
-
-<script>
-    // 게시물을 추가하는 함수
+ // 게시물을 추가하는 함수
     function addPost() {
         const content = document.getElementById('postContent').value;
         if (content.trim() === '') {
@@ -317,6 +307,15 @@
 
     // 페이지 로드 시 게시물 표시
     document.addEventListener('DOMContentLoaded', displayPosts);
+    
+    // 게시판
+
+<h2>공개 게시판</h2>
+<textarea id="postContent" placeholder="게시물을 작성하세요..."></textarea>
+<button onclick="addPost()">게시물 추가</button>
+
+<div id="postList"></div>
+
 </script>
 
     
