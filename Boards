@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>웹 게시판</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            padding: 0;
+        }
+        .container {
+            max-width: 600px;
+            margin: auto;
+        }
+        h1 {
+            text-align: center;
+        }
+        .board {
+            border-collapse: collapse;
+            width: 100%;
+            margin-bottom: 20px;
+        }
+        .board th, .board td {
+            border: 1px solid #ddd;
+            padding: 8px;
+        }
+        .board th {
+            background-color: #f2f2f2;
+            text-align: center;
+        }
+        .post-form {
+            margin-bottom: 20px;
+        }
+        .post-form input[type="text"] {
+            width: calc(100% - 110px);
+            padding: 10px;
+            margin-right: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        .post-form button {
+            padding: 10px 20px;
+            border: none;
+            background-color: #28a745;
+            color: white;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .post-form button:hover {
+            background-color: #218838;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>웹 게시판</h1>
+
+        <form class="post-form" id="postForm">
+            <input type="text" id="postContent" placeholder="게시글을 입력하세요" required>
+            <button type="submit">게시</button>
+        </form>
+
+        <table class="board" id="board">
+            <thead>
+                <tr>
+                    <th>번호</th>
+                    <th>내용</th>
+                </tr>
+            </thead>
+            <tbody id="postList">
+                <!-- 게시글 리스트가 여기에 표시됩니다 -->
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        const postForm = document.getElementById('postForm');
+        const postList = document.getElementById('postList');
+        let postCount = 0;
+
+        postForm.addEventListener('submit', function(event) {
+            event.preventDefault();
+            const postContent = document.getElementById('postContent').value;
+            if (postContent.trim() === '') return;
+
+            postCount++;
+            const newRow = document.createElement('tr');
+            newRow.innerHTML = `
+                <td>${postCount}</td>
+                <td>${postContent}</td>
+            `;
+            postList.appendChild(newRow);
+            document.getElementById('postContent').value = '';
+        });
+    </script>
+</body>
+</html>
