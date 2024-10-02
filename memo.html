@@ -345,7 +345,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/proj4js/2.7.5/proj4.js"></script>
 </head>
 <body>
-    <h3>좌표 국가지점번호 변환</h3>
+    <h3>좌표를 국가지점번호 변환</h3>
     <label for="lat">WGS84 위도:</label>
     <input type="text" id="lat" placeholder="위도 입력">
     <br>
@@ -419,6 +419,36 @@
         });
             
     </script>
+    
+    <!-- UTM-K to WGS84 변환 섹션 -->
+<h3>국가지점번호를 좌표로 변환</h3>
+<label for="utmX">UTM-K E 좌표:</label>
+<input type="text" id="utmX" placeholder="E 좌표 입력">
+<br>
+<label for="utmY">UTM-K N 좌표:</label>
+<input type="text" id="utmY" placeholder="N 좌표 입력">
+<br>
+<button id="convertToWGS84">변환하기</button>
+<h3>변환 결과</h3>
+<p id="wgs84Result"></p>
+
+<script>
+    document.getElementById('convertToWGS84').addEventListener('click', function() {
+        const utmX = parseFloat(document.getElementById('utmX').value);
+        const utmY = parseFloat(document.getElementById('utmY').value);
+
+        if (isNaN(utmX) || isNaN(utmY)) {
+            document.getElementById('wgs84Result').textContent = "유효한 UTM-K 좌표를 입력하세요.";
+            return;
+        }
+
+        // UTM-K에서 WGS84로 변환
+        const wgs84 = proj4("EPSG:5179", "WGS84", [utmX, utmY]);
+
+        document.getElementById('wgs84Result').textContent = `위도: ${wgs84[1].toFixed(6)}, 경도: ${wgs84[0].toFixed(6)}`;
+    });
+</script>
+    
    </body>
 </html>
 <br>
