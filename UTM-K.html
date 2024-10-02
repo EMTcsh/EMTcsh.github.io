@@ -40,10 +40,47 @@
             }
 
             // WGS84에서 선택된 EPSG로 변환
-            const utmK = proj4("WGS84", EPSG:${selectedEpsg}, [lon, lat]);
-            document.getElementById('result').textContent = X: ${utmK[0]}, Y: ${utmK[1]};
+            const utmK = proj4("WGS84", `EPSG:${selectedEpsg}`, [lon, lat]);
+
+            // x와 y의 앞자리 숫자 추출
+            const xValue = Math.floor(utmK[0]);
+            const yValue = Math.floor(utmK[1]);
+
+            // 한글 매핑
+            const xMapping = {
+                7: '가',
+                8: '나',
+                9: '다',
+                10: '라',
+                11: '마',
+                12: '바',
+                13: '사'
+            };
+
+            const yMapping = {
+                13: '가',
+                14: '나',
+                15: '다',
+                16: '라',
+                17: '마',
+                18: '바',
+                19: '사',
+                20: '아'
+            };
+
+            // 앞자리 숫자 결정
+            const firstDigitX = Math.floor(xValue / 100000); // x의 앞자리
+            const firstDigitY = Math.floor(yValue / 100000); // y의 앞자리
+
+            // 매핑된 한글 결정
+            const xOutput = xMapping[firstDigitX] || '';
+            const yOutput = yMapping[firstDigitY] || '';
+
+            // 결과 출력
+            document.getElementById('result').textContent = `X: ${utmK[0]} (${xOutput}), Y: ${utmK[1]} (${yOutput})`;
         });
     </script>
 </body>
 </html>
+
 
