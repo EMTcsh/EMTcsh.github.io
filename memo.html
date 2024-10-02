@@ -91,7 +91,7 @@
 
 <div class="coordinate-box" id="locationDisplay">위도: , 경도: </div>
 <div class="coordinate-box" id="dmsCoordinates">도분초: </div>
-
+  
 <div id="myLocation" class="info">🗺️ NAVER Map Location</div>
 
 <div id="map"></div> <!-- 지도 컨테이너 -->
@@ -174,26 +174,33 @@
 
     // 위치 표시
     function showPosition(position) {
-        latitude = position.coords.latitude;
-        longitude = position.coords.longitude;
-        document.getElementById('locationDisplay').textContent = `위도: ${latitude}, 경도: ${longitude}`;
-        document.getElementById('memo').value = `지도 좌표: ${latitude}, ${longitude}`;
+    latitude = position.coords.latitude;
+    longitude = position.coords.longitude;
+    document.getElementById('locationDisplay').textContent = `위도: ${latitude}, 경도: ${longitude}`;
+    
+    // UTM-K (GRS80) (EPSG:5179)로 변환
+    const utmK = proj4("WGS84", "EPSG:5179", [longitude, latitude]);
 
-        const dmsCoordinates = convertToDMS(latitude, longitude);
-        document.getElementById('dmsCoordinates').textContent = `도분초: ${dmsCoordinates}`;
+    const utmX = Math.floor(utmK[0]);
+    const utmY = Math.floor(utmK[1]);
 
-        const mapOptions = {
-            center: new naver.maps.LatLng(latitude, longitude),
-            zoom: 15
-        };
+    // 메모에 변환된 좌표 입력
+    document.getElementById('memo').value = `지도 좌표: ${latitude}, ${longitude} (UTM-K: X=${utmX}, Y=${utmY})`;
 
-        const map = new naver.maps.Map('map', mapOptions);
-        new naver.maps.Marker({
-            position: new naver.maps.LatLng(latitude, longitude),
-            map: map
-        });
-    }
+    const dmsCoordinates = convertToDMS(latitude, longitude);
+    document.getElementById('dmsCoordinates').textContent = `도분초: ${dmsCoordinates}`;
 
+    const mapOptions = {
+        center: new naver.maps.LatLng(latitude, longitude),
+        zoom: 15
+    };
+
+    const map = new naver.maps.Map('map', mapOptions);
+    new naver.maps.Marker({
+        position: new naver.maps.LatLng(latitude, longitude),
+        map: map
+    });
+}
     // 위치 오류 처리
     function showError(error) {
         switch (error.code) {
@@ -276,7 +283,7 @@
     }
 
 </script>   
-    
+
 <br>
 
 <!-- 산악구조 Time Recording 공지 게시판 표시 섹션 -->
@@ -327,6 +334,7 @@
             navigator.connection.addEventListener('change', updateNetworkInfo);
         }
     </script>
+  
 <!--좌표 국가지점번호 변환-->
 <!DOCTYPE html>
 <html lang="ko">
@@ -406,9 +414,10 @@
             const xOutput = xMapping[firstDigitX] || '';
             const yOutput = yMapping[firstDigitY] || '';
 
-           // 결과 출력
-            document.getElementById('result').textContent = `E 좌표: ${Math.floor(utmK[0])} (${xOutput}), N 좌표: ${Math.floor(utmK[1])} (${yOutput})`;        
+            // 결과 출력
+            document.getElementById('result').textContent = `E 좌표: ${Math.floor(utmK[0])} (${xOutput}), N 좌표: ${Math.floor(utmK[1])} (${yOutput})`;
         });
+            
     </script>
    </body>
 </html>
@@ -422,4 +431,3 @@
 
 </body>
 </html>
-
