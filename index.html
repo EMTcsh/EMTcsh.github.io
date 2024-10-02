@@ -609,19 +609,6 @@
         }
     }
     
-   // 네트워크 상태 확인
-    function checkNetworkStatus() {
-        if (navigator.onLine) {
-            document.getElementById('network-status').textContent = '✅ 네트워크 상태: 온라인';
-        } else {
-            document.getElementById('network-status').textContent = '❌ 네트워크 상태: 오프라인';
-        }
-    }
-
-    window.addEventListener('load', checkNetworkStatus);
-    window.addEventListener('online', checkNetworkStatus);
-    window.addEventListener('offline', checkNetworkStatus);
-    }
 </script>
   
 <!-- Add this section in your existing HTML where you want the share button -->
