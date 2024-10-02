@@ -312,3 +312,95 @@
 
 
 
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Firebase Realtime Chat</title>
+    <style>
+        .chat-box {
+            width: 300px;
+            height: 400px;
+            border: 1px solid #ccc;
+            padding: 10px;
+            overflow-y: scroll;
+            margin-bottom: 10px;
+        }
+        .message {
+            padding: 5px;
+            margin-bottom: 5px;
+            border-radius: 5px;
+        }
+        .user {
+            background-color: #d1e7dd;
+            text-align: right;
+        }
+        .others {
+            background-color: #f8d7da;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+    <h2>Firebase Realtime Chat</h2>
+    <div class="chat-box" id="chat-box"></div>
+    <input type="text" id="message-input" placeholder="메시지를 입력하세요..." />
+    <button onclick="sendMessage()">전송</button>
+
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js"></script>
+
+    <script>
+        // Firebase 설정 (Firebase Console에서 제공된 코드로 대체하세요)
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_AUTH_DOMAIN",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_STORAGE_BUCKET",
+            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+            appId: "YOUR_APP_ID",
+            databaseURL: "YOUR_DATABASE_URL"
+        };
+
+        // Firebase 초기화
+        const app = firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        const chatBox = document.getElementById('chat-box');
+        const messageInput = document.getElementById('message-input');
+
+        // 실시간으로 데이터베이스에서 메시지 가져오기
+        const messagesRef = firebase.database().ref('messages');
+
+        messagesRef.on('child_added', function(snapshot) {
+            const messageData = snapshot.val();
+            addMessage(messageData.message, messageData.sender);
+        });
+
+        // 메시지 전송
+        function sendMessage() {
+            const message = messageInput.value;
+            if (!message) return;
+
+            // 메시지 데이터를 Firebase Realtime Database에 저장
+            messagesRef.push({
+                message: message,
+                sender: 'user'
+            });
+
+            addMessage(message, 'user');
+            messageInput.value = '';
+        }
+
+        // 메시지를 화면에 추가하는 함수
+        function addMessage(message, sender) {
+            const messageElement = document.createElement('div');
+            messageElement.classList.add('message', sender);
+            messageElement.textContent = message;
+            chatBox.appendChild(messageElement);
+            chatBox.scrollTop = chatBox.scrollHeight; // 스크롤을 최신 메시지로 이동
+        }
+    </script>
+</body>
+</html>
