@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>산악구조 Time Recording 및 위치 확인</title>
+    <script type="text/javascript" src="https://openapi.map.naver.com/openapi/v3/maps.js?ncpClientId=g2u4orbiqf"></script> <!-- 네이버 지도 API -->
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+        h2, h3 {
+            text-align: center;
+        }
+        #memo {
+            width: 100%;
+            height: 200px;
+            margin-bottom: 10px;
+        }
+        .button-container {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+        .button {
+            flex: 1;
+            padding: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+            margin: 0 5px;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .button img {
+            width: 20px;
+            height: 20px;
+            margin-right: 5px;
+        }
+        .coordinate-box {
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin-top: 10px;
+            background-color:    #f0f0f0;
+            border-radius: 5px;
+        }   
+        #savedMemos div {
+            border: 1px solid #ddd;
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+        }
+        #map, .map {
+            height: 400px;
+            width: 100%;
+            margin-top: 20px;
+        }
+        #locationDisplay, #dmsCoordinates, .info {
+            margin-top: 10px;
+            font-weight: bold;
+        }
+
+
+    </style>
+</head>
+<body>
+
+<h2>🆘 산악구조 Time Recording</h2>
+<h4>📕 Memo Record</h4>
+<div id="savedMemos"></div>
+<textarea id="memo" placeholder="여기에 메모를 입력하세요..."></textarea>
+<div class="button-container">
+    <button class="button" onclick="saveMemo()">
+        <img src="https://img.icons8.com/ios-filled/50/ffffff/save.png" alt="저장"> Memo 추가
+    </button>
+    <button class="button" onclick="downloadMemos()">
+        <img src="https://img.icons8.com/ios-filled/50/ffffff/download.png" alt="다운로드"> Memo 저장
+    </button>
+    <button class="button" onclick="shareMemos()">
+        <img src="https://img.icons8.com/ios-filled/50/ffffff/share.png" alt="공유"> Memo 공유
+    </button>
+</div>
+
+<h3>📍 My GPS 좌표</h3>
+<button id="getLocation">내 위치 확인</button>
+
+<div class="coordinate-box" id="locationDisplay">위도: , 경도: </div>
+<div class="coordinate-box" id="dmsCoordinates">도분초: </div>
+
+<div id="myLocation" class="info">NAVER Map Location</div>
+
+<div id="map"></div> <!-- 지도 컨테이너 -->
+
+<!-- 상대방 위치 확인 -->
+<h3>🚩 Target GPS 좌표</h3>
+<div id="distanceInfo" class="info"></div>
+<label for="otherLatitude">좌표 위도:</label>
+<input type="text" id="otherLatitude" placeholder="상대방 위도 36.××××를 입력하세요" required><br>
+<label for="otherLongitude">좌표 경도:</label>
+<input type="text" id="otherLongitude" placeholder="상대방 경도 126.××××를 입력하세요" required><br><br>
+<button class="button" onclick="showLocations()">대상 위치 보기</button>
+<div id="myLocation" class="info">NAVER Map Location</div>
+<div id="distanceInfo" class="info"></div>
+<div id="mapComparison" class="map"></div> <!-- 상대 위치 지도 컨테이너 -->
+
+<script>
+    let latitude, longitude;
+    const memos = [];
+
+    // 메모 추가
+    function saveMemo() {
+        const memo = document.getElementById('memo').value;
+        if (memo) {
+            const timestamp = new Date().toLocaleString();
+            const memoWithTimestamp = `${timestamp}: ${memo}`;
+            memos.push(memoWithTimestamp);
+            const savedMemosDiv = document.getElementById('savedMemos');
+            const memoElement = document.createElement('div');
+            memoElement.textContent = memoWithTimestamp;
+            savedMemosDiv.appendChild(memoElement);
+            document.getElementById('memo').value = '';
+        } else {
+            alert('메모를 입력해주세요.');
+        }
+    }
+
+    // 메모 다운로드
+    function downloadMemos() {
+        const blob = new Blob([memos.join('\n')], { type: 'text/plain' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'memos.txt';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    }
+
+    // 메모 공유
+    function shareMemos() {
+        if (navigator.share) {
+            const memoText = memos.join('\n');
+            
+            const mapLinkGoogle = `https://www.google.com/maps?q=${latitude},${longitude}`;
+            const mapLinkKakao = `https://map.kakao.com/link/map/Location,${latitude},${longitude}`;
+
+            const shareContent = `메모:\n${memoText}\n\n지도 좌표:\n위도: ${latitude}, 경도: ${longitude}\n\n지도 링크:\nGoogle: ${mapLinkGoogle}\nKakao: ${mapLinkKakao}`;
+
+            navigator.share({
+                title: 'Memo 및 위치 공유',
+                text: shareContent
+            })
+            .then(() => console.log('메모가 공유되었습니다.'))
+            .catch(error => console.error('공유 오류:', error));
+        } else {
+            alert("이 브라우저는 공유 기능을 지원하지 않습니다.");
+        }
+    }
+
+    // 현재 위치 가져오기
+    document.getElementById('getLocation').addEventListener('click', function() {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(showPosition, showError);
+        } else {
+            alert("이 브라우저는 위치 정보를 지원하지 않습니다.");
+        }
+    });
+
+    // 위치 표시
+    function showPosition(position) {
+        latitude = position.coords.latitude;
+        longitude = position.coords.longitude;
+        document.getElementById('locationDisplay').textContent = `위도: ${latitude}, 경도: ${longitude}`;
+        document.getElementById('memo').value = `지도 좌표: ${latitude}, ${longitude}`;
+
+        const dmsCoordinates = convertToDMS(latitude, longitude);
+        document.getElementById('dmsCoordinates').textContent = `도분초: ${dmsCoordinates}`;
+
+        const mapOptions = {
+            center: new naver.maps.LatLng(latitude, longitude),
+            zoom: 15
+        };
+
+        const map = new naver.maps.Map('map', mapOptions);
+        new naver.maps.Marker({
+            position: new naver.maps.LatLng(latitude, longitude),
+            map: map
+        });
+    }
+
+    // 위치 오류 처리
+    function showError(error) {
+        switch (error.code) {
+            case error.PERMISSION_DENIED:
+                alert("사용자가 위치 정보를 허용하지 않았습니다.");
+                break;
+            case error.POSITION_UNAVAILABLE:
+                alert("위치 정보를 사용할 수 없습니다.");
+                break;
+            case error.TIMEOUT:
+                alert("위치 정보 요청이 시간 초과되었습니다.");
+                break;
+            case error.UNKNOWN_ERROR:
+                alert("알 수 없는 오류가 발생했습니다.");
+                break;
+        }
+    }
+
+    // 도분초 좌표 변환
+    function convertToDMS(lat, lon) {
+        const latDeg = Math.floor(Math.abs(lat));
+        const latMin = Math.floor((Math.abs(lat) - latDeg) * 60);
+        const latSec = ((Math.abs(lat) - latDeg) * 60 - latMin) * 60;
+
+        const lonDeg = Math.floor(Math.abs(lon));
+        const lonMin = Math.floor((Math.abs(lon) - lonDeg) * 60);
+        const lonSec = ((Math.abs(lon) - lonDeg) * 60 - lonMin) * 60;
+
+        const latDirection = lat >= 0 ? 'N' : 'S';
+        const lonDirection = lon >= 0 ? 'E' : 'W';
+
+        return `${latDeg}° ${latMin}' ${latSec.toFixed(2)}" ${latDirection}, ${lonDeg}° ${lonMin}' ${lonSec.toFixed(2)}" ${lonDirection}`;
+    }
+
+    // 상대방 위치 비교
+    function showLocations() {
+        const otherLatitude = parseFloat(document.getElementById('otherLatitude').value);
+        const otherLongitude = parseFloat(document.getElementById('otherLongitude').value);
+
+        if (latitude && longitude && !isNaN(otherLatitude) && !isNaN(otherLongitude)) {
+            const mapOptions = {
+                center: new naver.maps.LatLng(latitude, longitude),
+                zoom: 10
+            };
+
+            const mapComparison = new naver.maps.Map('mapComparison', mapOptions);
+
+            // 내 위치 마커
+            new naver.maps.Marker({
+                position: new naver.maps.LatLng(latitude, longitude),
+                map: mapComparison,
+                title: "내 위치"
+            });
+
+            // 상대방 위치 마커
+            const otherPosition = new naver.maps.LatLng(otherLatitude, otherLongitude);
+            new naver.maps.Marker({
+                position: otherPosition,
+                map: mapComparison,
+                title: "상대방 위치"
+            });
+
+            // 거리 계산
+            const distance = naver.maps.geometry.spherical.computeDistanceBetween(
+                new naver.maps.LatLng(latitude, longitude),
+                otherPosition
+            );
+
+            // 거리 정보 표시
+            document.getElementById('distanceInfo').textContent = `두 위치 간의 거리: ${(distance / 1000).toFixed(2)} km`;
+
+            // 지도 중앙에 두 위치 표시
+            const bounds = new naver.maps.LatLngBounds();
+            bounds.extend(new naver.maps.LatLng(latitude, longitude));
+            bounds.extend(otherPosition);
+            mapComparison.fitBounds(bounds);
+        } else {
+            alert("모든 위치 정보를 올바르게 입력해주세요.");
+        }
+    }
+
+</script>   
+    
+<br>
+<!-- 산악구조 Time Recording 공지 게시판 표시 섹션 -->
+    <title>Discord 초대 링크</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 10px;
+        }
+        .discord-link {
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 10px;
+            margin: 10px 0;
+            text-align: center;
+            background-color: #f4f4f4;
+        }
+        a {
+            text-decoration: none;
+            color: #7289DA; /* Discord 블루 색상 */
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+<div class="discord-link">    
+    <p> 🐸 Beta Ver. 0.9.26. 국립공원 응급처치 연구회. E-mail: paramedic@knps.or.kr. </p> 
+    <a href="https://discord.gg/ryaMRTAhwP" target="_blank">국립공원 응급처치 연구회 Discord 서버</a>
+</div>
+        
+</body>
+</html>
+
+
+
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Firebase Realtime Chat</title>
+    <style>
+        .chat-box {
+            width: 300px;
+            height: 400px;
+            border: 1px solid #ccc;
+            padding: 10px;
+            overflow-y: scroll;
+            margin-bottom: 10px;
+        }
+        .message {
+            padding: 5px;
+            margin-bottom: 5px;
+            border-radius: 5px;
+        }
+        .user {
+            background-color: #d1e7dd;
+            text-align: right;
+        }
+        .others {
+            background-color: #f8d7da;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+    <h2>Firebase Realtime Chat</h2>
+    <div class="chat-box" id="chat-box"></div>
+    <input type="text" id="message-input" placeholder="메시지를 입력하세요..." />
+    <button onclick="sendMessage()">전송</button>
+
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js"></script>
+
+    <script>
+        // Firebase 설정 (Firebase Console에서 제공된 코드로 대체하세요)
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_AUTH_DOMAIN",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_STORAGE_BUCKET",
+            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+            appId: "YOUR_APP_ID",
+            databaseURL: "YOUR_DATABASE_URL"
+        };
+
+        // Firebase 초기화
+        const app = firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        const chatBox = document.getElementById('chat-box');
+        const messageInput = document.getElementById('message-input');
+
+        // 실시간으로 데이터베이스에서 메시지 가져오기
+        const messagesRef = firebase.database().ref('messages');
+
+        messagesRef.on('child_added', function(snapshot) {
+            const messageData = snapshot.val();
+            addMessage(messageData.message, messageData.sender);
+        });
+
+        // 메시지 전송
+        function sendMessage() {
+            const message = messageInput.value;
+            if (!message) return;
+
+            // 메시지 데이터를 Firebase Realtime Database에 저장
+            messagesRef.push({
+                message: message,
+                sender: 'user'
+            });
+
+            addMessage(message, 'user');
+            messageInput.value = '';
+        }
+
+        // 메시지를 화면에 추가하는 함수
+        function addMessage(message, sender) {
+            const messageElement = document.createElement('div');
+            messageElement.classList.add('message', sender);
+            messageElement.textContent = message;
+            chatBox.appendChild(messageElement);
+            chatBox.scrollTop = chatBox.scrollHeight; // 스크롤을 최신 메시지로 이동
+        }
+    </script>
+</body>
+</html>
