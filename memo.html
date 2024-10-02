@@ -432,41 +432,40 @@
 
     <!--네트워크 종류확인-->
     <h3>ℹ️ 네트워크 상태 확인</h3>
-    <p id="network-status">❗ 네트워크 상태를 확인 중...</p>
+<p id="network-status">❗ 네트워크 상태를 확인 중...</p>
 
-    <script>
-        function updateNetworkInfo() {
-            const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
-            const networkStatusElement = document.getElementById("network-status");
+<script>
+    function updateNetworkInfo() {
+        const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+        const networkStatusElement = document.getElementById("network-status");
 
-            if (connection) {
-                const type = connection.type || connection.effectiveType;
-                networkStatusElement.textContent = `🛜 현재 네트워크 유형: ${type}`;
-            } else {
-                networkStatusElement.textContent = "네트워크 정보를 가져올 수 없습니다.";
-            }
-        }
-
-        updateNetworkInfo();
-
-        // 네트워크 상태 변경 감지
-        if (navigator.connection) {
-            navigator.connection.addEventListener('change', updateNetworkInfo);
-        }
-    
-// 네트워크 상태 확인
-    function checkNetworkStatus() {
-        if (navigator.onLine) {
-            document.getElementById('network-status').textContent = '✅ 네트워크 상태: 온라인';
+        if (connection) {
+            const type = connection.effectiveType || connection.type;
+            networkStatusElement.textContent = `🛜 현재 네트워크 유형: ${type}`;
         } else {
-            document.getElementById('network-status').textContent = '❌ 네트워크 상태: 오프라인';
+            networkStatusElement.textContent = "네트워크 정보를 가져올 수 없습니다.";
+        }
+
+        checkNetworkStatus(); // Update online/offline status
+    }
+
+    function checkNetworkStatus() {
+        const networkStatusElement = document.getElementById('network-status');
+        if (navigator.onLine) {
+            networkStatusElement.textContent += ' ✅ 네트워크 상태: 온라인';
+        } else {
+            networkStatusElement.textContent += ' ❌ 네트워크 상태: 오프라인';
         }
     }
 
-    window.addEventListener('load', checkNetworkStatus);
-    window.addEventListener('online', checkNetworkStatus);
-    window.addEventListener('offline', checkNetworkStatus);
-</script>  
+    window.addEventListener('load', updateNetworkInfo);
+    window.addEventListener('online', updateNetworkInfo);
+    window.addEventListener('offline', updateNetworkInfo);
+
+    if (navigator.connection) {
+        navigator.connection.addEventListener('change', updateNetworkInfo);
+    }
+</script>
     
 <!--공지 안내-->
 <div class="discord-link">    
