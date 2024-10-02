@@ -333,9 +333,78 @@
     <p> 🐸 Memo Ver. 0.9.26. 국립공원 응급처치 연구회. E-mail: paramedic@knps.or.kr. </p> 
     <a href="https://discord.gg/ryaMRTAhwP" target="_blank">국립공원 응급처치 연구회 Discord 서버</a>
 </div>
-        
+
 </body>
 </html>
 
+
+
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EPSG 5179 좌표 변환</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/proj4js/2.7.6/proj4.js"></script>
+</head>
+<body>
+    <h1>EPSG 5179 좌표 변환 (UTM-K ↔ WGS84)</h1>
+
+    <div>
+        <h3>WGS84 (경도, 위도) ➔ EPSG 5179 (UTM-K)</h3>
+        <label for="lng">경도: </label>
+        <input type="text" id="lng" placeholder="예: 127.0"><br>
+        <label for="lat">위도: </label>
+        <input type="text" id="lat" placeholder="예: 37.5"><br>
+        <p id="resultUTMK">UTMK X: , Y: </p>
+    </div>
+
+    <div>
+        <h3>EPSG 5179 (UTM-K) ➔ WGS84 (경도, 위도)</h3>
+        <label for="x">X: </label>
+        <input type="text" id="x" placeholder="예: 958675.1"><br>
+        <label for="y">Y: </label>
+        <input type="text" id="y" placeholder="예: 1942681.2"><br>
+        <p id="resultWGS84">경도: , 위도: </p>
+    </div>
+
+    <script>
+        // 좌표계 정의 (EPSG:5179)
+        proj4.defs("EPSG:5179", "+proj=tmerc +lat_0=38 +lon_0=127.5 +k=0.9996 +x_0=1000000 +y_0=2000000 +ellps=GRS80 +units=m +no_defs");
+
+        // WGS84 좌표에서 EPSG 5179로 변환
+        function convertToUTMK() {
+            var lng = parseFloat(document.getElementById("lng").value);
+            var lat = parseFloat(document.getElementById("lat").value);
+            if (!isNaN(lng) && !isNaN(lat)) {
+                var wgs84 = [lng, lat];
+                var utmk = proj4('EPSG:4326', 'EPSG:5179', wgs84); // WGS84 to UTM-K
+                document.getElementById("resultUTMK").innerText = "UTMK X: " + utmk[0].toFixed(2) + ", Y: " + utmk[1].toFixed(2);
+            } else {
+                document.getElementById("resultUTMK").innerText = "UTMK X: , Y: ";
+            }
+        }
+
+        // EPSG 5179 좌표에서 WGS84로 변환
+        function convertToWGS84() {
+            var x = parseFloat(document.getElementById("x").value);
+            var y = parseFloat(document.getElementById("y").value);
+            if (!isNaN(x) && !isNaN(y)) {
+                var utmk = [x, y];
+                var wgs84 = proj4('EPSG:5179', 'EPSG:4326', utmk); // UTM-K to WGS84
+                document.getElementById("resultWGS84").innerText = "경도: " + wgs84[0].toFixed(6) + ", 위도: " + wgs84[1].toFixed(6);
+            } else {
+                document.getElementById("resultWGS84").innerText = "경도: , 위도: ";
+            }
+        }
+
+        // 입력 변화 감지 및 자동 변환
+        document.getElementById("lng").addEventListener("input", convertToUTMK);
+        document.getElementById("lat").addEventListener("input", convertToUTMK);
+        document.getElementById("x").addEventListener("input", convertToWGS84);
+        document.getElementById("y").addEventListener("input", convertToWGS84);
+    </script>
+</body>
+</html>
 
 
