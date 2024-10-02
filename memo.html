@@ -310,16 +310,14 @@
 </body>
 </html>
 
+
 <!DOCTYPE html>
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WebSocket Chat</title>
+    <title>Long Polling Chat</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-        }
         .chat-box {
             width: 300px;
             height: 400px;
@@ -341,62 +339,52 @@
             background-color: #f8d7da;
             text-align: left;
         }
-        input[type="text"] {
-            width: 80%;
-            padding: 5px;
-        }
-        button {
-            width: 18%;
-            padding: 5px;
-        }
     </style>
 </head>
 <body>
-    <h2>실시간 채팅</h2>
-    <div class="chat-box" id="chat-box">
-        <!-- 메시지가 여기 나타납니다. -->
-    </div>
+    <h2>Long Polling Chat</h2>
+    <div class="chat-box" id="chat-box"></div>
     <input type="text" id="message-input" placeholder="메시지를 입력하세요..." />
     <button onclick="sendMessage()">전송</button>
 
     <script>
         const chatBox = document.getElementById('chat-box');
-        const messageInput = document.getElementById('message-input');
 
-        // WebSocket 서버에 연결
-        const socket = new WebSocket('ws://localhost:3000');
-
-        // 서버로부터 메시지를 받을 때
-        socket.onmessage = function(event) {
-            const message = event.data;
-            addMessage(message, 'others');
-        };
-
-        // 메시지 전송 함수
         function sendMessage() {
+            const messageInput = document.getElementById('message-input');
             const message = messageInput.value;
-            if (message.trim() === '') return;
+            if (!message) return;
 
-            // 자신의 메시지를 채팅창에 추가
+            // 메시지 전송
+            fetch('/send', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message })
+            });
+
+            // 사용자의 메시지를 바로 표시
             addMessage(message, 'user');
-
-            // 서버로 메시지 전송
-            socket.send(message);
-
-            // 입력 필드 초기화
             messageInput.value = '';
         }
 
-        // 메시지를 채팅창에 추가하는 함수
         function addMessage(message, sender) {
             const messageElement = document.createElement('div');
             messageElement.classList.add('message', sender);
             messageElement.textContent = message;
             chatBox.appendChild(messageElement);
-
-            // 스크롤을 최신 메시지로 이동
             chatBox.scrollTop = chatBox.scrollHeight;
         }
+
+        // 서버에서 메시지 수신 대기
+        function receiveMessage() {
+            fetch('/receive').then(response => response.json()).then(data => {
+                addMessage(data.message, 'others');
+                receiveMessage(); // 다시 수신 대기
+            });
+        }
+
+        // 처음에 메시지 수신 시작
+        receiveMessage();
     </script>
 </body>
 </html>
