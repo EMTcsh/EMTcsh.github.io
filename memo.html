@@ -304,7 +304,7 @@
 
 <!--네트워크 종류확인-->
 <body>
-    <h3>🛜 네트워크 상태 확인</h3>
+    <h3>ℹ️ 네트워크 상태 확인</h3>
     <p id="network-status">❗ 네트워크 상태를 확인 중...</p>
 
     <script>
@@ -314,7 +314,7 @@
 
             if (connection) {
                 const type = connection.type || connection.effectiveType;
-                networkStatusElement.textContent = `ℹ️ 현재 네트워크 유형: ${type}`;
+                networkStatusElement.textContent = `🛜 현재 네트워크 유형: ${type}`;
             } else {
                 networkStatusElement.textContent = "네트워크 정보를 가져올 수 없습니다.";
             }
