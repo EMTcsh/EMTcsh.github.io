@@ -59,8 +59,9 @@
         // Remote 설정
         function setRemoteDescription() {
             const remoteOffer = JSON.parse(document.getElementById('remoteOffer').value);
-            peerConnection.setRemoteDescription(new RTCSessionDescription(remoteOffer));
-            peerConnection.createAnswer().then(answer => {
+            peerConnection.setRemoteDescription(new RTCSessionDescription(remoteOffer)).then(() => {
+                return peerConnection.createAnswer();
+            }).then(answer => {
                 peerConnection.setLocalDescription(answer);
                 document.getElementById('localOffer').value = JSON.stringify(answer);
             });
