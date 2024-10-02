@@ -312,3 +312,94 @@
 
 
 
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebRTC P2P Chat</title>
+    <style>
+        .chat-box {
+            width: 300px;
+            height: 400px;
+            border: 1px solid #ccc;
+            padding: 10px;
+            overflow-y: scroll;
+            margin-bottom: 10px;
+        }
+        .message {
+            padding: 5px;
+            margin-bottom: 5px;
+            border-radius: 5px;
+        }
+        .user {
+            background-color: #d1e7dd;
+            text-align: right;
+        }
+        .others {
+            background-color: #f8d7da;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+    <h2>WebRTC P2P Chat</h2>
+    <div class="chat-box" id="chat-box"></div>
+    <input type="text" id="message-input" placeholder="메시지를 입력하세요..." />
+    <button onclick="sendMessage()">전송</button>
+    <br><br>
+    <textarea id="localOffer" placeholder="Local Offer"></textarea><br>
+    <textarea id="remoteOffer" placeholder="Remote Offer"></textarea><br>
+    <button onclick="createOffer()">Offer 생성</button>
+    <button onclick="setRemoteDescription()">Remote 설정</button>
+
+    <script>
+        let peerConnection = new RTCPeerConnection();
+        const chatBox = document.getElementById('chat-box');
+        const messageInput = document.getElementById('message-input');
+
+        // 데이터 채널 생성 및 설정
+        const dataChannel = peerConnection.createDataChannel("chat");
+        dataChannel.onmessage = event => addMessage(event.data, 'others');
+
+        // Offer 생성
+        function createOffer() {
+            peerConnection.createOffer().then(offer => {
+                peerConnection.setLocalDescription(offer);
+                document.getElementById('localOffer').value = JSON.stringify(offer);
+            });
+        }
+
+        // Remote 설정
+        function setRemoteDescription() {
+            const remoteOffer = JSON.parse(document.getElementById('remoteOffer').value);
+            peerConnection.setRemoteDescription(new RTCSessionDescription(remoteOffer));
+            peerConnection.createAnswer().then(answer => {
+                peerConnection.setLocalDescription(answer);
+                document.getElementById('localOffer').value = JSON.stringify(answer);
+            });
+        }
+
+        peerConnection.onicecandidate = event => {
+            if (event.candidate) {
+                console.log('ICE Candidate:', JSON.stringify(event.candidate));
+            }
+        };
+
+        function sendMessage() {
+            const message = messageInput.value;
+            dataChannel.send(message);
+            addMessage(message, 'user');
+            messageInput.value = '';
+        }
+
+        function addMessage(message, sender) {
+            const messageElement = document.createElement('div');
+            messageElement.classList.add('message', sender);
+            messageElement.textContent = message;
+            chatBox.appendChild(messageElement);
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+    </script>
+</body>
+</html>
