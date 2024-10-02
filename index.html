@@ -189,7 +189,25 @@
     <h2></h2>
     <div class="result">
         <div class="footer"><p>© 2024 Paramedic Web Applications. EMT Beta Ver. 0.9.28. Korea National Park Service Paramedic Lab.</p></div>
-        <h4> 응급환자의 신속한 평가와 기록 및 응급구조사의 현장 대응력 향상을 위하여 본 페이지를 만들었습니다. <h4>    
+        <h4> 응급환자의 신속한 평가와 기록 및 응급구조사의 현장 대응력 향상을 위하여 본 페이지를 만들었습니다. <h4>
+            <!--네트워크 상태확인-->
+<p id="network-status">❗ 네트워크 상태를 확인 중...</p>
+
+<script>
+    function updateNetworkStatus() {
+        const networkStatusElement = document.getElementById('network-status');
+        if (navigator.onLine) {
+            networkStatusElement.textContent = '✅ 네트워크 상태: 온라인';
+        } else {
+            networkStatusElement.textContent = '❌ 네트워크 상태: 오프라인';
+        }
+    }
+
+    window.addEventListener('load', updateNetworkStatus);
+    window.addEventListener('online', updateNetworkStatus);
+    window.addEventListener('offline', updateNetworkStatus);
+</script>
+
     </div>
 </div>     
 <br>
