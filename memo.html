@@ -364,7 +364,7 @@
         const messageInput = document.getElementById('message-input');
 
         // WebSocket 서버에 연결
-        const socket = new WebSocket('ws://localhost:8080');
+        const socket = new WebSocket('ws://localhost:3000');
 
         // 서버로부터 메시지를 받을 때
         socket.onmessage = function(event) {
