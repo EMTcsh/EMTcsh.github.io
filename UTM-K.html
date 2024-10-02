@@ -3,11 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WGS84 to UTM-K 변환기</title>
+    <title>좌표 변환기</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/proj4js/2.7.5/proj4.js"></script>
 </head>
 <body>
-    <h1>WGS84 to UTM-K 변환기</h1>
+    <h1>좌표 변환기</h1>
+    
+    <h2>WGS84 to EPSG 변환</h2>
     <label for="lat">WGS84 위도:</label>
     <input type="text" id="lat" placeholder="위도 입력">
     <br>
@@ -18,31 +20,66 @@
     <select id="epsg">
         <option value="5178">UTM-K (Bessel) (EPSG:5178)</option>
         <option value="5179">UTM-K (GRS80) (EPSG:5179)</option>
+        <option value="5185">서부원점 (EPSG:5185)</option>
+        <option value="5186">중부원점 (EPSG:5186)</option>
+        <option value="5187">동부원점 (EPSG:5187)</option>
+        <option value="5188">동해(울릉)원점 (EPSG:5188)</option>
     </select>
     <br>
-    <button id="convert">변환하기</button>
-    <h2>변환 결과</h2>
-    <p id="result"></p>
+    <button id="convertToEpsg">변환하기</button>
+    <h3>변환 결과 (EPSG)</h3>
+    <p id="resultToEpsg"></p>
+
+    <h2>EPSG to WGS84 변환</h2>
+    <label for="epsgX">EPSG X 좌표:</label>
+    <input type="text" id="epsgX" placeholder="X 좌표 입력">
+    <br>
+    <label for="epsgY">EPSG Y 좌표:</label>
+    <input type="text" id="epsgY" placeholder="Y 좌표 입력">
+    <br>
+    <button id="convertToWGS84">변환하기</button>
+    <h3>변환 결과 (WGS84)</h3>
+    <p id="resultToWGS84"></p>
 
     <script>
         // EPSG 정의
         proj4.defs("EPSG:5178", "+proj=tmerc +lat_0=38 +lon_0=127.5 +k=0.9996 +x_0=1000000 +y_0=2000000 +ellps=bessel +units=m +no_defs +towgs84=-115.80,474.99,674.11,1.16,-2.31,-1.63,6.43");
         proj4.defs("EPSG:5179", "+proj=tmerc +lat_0=38 +lon_0=127.5 +k=0.9996 +x_0=1000000 +y_0=2000000 +ellps=GRS80 +units=m +no_defs");
+        proj4.defs("EPSG:5185", "+proj=tmerc +lat_0=38 +lon_0=125 +k=1 +x_0=200000 +y_0=60000 +ellps=GRS80 +units=m +no_defs");
+        proj4.defs("EPSG:5186", "+proj=tmerc +lat_0=38 +lon_0=127 +k=1 +x_0=200000 +y_0=60000 +ellps=GRS80 +units=m +no_defs");
+        proj4.defs("EPSG:5187", "+proj=tmerc +lat_0=38 +lon_0=129 +k=1 +x_0=200000 +y_0=60000 +ellps=GRS80 +units=m +no_defs");
+        proj4.defs("EPSG:5188", "+proj=tmerc +lat_0=38 +lon_0=131 +k=1 +x_0=200000 +y_0=60000 +ellps=GRS80 +units=m +no_defs");
 
-        document.getElementById('convert').addEventListener('click', function() {
+        document.getElementById('convertToEpsg').addEventListener('click', function() {
             const lat = parseFloat(document.getElementById('lat').value);
             const lon = parseFloat(document.getElementById('lon').value);
             const selectedEpsg = document.getElementById('epsg').value;
 
             if (isNaN(lat) || isNaN(lon)) {
-                document.getElementById('result').textContent = "유효한 좌표를 입력하세요.";
+                document.getElementById('resultToEpsg').textContent = "유효한 좌표를 입력하세요.";
                 return;
             }
 
             // WGS84에서 선택된 EPSG로 변환
             const utmK = proj4("WGS84", `EPSG:${selectedEpsg}`, [lon, lat]);
-            document.getElementById('result').textContent = `X: ${utmK[0]}, Y: ${utmK[1]}`;
+            document.getElementById('resultToEpsg').textContent = `X: ${utmK[0]}, Y: ${utmK[1]}`;
+        });
+
+        document.getElementById('convertToWGS84').addEventListener('click', function() {
+            const epsgX = parseFloat(document.getElementById('epsgX').value);
+            const epsgY = parseFloat(document.getElementById('epsgY').value);
+            const selectedEpsg = document.getElementById('epsg').value;
+
+            if (isNaN(epsgX) || isNaN(epsgY)) {
+                document.getElementById('resultToWGS84').textContent = "유효한 좌표를 입력하세요.";
+                return;
+            }
+
+            // 선택된 EPSG에서 WGS84로 변환
+            const wgs84 = proj4(`EPSG:${selectedEpsg}`, "WGS84", [epsgX, epsgY]);
+            document.getElementById('resultToWGS84').textContent = `위도: ${wgs84[1]}, 경도: ${wgs84[0]}`;
         });
     </script>
 </body>
 </html>
+
