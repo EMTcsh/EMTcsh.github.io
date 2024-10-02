@@ -406,8 +406,8 @@
             const xOutput = xMapping[firstDigitX] || '';
             const yOutput = yMapping[firstDigitY] || '';
 
-            // 결과 출력
-            document.getElementById('result').textContent = `E 좌표(X): ${utmK[0]} (${xOutput}), N 좌표(Y): ${utmK[1]} (${yOutput})`;
+           // 결과 출력
+            document.getElementById('result').textContent = `E 좌표: ${Math.floor(utmK[0])} (${xOutput}), N 좌표: ${Math.floor(utmK[1])} (${yOutput})`;        
         });
     </script>
    </body>
