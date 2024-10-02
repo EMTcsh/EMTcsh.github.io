@@ -608,8 +608,19 @@
             alert('이 브라우저는 공유 기능을 지원하지 않습니다. 기록한 데이터를 수동으로 복사하여 공유하세요.');
         }
     }
-  
-</script>
+    
+   // 네트워크 상태 확인
+    function checkNetworkStatus() {
+        if (navigator.onLine) {
+            document.getElementById('network-status').textContent = '✅ 네트워크 상태: 온라인';
+        } else {
+            document.getElementById('network-status').textContent = '❌ 네트워크 상태: 오프라인';
+        }
+    }
+
+    window.addEventListener('load', checkNetworkStatus);
+    window.addEventListener('online', checkNetworkStatus);
+    window.addEventListener('offline', checkNetworkStatus);</script>
   
 <!-- Add this section in your existing HTML where you want the share button -->
 <div class="section">
