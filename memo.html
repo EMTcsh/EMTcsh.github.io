@@ -312,3 +312,92 @@
 
 
 
+
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SSE Chat</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        .chat-box {
+            width: 300px;
+            height: 400px;
+            border: 1px solid #ccc;
+            padding: 10px;
+            overflow-y: scroll;
+            margin-bottom: 10px;
+        }
+        .message {
+            padding: 5px;
+            margin-bottom: 5px;
+            border-radius: 5px;
+        }
+        .user {
+            background-color: #d1e7dd;
+            text-align: right;
+        }
+        .others {
+            background-color: #f8d7da;
+            text-align: left;
+        }
+        input[type="text"] {
+            width: 80%;
+            padding: 5px;
+        }
+        button {
+            width: 18%;
+            padding: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h2>Server-Sent Events Chat</h2>
+    <div class="chat-box" id="chat-box"></div>
+    <input type="text" id="message-input" placeholder="메시지를 입력하세요..." />
+    <button onclick="sendMessage()">전송</button>
+
+    <script>
+        const chatBox = document.getElementById('chat-box');
+
+        // SSE 연결 설정
+        const eventSource = new EventSource('/stream');
+
+        // 서버로부터 메시지를 받을 때마다 실행
+        eventSource.onmessage = function(event) {
+            addMessage(event.data, 'others');
+        };
+
+        // 메시지 전송 함수
+        function sendMessage() {
+            const messageInput = document.getElementById('message-input');
+            const message = messageInput.value;
+            if (!message) return;
+
+            // 메시지 전송
+            fetch('/send', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message })
+            });
+
+            // 사용자의 메시지를 바로 추가
+            addMessage(message, 'user');
+            messageInput.value = '';
+        }
+
+        // 메시지를 채팅창에 추가하는 함수
+        function addMessage(message, sender) {
+            const messageElement = document.createElement('div');
+            messageElement.classList.add('message', sender);
+            messageElement.textContent = message;
+            chatBox.appendChild(messageElement);
+            chatBox.scrollTop = chatBox.scrollHeight; // 스크롤을 최신 메시지로 이동
+        }
+    </script>
+</body>
+</html>
+
