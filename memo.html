@@ -86,6 +86,20 @@
     </button>
 </div>
 
+// 네트워크 상태 확인
+    function checkNetworkStatus() {
+        if (navigator.onLine) {
+            document.getElementById('network-status').textContent = '✅ 네트워크 상태: 온라인';
+        } else {
+            document.getElementById('network-status').textContent = '❌ 네트워크 상태: 오프라인';
+        }
+    }
+
+    window.addEventListener('load', checkNetworkStatus);
+    window.addEventListener('online', checkNetworkStatus);
+    window.addEventListener('offline', checkNetworkStatus);
+</script>    
+    
 <h3>🌐 My GPS 좌표</h3>
 <button id="getLocation">내 위치 확인</button>
 
