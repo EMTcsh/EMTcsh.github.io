@@ -185,7 +185,7 @@
     const utmY = Math.floor(utmK[1]);
 
     // 메모에 변환된 좌표 입력
-    document.getElementById('memo').value = `내위치 좌표: ${latitude}, ${longitude} (UTM-K: X=${utmX}, Y=${utmY})`;
+    document.getElementById('memo').value = `내 위치 좌표: ${latitude}, ${longitude} (UTM-K: X=${utmX}, Y=${utmY})`;
 
     const dmsCoordinates = convertToDMS(latitude, longitude);
     document.getElementById('dmsCoordinates').textContent = `도분초: ${dmsCoordinates}`;
