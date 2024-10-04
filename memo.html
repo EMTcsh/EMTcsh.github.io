@@ -284,38 +284,33 @@
 
 
 <!-- 도분초 도좌표 변환-->
-        function convertDMSToDecimal(dms) {
-            const regex = /(\d+)°\s*(\d+)'\s*(\d+)\"?\s*([NSEW])/;
-            const match = dms.match(regex);
-            if (!match) return null;
+       function convertDMSToDecimal(dms) {
+    const regex = /(\d+)°\s*(\d+)'?\s*(\d+(\.\d+)?)?\"?\s*([NSEW])/;
+    const match = dms.match(regex);
+    if (!match) return null;
 
-            let degrees = parseFloat(match[1]);
-            const minutes = parseFloat(match[2]);
-            const seconds = parseFloat(match[3]);
-            const direction = match[4];
+    let degrees = parseFloat(match[1]);
+    const minutes = parseFloat(match[2]);
+    const seconds = parseFloat(match[3]) || 0;
+    const direction = match[5];
 
-            let decimal = degrees + minutes / 60 + seconds / 3600;
-            if (direction === 'S' || direction === 'W') {
-                decimal *= -1;
-            }
+    let decimal = degrees + minutes / 60 + seconds / 3600;
 
-            return decimal;
-        }
+    if (direction === 'S' || direction === 'W') {
+        decimal *= -1;
+    }
 
-        document.getElementById("convertDMS").addEventListener("click", function() {
-            const dmsLat = document.getElementById("dmsLat").value;
-            const dmsLon = document.getElementById("dmsLon").value;
+    return decimal;
+}
 
-            const decimalLat = convertDMSToDecimal(dmsLat);
-            const decimalLon = convertDMSToDecimal(dmsLon);
+// 예시 좌표 (위도: 37° 30' 00" N, 경도: 127° 00' 00" E)
+const latitudeDMS = "37° 30' 00\" N";
+const longitudeDMS = "127° 00' 00\" E";
 
-            if (decimalLat !== null && decimalLon !== null) {
-                document.getElementById("dmsResult").innerText = 
-                    `위도: ${decimalLat.toFixed(6)}°, 경도: ${decimalLon.toFixed(6)}°`;
-            } else {
-                document.getElementById("dmsResult").innerText = "잘못된 DMS 형식입니다.";
-            }
-        });
+const latitudeDecimal = convertDMSToDecimal(latitudeDMS);
+const longitudeDecimal = convertDMSToDecimal(longitudeDMS);
+
+console.log(`위도: ${latitudeDecimal}, 경도: ${longitudeDecimal}`);
 
 
     </script>
