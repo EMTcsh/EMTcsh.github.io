@@ -283,7 +283,42 @@
     }
 
 </script>   
+<!-- 도분초 도좌표 변환-->
+    <script>
+        function convertDMSToDecimal(dms) {
+            const regex = /(\d+)°\s*(\d+)'\s*(\d+)\"?\s*([NSEW])/;
+            const match = dms.match(regex);
+            if (!match) return null;
 
+            let degrees = parseFloat(match[1]);
+            const minutes = parseFloat(match[2]);
+            const seconds = parseFloat(match[3]);
+            const direction = match[4];
+
+            let decimal = degrees + minutes / 60 + seconds / 3600;
+            if (direction === 'S' || direction === 'W') {
+                decimal *= -1;
+            }
+
+            return decimal;
+        }
+
+        document.getElementById("convertDMS").addEventListener("click", function() {
+            const dmsLat = document.getElementById("dmsLat").value;
+            const dmsLon = document.getElementById("dmsLon").value;
+
+            const decimalLat = convertDMSToDecimal(dmsLat);
+            const decimalLon = convertDMSToDecimal(dmsLon);
+
+            if (decimalLat !== null && decimalLon !== null) {
+                document.getElementById("dmsResult").innerText = 
+                    `위도: ${decimalLat.toFixed(6)}°, 경도: ${decimalLon.toFixed(6)}°`;
+            } else {
+                document.getElementById("dmsResult").innerText = "잘못된 DMS 형식입니다.";
+            }
+        });
+    </script>
+    
 <br>
 
 <!-- 산악구조 Time Recording 공지 게시판 표시 섹션 -->
