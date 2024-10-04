@@ -282,9 +282,8 @@
         }
     }
 
-</script>   
+
 <!-- 도분초 도좌표 변환-->
-    <script>
         function convertDMSToDecimal(dms) {
             const regex = /(\d+)°\s*(\d+)'\s*(\d+)\"?\s*([NSEW])/;
             const match = dms.match(regex);
@@ -317,6 +316,8 @@
                 document.getElementById("dmsResult").innerText = "잘못된 DMS 형식입니다.";
             }
         });
+
+
     </script>
     
 <br>
@@ -384,19 +385,6 @@
     <h4>ℹ️ 변환 결과</h4>
     <p id="result"></p>
 
-<!--도분초 도좌표 변환-->  
-<h3>🌐 DMS 좌표 변환</h3>
-<label for="dmsLat">위도 (도분초):</label>
-<input type="text" id="dmsLat" placeholder="위도 입력 (예: 37° 30' 00\" N)">
-<br>
-<label for="dmsLon">경도 (도분초):</label>
-<input type="text" id="dmsLon" placeholder="경도 입력 (예: 127° 00' 00\" E)">
-<br>
-<button id="convertDMS">DMS 변환하기</button>
-<h4>ℹ️ 변환 결과</h4>
-<p id="dmsResult"></p>
-    
-    <script>
         // EPSG 정의
         proj4.defs("EPSG:5178", "+proj=tmerc +lat_0=38 +lon_0=127.5 +k=0.9996 +x_0=1000000 +y_0=2000000 +ellps=bessel +units=m +no_defs +towgs84=-115.80,474.99,674.11,1.16,-2.31,-1.63,6.43");
         proj4.defs("EPSG:5179", "+proj=tmerc +lat_0=38 +lon_0=127.5 +k=0.9996 +x_0=1000000 +y_0=2000000 +ellps=GRS80 +units=m +no_defs");
