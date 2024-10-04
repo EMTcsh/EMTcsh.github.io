@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DMS to Decimal Degrees Converter</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        .container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+        }
+        .input-group {
+            margin-bottom: 10px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        input, select {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        button {
+            width: 100%;
+            padding: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        #dd-result {
+            margin-top: 20px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>DMS 좌표 변환기</h1>
+
+        <div class="input-group">
+            <label for="dms-degrees">도 (Degrees)</label>
+            <input type="text" id="dms-degrees" placeholder="예: 37">
+        </div>
+
+        <div class="input-group">
+            <label for="dms-minutes">분 (Minutes)</label>
+            <input type="text" id="dms-minutes" placeholder="예: 48">
+        </div>
+
+        <div class="input-group">
+            <label for="dms-seconds">초 (Seconds)</label>
+            <input type="text" id="dms-seconds" placeholder="예: 30">
+        </div>
+
+        <div class="input-group">
+            <label for="dms-direction">방향 (Direction)</label>
+            <select id="dms-direction">
+                <option value="N">북 (N)</option>
+                <option value="S">남 (S)</option>
+                <option value="E">동 (E)</option>
+                <option value="W">서 (W)</option>
+            </select>
+        </div>
+
+        <button onclick="convertDMStoDD()">DMS -> 십진수 변환</button>
+
+        <div id="dd-result"></div>
+    </div>
+
+    <script>
+        function dms2dd(degrees, minutes, seconds, direction) {
+            var dd = degrees + minutes/60 + seconds/(60*60);
+            if (direction == "S" || direction == "W") {
+                dd = dd * -1;
+            }
+            return dd;
+        }
+
+        function convertDMStoDD() {
+            var degrees = parseFloat(document.getElementById("dms-degrees").value);
+            var minutes = parseFloat(document.getElementById("dms-minutes").value);
+            var seconds = parseFloat(document.getElementById("dms-seconds").value);
+            var direction = document.getElementById("dms-direction").value;
+
+            if (isNaN(degrees) || isNaN(minutes) || isNaN(seconds)) {
+                document.getElementById("dd-result").innerHTML = "유효한 숫자를 입력해주세요.";
+                return;
+            }
+
+            var dd = dms2dd(degrees, minutes, seconds, direction);
+            document.getElementById("dd-result").innerHTML = "십진수 좌표: " + dd;
+        }
+    </script>
+
+</body>
+</html>
