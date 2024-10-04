@@ -282,25 +282,8 @@
         }
     }
 
+</script>   
 
-<!-- 도분초 도좌표 변환-->
-              function convertDMS() {
-            const latitudeDMS = document.getElementById("latitude").value;
-            const longitudeDMS = document.getElementById("longitude").value;
-
-            const latitudeDecimal = convertDMSToDecimal(latitudeDMS);
-            const longitudeDecimal = convertDMSToDecimal(longitudeDMS);
-
-            if (latitudeDecimal !== null && longitudeDecimal !== null) {
-                document.getElementById("result").innerText = 
-                    `위도: ${latitudeDecimal}, 경도: ${longitudeDecimal}`;
-            } else {
-                document.getElementById("result").innerText = "잘못된 입력입니다. 형식을 확인해주세요.";
-            }
-        }
-
-    </script>
-    
 <br>
 
 <!-- 산악구조 Time Recording 공지 게시판 표시 섹션 -->
@@ -326,24 +309,16 @@
     </style>
 </head>
 
-<!--도분초 도좌표 변환-->  
-<h3>🌐 DMS 좌표 변환</h3>
-    <form id="dmsForm">
-        <label for="latitude">위도 (예: 37° 30' 00" N):</label>
-        <input type="text" id="latitude" name="latitude" placeholder="37° 30' 00" N"><br><br>
-        
-        <label for="longitude">경도 (예: 127° 00' 00" E):</label>
-        <input type="text" id="longitude" name="longitude" placeholder="127° 00' 00" E"><br><br>
-        
-        <button type="button" onclick="convertDMS()">변환하기</button>
-    </form>
-    
-    <h3>결과:</h3>
-    <p id="result"></p>
-                  
-    
-<br>    
 <!--좌표 국가지점번호 변환-->
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>좌표 국가지점번호 변환</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/proj4js/2.7.5/proj4.js"></script>
+</head>
+<body>
     <h3>🌐 좌표 국가지점번호 변환</h3>
     <label for="lat">WGS84 위도:</label>
     <input type="text" id="lat" placeholder="위도 입력">
@@ -361,10 +336,8 @@
     <h4>ℹ️ 변환 결과</h4>
     <p id="result"></p>
 
-      
-  
-<script>
-// EPSG 정의
+    <script>
+        // EPSG 정의
         proj4.defs("EPSG:5178", "+proj=tmerc +lat_0=38 +lon_0=127.5 +k=0.9996 +x_0=1000000 +y_0=2000000 +ellps=bessel +units=m +no_defs +towgs84=-115.80,474.99,674.11,1.16,-2.31,-1.63,6.43");
         proj4.defs("EPSG:5179", "+proj=tmerc +lat_0=38 +lon_0=127.5 +k=0.9996 +x_0=1000000 +y_0=2000000 +ellps=GRS80 +units=m +no_defs");
 
@@ -426,12 +399,12 @@
    <!-- UTM-K to WGS84 변환 섹션 -->
 <h3>🌐 국가지점번호 좌표변환</h3>
 <label for="utmX">UTM-K E 좌표:</label>
-<input type="text" id="utmX" placeholder="동향값 앞 좌표 입력, 끝자리 0 추가">
+<input type="text" id="utmX" placeholder="동향값 E 좌표 입력">
 <br>
 첫번째 7:가, 8:나, 9:다, 10:라, 11:마, 12:바, 13:사
 <br>
 <label for="utmY">UTM-K N 좌표:</label>
-<input type="text" id="utmY" placeholder="북향값 뒤 좌표 입력, 끝자리 0 추가">
+<input type="text" id="utmY" placeholder="북향값 N 좌표 입력">
 <br>
 두번째 13:가, 14:나, 15:다, 16:라, 17:마, 18:바, 19:사, 20:아  
 <br>
