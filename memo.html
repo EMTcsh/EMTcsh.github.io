@@ -201,6 +201,23 @@
         map: map
     });
 }
+  
+      // 도분초 좌표 변환
+    function convertToDMS(lat, lon) {
+        const latDeg = Math.floor(Math.abs(lat));
+        const latMin = Math.floor((Math.abs(lat) - latDeg) * 60);
+        const latSec = ((Math.abs(lat) - latDeg) * 60 - latMin) * 60;
+
+        const lonDeg = Math.floor(Math.abs(lon));
+        const lonMin = Math.floor((Math.abs(lon) - lonDeg) * 60);
+        const lonSec = ((Math.abs(lon) - lonDeg) * 60 - lonMin) * 60;
+
+        const latDirection = lat >= 0 ? 'N' : 'S';
+        const lonDirection = lon >= 0 ? 'E' : 'W';
+
+        return `${latDeg}° ${latMin}' ${latSec.toFixed(2)}" ${latDirection}, ${lonDeg}° ${lonMin}' ${lonSec.toFixed(2)}" ${lonDirection}`;
+    }
+  
     // 위치 오류 처리
     function showError(error) {
         switch (error.code) {
@@ -280,10 +297,8 @@
         } else {
             alert("모든 위치 정보를 올바르게 입력해주세요.");
         }
-    }
-
-</script>   
-
+    } 
+</script>  
 <br>
 
 <!-- 산악구조 Time Recording 공지 게시판 표시 섹션 -->
@@ -309,6 +324,53 @@
     </style>
 </head>
 
+<!-- DMS to Decimal Degrees Converter -->
+<h3>🌐 도분초 도좌표 변환</h3>
+<label for="dmsLat">위도 DMS (예: 37° 30' 0" N):</label>
+<input type="text" id="dmsLat" placeholder="위도 DMS 입력">
+<br>
+<label for="dmsLon">경도 DMS (예: 127° 0' 0" E):</label>
+<input type="text" id="dmsLon" placeholder="경도 DMS 입력">
+<br>
+<button id="convertDMS">변환하기</button>
+<h4>ℹ️ 변환 결과</h4>
+<p id="decimalResult"></p>
+
+  <script>                       
+   // DMS 좌표를 도좌표로 변환
+     document.getElementById('convertDMS').addEventListener('click', function() {
+        const dmsLat = document.getElementById('dmsLat').value;
+        const dmsLon = document.getElementById('dmsLon').value;
+
+        const decimalLat = convertDMSToDecimal(dmsLat);
+        const decimalLon = convertDMSToDecimal(dmsLon);
+
+        if (decimalLat !== null && decimalLon !== null) {
+            document.getElementById('decimalResult').textContent = `위도: ${decimalLat.toFixed(6)}, 경도: ${decimalLon.toFixed(6)}`;
+        } else {
+            document.getElementById('decimalResult').textContent = "유효한 DMS 형식으로 입력해주세요.";
+        }
+    });
+
+    // DMS 문자열을 도좌표로 변환하는 함수
+    function convertDMSToDecimal(dms) {
+        const parts = dms.match(/(\d+)[°\s]+(\d+)'?\s*(\d*\.?\d*)?"?\s*([NS,EW])?/);
+        if (!parts) return null;
+
+        let degrees = parseFloat(parts[1]);
+        const minutes = parseFloat(parts[2]) / 60;
+        const seconds = parseFloat(parts[3]) / 3600;
+        const direction = parts[4];
+
+        let decimal = degrees + minutes + seconds;
+        if (direction === 'S' || direction === 'W') {
+            decimal *= -1;
+        }
+        return decimal;
+    }
+  
+</script>  
+  
 <!--좌표 국가지점번호 변환-->
 <!DOCTYPE html>
 <html lang="ko">
