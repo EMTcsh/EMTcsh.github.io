@@ -85,15 +85,13 @@
         <img src="https://img.icons8.com/ios-filled/50/ffffff/share.png" alt="공유"> Memo 공유
     </button>
 </div>  
-<br>
-    
-<!-- 내 위치 확인 -->    
+
 <h3>🌐 My GPS 좌표</h3>
 <button id="getLocation">내 위치 확인</button>
 
 <div class="coordinate-box" id="locationDisplay">위도: , 경도: </div>
 <div class="coordinate-box" id="dmsCoordinates">도분초: </div>
-  
+
 <div id="myLocation" class="info">📍 Map Location</div>
 
 <div id="map"></div> <!-- 지도 컨테이너 -->
@@ -148,7 +146,7 @@
     function shareMemos() {
         if (navigator.share) {
             const memoText = memos.join('\n');
-            
+
             const mapLinkGoogle = `https://www.google.com/maps?q=${latitude},${longitude}`;
             const mapLinkKakao = `https://map.kakao.com/link/map/Location,${latitude},${longitude}`;
 
@@ -179,7 +177,7 @@
     latitude = position.coords.latitude;
     longitude = position.coords.longitude;
     document.getElementById('locationDisplay').textContent = `위도: ${latitude}, 경도: ${longitude}`;
-    
+
     // UTM-K (GRS80) (EPSG:5179)로 변환
     const utmK = proj4("WGS84", "EPSG:5179", [longitude, latitude]);
 
@@ -203,7 +201,7 @@
         map: map
     });
 }
-  
+
       // 도분초 좌표 변환
     function convertToDMS(lat, lon) {
         const latDeg = Math.floor(Math.abs(lat));
@@ -219,7 +217,7 @@
 
         return `${latDeg}° ${latMin}' ${latSec.toFixed(2)}" ${latDirection}, ${lonDeg}° ${lonMin}' ${lonSec.toFixed(2)}" ${lonDirection}`;
     }
-  
+
     // 위치 오류 처리
     function showError(error) {
         switch (error.code) {
@@ -370,10 +368,10 @@
         }
         return decimal;
     }
-  
+
 </script>  
 <br>
-    
+
 <!--좌표 국가지점번호 변환-->
 <!DOCTYPE html>
 <html lang="ko">
@@ -456,11 +454,11 @@
             // 결과 출력
             document.getElementById('result').textContent = `E 좌표: ${Math.floor(utmK[0])} (${xOutput}), N 좌표: ${Math.floor(utmK[1])} (${yOutput})`;
         });
-            
+
     </script>
 
 <br>
-    
+
    <!-- UTM-K to WGS84 변환 섹션 -->
 <h3>🌐 국가지점번호 -> D 좌표 변환</h3>
 <label for="utmX">UTM-K E 좌표:</label>
@@ -493,54 +491,15 @@
         document.getElementById('wgs84Result').textContent = `위도: ${wgs84[1].toFixed(6)}, 경도: ${wgs84[0].toFixed(6)}`;
     });
 </script>
-    
+
    </body>
 </html>
 
     <br>
 
- <!--네트워크 종류 확인-->
-    <h3>🛜 네트워크 종류 확인</h3>
-<p id="network-status">❗ 네트워크 상태를 확인 중...</p>
-
-<script>
-    function updateNetworkInfo() {
-        const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
-        const networkStatusElement = document.getElementById("network-status");
-
-        if (connection) {
-            const type = connection.effectiveType || connection.type;
-            networkStatusElement.textContent = `🛜 네트워크 유형: ${type}`<br>;
-        } else {
-            networkStatusElement.textContent = "네트워크 정보를 가져올 수 없습니다.";
-        }
-
-        checkNetworkStatus(); // Update online/offline status
-    }
-
-    function checkNetworkStatus() {
-        const networkStatusElement = document.getElementById('network-status');
-        if (navigator.onLine) {
-            networkStatusElement.textContent += ' ✅ 네트워크 상태: 온라인';
-        } else {
-            networkStatusElement.textContent += ' ❌ 네트워크 상태: 오프라인';
-        }
-    }
-
-    window.addEventListener('load', updateNetworkInfo);
-    window.addEventListener('online', updateNetworkInfo);
-    window.addEventListener('offline', updateNetworkInfo);
-
-    if (navigator.connection) {
-        navigator.connection.addEventListener('change', updateNetworkInfo);
-    }
-</script>
-<br>
-
-</body>
-</html>
-
 <!--위성 상태 표시-->
+<!DOCTYPE html>
+<html lang="ko">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -566,9 +525,9 @@
 </head>
 <body>
 
-    <h3> 🛰️ 위성 상태 표시</h3>
+    <h3>위성 상태 표시</h3>
     <button onclick="getLocation()">위치 정보 가져오기</button>
-    <div id="status"> ❗ 위성 상태를 확인 중...</div>
+    <div id="status">위성 상태를 확인 중...</div>
     <div id="satellite-info"></div>
     <div id="error"></div>
 
@@ -614,8 +573,49 @@
             }
         }
     </script>
-    <br>
-    
+<br>
+
+ <!--네트워크 종류 확인-->
+    <h3>🛜 네트워크 종류 확인</h3>
+<p id="network-status">❗ 네트워크 상태를 확인 중...</p>
+
+<script>
+    function updateNetworkInfo() {
+        const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+        const networkStatusElement = document.getElementById("network-status");
+
+        if (connection) {
+            const type = connection.effectiveType || connection.type;
+            networkStatusElement.textContent = `🛜 네트워크 유형: ${type}`;
+        } else {
+            networkStatusElement.textContent = "네트워크 정보를 가져올 수 없습니다.";
+        }
+
+        checkNetworkStatus(); // Update online/offline status
+    }
+
+    function checkNetworkStatus() {
+        const networkStatusElement = document.getElementById('network-status');
+        if (navigator.onLine) {
+            networkStatusElement.textContent += ' ✅ 네트워크 상태: 온라인';
+        } else {
+            networkStatusElement.textContent += ' ❌ 네트워크 상태: 오프라인';
+        }
+    }
+
+    window.addEventListener('load', updateNetworkInfo);
+    window.addEventListener('online', updateNetworkInfo);
+    window.addEventListener('offline', updateNetworkInfo);
+
+    if (navigator.connection) {
+        navigator.connection.addEventListener('change', updateNetworkInfo);
+    }
+</script>
+<br>
+
+</body>
+</html>
+
 <!--공지 안내-->
 <div class="discord-link">    
     <p> 🐸 Memo Ver. 0.9.26. 국립공원 응급처치 연구회. E-mail: paramedic@knps.or.kr. </p> 
