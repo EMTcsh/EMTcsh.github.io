@@ -598,10 +598,11 @@
         const networkStatusElement = document.getElementById('network-status');
         if (navigator.onLine) {
             networkStatusElement.textContent += ' 
-
 ✅ 네트워크 상태: 온라인';
-        } else {
-            networkStatusElement.textContent += ' ❌ 네트워크 상태: 오프라인';
+        } 
+
+else {           
+networkStatusElement.textContent += ' ❌ 네트워크 상태: 오프라인';
         }
     }
 
