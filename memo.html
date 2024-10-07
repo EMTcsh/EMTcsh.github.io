@@ -1,54 +1,3 @@
-<!--위성 상태 표시-->
-<!DOCTYPE html>
-<html lang="ko">
-<body>
-    <div id="status">🛰 위성 상태를 확인 중...</div>
-    <div id="satellite-info"></div>
-    <div id="error"></div>
-
-    <script>
-        // 위치 정보와 위성 상태를 가져오는 함수
-        function getLocation() {
-            if (navigator.geolocation) {
-                navigator.geolocation.watchPosition(showPosition, showError, {
-                    enableHighAccuracy: true
-                });
-            } else {
-                document.getElementById("error").innerHTML = "이 브라우저는 위치 서비스를 지원하지 않습니다.";
-            }
-        }
-
-        // 위치 정보를 성공적으로 가져왔을 때 실행되는 함수
-        function showPosition(position) {
-            const statusElement = document.getElementById("status");
-            const satelliteInfoElement = document.getElementById("satellite-info");
-
-            statusElement.innerHTML = `위도: ${position.coords.latitude}, 경도: ${position.coords.longitude}`;
-            satelliteInfoElement.innerHTML = `위성 사용 가능 여부: ${position.coords.accuracy < 50 ? '정확한 신호' : '약한 신호'} (정확도: ${position.coords.accuracy}m)`;
-
-            // 이 부분에서 GNSS 위성 수, 신호 세기 등을 추가적인 API 또는 장비를 통해 표시할 수 있습니다.
-        }
-
-        // 오류가 발생했을 때 실행되는 함수
-        function showError(error) {
-            const errorElement = document.getElementById("error");
-            switch (error.code) {
-                case error.PERMISSION_DENIED:
-                    errorElement.innerHTML = "사용자가 위치 정보 제공을 거부했습니다.";
-                    break;
-                case error.POSITION_UNAVAILABLE:
-                    errorElement.innerHTML = "위치 정보를 사용할 수 없습니다.";
-                    break;
-                case error.TIMEOUT:
-                    errorElement.innerHTML = "위치 정보를 가져오는 데 시간이 초과되었습니다.";
-                    break;
-                case error.UNKNOWN_ERROR:
-                    errorElement.innerHTML = "알 수 없는 오류가 발생했습니다.";
-                    break;
-            }
-        }
-    </script>
-    
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -136,7 +85,56 @@
         <img src="https://img.icons8.com/ios-filled/50/ffffff/share.png" alt="공유"> Memo 공유
     </button>
 </div>  
+    
+<!--위성 상태 표시-->
+<body>
+    <div id="status">🛰 위성 상태를 확인 중...</div>
+    <div id="satellite-info"></div>
+    <div id="error"></div>
 
+    <script>
+        // 위치 정보와 위성 상태를 가져오는 함수
+        function getLocation() {
+            if (navigator.geolocation) {
+                navigator.geolocation.watchPosition(showPosition, showError, {
+                    enableHighAccuracy: true
+                });
+            } else {
+                document.getElementById("error").innerHTML = "이 브라우저는 위치 서비스를 지원하지 않습니다.";
+            }
+        }
+
+        // 위치 정보를 성공적으로 가져왔을 때 실행되는 함수
+        function showPosition(position) {
+            const statusElement = document.getElementById("status");
+            const satelliteInfoElement = document.getElementById("satellite-info");
+
+            statusElement.innerHTML = `위도: ${position.coords.latitude}, 경도: ${position.coords.longitude}`;
+            satelliteInfoElement.innerHTML = `위성 사용 가능 여부: ${position.coords.accuracy < 50 ? '정확한 신호' : '약한 신호'} (정확도: ${position.coords.accuracy}m)`;
+
+            // 이 부분에서 GNSS 위성 수, 신호 세기 등을 추가적인 API 또는 장비를 통해 표시할 수 있습니다.
+        }
+
+        // 오류가 발생했을 때 실행되는 함수
+        function showError(error) {
+            const errorElement = document.getElementById("error");
+            switch (error.code) {
+                case error.PERMISSION_DENIED:
+                    errorElement.innerHTML = "사용자가 위치 정보 제공을 거부했습니다.";
+                    break;
+                case error.POSITION_UNAVAILABLE:
+                    errorElement.innerHTML = "위치 정보를 사용할 수 없습니다.";
+                    break;
+                case error.TIMEOUT:
+                    errorElement.innerHTML = "위치 정보를 가져오는 데 시간이 초과되었습니다.";
+                    break;
+                case error.UNKNOWN_ERROR:
+                    errorElement.innerHTML = "알 수 없는 오류가 발생했습니다.";
+                    break;
+            }
+        }
+    </script>
+    
 <h3>🌐 My GPS 좌표</h3>
 <button id="getLocation">내 위치 확인</button>
 
