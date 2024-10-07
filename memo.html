@@ -85,6 +85,13 @@
         <img src="https://img.icons8.com/ios-filled/50/ffffff/share.png" alt="공유"> Memo 공유
     </button>
 </div>  
+
+<h3> 🛰️ 위성 상태 표시</h3>
+    <button onclick="getLocation()">위치 정보 가져오기</button>
+    <div id="status"> ❗ 위성 상태를 확인 중...</div>
+    <div id="satellite-info"></div>
+    <div id="error"></div>
+    
     
 <h3>🌐 My GPS 좌표</h3>
 <button id="getLocation">내 위치 확인</button>
@@ -108,12 +115,6 @@
 <div id="distanceInfo" class="info"></div>
 <div id="mapComparison" class="map"></div> <!-- 상대 위치 지도 컨테이너 -->
 
-<h3> 🛰️ 위성 상태 표시</h3>
-    <button onclick="getLocation()">위치 정보 가져오기</button>
-    <div id="status"> ❗ 위성 상태를 확인 중...</div>
-    <div id="satellite-info"></div>
-    <div id="error"></div>
-    
 <script>
     let latitude, longitude;
     const memos = [];
@@ -514,14 +515,14 @@
 
         if (connection) {
             const type = connection.effectiveType || connection.type;
-            networkStatusElement.textContent = `🛜 네트워크 유형: ${type}`;
+            networkStatusElement.textContent = `🛜 네트워크 유형: ${type}`<br>;
         } else {
             networkStatusElement.textContent = "네트워크 정보를 가져올 수 없습니다.";
         }
 
         checkNetworkStatus(); // Update online/offline status
     }
-<br>
+
     function checkNetworkStatus() {
         const networkStatusElement = document.getElementById('network-status');
         if (navigator.onLine) {
