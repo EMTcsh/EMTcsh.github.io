@@ -600,12 +600,10 @@
             networkStatusElement.textContent += ' 
 ✅ 네트워크 상태: 온라인';
         } 
-
 else {           
 networkStatusElement.textContent += ' ❌ 네트워크 상태: 오프라인';
         }
     }
-
     window.addEventListener('load', updateNetworkInfo);
     window.addEventListener('online', updateNetworkInfo);
     window.addEventListener('offline', updateNetworkInfo);
