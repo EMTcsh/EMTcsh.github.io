@@ -108,7 +108,11 @@
 <div id="distanceInfo" class="info"></div>
 <div id="mapComparison" class="map"></div> <!-- 상대 위치 지도 컨테이너 -->
 
-
+<h3> 🛰️ 위성 상태 표시</h3>
+    <button onclick="getLocation()">위치 정보 가져오기</button>
+    <div id="status"> ❗ 위성 상태를 확인 중...</div>
+    <div id="satellite-info"></div>
+    <div id="error"></div>
     
 <script>
     let latitude, longitude;
@@ -500,7 +504,7 @@
     <br>
 
  <!--네트워크 종류 확인-->
-    <h3>네트워크 종류 확인</h3>
+    <h3>🛜 네트워크 종류 확인</h3>
 <p id="network-status">❗ 네트워크 상태를 확인 중...</p>
 
 <script>
@@ -517,7 +521,7 @@
 
         checkNetworkStatus(); // Update online/offline status
     }
-
+<br>
     function checkNetworkStatus() {
         const networkStatusElement = document.getElementById('network-status');
         if (navigator.onLine) {
