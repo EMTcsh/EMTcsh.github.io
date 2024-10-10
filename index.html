@@ -547,13 +547,7 @@ function saveTraumaAssessment() {
   document.getElementById('traumaAssessmentForm').reset(); // Reset form fields
 
     // Append assessment data to the saved data section
-    document.getElementById('savedData').innerHTML += assessmentHTML;
-
-    // Also display in trauma assessment results
-    document.getElementById('traumaAssessmentResults').innerHTML += assessmentHTML;
-
-    // Reset form fields
-    document.getElementById('traumaAssessmentForm').reset(); 
+    document.getElementById('savedData').innerHTML += assessmentHTML;   
 }
 
     // Save AMPLE data
