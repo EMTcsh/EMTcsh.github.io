@@ -307,7 +307,25 @@
 <!-- 환자 평가 섹션 -->
 <div class="section">
     <h2>ABCDE - 환자평가</h2>
-    <form id="traumaAssessmentForm">
+   <form id="traumaAssessmentForm">
+        <div class="form-group">
+            <label for="patientName">이름</label>
+            <input type="text" id="patientName" required>
+        </div>
+        <div class="form-group">
+            <label for="patientAge">나이</label>
+            <input type="number" id="patientAge" required>
+        </div>
+        <div class="form-group">
+            <label for="patientGender">성별</label>
+            <select id="traumaAssessmentForm" required>
+                <option value="">선택</option>
+                <option value="male">남성</option>
+                <option value="female">여성</option>
+                <option value="unknown">미상</option>
+            </select>
+        </div>
+      <form id="traumaAssessmentForm">
         <div class="form-group">
             <label>Airway (기도)</label>
             <textarea id="airwayDetails" placeholder="기도 확보 여부, 관리 조치에 대한 세부 사항 입력"></textarea>
@@ -474,9 +492,7 @@
             <div class="gcs-result">
                 <strong>[GCS 결과]</strong>
                 <strong>시간:</strong> ${timestamp}
-                <p><strong>이름:</strong> ${name}</p>
-                <p><strong>나이:</strong> ${age}</p>
-                <p><strong>성별:</strong> ${gender}</p>
+               <p><strong>이름:</strong> ${name}, <strong>나이:</strong> ${age}, <strong>성별:</strong> ${gender}</p>
                 <p><strong>GCS 점수:</strong> ${totalScore} (${state})</p>
                 <p><strong>부상 정도:</strong> ${injurySeverity}</p>
             </div>
@@ -494,6 +510,9 @@
     
     // Save trauma assessment data
     function saveTraumaAssessment() {
+    const name = document.getElementById('name').value;
+    const age = document.getElementById('age').value;
+    const gender = document.getElementById('gender').value;
     const airway = document.getElementById('airwayDetails').value;
     const breathing = document.getElementById('breathingDetails').value;
     const circulation = document.getElementById('circulationDetails').value;
@@ -507,6 +526,7 @@
         <div class="board-item">
             <strong>[ABCDE]</strong>
             <strong>${timestamp}</strong>
+           <p><strong>이름:</strong> ${name}, <strong>나이:</strong> ${age}, <strong>성별:</strong> ${gender}</p>
             <p><strong>기도:</strong> ${airway}</p>
             <p><strong>호흡:</strong> ${breathing}</p>
             <p><strong>순환:</strong> ${circulation}</p>
@@ -619,7 +639,7 @@
         // Create a link element to download the file
         const a = document.createElement('a');
         a.href = url;
-        a.download = 'EMS_saved_data.txt'; // Specify the file name
+        a.download = 'EMS_Saved_Data.txt'; // Specify the file name
         document.body.appendChild(a);
         a.click(); // Programmatically click the link to trigger the download
         document.body.removeChild(a); // Clean up
@@ -634,7 +654,7 @@
         if (navigator.share) {
             navigator.share({
                 title: 'PARAMEDIC 기록된 데이터',
-                text: EMS_savedDataText,
+                text: savedDataText,
                 url: window.location.href // Optional, share the current URL
             })
             .then(() => console.log('데이터가 공유되었습니다.'))
@@ -686,6 +706,9 @@
     <p> 🐸 EMT Ver.0.9.26. 국립공원 응급처치 연구회. E-mail: paramedic@knps.or.kr. </p> 
     <a href="https://discord.gg/ryaMRTAhwP" target="_blank">국립공원 응급처치 연구회 Discord 서버</a>
 </div>
+    
+</body>
+</html>
     
 </body>
 </html>
