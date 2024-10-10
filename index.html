@@ -472,10 +472,14 @@
         injurySeverity = '중증 손상 (Severe Injury)';
     }
        
-        const resultHTML =
-
-<p><strong>[GCS 결과]</strong>
-<strong>${timestamp}</strong><br>, ${name}, <strong>나이:</strong> ${age}, <strong>성별:</strong> ${gender}</p> <p><strong>GCS 점수:</strong> ${totalScore}, <strong>상태:</strong> ${state}, <strong>부상 정도:</strong> ${injurySeverity}</p>;
+        const resultHTML = `
+div class="board-item">
+<strong>[GCS 결과]</strong>
+<strong>${timestamp}</strong>
+<p>${name}, <strong>나이:</strong> ${age}, <strong>성별:</strong> ${gender}</p> 
+<p><strong>GCS 점수:</strong> ${totalScore}</p>
+<p><strong>상태:</strong> ${state}</p> <p><strong>부상 정도:</strong> ${injurySeverity}</p>
+`;
 
     document.getElementById('gcsResult').innerHTML = resultHTML;
     document.getElementById('gcsResultContainer').style.display = 'block';
