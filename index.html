@@ -350,22 +350,22 @@
     <div class="result" id="traumaAssessmentResults"></div>
 </div>
 <br>
-            
+
 <!-- SAMPLE 입력 섹션 -->
 <div class="section">
     <h2>SAMPLE - 환자평가</h2>
     <form id="ampleForm">
         <div class="form-group">
-            <label for="patientName">이름</label>
-            <input type="text" id="patientName" required>
+            <label for="ample_patientName">이름</label>
+            <input type="text" id="ample_patientName" required>
         </div>
         <div class="form-group">
-            <label for="patientAge">나이</label>
-            <input type="number" id="patientAge" required>
+            <label for="ample_patientAge">나이</label>
+            <input type="number" id="ample_patientAge" required>
         </div>
         <div class="form-group">
-            <label for="patientGender">성별</label>
-            <select id="patientGender" required>
+            <label for="ample_patientGender">성별</label>
+            <select id="ample_patientGender" required>
                 <option value="">선택</option>
                 <option value="male">남성</option>
                 <option value="female">여성</option>
@@ -374,49 +374,49 @@
         </div>
         <div class="form-group">
             <label for="CC">Signs and Symptoms (증상):</label>
-            <input type="text" id="CC" name="Signs and Symptoms (증상)">
+            <input type="text" id="CC">
         </div>
         <div class="form-group">
             <label for="allergy">Allergies (알레르기):</label>
-            <input type="text" id="allergy" name="allergy">
+            <input type="text" id="allergy">
         </div>
         <div class="form-group">
             <label for="medications">Medications (약물):</label>
-            <input type="text" id="medications" name="medications">
+            <input type="text" id="medications">
         </div>
         <div class="form-group">
             <label for="pain">Past Medical History (과거력):</label>
-            <input type="text" id="pain" name="pain">
+            <input type="text" id="pain">
         </div>
         <div class="form-group">
             <label for="lastMeal">Last Oral Intake (최종 섭취):</label>
-            <input type="text" id="lastMeal" name="lastMeal">
+            <input type="text" id="lastMeal">
         </div>
         <div class="form-group">
             <label for="event">Events (사건):</label>
-            <input type="text" id="event" name="event">
+            <input type="text" id="event">
         </div>
-      <button type="button" onclick="saveAMPLEData()">기록</button>
+        <button type="button" onclick="saveAMPLEData()">기록</button>
     </form>
-   <div class="result" id="ampleResults"> </div>
+    <div class="result" id="ampleResults"></div>
 </div>
-  <br>  
+<br>
   
 <!-- 생체징후 입력 섹션 -->
 <div class="section">
     <h2>생체징후 - 환자평가</h2>
     <form id="bprtForm">
         <div class="form-group">
-            <label for="patientName">이름</label>
-            <input type="text" id="patientName" required>
+            <label for="bprt_patientName">이름</label>
+            <input type="text" id="bprt_patientName" required>
         </div>
         <div class="form-group">
-            <label for="patientAge">나이</label>
-            <input type="number" id="patientAge" required>
+            <label for="bprt_patientAge">나이</label>
+            <input type="number" id="bprt_patientAge" required>
         </div>
         <div class="form-group">
-            <label for="patientGender">성별</label>
-            <select id="patientGender" required>
+            <label for="bprt_patientGender">성별</label>
+            <select id="bprt_patientGender" required>
                 <option value="">선택</option>
                 <option value="male">남성</option>
                 <option value="female">여성</option>
@@ -425,23 +425,23 @@
         </div>
         <div class="form-group">
             <label for="bloodPressure">혈압:</label>
-            <input type="text" id="bloodPressure" name="bloodPressure" placeholder="예: 120/80 mmHg">
+            <input type="text" id="bloodPressure" placeholder="예: 120/80 mmHg">
         </div>
         <div class="form-group">
             <label for="pulse">맥박:</label>
-            <input type="text" id="pulse" name="pulse" placeholder="예: 72 bpm">
+            <input type="text" id="pulse" placeholder="예: 72 bpm">
         </div>
         <div class="form-group">
             <label for="respiration">호흡수:</label>
-            <input type="text" id="respiration" name="respiration" placeholder="예: 16 breaths/min">
+            <input type="text" id="respiration" placeholder="예: 16 breaths/min">
         </div>
         <div class="form-group">
             <label for="temperature">체온:</label>
-            <input type="text" id="temperature" name="temperature" placeholder="예: 36.6 °C">
+            <input type="text" id="temperature" placeholder="예: 36.6 °C">
         </div>
         <button type="button" onclick="savebprtData()">기록</button>
     </form>
-   <div class="result" id="bprtResults"> </div>
+    <div class="result" id="bprtResults"></div>
 </div>
 <br>
 
@@ -452,7 +452,7 @@
 </div>
 
 <script>
-    // Calculate GCS score and determine the state
+   // Calculate GCS score and determine the state
     function calculateGCS() {
         const name = document.getElementById('name').value;
         const age = document.getElementById('age').value;
@@ -549,18 +549,18 @@ function saveTraumaAssessment() {
     // Append assessment data to the saved data section
     document.getElementById('savedData').innerHTML += assessmentHTML;   
 }
-
+  
     // Save AMPLE data
-        function saveAMPLEData() {
-        const name = document.getElementById('patientName').value;
-        const age = document.getElementById('patientAge').value;
-        const gender = document.getElementById('patientGender').value;
+    function saveAMPLEData() {
+        const name = document.getElementById('ample_patientName').value;
+        const age = document.getElementById('ample_patientAge').value;
+        const gender = document.getElementById('ample_patientGender').value;
         const CC = document.getElementById('CC').value;
         const allergy = document.getElementById('allergy').value;
         const medications = document.getElementById('medications').value;
         const pain = document.getElementById('pain').value;
         const lastMeal = document.getElementById('lastMeal').value;
-        const event = document.getElementById('event').value;        
+        const event = document.getElementById('event').value;
 
         const currentDate = new Date();
         const timestamp = currentDate.toLocaleString();
@@ -575,26 +575,22 @@ function saveTraumaAssessment() {
                 <p><strong>약물:</strong> ${medications}</p>
                 <p><strong>통증:</strong> ${pain}</p>
                 <p><strong>마지막 식사:</strong> ${lastMeal}</p>
-                <p><strong>사건:</strong> ${event}</p>                
-           <br> </div>
+                <p><strong>사건:</strong> ${event}</p>
+                <br>
+            </div>
         `;
 
-            // Append AMPLE data to the saved data section
+        // Append AMPLE data to the saved data section
         document.getElementById('savedData').innerHTML += ampleHTML;
-
-        // Also display in AMPLE results
         document.getElementById('ampleResults').innerHTML += ampleHTML;
-
-        // Reset form fields
         document.getElementById('ampleForm').reset();
     }
-  
-  // Save bprt data
-        function savebprtData() {
-        const name = document.getElementById('patientName').value;
-        const age = document.getElementById('patientAge').value;
-        const gender = document.getElementById('patientGender').value;
-        
+
+    // Save bprt data
+    function savebprtData() {
+        const name = document.getElementById('bprt_patientName').value;
+        const age = document.getElementById('bprt_patientAge').value;
+        const gender = document.getElementById('bprt_patientGender').value;        
         const bloodPressure = document.getElementById('bloodPressure').value;
         const pulse = document.getElementById('pulse').value;
         const respiration = document.getElementById('respiration').value;
@@ -612,45 +608,32 @@ function saveTraumaAssessment() {
                 <p><strong>맥박:</strong> ${pulse}</p>
                 <p><strong>호흡수:</strong> ${respiration}</p>
                 <p><strong>체온:</strong> ${temperature}</p>
-           <br> </div>
+                <br>
+            </div>
         `;
 
-            // Append bprt data to the saved data section
+        // Append bprt data to the saved data section
         document.getElementById('savedData').innerHTML += bprtHTML;
-
-        // Also display in bprt results
         document.getElementById('bprtResults').innerHTML += bprtHTML;
-
-        // Reset form fields
         document.getElementById('bprtForm').reset();
     }
 
-</script>
-
-<script>
-    // Existing code...
-
     // Function to download saved data as a text file
     function downloadData() {
-        // Retrieve the text content from the savedData div
         const savedDataText = document.getElementById('savedData').innerText;
-
-        // Create a blob with the saved data
         const blob = new Blob([savedDataText], { type: 'text/plain' });
         const url = URL.createObjectURL(blob);
 
-        // Create a link element to download the file
         const a = document.createElement('a');
         a.href = url;
-        a.download = 'EMS_Saved_Data.txt'; // Specify the file name
+        a.download = 'EMS_Saved_Data.txt';
         document.body.appendChild(a);
-        a.click(); // Programmatically click the link to trigger the download
-        document.body.removeChild(a); // Clean up
-        URL.revokeObjectURL(url); // Release the blob URL
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
     }
 
-<!-- Add this section in your existing HTML where you want the share button -->
-  // Function to share saved data using the Web Share API
+    // Function to share saved data using the Web Share API
     function shareData() {
         const savedDataText = document.getElementById('savedData').innerText;
 
@@ -658,7 +641,7 @@ function saveTraumaAssessment() {
             navigator.share({
                 title: 'PARAMEDIC 기록된 데이터',
                 text: savedDataText,
-                url: window.location.href // Optional, share the current URL
+                url: window.location.href
             })
             .then(() => console.log('데이터가 공유되었습니다.'))
             .catch((error) => console.error('공유 중 오류 발생:', error));
@@ -666,8 +649,8 @@ function saveTraumaAssessment() {
             alert('이 브라우저는 공유 기능을 지원하지 않습니다. 기록한 데이터를 수동으로 복사하여 공유하세요.');
         }
     }
-    
 </script>
+
   
 <!-- Add this section in your existing HTML where you want the share button -->
 <div class="section">
@@ -709,9 +692,6 @@ function saveTraumaAssessment() {
     <p> 🐸 EMT Ver.0.9.26. 국립공원 응급처치 연구회. E-mail: paramedic@knps.or.kr. </p> 
     <a href="https://discord.gg/ryaMRTAhwP" target="_blank">국립공원 응급처치 연구회 Discord 서버</a>
 </div>
-    
-</body>
-</html>
     
 </body>
 </html>
