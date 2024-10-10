@@ -247,7 +247,7 @@
 
 <!-- GCS 혼수척도 계산기 섹션 -->
 <div class="section">
-    <h2> Glasgow Coma Scale - 환자평가</h2>
+    <h2>Glasgow Coma Scale - 환자평가</h2>
     <form id="gcsForm" onsubmit="return calculateGCS()">
         <div class="form-group">
             <label for="name">이름</label>
@@ -260,7 +260,8 @@
         <div class="form-group">
             <label for="gender">성별</label>
             <select id="gender" required>
-                <option value="">선택</option>           <option value="male">남성</option>
+                <option value="">선택</option>
+                <option value="male">남성</option>
                 <option value="female">여성</option>
                 <option value="unknown">미상</option>
             </select>
@@ -297,10 +298,15 @@
         </div>
         <button type="submit">계산</button>
     </form>
-    <div class="result-container" id="gcsResultContainer">
-        
+    <div class="result-container" id="gcsResultContainer" style="display: none;">
         <div id="gcsResult"></div>
     </div>
+</div>
+<br>
+
+<div class="section">
+    <h2>환자평가 기록 데이터</h2>
+    <div id="savedData" class="board"></div>
 </div>
 <br>
 
@@ -436,63 +442,60 @@
 
 <script>
     // Calculate GCS score and determine the state
-    const timestamp = new Date().toLocaleString();
-
     function calculateGCS() {
-    const name = document.getElementById('name').value;
-    const age = document.getElementById('age').value;
-    const gender = document.getElementById('gender').value;
-    const eye = parseInt(document.getElementById('eye').value);
-    const verbal = parseInt(document.getElementById('verbal').value);
-    const motor = parseInt(document.getElementById('motor').value);
-    const totalScore = eye + verbal + motor;
+        const name = document.getElementById('name').value;
+        const age = document.getElementById('age').value;
+        const gender = document.getElementById('gender').value;
+        const eye = parseInt(document.getElementById('eye').value);
+        const verbal = parseInt(document.getElementById('verbal').value);
+        const motor = parseInt(document.getElementById('motor').value);
+        const totalScore = eye + verbal + motor;
 
-    let state;
-    if (totalScore === 15) {
-        state = '정상';
-        alert('GCS 점수: 15점 - 정상입니다.');
-    } else if (totalScore >= 13) {
-        state = 'Drowsy (졸림)';
-    } else if (totalScore >= 9) {
-        state = 'Stupor (혼미)';
-    } else if (totalScore >= 4) {
-        state = 'Semicoma (반혼수)';
-    } else if (totalScore >= 3) {
-        state = 'Coma (혼수)';
-    } else {
-        state = '심각한 상태입니다.';
-    }
+        let state;
+        if (totalScore === 15) {
+            state = '정상';
+        } else if (totalScore >= 13) {
+            state = '졸림 (Drowsy)';
+        } else if (totalScore >= 9) {
+            state = '혼미 (Stupor)';
+        } else if (totalScore >= 4) {
+            state = '반혼수 (Semicoma)';
+        } else if (totalScore >= 3) {
+            state = '혼수 (Coma)';
+        } else {
+            state = '심각한 상태';
+        }
 
-    let injurySeverity;
-    if (totalScore >= 13) {
-        injurySeverity = '경미한 손상 (Mild Injury)';
-    } else if (totalScore >= 9) {
-        injurySeverity = '중등도 손상 (Moderate Injury)';
-    } else {
-        injurySeverity = '중증 손상 (Severe Injury)';
-    }
-       
+        let injurySeverity;
+        if (totalScore >= 13) {
+            injurySeverity = '경미한 손상';
+        } else if (totalScore >= 9) {
+            injurySeverity = '중등도 손상';
+        } else {
+            injurySeverity = '중증 손상';
+        }
+
+        const timestamp = new Date().toLocaleString();
         const resultHTML = `
-<strong>[GCS 결과]</strong>
-<strong>${timestamp}</strong>  
-<p><strong>이름:</strong> ${name}, <strong>나이:</strong> ${age}, <strong>성별:</strong> ${gender}</p>
+            <div class="gcs-result">
+                <strong>[GCS 결과]</strong>
+                <p><strong>시간:</strong> ${timestamp}</p>
+                <p><strong>이름:</strong> ${name}</p>
+                <p><strong>GCS 점수:</strong> ${totalScore} (${state})</p>
+                <p><strong>부상 정도:</strong> ${injurySeverity}</p>
+            </div>
+        `;
 
- 
-<p><strong>GCS 점수:</strong> ${totalScore}</p>
-<p><strong>상태:</strong> ${state}</p> <p><strong>부상 정도:</strong> ${injurySeverity}</p>
-`;
+        document.getElementById('gcsResult').innerHTML = resultHTML;
+        document.getElementById('gcsResultContainer').style.display = 'block';
 
-    document.getElementById('gcsResult').innerHTML = resultHTML;
-    document.getElementById('gcsResultContainer').style.display = 'block';
+        // 기록된 데이터 섹션에 추가
+        const savedData = document.getElementById('savedData');
+        savedData.innerHTML += `<div class="board-item">${resultHTML}<br></div>`;
 
-    // Save GCS result to the saved data section
-    const timestamp = new Date().toLocaleString();
-    const savedData = document.getElementById('savedData');
-    savedData.innerHTML += `<div class="board-item"><strong>[GCS 결과]</strong><strong>${timestamp}</strong><br>${resultHTML}<br></div>`;
-
-    return false; // Prevent form submission
-}
-
+        return false; // 폼 제출 방지
+    }
+    
     // Save trauma assessment data
     function saveTraumaAssessment() {
     const airway = document.getElementById('airwayDetails').value;
