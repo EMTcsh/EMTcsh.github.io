@@ -617,7 +617,7 @@
         // Create a link element to download the file
         const a = document.createElement('a');
         a.href = url;
-        a.download = 'saved_data.txt'; // Specify the file name
+        a.download = 'EMS_saved_data.txt'; // Specify the file name
         document.body.appendChild(a);
         a.click(); // Programmatically click the link to trigger the download
         document.body.removeChild(a); // Clean up
@@ -632,7 +632,7 @@
         if (navigator.share) {
             navigator.share({
                 title: 'PARAMEDIC 기록된 데이터',
-                text: savedDataText,
+                text: EMS_savedDataText,
                 url: window.location.href // Optional, share the current URL
             })
             .then(() => console.log('데이터가 공유되었습니다.'))
