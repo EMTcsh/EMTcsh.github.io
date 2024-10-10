@@ -307,7 +307,7 @@
 <!-- 환자 평가 섹션 -->
 <div class="section">
     <h2>ABCDE - 환자평가</h2>
-   <form id="traumaAssessmentForm">
+    <form id="traumaAssessmentForm">
         <div class="form-group">
             <label for="patientName">이름</label>
             <input type="text" id="patientName" required>
@@ -318,14 +318,13 @@
         </div>
         <div class="form-group">
             <label for="patientGender">성별</label>
-            <select id="traumaAssessmentForm" required>
+            <select id="patientGender" required>
                 <option value="">선택</option>
                 <option value="male">남성</option>
                 <option value="female">여성</option>
                 <option value="unknown">미상</option>
             </select>
         </div>
-      <form id="traumaAssessmentForm">
         <div class="form-group">
             <label>Airway (기도)</label>
             <textarea id="airwayDetails" placeholder="기도 확보 여부, 관리 조치에 대한 세부 사항 입력"></textarea>
@@ -351,7 +350,7 @@
     <div class="result" id="traumaAssessmentResults"></div>
 </div>
 <br>
-
+            
 <!-- SAMPLE 입력 섹션 -->
 <div class="section">
     <h2>SAMPLE - 환자평가</h2>
@@ -509,10 +508,10 @@
     }
     
     // Save trauma assessment data
-    function saveTraumaAssessment() {
-    const name = document.getElementById('name').value;
-    const age = document.getElementById('age').value;
-    const gender = document.getElementById('gender').value;
+function saveTraumaAssessment() {
+    const name = document.getElementById('patientName').value;
+    const age = document.getElementById('patientAge').value;
+    const gender = document.getElementById('patientGender').value;
     const airway = document.getElementById('airwayDetails').value;
     const breathing = document.getElementById('breathingDetails').value;
     const circulation = document.getElementById('circulationDetails').value;
@@ -526,16 +525,26 @@
         <div class="board-item">
             <strong>[ABCDE]</strong>
             <strong>${timestamp}</strong>
-           <p><strong>이름:</strong> ${name}, <strong>나이:</strong> ${age}, <strong>성별:</strong> ${gender}</p>
+            <p><strong>이름:</strong> ${name}, <strong>나이:</strong> ${age}, <strong>성별:</strong> ${gender}</p>
             <p><strong>기도:</strong> ${airway}</p>
             <p><strong>호흡:</strong> ${breathing}</p>
             <p><strong>순환:</strong> ${circulation}</p>
             <p><strong>의식:</strong> ${disability}</p>
             <p><strong>노출:</strong> ${exposure}</p>
-       <br> </div>
+            <br>
+        </div>
     `;
 
-    document.getElementById('traumaAssessmentForm').reset(); // Reset form fields
+    // Reset form fields
+    document.getElementById('traumaAssessmentForm').reset();
+
+    // Append assessment data to the saved data section
+    document.getElementById('traumaAssessmentResults').innerHTML += assessmentHTML;
+
+    // Reset form fields (중복 호출 제거)
+  
+    // document.getElementById('traumaAssessmentForm').reset(); 
+  document.getElementById('traumaAssessmentForm').reset(); // Reset form fields
 
     // Append assessment data to the saved data section
     document.getElementById('savedData').innerHTML += assessmentHTML;
