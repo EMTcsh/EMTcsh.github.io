@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>응급처치 기록 양식</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+        }
+        label {
+            display: block;
+            margin-top: 10px;
+        }
+        input, select {
+            width: 100%;
+            padding: 8px;
+            margin-top: 5px;
+        }
+        button {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <h1>심폐소생술 응급처치 기록</h1>
+    
+    <label for="start_time">응급처치 시작 시간</label>
+    <input type="date" id="start_time" required>
+
+    <label for="cpr_start_time">CPR 시작 시간(분)</label>
+    <input type="number" id="cpr_start_time" required>
+
+    <label for="patient_category">환자 분류</label>
+    <select id="patient_category">
+        <option value="응급처치">응급처치</option>
+        <option value="CPR">CPR</option>
+        <option value="구조대 CPR">구조대 CPR</option>
+        <option value="CPR 안함">CPR 안함</option>
+    </select>
+
+    <h3>환자 상태</h3>
+    <label for="breath">호흡</label>
+    <input type="text" id="breath">
+
+    <label for="pulse">맥박</label>
+    <input type="text" id="pulse">
+
+    <label for="spo2">SpO2(%)</label>
+    <input type="text" id="spo2">
+
+    <label for="pupil_reaction_left">동공반응 (좌)</label>
+    <input type="text" id="pupil_reaction_left">
+
+    <label for="pupil_reaction_right">동공반응 (우)</label>
+    <input type="text" id="pupil_reaction_right">
+
+    <h3>기초 활력 측정</h3>
+    <label for="blood_pressure">혈압 (/mmHg)</label>
+    <input type="text" id="blood_pressure">
+
+    <label for="heart_rate">맥박 (회/min)</label>
+    <input type="text" id="heart_rate">
+
+    <label for="respiratory_rate">호흡수 (회/min)</label>
+    <input type="text" id="respiratory_rate">
+
+    <label for="temperature">체온 (ºC)</label>
+    <input type="text" id="temperature">
+
+    <label for="blood_sugar">혈당 (mg/dl)</label>
+    <input type="text" id="blood_sugar">
+
+    <h3>응급처치 - 기도 확보</h3>
+    <label for="airway_management_time">시간 설정</label>
+    <input type="time" id="airway_management_time">
+
+    <h3>응급처치 - 산소 투여</h3>
+    <label for="oxygen_amount">산소 투여량 (L/min)</label>
+    <input type="text" id="oxygen_amount">
+
+    <h3>응급처치 - CPR 장비 사용</h3>
+    <label for="cpr_equipment">CPR 장비 사용</label>
+    <select id="cpr_equipment">
+        <option value="AED">AED</option>
+        <option value="ECG Monitoring">ECG Monitoring</option>
+        <option value="산소투여">산소투여</option>
+        <option value="자동 심장 압박기">자동 심장 압박기</option>
+        <option value="기타">기타</option>
+    </select>
+
+    <h3>AED 및 Shock 정보</h3>
+    <label for="aed_time">AED 적용 시간 (시/분)</label>
+    <input type="time" id="aed_time">
+
+    <label for="shock_count">Shock 적용 횟수</label>
+    <input type="number" id="shock_count">
+
+    <label for="shock_times">Shock 적용 시간 (분)</label>
+    <input type="text" id="shock_times">
+
+    <h3>응급처치 - 순환 보조</h3>
+    <label for="circulation_support">순환 보조 방법</label>
+    <select id="circulation_support">
+        <option value="정맥로확보">정맥로확보</option>
+        <option value="수액공급">수액공급</option>
+        <option value="약물투여">약물투여</option>
+        <option value="경구투여">경구투여</option>
+    </select>
+
+    <label for="dosage">투여량: 수액ㅣ약물(cc)</label>
+    <input type="text" id="dosage">
+
+    <h3>응급처치 - 고정</h3>
+    <label for="immobilization">고정 방법</label>
+    <select id="immobilization">
+        <option value="경추고정">경추고정</option>
+        <option value="척추고정">척추고정</option>
+        <option value="부목고정">부목고정</option>
+        <option value="머리고정">머리고정</option>
+    </select>
+
+    <label for="splint_type">부목 종류</label>
+    <input type="text" id="splint_type">
+
+    <h3>기타 정보</h3>
+    <label for="alcohol">음주 여부</label>
+    <input type="text" id="alcohol">
+
+    <label for="transport_method">현장 이송 방법</label>
+    <input type="text" id="transport_method">
+
+    <label for="hospital_transport_method">병원 이송 방법</label>
+    <input type="text" id="hospital_transport_method">
+
+    <label for="hospital_transport">병원 이송 여부</label>
+    <input type="text" id="hospital_transport">
+
+    <label for="patient_hospital">환자 이송 병원</label>
+    <input type="text" id="patient_hospital">
+
+    <label for="special_notes">특이 사항 (현장 사진)</label>
+    <input type="file" id="special_notes" accept="image/*">
+
+    <label for="completion_time">완료 시간</label>
+    <input type="time" id="completion_time">
+
+    <button type="submit">등록</button>
+</body>
+</html>
