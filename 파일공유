@@ -1,0 +1,88 @@
+<!-- OPQRST - 환자 평가 섹션 -->
+<div class="section">
+    <h2>OPQRST - 환자평가</h2>
+    <form id="opqrstForm">
+        <div class="form-group">
+            <label for="opqrst_patientName">이름</label>
+            <input type="text" id="opqrst_patientName" required>
+        </div>
+        <div class="form-group">
+            <label for="opqrst_patientAge">나이</label>
+            <input type="number" id="opqrst_patientAge" required>
+        </div>
+        <div class="form-group">
+            <label for="opqrst_patientGender">성별</label>
+            <select id="opqrst_patientGender" required>
+                <option value="">선택</option>
+                <option value="male">남성</option>
+                <option value="female">여성</option>
+                <option value="unknown">미상</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="onset">Onset (시작 시간):</label>
+            <input type="text" id="onset" placeholder="증상이 언제 시작되었나요?">
+        </div>
+        <div class="form-group">
+            <label for="provocation">Provocation (악화/완화 요인):</label>
+            <input type="text" id="provocation" placeholder="증상을 악화시키거나 완화시키는 요인은?">
+        </div>
+        <div class="form-group">
+            <label for="quality">Quality (증상 특성):</label>
+            <input type="text" id="quality" placeholder="증상의 특성은? (예: 날카로움, 둔함)">
+        </div>
+        <div class="form-group">
+            <label for="region">Region/Radiation (위치/방사):</label>
+            <input type="text" id="region" placeholder="통증이나 증상의 위치 또는 방사 위치">
+        </div>
+        <div class="form-group">
+            <label for="severity">Severity (강도):</label>
+            <input type="text" id="severity" placeholder="증상의 강도를 0~10으로 평가하세요">
+        </div>
+        <div class="form-group">
+            <label for="time">Time (기간):</label>
+            <input type="text" id="time" placeholder="증상이 얼마나 지속되었나요?">
+        </div>
+        <button type="button" onclick="saveOPQRSTData()">기록</button>
+    </form>
+    <div class="result" id="opqrstResults"></div>
+</div>
+<br>
+
+<script>
+    // Save OPQRST data
+    function saveOPQRSTData() {
+        const name = document.getElementById('opqrst_patientName').value;
+        const age = document.getElementById('opqrst_patientAge').value;
+        const gender = document.getElementById('opqrst_patientGender').value;
+        const onset = document.getElementById('onset').value;
+        const provocation = document.getElementById('provocation').value;
+        const quality = document.getElementById('quality').value;
+        const region = document.getElementById('region').value;
+        const severity = document.getElementById('severity').value;
+        const time = document.getElementById('time').value;
+
+        const timestamp = new Date().toLocaleString();
+        const opqrstHTML = `
+            <div class="board-item">
+                <strong>[OPQRST]</strong>
+                <strong>${timestamp}</strong>
+                <p><strong>이름:</strong> ${name}, <strong>나이:</strong> ${age}, <strong>성별:</strong> ${gender}</p>
+                <p><strong>Onset:</strong> ${onset}</p>
+                <p><strong>Provocation:</strong> ${provocation}</p>
+                <p><strong>Quality:</strong> ${quality}</p>
+                <p><strong>Region/Radiation:</strong> ${region}</p>
+                <p><strong>Severity:</strong> ${severity}</p>
+                <p><strong>Time:</strong> ${time}</p>
+                <br>
+            </div>
+        `;
+
+        // Reset form fields
+        document.getElementById('opqrstForm').reset();
+
+        // Append OPQRST data to the saved data section
+        document.getElementById('opqrstResults').innerHTML += opqrstHTML;
+        document.getElementById('savedData').innerHTML += opqrstHTML;
+    }
+</script>
