@@ -351,6 +351,57 @@
 </div>
 <br>
 
+<!-- OPQRST - 환자 평가 섹션 -->
+<div class="section">
+    <h2>OPQRST - 환자평가</h2>
+    <form id="opqrstForm">
+        <div class="form-group">
+            <label for="opqrst_patientName">이름</label>
+            <input type="text" id="opqrst_patientName" required>
+        </div>
+        <div class="form-group">
+            <label for="opqrst_patientAge">나이</label>
+            <input type="number" id="opqrst_patientAge" required>
+        </div>
+        <div class="form-group">
+            <label for="opqrst_patientGender">성별</label>
+            <select id="opqrst_patientGender" required>
+                <option value="">선택</option>
+                <option value="male">남성</option>
+                <option value="female">여성</option>
+                <option value="unknown">미상</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="onset">Onset (시작 시간):</label>
+            <input type="text" id="onset" placeholder="증상이 언제 시작되었나요?">
+        </div>
+        <div class="form-group">
+            <label for="provocation">Provocation (악화/완화 요인):</label>
+            <input type="text" id="provocation" placeholder="증상을 악화시키거나 완화시키는 요인은?">
+        </div>
+        <div class="form-group">
+            <label for="quality">Quality (증상 특성):</label>
+            <input type="text" id="quality" placeholder="증상의 특성은? (예: 날카로움, 둔함)">
+        </div>
+        <div class="form-group">
+            <label for="region">Region/Radiation (위치/방사):</label>
+            <input type="text" id="region" placeholder="통증이나 증상의 위치 또는 방사 위치">
+        </div>
+        <div class="form-group">
+            <label for="severity">Severity (강도):</label>
+            <input type="text" id="severity" placeholder="증상의 강도를 0~10으로 평가하세요">
+        </div>
+        <div class="form-group">
+            <label for="time">Time (기간):</label>
+            <input type="text" id="time" placeholder="증상이 얼마나 지속되었나요?">
+        </div>
+        <button type="button" onclick="saveOPQRSTData()">기록</button>
+    </form>
+    <div class="result" id="opqrstResults"></div>
+</div>
+<br>      
+      
 <!-- SAMPLE 입력 섹션 -->
 <div class="section">
     <h2>SAMPLE - 환자평가</h2>
@@ -424,19 +475,19 @@
             </select>
         </div>
         <div class="form-group">
-            <label for="bloodPressure">혈압:</label>
+            <label for="bloodPressure">Blood Pressure (혈압):</label>
             <input type="text" id="bloodPressure" placeholder="예: 120/80 mmHg">
         </div>
         <div class="form-group">
-            <label for="pulse">맥박:</label>
+            <label for="pulse">Pulse (맥박):</label>
             <input type="text" id="pulse" placeholder="예: 72 bpm">
         </div>
         <div class="form-group">
-            <label for="respiration">호흡수:</label>
+            <label for="respiration">Respiratory Rate (호흡수):</label>
             <input type="text" id="respiration" placeholder="예: 16 breaths/min">
         </div>
         <div class="form-group">
-            <label for="temperature">체온:</label>
+            <label for="temperature">Body Temperature (체온):</label>
             <input type="text" id="temperature" placeholder="예: 36.6 °C">
         </div>
         <button type="button" onclick="savebprtData()">기록</button>
@@ -526,11 +577,11 @@ function saveTraumaAssessment() {
             <strong>[ABCDE]</strong>
             <strong>${timestamp}</strong>
             <p><strong>이름:</strong> ${name}, <strong>나이:</strong> ${age}, <strong>성별:</strong> ${gender}</p>
-            <p><strong>기도:</strong> ${airway}</p>
-            <p><strong>호흡:</strong> ${breathing}</p>
-            <p><strong>순환:</strong> ${circulation}</p>
-            <p><strong>의식:</strong> ${disability}</p>
-            <p><strong>노출:</strong> ${exposure}</p>
+            <p><strong>Airway (기도) :</strong> ${airway}</p>
+            <p><strong>Breathing (호흡) :</strong> ${breathing}</p>
+            <p><strong>Circulation (순환) :</strong> ${circulation}</p>
+            <p><strong>Disability (의식) :</strong> ${disability}</p>
+            <p><strong>Exposure (노출 및 환경) :</strong> ${exposure}</p>
             <br>
         </div>
     `;
@@ -549,6 +600,42 @@ function saveTraumaAssessment() {
     // Append assessment data to the saved data section
     document.getElementById('savedData').innerHTML += assessmentHTML;   
 }
+  
+   // Save OPQRST data
+    function saveOPQRSTData() {
+        const name = document.getElementById('opqrst_patientName').value;
+        const age = document.getElementById('opqrst_patientAge').value;
+        const gender = document.getElementById('opqrst_patientGender').value;
+        const onset = document.getElementById('onset').value;
+        const provocation = document.getElementById('provocation').value;
+        const quality = document.getElementById('quality').value;
+        const region = document.getElementById('region').value;
+        const severity = document.getElementById('severity').value;
+        const time = document.getElementById('time').value;
+
+        const timestamp = new Date().toLocaleString();
+        const opqrstHTML = `
+            <div class="board-item">
+                <strong>[OPQRST]</strong>
+                <strong>${timestamp}</strong>
+                <p><strong>이름:</strong> ${name}, <strong>나이:</strong> ${age}, <strong>성별:</strong> ${gender}</p>
+                <p><strong>Onset (시작 시간) :</strong> ${onset}</p>
+                <p><strong>Provocation (악화/완화 요인) :</strong> ${provocation}</p>
+                <p><strong>Quality (증상 특성) :</strong> ${quality}</p>
+                <p><strong>Region/Radiation (위치/방사) :</strong> ${region}</p>
+                <p><strong>Severity (강도) :</strong> ${severity}</p>
+                <p><strong>Time (기간) :</strong> ${time}</p>
+                <br>
+            </div>
+        `;
+
+        // Reset form fields
+        document.getElementById('opqrstForm').reset();
+
+        // Append OPQRST data to the saved data section
+        document.getElementById('opqrstResults').innerHTML += opqrstHTML;
+        document.getElementById('savedData').innerHTML += opqrstHTML;
+    }
   
     // Save AMPLE data
     function saveAMPLEData() {
@@ -570,12 +657,12 @@ function saveTraumaAssessment() {
                 <strong>[SAMPLE]</strong>
                 <strong>${timestamp}</strong>
                 <p><strong>이름:</strong> ${name}, <strong>나이:</strong> ${age}, <strong>성별:</strong> ${gender}</p>
-                <p><strong>증상:</strong> ${CC}</p>
-                <p><strong>알레르기:</strong> ${allergy}</p>
-                <p><strong>약물:</strong> ${medications}</p>
-                <p><strong>과거력:</strong> ${pain}</p>
-                <p><strong>마지막 식사:</strong> ${lastMeal}</p>
-                <p><strong>사건:</strong> ${event}</p>
+                <p><strong>Signs and Symptoms (증상) :</strong> ${CC}</p>
+                <p><strong>Allergies (알레르기) :</strong> ${allergy}</p>
+                <p><strong>Medications (약물) :</strong> ${medications}</p>
+                <p><strong>Past Medical History (과거력) :</strong> ${pain}</p>
+                <p><strong>Last Oral Intake (최종 섭취) :</strong> ${lastMeal}</p>
+                <p><strong>Events (사건) :</strong> ${event}</p>
                 <br>
             </div>
         `;
@@ -604,10 +691,10 @@ function saveTraumaAssessment() {
                 <strong>[BP.P.RR.T]</strong>
                 <strong>${timestamp}</strong>
                 <p><strong>이름:</strong> ${name}, <strong>나이:</strong> ${age}, <strong>성별:</strong> ${gender}</p>
-                <p><strong>혈압:</strong> ${bloodPressure}</p>
-                <p><strong>맥박:</strong> ${pulse}</p>
-                <p><strong>호흡수:</strong> ${respiration}</p>
-                <p><strong>체온:</strong> ${temperature}</p>
+                <p><strong>Blood Pressure (혈압) :</strong> ${bloodPressure}</p>
+                <p><strong>Pulse (맥박) :</strong> ${pulse}</p>
+                <p><strong>Respiratory Rate (호흡수) :</strong> ${respiration}</p>
+                <p><strong>Body Temperature (체온) :</strong> ${temperature}</p>
                 <br>
             </div>
         `;
