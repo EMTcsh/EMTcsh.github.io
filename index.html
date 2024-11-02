@@ -490,6 +490,10 @@
             <label for="temperature">Body Temperature (체온):</label>
             <input type="text" id="temperature" placeholder="예: 36.6 °C">
         </div>
+       <div class="form-group">
+            <label for="temperature">Blood Sugar (혈당):</label>
+            <input type="text" id="bloodsugar" placeholder="예: 100 mg/dL">
+        </div>
         <button type="button" onclick="savebprtData()">기록</button>
     </form>
     <div class="result" id="bprtResults"></div>
@@ -682,6 +686,7 @@ function saveTraumaAssessment() {
         const pulse = document.getElementById('pulse').value;
         const respiration = document.getElementById('respiration').value;
         const temperature = document.getElementById('temperature').value;
+        const bloodsugar = document.getElementById('bloodsugar').value;
 
         const currentDate = new Date();
         const timestamp = currentDate.toLocaleString();
@@ -695,6 +700,7 @@ function saveTraumaAssessment() {
                 <p><strong>Pulse (맥박) :</strong> ${pulse}</p>
                 <p><strong>Respiratory Rate (호흡수) :</strong> ${respiration}</p>
                 <p><strong>Body Temperature (체온) :</strong> ${temperature}</p>
+                <p><strong>Blood sugar (혈당) :</strong> ${bloodsugar}</p>
                 <br>
             </div>
         `;
