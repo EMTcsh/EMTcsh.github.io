@@ -2,75 +2,6 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible=IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ROSIER 점수 계산기</title>
-</head>
-<body>
-    <h1>ROSIER 점수 계산기</h1>
-    <form>
-        <h3>증상</h3>
-        <label>
-            <input type="checkbox" name="symptoms" value="1"> 안면 비대칭 (+1점)
-        </label><br>
-        <label>
-            <input type="checkbox" name="symptoms" value="1"> 팔의 약화 (+1점)
-        </label><br>
-        <label>
-            <input type="checkbox" name="symptoms" value="1"> 다리의 약화 (+1점)
-        </label><br>
-        <label>
-            <input type="checkbox" name="symptoms" value="1"> 언어장애 (+1점)
-        </label><br>
-        <label>
-            <input type="checkbox" name="symptoms" value="1"> 시각장애 (+1점)
-        </label><br>
-        
-        <h3>감점 항목</h3>
-        <label>
-            <input type="checkbox" name="deductions" value="-1"> 발작의 병력 (-1점)
-        </label><br>
-        <label>
-            <input type="checkbox" name="deductions" value="-1"> 혈당 수치가 낮음 (< 3.5 mmol/L) (-1점)
-        </label><br>
-        
-        <button type="button" onclick="calculateROSIER()">계산하기</button>
-    </form>
-
-    <h2 id="result"></h2>
-
-    <script>
-        function calculateROSIER() {
-            let score = 0;
-            const symptoms = document.querySelectorAll('input[name="symptoms"]:checked');
-            const deductions = document.querySelectorAll('input[name="deductions"]:checked');
-            
-            symptoms.forEach(symptom => {
-                score += parseInt(symptom.value);
-            });
-
-            deductions.forEach(deduction => {
-                score += parseInt(deduction.value);
-            });
-
-            let resultText = `총 ROSIER 점수: ${score}`;
-            if (score > 0) {
-                resultText += " - 뇌졸중 가능성 높음";
-            } else if (score === 0) {
-                resultText += " - 뇌졸중 가능성 없음";
-            }
-
-            document.getElementById('result').textContent = resultText;
-        }
-    </script>
-</body>
-</html>
-
-
-<!DOCTYPE html>
-<html lang="ko">
-<head>
-    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>📌  PARAMEDIC 응급환자 평가도구</title>
     <style>
@@ -251,31 +182,102 @@
     </div>
 </div>     
 <br>
-              <!-- 나이 계산기 섹션 -->
-<h2>나이 계산기</h2>
+
+<!-- 나이 계산기 섹션 -->
+<div class="section">
+  <h2>나이 계산기</h2>
+  <form id="ageForm">
     <label for="birthdate">생년월일을 입력하세요 (YYYY-MM-DD):</label>
-    <input type="date" id="birthdate">
-    <button onclick="calculateAge()">나이 계산</button>
-    <p id="result"></p>
-    <script>
-        function calculateAge() {
-            const birthdateInput = document.getElementById('birthdate').value;
-            const birthdate = new Date(birthdateInput);
-            const today = new Date();
-            if (!birthdateInput) {
-                document.getElementById('result').innerText = '생년월일을 입력하세요.';
-                return;
-            }
-            let age = today.getFullYear() - birthdate.getFullYear();
-            const monthDifference = today.getMonth() - birthdate.getMonth();
-            // 생일이 지나지 않았다면 나이를 하나 줄임
-            if (monthDifference < 0 || (monthDifference === 0 && today.getDate() < birthdate.getDate())) {
-                age--;
-            }
-            document.getElementById('result').innerText = `당신의 나이는 ${age}세입니다.`;
-        }
-    </script>
-  <br>          
+    <input type="date" id="birthdate" required>
+    <button type="button" onclick="calculateAge()">나이 계산</button>
+    <p id="ageResult"></p>
+  </form>
+
+  <script>
+    function calculateAge() {
+      const birthdateInput = document.getElementById('birthdate').value;
+      if (!birthdateInput) {
+        document.getElementById('ageResult').innerText = '생년월일을 입력하세요.';
+        return;
+      }
+
+      const birthdate = new Date(birthdateInput);
+      const today = new Date();
+      let age = today.getFullYear() - birthdate.getFullYear();
+      const monthDifference = today.getMonth() - birthdate.getMonth();
+      
+      // 생일이 지나지 않았다면 나이를 하나 줄임
+      if (monthDifference < 0 || (monthDifference === 0 && today.getDate() < birthdate.getDate())) {
+        age--;
+      }
+
+      document.getElementById('ageResult').innerText = `당신의 나이는 ${age}세입니다.`;
+    }
+  </script>
+</div>
+  </br>         
+      
+<!-- 뇌졸증용 ROSIER 점수 계산기 섹션 -->
+<div class="section">
+  <h2>뇌졸증용 ROSIER 점수 계산기</h2>
+  <form id="rosierForm">
+    <h3>증상</h3>
+    <label>
+      <input type="checkbox" name="symptoms" value="1"> 안면 비대칭 (+1점)
+    </label><br>
+    <label>
+      <input type="checkbox" name="symptoms" value="1"> 팔의 약화 (+1점)
+    </label><br>
+    <label>
+      <input type="checkbox" name="symptoms" value="1"> 다리의 약화 (+1점)
+    </label><br>
+    <label>
+      <input type="checkbox" name="symptoms" value="1"> 언어장애 (+1점)
+    </label><br>
+    <label>
+      <input type="checkbox" name="symptoms" value="1"> 시각장애 (+1점)
+    </label><br>
+
+    <h3>감점 항목</h3>
+    <label>
+      <input type="checkbox" name="deductions" value="-1"> 발작의 병력 (-1점)
+    </label><br>
+    <label>
+      <input type="checkbox" name="deductions" value="-1"> 혈당 수치가 낮음 (< 3.5 mmol/L) (-1점)
+    </label><br>
+
+    <button type="button" onclick="calculateROSIER()">계산하기</button>
+  </form>
+
+  <h2 id="rosierResult"></h2>
+
+  <script>
+    function calculateROSIER() {
+      let score = 0;
+      const symptoms = document.querySelectorAll('input[name="symptoms"]:checked');
+      const deductions = document.querySelectorAll('input[name="deductions"]:checked');
+      
+      symptoms.forEach(symptom => {
+        score += parseInt(symptom.value);
+      });
+
+      deductions.forEach(deduction => {
+        score += parseInt(deduction.value);
+      });
+
+      let resultText = `총 ROSIER 점수: ${score}`;
+      if (score > 0) {
+        resultText += " - 뇌졸중 가능성 높음";
+      } else if (score === 0) {
+        resultText += " - 뇌졸중 가능성 없음";
+      }
+
+      document.getElementById('rosierResult').textContent = resultText;
+    }
+  </script>
+</div>
+<br>
+      
 <!-- GCS 혼수척도 계산기 섹션 -->
 <div class="section">
     <h2>Glasgow Coma Scale - 환자평가</h2>
