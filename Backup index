@@ -171,6 +171,7 @@
         } else {
             networkStatusElement.textContent = '❌ 네트워크 상태: 오프라인';
         }
+}
 @@ -206,585 +7,27 @@ <h2></h2>
     window.addEventListener('online', updateNetworkStatus);
     window.addEventListener('offline', updateNetworkStatus);
