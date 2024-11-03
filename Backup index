@@ -248,10 +248,9 @@
       <input type="checkbox" name="deductions" value="-1"> 혈당 수치가 낮음 (< 3.5 mmol/L) (-1점)
     </label><br>
 
-    <button type="button" onclick="calculateROSIER()">계산하기</button>
-  </form>
-
-  <h2 id="rosierResult"></h2>
+     <button type="button" onclick="calculateROSIER()">계산</button>
+     </form>
+    <div class="result" id="rosierResult"></div>
 
   <script>
     function calculateROSIER() {
