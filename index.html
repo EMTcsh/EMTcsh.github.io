@@ -2,6 +2,75 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible=IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ROSIER 점수 계산기</title>
+</head>
+<body>
+    <h1>ROSIER 점수 계산기</h1>
+    <form>
+        <h3>증상</h3>
+        <label>
+            <input type="checkbox" name="symptoms" value="1"> 안면 비대칭 (+1점)
+        </label><br>
+        <label>
+            <input type="checkbox" name="symptoms" value="1"> 팔의 약화 (+1점)
+        </label><br>
+        <label>
+            <input type="checkbox" name="symptoms" value="1"> 다리의 약화 (+1점)
+        </label><br>
+        <label>
+            <input type="checkbox" name="symptoms" value="1"> 언어장애 (+1점)
+        </label><br>
+        <label>
+            <input type="checkbox" name="symptoms" value="1"> 시각장애 (+1점)
+        </label><br>
+        
+        <h3>감점 항목</h3>
+        <label>
+            <input type="checkbox" name="deductions" value="-1"> 발작의 병력 (-1점)
+        </label><br>
+        <label>
+            <input type="checkbox" name="deductions" value="-1"> 혈당 수치가 낮음 (< 3.5 mmol/L) (-1점)
+        </label><br>
+        
+        <button type="button" onclick="calculateROSIER()">계산하기</button>
+    </form>
+
+    <h2 id="result"></h2>
+
+    <script>
+        function calculateROSIER() {
+            let score = 0;
+            const symptoms = document.querySelectorAll('input[name="symptoms"]:checked');
+            const deductions = document.querySelectorAll('input[name="deductions"]:checked');
+            
+            symptoms.forEach(symptom => {
+                score += parseInt(symptom.value);
+            });
+
+            deductions.forEach(deduction => {
+                score += parseInt(deduction.value);
+            });
+
+            let resultText = `총 ROSIER 점수: ${score}`;
+            if (score > 0) {
+                resultText += " - 뇌졸중 가능성 높음";
+            } else if (score === 0) {
+                resultText += " - 뇌졸중 가능성 없음";
+            }
+
+            document.getElementById('result').textContent = resultText;
+        }
+    </script>
+</body>
+</html>
+
+
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>📌  PARAMEDIC 응급환자 평가도구</title>
     <style>
