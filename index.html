@@ -162,21 +162,44 @@
 <div class="section">
     <h2></h2>
     <div class="result">
-        <!-- 네트워크 상태 확인 -->
-        <p id="network-status">❗ 네트워크 상태를 확인 중...</p>
-        <script>
-            function updateNetworkStatus() {
-                const networkStatusElement = document.getElementById('network-status');
-                if (navigator.onLine) {
-                    networkStatusElement.textContent = '✅ 네트워크 상태: 온라인';
-                } else {
-                    networkStatusElement.textContent = '❌ 네트워크 상태: 오프라인';
-                }
-            }
+                   
+ <!--네트워크 종류 확인-->
+    <h3></h3>
+<p id="network-status">❗ 네트워크 상태를 확인 중...</p>
 
-            window.addEventListener('online', updateNetworkStatus);
-            window.addEventListener('offline', updateNetworkStatus);
-        </script>
+<script>
+    function updateNetworkInfo() {
+        const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+        const networkStatusElement = document.getElementById("network-status");
+
+        if (connection) {
+            const type = connection.effectiveType || connection.type;
+            networkStatusElement.textContent = `🛜 네트워크 유형: ${type}`;
+        } else {
+            networkStatusElement.textContent = "네트워크 정보를 가져올 수 없습니다.";
+        }
+
+        checkNetworkStatus(); // Update online/offline status
+    }
+
+    function checkNetworkStatus() {
+        const networkStatusElement = document.getElementById('network-status');
+        if (navigator.onLine) {
+            networkStatusElement.textContent += ' ✅ 네트워크 상태: 온라인';
+        } else {
+            networkStatusElement.textContent += ' ❌ 네트워크 상태: 오프라인';
+        }
+    }
+
+    window.addEventListener('load', updateNetworkInfo);
+    window.addEventListener('online', updateNetworkInfo);
+    window.addEventListener('offline', updateNetworkInfo);
+
+    if (navigator.connection) {
+        navigator.connection.addEventListener('change', updateNetworkInfo);
+    }
+</script>
+<!-- 네트워크 상태 확인 끝 -->
         
         <div class="footer">
             <p>© 2024 Paramedic Web Applications. EMT Ver. 0.9.28. Korea National Park Service Paramedic Lab.</p>
