@@ -493,28 +493,10 @@
         document.getElementById('wgs84Result').textContent = `위도: ${wgs84[1].toFixed(6)}, 경도: ${wgs84[0].toFixed(6)}`;
     });
 </script>
-
-   // MGRS 변환 스크립트
-    <script>
-    document.getElementById('convertToMGRS').addEventListener('click', function() {
-        const utmX = parseFloat(document.getElementById('utmX_MGRS').value);
-        const utmY = parseFloat(document.getElementById('utmY_MGRS').value);
-
-        if (isNaN(utmX) || isNaN(utmY)) {
-            document.getElementById('mgrsResult').textContent = "유효한 UTM-K 좌표를 입력하세요.";
-            return;
-        }
-
-        // UTM-K 좌표를 MGRS로 변환
-        const mgrs = MGRS.forward([utmX, utmY]);
-
-        document.getElementById('mgrsResult').textContent = `MGRS: ${mgrs}`;
-    });
-  
-</script>
+<br>
     
 <!-- MGRS 좌표 변환 기능 추가 -->
-<h4>🌐 D 좌표 -> MGRS 변환</h4>
+<h3>🌐 D 좌표 -> MGRS 변환</h3>
 <label for="lat">위도 (D):</label>
 <input type="text" id="mgrsLat" placeholder="위도 입력 (예: 37.000000)">
 <br>
@@ -548,6 +530,25 @@
 
         document.getElementById('mgrsResult').textContent = `MGRS 좌표: ${mgrs}`;
     });
+</script>
+
+      // MGRS 변환 스크립트
+    <script>
+    document.getElementById('convertToMGRS').addEventListener('click', function() {
+        const utmX = parseFloat(document.getElementById('utmX_MGRS').value);
+        const utmY = parseFloat(document.getElementById('utmY_MGRS').value);
+
+        if (isNaN(utmX) || isNaN(utmY)) {
+            document.getElementById('mgrsResult').textContent = "유효한 UTM-K 좌표를 입력하세요.";
+            return;
+        }
+
+        // UTM-K 좌표를 MGRS로 변환
+        const mgrs = MGRS.forward([utmX, utmY]);
+
+        document.getElementById('mgrsResult').textContent = `MGRS: ${mgrs}`;
+    });
+  
 </script>
     
    </body>
