@@ -495,6 +495,7 @@
 </script>
 
    // MGRS 변환 스크립트
+    <script>
     document.getElementById('convertToMGRS').addEventListener('click', function() {
         const utmX = parseFloat(document.getElementById('utmX_MGRS').value);
         const utmY = parseFloat(document.getElementById('utmY_MGRS').value);
@@ -511,8 +512,9 @@
     });
   
 </script>
+    
 <!-- MGRS 좌표 변환 기능 추가 -->
-<h3>🌐 D 좌표 -> MGRS 변환</h3>
+<h4>🌐 D 좌표 -> MGRS 변환</h4>
 <label for="lat">위도 (D):</label>
 <input type="text" id="mgrsLat" placeholder="위도 입력 (예: 37.000000)">
 <br>
