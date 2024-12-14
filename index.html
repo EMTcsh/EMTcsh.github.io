@@ -550,6 +550,10 @@
             <label for="temperature">Blood Sugar (혈당):</label>
             <input type="text" id="bloodsugar" placeholder="예: 100 mg/dL">
         </div>
+        <div class="form-group">
+            <label for="oxygenSaturation">Oxygen Saturation (산소포화도):</label>
+            <input type="text" id="oxygenSaturation" placeholder="예: 98%">
+        </div>
         <button type="button" onclick="savebprtData()">기록</button>
     </form>
     <div class="result" id="bprtResults"></div>
@@ -722,6 +726,7 @@ function saveTraumaAssessment() {
         const respiration = document.getElementById('respiration').value;
         const temperature = document.getElementById('temperature').value;
         const bloodsugar = document.getElementById('bloodsugar').value;
+         const oxygenSaturation = document.getElementById('oxygenSaturation').value;
         const currentDate = new Date();
         const timestamp = currentDate.toLocaleString();
         const bprtHTML = `
@@ -734,6 +739,7 @@ function saveTraumaAssessment() {
                 <p><strong>Respiratory Rate (호흡수) :</strong> ${respiration}</p>
                 <p><strong>Body Temperature (체온) :</strong> ${temperature}</p>
                 <p><strong>Blood sugar (혈당) :</strong> ${bloodsugar}</p>
+                <p><strong>Oxygen Saturation (산소포화도) :</strong> ${oxygenSaturation}</p>
                 <br>
             </div>
         `;
