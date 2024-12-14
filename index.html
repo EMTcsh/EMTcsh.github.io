@@ -558,7 +558,8 @@
     </form>
     <div class="result" id="bprtResults"></div>
 </div>
-<br>
+<br
+    
 <!-- 결과 및 기록된 데이터 섹션 -->
 <div class="section">
     <h2>환자평가 기록 데이터</h2>
@@ -731,7 +732,7 @@ function saveTraumaAssessment() {
         const timestamp = currentDate.toLocaleString();
         const bprtHTML = `
             <div class="board-item">
-                <strong>[BP.P.RR.T]</strong>
+                <strong>[BP.P.RR.T.BST.O₂]</strong>
                 <strong>${timestamp}</strong>
                 <p><strong>이름:</strong> ${name}, <strong>나이:</strong> ${age}, <strong>성별:</strong> ${gender}</p>
                 <p><strong>Blood Pressure (혈압) :</strong> ${bloodPressure}</p>
