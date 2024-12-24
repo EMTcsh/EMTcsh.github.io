@@ -84,7 +84,9 @@
     <button class="button" onclick="shareMemos()">
         <img src="https://img.icons8.com/ios-filled/50/ffffff/share.png" alt="공유"> Memo 공유
     </button>
-</div>  
+</div>
+  <!-- 인쇄 버튼 -->
+<button id="printButton" onclick="printPage()">프린터로 인쇄</button>
     <br>
 
 <!-- 내 위치 확인 -->     
@@ -492,6 +494,25 @@
 
         document.getElementById('wgs84Result').textContent = `위도: ${wgs84[1].toFixed(6)}, 경도: ${wgs84[0].toFixed(6)}`;
     });
+  
+  // 프린트
+    function printPage() {
+        var memoContent = document.getElementById('savedMemos').innerHTML;
+        var mapContent = document.getElementById('map').innerHTML;
+
+        var printWindow = window.open('', '', 'height=600, width=800');
+        printWindow.document.write('<html><head><title>산악구조 기록</title>');
+        printWindow.document.write('<style> body { font-family: Arial, sans-serif; margin: 20px; } </style>');
+        printWindow.document.write('</head><body>');
+        printWindow.document.write('<h2>🆘 산악구조 Time Recording</h2>');
+        printWindow.document.write('<h4>📕 Memo Record</h4>');
+        printWindow.document.write(memoContent);  // Memo content
+        printWindow.document.write('<h4>📍 지도 위치</h4>');
+        printWindow.document.write(mapContent);  // Map content
+        printWindow.document.write('</body></html>');
+        printWindow.document.close();
+        printWindow.print();
+    }
 </script>
 <br>
 
