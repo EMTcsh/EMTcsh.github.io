@@ -74,7 +74,8 @@
 <h4>📕 Memo Record</h4>
 <div id="savedMemos"></div>
     <!-- 인쇄 버튼 -->
-<button id="printButton" onclick="printPage()">프린터로 인쇄</button>
+<button id="printButton" onclick="printPagememo()">메모 프린터로 인쇄</button>
+  <button id="printButton" onclick="printPagemap()">지도 프린터로 인쇄</button>
     <br>
   <br>
 <textarea id="memo" placeholder="여기에 메모를 입력하세요..."></textarea>
@@ -497,10 +498,9 @@
         document.getElementById('wgs84Result').textContent = `위도: ${wgs84[1].toFixed(6)}, 경도: ${wgs84[0].toFixed(6)}`;
     });
   
-  // 프린트
-    function printPage() {
+  // 메모 프린트
+    function printPagememo() {
         var memoContent = document.getElementById('savedMemos').innerHTML;
-        var mapContent = document.getElementById('map').innerHTML;
 
         var printWindow = window.open('', '', 'height=600, width=800');
         printWindow.document.write('<html><head><title>산악구조 기록</title>');
@@ -509,8 +509,21 @@
         printWindow.document.write('<h2>🆘 산악구조 Time Recording</h2>');
         printWindow.document.write('<h4>📕 Memo Record</h4>');
         printWindow.document.write(memoContent);  // Memo content
+        printWindow.document.write('</body></html>');
+        printWindow.document.close();
+        printWindow.print();
+    }
+   // 지도 프린트
+    function printPagemap() {
+        var mapContent = document.getElementById('map').innerHTML;
+
+        var printWindow = window.open('', '', 'height=600, width=800');
+        printWindow.document.write('<html><head><title>산악구조 기록</title>');
+        printWindow.document.write('<style> body { font-family: Arial, sans-serif; margin: 20px; } </style>');
+        printWindow.document.write('</head><body>');
+        printWindow.document.write('<h2>🆘 산악구조 Time Recording</h2>');
         printWindow.document.write('<h4>📍 지도 위치</h4>');
-        printWindow.document.write(mapContent);  // Map content
+        printWindow.document.write(map);  // Map content
         printWindow.document.write('</body></html>');
         printWindow.document.close();
         printWindow.print();
