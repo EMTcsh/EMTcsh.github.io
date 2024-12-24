@@ -717,6 +717,7 @@ function saveTraumaAssessment() {
         document.getElementById('ampleResults').innerHTML += ampleHTML;
         document.getElementById('ampleForm').reset();
     }
+  
     // Save bprt data
     function savebprtData() {
         const name = document.getElementById('bprt_patientName').value;
@@ -749,6 +750,27 @@ function saveTraumaAssessment() {
         document.getElementById('bprtResults').innerHTML += bprtHTML;
         document.getElementById('bprtForm').reset();
     }
+      // 메모 프린트
+  function printPage() {     
+    var memoContent = document.getElementById('savedData').innerHTML;
+
+    // 새 인쇄 창 열기
+    var printWindow = window.open('', '', 'height=600, width=800');
+    
+    // 인쇄 창에 HTML 콘텐츠 작성
+    printWindow.document.write('<html><head><title>PARAMEDIC 응급환자 평가도구</title>');
+    printWindow.document.write('<style> body { font-family: Arial, sans-serif; margin: 20px; } </style>');
+    printWindow.document.write('</head><body>');
+    printWindow.document.write('<h2>PARAMEDIC 응급환자 평가도구</h2>');
+    printWindow.document.write('<h4>📕 Memo Record</h4>');
+    printWindow.document.write(memoContent);  // Memo content
+    printWindow.document.write('</body></html>');
+    
+    // 문서 닫기 후 인쇄
+    printWindow.document.close();
+    printWindow.print();
+  }
+  
     // Function to download saved data as a text file
     function downloadData() {
         const savedDataText = document.getElementById('savedData').innerText;
@@ -762,6 +784,7 @@ function saveTraumaAssessment() {
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
     }
+  
     // Function to share saved data using the Web Share API
     function shareData() {
         const savedDataText = document.getElementById('savedData').innerText;
@@ -776,8 +799,16 @@ function saveTraumaAssessment() {
         } else {
             alert('이 브라우저는 공유 기능을 지원하지 않습니다. 기록한 데이터를 수동으로 복사하여 공유하세요.');
         }
+      
+   
     }
 </script>
+  
+  <!-- 인쇄 버튼 -->
+  <div class="section">
+    <h2>Data 인쇄</h2>
+  <button id="printButton" onclick="printPage()">프린터로 인쇄</button>
+  </div>
   
 <!-- Add this section in your existing HTML where you want the share button -->
 <div class="section">
