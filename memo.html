@@ -73,20 +73,21 @@
 <h2>🆘 산악구조 Time Recording</h2>
 <h4>📕 Memo Record</h4>
 <div id="savedMemos"></div>
-    <!-- 인쇄 버튼 -->
-<button id="printButton" onclick="printPagememo()">메모 PDF로 저장</button>
+     <!-- 공유 버튼 -->
+  <button id="button" onclick="shareMemos()">Memo 공유</button>
       <br>
   <br>
+   <!-- 입력 버튼 -->
 <textarea id="memo" placeholder="여기에 메모를 입력하세요..."></textarea>
 <div class="button-container">
     <button class="button" onclick="saveMemo()">
         <img src="https://img.icons8.com/ios-filled/50/ffffff/save.png" alt="저장"> Memo 추가
     </button>
     <button class="button" onclick="printPagemap()">
-        <img src="https://img.icons8.com/ios-filled/50/ffffff/download.png" alt="지도 저장"> 지도 PDF 저장
+        <img src="https://img.icons8.com/ios-filled/50/ffffff/download.png" alt="공유"> 지도 저장
     </button>
-    <button class="button" onclick="shareMemos()">
-        <img src="https://img.icons8.com/ios-filled/50/ffffff/share.png" alt="공유"> Memo 공유
+    <button class="button" onclick="printPagememo()">
+         <img src="https://img.icons8.com/ios-filled/50/ffffff/download.png" alt="지도 저장"> Memo 저장
     </button>
 </div>
     <br>
