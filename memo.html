@@ -73,6 +73,10 @@
 <h2>🆘 산악구조 Time Recording</h2>
 <h4>📕 Memo Record</h4>
 <div id="savedMemos"></div>
+    <!-- 인쇄 버튼 -->
+<button id="printButton" onclick="printPage()">프린터로 인쇄</button>
+    <br>
+  <br>
 <textarea id="memo" placeholder="여기에 메모를 입력하세요..."></textarea>
 <div class="button-container">
     <button class="button" onclick="saveMemo()">
@@ -85,8 +89,6 @@
         <img src="https://img.icons8.com/ios-filled/50/ffffff/share.png" alt="공유"> Memo 공유
     </button>
 </div>
-  <!-- 인쇄 버튼 -->
-<button id="printButton" onclick="printPage()">프린터로 인쇄</button>
     <br>
 
 <!-- 내 위치 확인 -->     
@@ -498,7 +500,7 @@
   // 프린트
     function printPage() {
         var memoContent = document.getElementById('savedMemos').innerHTML;
-        var mapContent = document.getElementById('utmX').innerHTML;
+        var mapContent = document.getElementById('result').innerHTML;
 
         var printWindow = window.open('', '', 'height=600, width=800');
         printWindow.document.write('<html><head><title>산악구조 기록</title>');
