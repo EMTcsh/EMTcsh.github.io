@@ -81,6 +81,27 @@
 
 <div id="map"></div> <!-- 지도 컨테이너 -->  
 <script>
+    // 현재 위치 가져오기
+    document.getElementById('getLocation').addEventListener('click', function() {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(showPosition, showError);
+        } else {
+            alert("이 브라우저는 위치 정보를 지원하지 않습니다.");
+        }
+    });
+
+    // 위치 표시
+    function showPosition(position) {
+    latitude = position.coords.latitude;
+    longitude = position.coords.longitude;
+    document.getElementById('locationDisplay').textContent = `위도: ${latitude}, 경도: ${longitude}`;
+
+    // UTM-K (GRS80) (EPSG:5179)로 변환
+    const utmK = proj4("WGS84", "EPSG:5179", [longitude, latitude]);
+
+    const utmX = Math.floor(utmK[0]);
+    const utmY = Math.floor(utmK[1]);
+
 		var container = document.getElementById('map');
 		var options = {
 			center: new kakao.maps.LatLng(33.450701, 126.570667),
