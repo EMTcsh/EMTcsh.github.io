@@ -80,6 +80,16 @@
 
 <div id="map"></div> <!-- 지도 컨테이너 -->  
 
+	<script>
+		var container = document.getElementById('map');
+		var options = {
+			center: new kakao.maps.LatLng(33.450701, 126.570667),
+			level: 3
+		};
+
+		var map = new kakao.maps.Map(container, options);
+	</script>
+    
 <script>
     // Initialize the Kakao map
     let map, marker, currentLat, currentLng;
