@@ -7,7 +7,16 @@
     
     <!-- 카카오 지도 API -->
     <script type="text/javascript" src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=ff9e145029506d6e4c72d1f2b01ea424&libraries=services"></script> <!-- 카카오 지도 API -->
-    
+    <script>
+		var container = document.getElementById('map');
+		var options = {
+			center: new kakao.maps.LatLng(33.450701, 126.570667),
+			level: 3
+		};
+
+		var map = new kakao.maps.Map(container, options);
+	</script>
+	
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -80,15 +89,7 @@
 
 <div id="map"></div> <!-- 지도 컨테이너 -->  
 
-	<script>
-		var container = document.getElementById('map');
-		var options = {
-			center: new kakao.maps.LatLng(33.450701, 126.570667),
-			level: 3
-		};
-
-		var map = new kakao.maps.Map(container, options);
-	</script>
+	
     
 <script>
     // Initialize the Kakao map
