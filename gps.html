@@ -140,18 +140,9 @@
         let s = ((degree - d - m / 60) * 3600).toFixed(2);
         return `${d}° ${m}' ${s}" ${type === 'lat' ? (degree > 0 ? 'N' : 'S') : (degree > 0 ? 'E' : 'W')}`;
     }
-
+</script>
+<script>
     // Placeholder functions for the buttons
-    function saveMemo() {
-        let memoText = document.getElementById('memo').value;
-        if (memoText) {
-            let savedMemos = document.getElementById('savedMemos');
-            let newMemo = document.createElement('div');
-            newMemo.textContent = memoText;
-            savedMemos.appendChild(newMemo);
-            document.getElementById('memo').value = ''; // Clear the input
-        }
-    }
 
     function shareMemos() {
         let memos = document.getElementById('savedMemos').innerText;
@@ -160,47 +151,6 @@
 
     function printPagemap() {
         window.print();  // This will print the page including the map
-    }
-
-    function printPagememo() {
-        window.print();  // This will print the page including the memos
-    }
-
-    // Initialize map on page load
-    window.onload = initMap; 
-
-
-    let latitude, longitude;
-    const memos = [];
-
-    // 메모 추가
-    function saveMemo() {
-        const memo = document.getElementById('memo').value;
-        if (memo) {
-            const timestamp = new Date().toLocaleString();
-            const memoWithTimestamp = `${timestamp}: ${memo}`;
-            memos.push(memoWithTimestamp);
-            const savedMemosDiv = document.getElementById('savedMemos');
-            const memoElement = document.createElement('div');
-            memoElement.textContent = memoWithTimestamp;
-            savedMemosDiv.appendChild(memoElement);
-            document.getElementById('memo').value = '';
-        } else {
-            alert('메모를 입력해주세요.');
-        }
-    }
-
-    // 메모 다운로드
-    function downloadMemos() {
-        const blob = new Blob([memos.join('\n')], { type: 'text/plain' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'memos.txt';
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
     }
 
     // 메모 공유
