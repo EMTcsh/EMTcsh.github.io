@@ -132,7 +132,8 @@
             alert("Geolocation is not supported by this browser.");
         }
     });
-
+</script>
+<script>    
 
     // Function to convert coordinates to DMS (Degrees, Minutes, Seconds)
     function convertToDMS(degree, type) {
@@ -141,8 +142,7 @@
         let s = ((degree - d - m / 60) * 3600).toFixed(2);
         return `${d}° ${m}' ${s}" ${type === 'lat' ? (degree > 0 ? 'N' : 'S') : (degree > 0 ? 'E' : 'W')}`;
     }
-</script>
-<script>    
+   
     // Placeholder functions for the buttons
 
     function shareMemos() {
