@@ -7,8 +7,7 @@
     
     <!-- 카카오 지도 API -->
     <script type="text/javascript" src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=ff9e145029506d6e4c72d1f2b01ea424&libraries=services"></script> <!-- 카카오 지도 API -->
-      
-    <!-- 입력 버튼 스타일 -->
+    
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -40,18 +39,13 @@
             align-items: center;
             justify-content: center;
         }
-        .button img {
-            width: 20px;
-            height: 20px;
-            margin-right: 5px;
-        }
         .coordinate-box {
             border: 1px solid #ccc;
             padding: 10px;
             margin-top: 10px;
-            background-color:    #f0f0f0;
+            background-color: #f0f0f0;
             border-radius: 5px;
-        }   
+        }
         #savedMemos div {
             border: 1px solid #ddd;
             padding: 10px;
@@ -59,7 +53,7 @@
             border-radius: 5px;
             background-color: #f9f9f9;
         }
-        #map, .map {
+        #map {
             height: 400px;
             width: 100%;
             margin-top: 20px;
@@ -73,16 +67,11 @@
 <body>
 
 <h2>🆘 산악구조 GPS Recording</h2>
-<h4>📕 GPS Record</h4>
-<div id="savedMemos"></div>
-<!-- 공유 버튼 -->
-<button id="button" onclick="shareMemos()">Memo 공유</button>
-<br>
-<br>
 
 <!-- 내 위치 확인 -->     
-<h3>🌐 내위치 GPS 좌표</h3>
+<h4>🌐 내위치 GPS 좌표</h4>
 <button id="getLocation">내 위치 확인</button>
+<button id="shareLocation">위치 공유</button> <!-- 위치 공유 버튼 추가 -->
 
 <div class="coordinate-box" id="locationDisplay">위도: , 경도: </div>
 <div class="coordinate-box" id="dmsCoordinates">도분초: </div>
@@ -90,10 +79,10 @@
 <div id="myLocation" class="info">📍 Map Location</div>
 
 <div id="map"></div> <!-- 지도 컨테이너 -->  
-  
+
 <script>
     // Initialize the Kakao map
-    let map, marker;
+    let map, marker, currentLat, currentLng;
     function initMap() {
         map = new kakao.maps.Map(document.getElementById('map'), {
             center: new kakao.maps.LatLng(37.5665, 126.9780), // Default to Seoul
@@ -105,34 +94,32 @@
     document.getElementById("getLocation").addEventListener("click", function() {
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(function(position) {
-                let lat = position.coords.latitude;
-                let lng = position.coords.longitude;
+                currentLat = position.coords.latitude;
+                currentLng = position.coords.longitude;
 
                 // Display coordinates
-                document.getElementById("locationDisplay").innerText = "위도: " + lat + ", 경도: " + lng;
-
+                document.getElementById("locationDisplay").innerText = "위도: " + currentLat + ", 경도: " + currentLng;
 
                 // Display DMS (degrees, minutes, seconds) coordinates
-                let dmsLat = convertToDMS(lat, 'lat');
-                let dmsLng = convertToDMS(lng, 'lng');
+                let dmsLat = convertToDMS(currentLat, 'lat');
+                let dmsLng = convertToDMS(currentLng, 'lng');
                 document.getElementById("dmsCoordinates").innerText = `도분초: ${dmsLat}, ${dmsLng}`;
 
                 // Update map center and add marker
-                map.setCenter(new kakao.maps.LatLng(lat, lng));
+                map.setCenter(new kakao.maps.LatLng(currentLat, currentLng));
                 if (!marker) {
                     marker = new kakao.maps.Marker({
-                        position: new kakao.maps.LatLng(lat, lng),
+                        position: new kakao.maps.LatLng(currentLat, currentLng),
                         map: map
                     });
                 } else {
-                    marker.setPosition(new kakao.maps.LatLng(lat, lng));
+                    marker.setPosition(new kakao.maps.LatLng(currentLat, currentLng));
                 }
             });
         } else {
             alert("Geolocation is not supported by this browser.");
         }
     });
-
 
     // Function to convert coordinates to DMS (Degrees, Minutes, Seconds)
     function convertToDMS(degree, type) {
@@ -141,176 +128,45 @@
         let s = ((degree - d - m / 60) * 3600).toFixed(2);
         return `${d}° ${m}' ${s}" ${type === 'lat' ? (degree > 0 ? 'N' : 'S') : (degree > 0 ? 'E' : 'W')}`;
     }
-   
-    // Placeholder functions for the buttons
 
+    // Function to share location
+    document.getElementById("shareLocation").addEventListener("click", function() {
+        if (currentLat && currentLng) {
+            const googleMapLink = `https://www.google.com/maps?q=${currentLat},${currentLng}`;
+            const kakaoMapLink = `https://map.kakao.com/link/map/Location,${currentLat},${currentLng}`;
+
+            const shareMessage = `🚨 산악구조 위치 공유\n\n위도: ${currentLat}, 경도: ${currentLng}\n\nGoogle 지도: ${googleMapLink}\nKakao 지도: ${kakaoMapLink}`;
+
+            if (navigator.share) {
+                navigator.share({
+                    title: "산악구조 GPS 위치",
+                    text: shareMessage,
+                    url: googleMapLink
+                }).then(() => {
+                    console.log('위치가 공유되었습니다.');
+                }).catch((error) => {
+                    console.error('위치 공유 오류:', error);
+                });
+            } else {
+                alert('이 브라우저는 위치 공유를 지원하지 않습니다.\n링크를 복사하여 공유하세요:\n' + shareMessage);
+            }
+        } else {
+            alert('위치를 먼저 확인한 후 공유할 수 있습니다.');
+        }
+    });
+
+    // Function to share memo
     function shareMemos() {
         let memos = document.getElementById('savedMemos').innerText;
         alert("Memo shared:\n" + memos);
     }
 
+    // Function to print map and memo
     function printPagemap() {
         window.print();  // This will print the page including the map
     }
-
-    // 메모 공유
-    function shareMemos() {
-        if (navigator.share) {
-            const memoText = memos.join('\n');
-
-            const mapLinkGoogle = `https://www.google.com/maps?q=${latitude},${longitude}`;
-            const mapLinkKakao = `https://map.kakao.com/link/map/Location,${latitude},${longitude}`;
-
-            const shareContent = `메모:\n${memoText}\n\n지도 좌표:\n위도: ${latitude}, 경도: ${longitude}\n\n지도 링크:\nGoogle: ${mapLinkGoogle}\nKakao: ${mapLinkKakao}`;
-
-            navigator.share({
-                title: 'Memo 및 위치 공유',
-                text: shareContent
-            })
-            .then(() => console.log('메모가 공유되었습니다.'))
-            .catch(error => console.error('공유 오류:', error));
-        } else {
-            alert("이 브라우저는 공유 기능을 지원하지 않습니다.");
-        }
-    }
-
-    // 현재 위치 가져오기
-    document.getElementById('getLocation').addEventListener('click', function() {
-        if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(showPosition, showError);
-        } else {
-            alert("이 브라우저는 위치 정보를 지원하지 않습니다.");
-        }
-    });
-
-    // 위치 표시
-    function showPosition(position) {
-    latitude = position.coords.latitude;
-    longitude = position.coords.longitude;
-    document.getElementById('locationDisplay').textContent = `위도: ${latitude}, 경도: ${longitude}`;
-
-    // UTM-K (GRS80) (EPSG:5179)로 변환
-    const utmK = proj4("WGS84", "EPSG:5179", [longitude, latitude]);
-
-    const utmX = Math.floor(utmK[0]);
-    const utmY = Math.floor(utmK[1]);
-
-    // 메모에 변환된 좌표 입력
-    document.getElementById('memo').value = `내 위치 좌표: ${latitude}, ${longitude} (UTM-K: X=${utmX}, Y=${utmY})`;
-
-    const dmsCoordinates = convertToDMS(latitude, longitude);
-    document.getElementById('dmsCoordinates').textContent = `도분초: ${dmsCoordinates}`;
-
-    const mapOptions = {
-        center: new naver.maps.LatLng(latitude, longitude),
-        zoom: 15
-    };
-
-    const map = new naver.maps.Map('map', mapOptions);
-    new naver.maps.Marker({
-        position: new naver.maps.LatLng(latitude, longitude),
-        map: map
-    });
-}
-
-      // 도분초 좌표 변환
-    function convertToDMS(lat, lon) {
-        const latDeg = Math.floor(Math.abs(lat));
-        const latMin = Math.floor((Math.abs(lat) - latDeg) * 60);
-        const latSec = ((Math.abs(lat) - latDeg) * 60 - latMin) * 60;
-
-        const lonDeg = Math.floor(Math.abs(lon));
-        const lonMin = Math.floor((Math.abs(lon) - lonDeg) * 60);
-        const lonSec = ((Math.abs(lon) - lonDeg) * 60 - lonMin) * 60;
-
-        const latDirection = lat >= 0 ? 'N' : 'S';
-        const lonDirection = lon >= 0 ? 'E' : 'W';
-
-        return `${latDeg}° ${latMin}' ${latSec.toFixed(2)}" ${latDirection}, ${lonDeg}° ${lonMin}' ${lonSec.toFixed(2)}" ${lonDirection}`;
-    }
-
-    // 위치 오류 처리
-    function showError(error) {
-        switch (error.code) {
-            case error.PERMISSION_DENIED:
-                alert("사용자가 위치 정보를 허용하지 않았습니다.");
-                break;
-            case error.POSITION_UNAVAILABLE:
-                alert("위치 정보를 사용할 수 없습니다.");
-                break;
-            case error.TIMEOUT:
-                alert("위치 정보 요청이 시간 초과되었습니다.");
-                break;
-            case error.UNKNOWN_ERROR:
-                alert("알 수 없는 오류가 발생했습니다.");
-                break;
-        }
-    }
-
-    // 도분초 좌표 변환
-    function convertToDMS(lat, lon) {
-        const latDeg = Math.floor(Math.abs(lat));
-        const latMin = Math.floor((Math.abs(lat) - latDeg) * 60);
-        const latSec = ((Math.abs(lat) - latDeg) * 60 - latMin) * 60;
-
-        const lonDeg = Math.floor(Math.abs(lon));
-        const lonMin = Math.floor((Math.abs(lon) - lonDeg) * 60);
-        const lonSec = ((Math.abs(lon) - lonDeg) * 60 - lonMin) * 60;
-
-        const latDirection = lat >= 0 ? 'N' : 'S';
-        const lonDirection = lon >= 0 ? 'E' : 'W';
-
-        return `${latDeg}° ${latMin}' ${latSec.toFixed(2)}" ${latDirection}, ${lonDeg}° ${lonMin}' ${lonSec.toFixed(2)}" ${lonDirection}`;
-    }
-  }
-
-    document.getElementById('convertToWGS84').addEventListener('click', function() {
-        const utmX = parseFloat(document.getElementById('utmX').value);
-        const utmY = parseFloat(document.getElementById('utmY').value);
-
-        if (isNaN(utmX) || isNaN(utmY)) {
-            document.getElementById('wgs84Result').textContent = "유효한 UTM-K 좌표를 입력하세요.";
-            return;
-        }
-
-        // UTM-K에서 WGS84로 변환
-        const wgs84 = proj4("EPSG:5179", "WGS84", [utmX, utmY]);
-
-        document.getElementById('wgs84Result').textContent = `위도: ${wgs84[1].toFixed(6)}, 경도: ${wgs84[0].toFixed(6)}`;
-    });
-  
-  // 메모 프린트
-    function printPagememo() {
-        var memoContent = document.getElementById('savedMemos').innerHTML;
-
-        var printWindow = window.open('', '', 'height=600, width=800');
-        printWindow.document.write('<html><head><title>산악구조 GPS 기록</title>');
-        printWindow.document.write('<style> body { font-family: Arial, sans-serif; margin: 20px; } </style>');
-        printWindow.document.write('</head><body>');
-        printWindow.document.write('<h2>🆘 산악구조 GPS Recording</h2>');
-        printWindow.document.write('<h4>📕 GPS Record</h4>');
-        printWindow.document.write(memoContent);  // Memo content
-        printWindow.document.write('</body></html>');
-        printWindow.document.close();
-        printWindow.print();
-    }
-   // 지도 프린트
-    function printPagemap() {
-        var mapContent = document.getElementById('map').innerHTML;
-
-        var printWindow = window.open('', '', 'height=600, width=800');
-        printWindow.document.write('<html><head><title>산악구조 GPS 기록</title>');
-        printWindow.document.write('<style> body { font-family: Arial, sans-serif; margin: 20px; } </style>');
-        printWindow.document.write('</head><body>');
-        printWindow.document.write('<h2>🆘 산악구조 GPS Recording</h2>');
-        printWindow.document.write('<h4>📍 지도 위치</h4>');
-        printWindow.document.write(mapContent);  // Map content
-        printWindow.document.write('</body></html>');
-        printWindow.document.close();
-        printWindow.print();
-    }
 </script>
-  
+
   <title>GPS 링크</title>
     <style>
         body {
@@ -337,7 +193,9 @@
   <a href="https://www.whereurl.com/" target="_blank">조난 위치공유 시스템 whereUrl</a>
     
 </div>
-
+  
+  
 </body>
 </html>
+
 
