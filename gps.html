@@ -110,7 +110,7 @@
 
                 // Display coordinates
                 document.getElementById("locationDisplay").innerText = "위도: " + lat + ", 경도: " + lng;
-<script>
+
 
                 // Display DMS (degrees, minutes, seconds) coordinates
                 let dmsLat = convertToDMS(lat, 'lat');
@@ -142,7 +142,7 @@
         return `${d}° ${m}' ${s}" ${type === 'lat' ? (degree > 0 ? 'N' : 'S') : (degree > 0 ? 'E' : 'W')}`;
     }
 </script>
-<script>
+<script>    
     // Placeholder functions for the buttons
 
     function shareMemos() {
