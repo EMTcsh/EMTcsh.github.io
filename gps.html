@@ -103,8 +103,8 @@
 
 <div id="myLocation" class="info">📍 Map Location</div>
 
-<div id="map"></div> <!-- 지도 컨테이너 -->
-
+<div id="map"></div> <!-- 지도 컨테이너 -->  
+  
 <script>
     // Initialize the Kakao map
     let map, marker;
@@ -180,8 +180,206 @@
     }
 
     // Initialize map on page load
-    window.onload = initMap;
+    window.onload = initMap; 
 </script>
+  
+<script>
+    let latitude, longitude;
+    const memos = [];
 
+    // 메모 추가
+    function saveMemo() {
+        const memo = document.getElementById('memo').value;
+        if (memo) {
+            const timestamp = new Date().toLocaleString();
+            const memoWithTimestamp = `${timestamp}: ${memo}`;
+            memos.push(memoWithTimestamp);
+            const savedMemosDiv = document.getElementById('savedMemos');
+            const memoElement = document.createElement('div');
+            memoElement.textContent = memoWithTimestamp;
+            savedMemosDiv.appendChild(memoElement);
+            document.getElementById('memo').value = '';
+        } else {
+            alert('메모를 입력해주세요.');
+        }
+    }
+
+    // 메모 다운로드
+    function downloadMemos() {
+        const blob = new Blob([memos.join('\n')], { type: 'text/plain' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'memos.txt';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    }
+
+    // 메모 공유
+    function shareMemos() {
+        if (navigator.share) {
+            const memoText = memos.join('\n');
+
+            const mapLinkGoogle = `https://www.google.com/maps?q=${latitude},${longitude}`;
+            const mapLinkKakao = `https://map.kakao.com/link/map/Location,${latitude},${longitude}`;
+
+            const shareContent = `메모:\n${memoText}\n\n지도 좌표:\n위도: ${latitude}, 경도: ${longitude}\n\n지도 링크:\nGoogle: ${mapLinkGoogle}\nKakao: ${mapLinkKakao}`;
+
+            navigator.share({
+                title: 'Memo 및 위치 공유',
+                text: shareContent
+            })
+            .then(() => console.log('메모가 공유되었습니다.'))
+            .catch(error => console.error('공유 오류:', error));
+        } else {
+            alert("이 브라우저는 공유 기능을 지원하지 않습니다.");
+        }
+    }
+
+    // 현재 위치 가져오기
+    document.getElementById('getLocation').addEventListener('click', function() {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(showPosition, showError);
+        } else {
+            alert("이 브라우저는 위치 정보를 지원하지 않습니다.");
+        }
+    });
+
+    // 위치 표시
+    function showPosition(position) {
+    latitude = position.coords.latitude;
+    longitude = position.coords.longitude;
+    document.getElementById('locationDisplay').textContent = `위도: ${latitude}, 경도: ${longitude}`;
+
+    // UTM-K (GRS80) (EPSG:5179)로 변환
+    const utmK = proj4("WGS84", "EPSG:5179", [longitude, latitude]);
+
+    const utmX = Math.floor(utmK[0]);
+    const utmY = Math.floor(utmK[1]);
+
+    // 메모에 변환된 좌표 입력
+    document.getElementById('memo').value = `내 위치 좌표: ${latitude}, ${longitude} (UTM-K: X=${utmX}, Y=${utmY})`;
+
+    const dmsCoordinates = convertToDMS(latitude, longitude);
+    document.getElementById('dmsCoordinates').textContent = `도분초: ${dmsCoordinates}`;
+
+    const mapOptions = {
+        center: new naver.maps.LatLng(latitude, longitude),
+        zoom: 15
+    };
+
+    const map = new naver.maps.Map('map', mapOptions);
+    new naver.maps.Marker({
+        position: new naver.maps.LatLng(latitude, longitude),
+        map: map
+    });
+}
+
+      // 도분초 좌표 변환
+    function convertToDMS(lat, lon) {
+        const latDeg = Math.floor(Math.abs(lat));
+        const latMin = Math.floor((Math.abs(lat) - latDeg) * 60);
+        const latSec = ((Math.abs(lat) - latDeg) * 60 - latMin) * 60;
+
+        const lonDeg = Math.floor(Math.abs(lon));
+        const lonMin = Math.floor((Math.abs(lon) - lonDeg) * 60);
+        const lonSec = ((Math.abs(lon) - lonDeg) * 60 - lonMin) * 60;
+
+        const latDirection = lat >= 0 ? 'N' : 'S';
+        const lonDirection = lon >= 0 ? 'E' : 'W';
+
+        return `${latDeg}° ${latMin}' ${latSec.toFixed(2)}" ${latDirection}, ${lonDeg}° ${lonMin}' ${lonSec.toFixed(2)}" ${lonDirection}`;
+    }
+
+    // 위치 오류 처리
+    function showError(error) {
+        switch (error.code) {
+            case error.PERMISSION_DENIED:
+                alert("사용자가 위치 정보를 허용하지 않았습니다.");
+                break;
+            case error.POSITION_UNAVAILABLE:
+                alert("위치 정보를 사용할 수 없습니다.");
+                break;
+            case error.TIMEOUT:
+                alert("위치 정보 요청이 시간 초과되었습니다.");
+                break;
+            case error.UNKNOWN_ERROR:
+                alert("알 수 없는 오류가 발생했습니다.");
+                break;
+        }
+    }
+
+    // 도분초 좌표 변환
+    function convertToDMS(lat, lon) {
+        const latDeg = Math.floor(Math.abs(lat));
+        const latMin = Math.floor((Math.abs(lat) - latDeg) * 60);
+        const latSec = ((Math.abs(lat) - latDeg) * 60 - latMin) * 60;
+
+        const lonDeg = Math.floor(Math.abs(lon));
+        const lonMin = Math.floor((Math.abs(lon) - lonDeg) * 60);
+        const lonSec = ((Math.abs(lon) - lonDeg) * 60 - lonMin) * 60;
+
+        const latDirection = lat >= 0 ? 'N' : 'S';
+        const lonDirection = lon >= 0 ? 'E' : 'W';
+
+        return `${latDeg}° ${latMin}' ${latSec.toFixed(2)}" ${latDirection}, ${lonDeg}° ${lonMin}' ${lonSec.toFixed(2)}" ${lonDirection}`;
+    }
+
+    // 상대방 위치 비교
+    function showLocations() {
+        const otherLatitude = parseFloat(document.getElementById('otherLatitude').value);
+        const otherLongitude = parseFloat(document.getElementById('otherLongitude').value);
+
+        if (latitude && longitude && !isNaN(otherLatitude) && !isNaN(otherLongitude)) {
+            const mapOptions = {
+                center: new naver.maps.LatLng(latitude, longitude),
+                zoom: 10
+            };
+
+            const mapComparison = new naver.maps.Map('mapComparison', mapOptions);
+
+            // 내 위치 마커
+            new naver.maps.Marker({
+                position: new naver.maps.LatLng(latitude, longitude),
+                map: mapComparison,
+                title: "내 위치"
+            });
+
+            // 상대방 위치 마커
+            const otherPosition = new naver.maps.LatLng(otherLatitude, otherLongitude);
+            new naver.maps.Marker({
+                position: otherPosition,
+                map: mapComparison,
+                title: "상대방 위치"
+            });
+
+            // 거리 계산
+            const distance = naver.maps.geometry.spherical.computeDistanceBetween(
+                new naver.maps.LatLng(latitude, longitude),
+                otherPosition
+            );
+
+            // 거리 정보 표시
+            document.getElementById('distanceInfo').textContent = `두 위치 간의 거리: ${(distance / 1000).toFixed(2)} km`;
+
+            // 지도 중앙에 두 위치 표시
+            const bounds = new naver.maps.LatLngBounds();
+            bounds.extend(new naver.maps.LatLng(latitude, longitude));
+            bounds.extend(otherPosition);
+            mapComparison.fitBounds(bounds);
+        } else {
+            alert("모든 위치 정보를 올바르게 입력해주세요.");
+        }
+    } 
+</script>  
+    
+<!--공지 안내-->
+<div class="discord-link">    
+    <p> 🐸 Memo Ver. 0.9.26. 국립공원 응급처치 연구회. E-mail: paramedic@knps.or.kr. </p> 
+    <a href="https://discord.gg/ryaMRTAhwP" target="_blank">국립공원 응급처치 연구회 Discord 서버</a>
+</div>
+    
 </body>
 </html>
