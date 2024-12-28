@@ -106,7 +106,16 @@
 <div id="myLocation" class="info">📍 Map Location</div>
 
 <div id="map"></div> <!-- 지도 컨테이너 -->
+<script>
+		var container = document.getElementById('map');
+		var options = {
+			center: new kakao.maps.LatLng(33.450701, 126.570667),
+			level: 3
+		};
 
+		var map = new kakao.maps.Map(container, options);
+	</script>
+    
 <!-- 상대방 위치 확인 -->
 <h3>🌐 Target GPS 좌표</h3>
 <div id="distanceInfo" class="info"></div>
