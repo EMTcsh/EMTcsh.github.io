@@ -8,7 +8,6 @@
     <!-- 카카오 지도 API -->
     <script type="text/javascript" src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=ff9e145029506d6e4c72d1f2b01ea424&libraries=services"></script> <!-- 카카오 지도 API -->
     
-	
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -17,42 +16,12 @@
         h2, h3 {
             text-align: center;
         }
-        #memo {
-            width: 100%;
-            height: 200px;
-            margin-bottom: 10px;
-        }
-        .button-container {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 10px;
-        }
-        .button {
-            flex: 1;
-            padding: 10px;
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            cursor: pointer;
-            margin: 0 5px;
-            font-size: 16px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
         .coordinate-box {
             border: 1px solid #ccc;
             padding: 10px;
             margin-top: 10px;
             background-color: #f0f0f0;
             border-radius: 5px;
-        }
-        #savedMemos div {
-            border: 1px solid #ddd;
-            padding: 10px;
-            margin: 5px 0;
-            border-radius: 5px;
-            background-color: #f9f9f9;
         }
         #map {
             height: 400px;
@@ -67,7 +36,7 @@
 </head>
 <body>
 
-<h2>🆘 산악구조 GPS Recording</h2>
+<h2>🆘 산악구조 GPS 위치 확인</h2>
 
 <!-- 내 위치 확인 -->     
 <h4>🌐 My GPS 좌표</h4>
@@ -80,8 +49,25 @@
 <div id="myLocation" class="info">📍 Map Location</div>
 
 <div id="map"></div> <!-- 지도 컨테이너 -->  
+
 <script>
-    // 현재 위치 가져오기
+    let map, marker, currentLat, currentLng;
+
+    // Function to initialize the Kakao map
+    function initMap(lat, lng) {
+        map = new kakao.maps.Map(document.getElementById('map'), {
+            center: new kakao.maps.LatLng(lat, lng), // Center map at the user's location
+            level: 3
+        });
+
+        // Add marker at the user's location
+        marker = new kakao.maps.Marker({
+            position: new kakao.maps.LatLng(lat, lng),
+            map: map
+        });
+    }
+
+    // Get the user's location
     document.getElementById('getLocation').addEventListener('click', function() {
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(showPosition, showError);
@@ -90,27 +76,40 @@
         }
     });
 
-    // 위치 표시
+    // Show position on the page
     function showPosition(position) {
-    latitude = position.coords.latitude;
-    longitude = position.coords.longitude;
-    document.getElementById('locationDisplay').textContent = `위도: ${latitude}, 경도: ${longitude}`;
+        currentLat = position.coords.latitude;
+        currentLng = position.coords.longitude;
 
-    // UTM-K (GRS80) (EPSG:5179)로 변환
-    const utmK = proj4("WGS84", "EPSG:5179", [longitude, latitude]);
+        // Display the coordinates
+        document.getElementById('locationDisplay').textContent = `위도: ${currentLat}, 경도: ${currentLng}`;
 
-    const utmX = Math.floor(utmK[0]);
-    const utmY = Math.floor(utmK[1]);
+        // Convert coordinates to DMS format
+        let dmsLat = convertToDMS(currentLat, 'lat');
+        let dmsLng = convertToDMS(currentLng, 'lng');
+        document.getElementById('dmsCoordinates').textContent = `도분초: ${dmsLat}, ${dmsLng}`;
 
-		var container = document.getElementById('map');
-		var options = {
-			center: new kakao.maps.LatLng(33.450701, 126.570667),
-			level: 3
-		};
+        // Initialize the map with the user's position
+        initMap(currentLat, currentLng);
+    }
 
-		var map = new kakao.maps.Map(container, options);
-
-	
+    // Handle error when geolocation fails
+    function showError(error) {
+        switch(error.code) {
+            case error.PERMISSION_DENIED:
+                alert("사용자가 위치 정보를 요청하지 않았습니다.");
+                break;
+            case error.POSITION_UNAVAILABLE:
+                alert("위치 정보를 사용할 수 없습니다.");
+                break;
+            case error.TIMEOUT:
+                alert("위치 정보 요청이 시간초과되었습니다.");
+                break;
+            case error.UNKNOWN_ERROR:
+                alert("알 수 없는 오류가 발생했습니다.");
+                break;
+        }
+    }
 
     // Function to convert coordinates to DMS (Degrees, Minutes, Seconds)
     function convertToDMS(degree, type) {
@@ -145,17 +144,6 @@
             alert('위치를 먼저 확인한 후 공유할 수 있습니다.');
         }
     });
-
-    // Function to share memo
-    function shareMemos() {
-        let memos = document.getElementById('savedMemos').innerText;
-        alert("Memo shared:\n" + memos);
-    }
-
-    // Function to print map and memo
-    function printPagemap() {
-        window.print();  // This will print the page including the map
-    }
 </script>
 
   <title>GPS 링크</title>
@@ -185,8 +173,6 @@
     
 </div>
   
-  
 </body>
 </html>
-
 
