@@ -126,11 +126,11 @@
             
             const kakaoMapLink = `https://map.kakao.com/link/map/Location,${currentLat},${currentLng}`;
 
-            const shareMessage = `🚨 산악구조 위치 공유\n\n위도: ${currentLat}, 경도: ${currentLng}\n\nGoogle 
+            const shareMessage = `🚨조난자 위치\n\n위도: ${currentLat}, 경도: ${currentLng}\n\nGoogle 지도: ${googleMapLink}\nKakao 지도: ${kakaoMapLink}`;
 
             if (navigator.share) {
                 navigator.share({
-                    title: "산악구조 GPS 위치",
+                    title: "[조난자 GPS 공유]",
                     text: shareMessage,
                     url: kakaoMapLink
                 }).then(() => {
