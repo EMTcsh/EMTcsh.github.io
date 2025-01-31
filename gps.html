@@ -122,8 +122,9 @@
     document.getElementById("shareLocation").addEventListener("click", function() {
         if (currentLat && currentLng) {
             const googleMapLink = `https://www.google.com/maps?q=${currentLat},${currentLng}`;
-const naverMapLink = `https://map.naver.com/v5/search/${currentLat},${currentLng}`;
-            const tmapLink = `https://www.tmap.co.kr/tmap2/mobile/route.jsp?lat=${currentLat}&lon=${currentLng}`;
+
+            const naverMapLink = `https://map.naver.com/v5/search/${currentLat},${currentLng}`;
+         
             const kakaoMapLink = `https://map.kakao.com/link/map/Location,${currentLat},${currentLng}`;
 
             const shareMessage = `🚨 산악구조 위치 공유\n\n위도: ${currentLat}, 경도: ${currentLng}\n\nGoogle 지도: ${googleMapLink}\nKakao 지도: ${kakaoMapLink}`;
