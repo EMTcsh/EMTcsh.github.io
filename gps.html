@@ -121,9 +121,7 @@
     // Function to share location
     document.getElementById("shareLocation").addEventListener("click", function() {
         if (currentLat && currentLng) {
-           
-             const googleMapLink = `https://www.google.com/maps?q=${currentLat},${currentLng}`;
-         
+                  
             const kakaoMapLink = `https://map.kakao.com/link/map/Location,${currentLat},${currentLng}`;
 
             const shareMessage = `🚨 산악구조 위치 공유\n\n위도: ${currentLat}, 경도: ${currentLng}\n\nGoogle 지도: ${googleMapLink}\nKakao 지도: ${kakaoMapLink}`;
@@ -132,7 +130,7 @@
                 navigator.share({
                     title: "산악구조 GPS 위치",
                     text: shareMessage,
-                    url: googleMapLink
+                    url: kakaoMapLink
                 }).then(() => {
                     console.log('위치가 공유되었습니다.');
                 }).catch((error) => {
