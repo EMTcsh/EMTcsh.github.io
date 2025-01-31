@@ -126,7 +126,7 @@
             
             const kakaoMapLink = `https://map.kakao.com/link/map/Location,${currentLat},${currentLng}`;
 
-            const shareMessage = `🚨조난자 위치\n\n위도: ${currentLat}, 경도: ${currentLng}\n\nGoogle 지도: ${googleMapLink}\nKakao 지도: ${kakaoMapLink}`;
+            const shareMessage = `🚨조난자 위치 \n\n위도: ${currentLat} \n\n경도: ${currentLng} \n\nGoogle Map: ${googleMapLink} \nKakao Map:`;
 
             if (navigator.share) {
                 navigator.share({
