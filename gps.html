@@ -36,7 +36,7 @@
 </head>
 <body>
 
-<h2>🆘 구조요청 GPS 좌표표</h2>
+<h2>🆘 구조요청 GPS 좌표</h2>
 <br>
 <!-- 내 위치 확인 -->     
 <button id="getLocation">내 위치 확인</button>
@@ -126,11 +126,11 @@
             
             const kakaoMapLink = `https://map.kakao.com/link/map/Location,${currentLat},${currentLng}`;
 
-            const shareMessage = `\n\n🚨사고위치 좌표: \n\n위도: ${currentLat} \n\n경도: ${currentLng} \n\nGoogle Map: ${googleMapLink} \nKakao Map: `;
+            const shareMessage = `\n\n🚨요구조자 현위치 좌표: \n\n위도: ${currentLat} \n\n경도: ${currentLng} \n\nGoogle Map: ${googleMapLink} \nKakao Map: `;
 
             if (navigator.share) {
                 navigator.share({
-                    title: "[GPS 좌표 공유]",
+                    title: "[구조요청 GPS좌표 공유]",
                     text: shareMessage,
                     url: kakaoMapLink
                 }).then(() => {
