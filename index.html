@@ -360,7 +360,42 @@
     <div id="savedData" class="board"></div>
 </div>
 <script>
-    
+    // Save trauma assessment data
+function saveTraumaAssessment() {
+    const name = document.getElementById('patientName').value;
+    const age = document.getElementById('patientAge').value;
+    const gender = document.getElementById('patientGender').value;
+    const airway = document.getElementById('airwayDetails').value;
+    const breathing = document.getElementById('breathingDetails').value;
+    const circulation = document.getElementById('circulationDetails').value;
+    const disability = document.getElementById('disabilityDetails').value;
+    const exposure = document.getElementById('exposureDetails').value;
+    const currentDate = new Date();
+    const timestamp = currentDate.toLocaleString();
+    const assessmentHTML = `
+        <div class="board-item">
+            <strong>[ABCDE]</strong>
+            <strong>${timestamp}</strong>
+            <p><strong>이름:</strong> ${name}, <strong>나이:</strong> ${age}, <strong>성별:</strong> ${gender}</p>
+            <p><strong>Airway (기도) :</strong> ${airway}</p>
+            <p><strong>Breathing (호흡) :</strong> ${breathing}</p>
+            <p><strong>Circulation (순환) :</strong> ${circulation}</p>
+            <p><strong>Disability (의식) :</strong> ${disability}</p>
+            <p><strong>Exposure (노출 및 환경) :</strong> ${exposure}</p>
+            <br>
+        </div>
+    `;
+    // Reset form fields
+    document.getElementById('traumaAssessmentForm').reset();
+    // Append assessment data to the saved data section
+    document.getElementById('traumaAssessmentResults').innerHTML += assessmentHTML;
+    // Reset form fields (중복 호출 제거)
+  
+    // document.getElementById('traumaAssessmentForm').reset(); 
+  document.getElementById('traumaAssessmentForm').reset(); // Reset form fields
+    // Append assessment data to the saved data section
+    document.getElementById('savedData').innerHTML += assessmentHTML;   
+}
     // Save AMPLE data
     function saveAMPLEData() {
         const name = document.getElementById('ample_patientName').value;
