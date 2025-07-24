@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📌  PARAMEDIC 응급환자 평가도구</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f0f0f0;
+        }
+        .container {
+            width: 80%;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h1,
+        h2 {
+            color: #0056b3;
+        }
+        .section {
+            margin-bottom: 30px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background-color: #fff;
+        }
+        .section label {
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+        .section input[type="checkbox"] {
+            margin-right: 10px;
+            width: 25px;
+            height: 25px;
+        }
+        select,
+        input,
+        textarea {
+            width: calc(100% - 22px);
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            box-sizing: border-box;
+            font-size: 16px;
+        }
+        input,
+        textarea {
+            height: 45px;
+        }
+        textarea {
+            resize: vertical;
+        }
+        button {
+            width: 100%;
+            padding: 12px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            font-size: 18px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .result,
+        .status,
+        .footer,
+        .result-container {
+            margin-top: 20px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        .result-container {
+            background-color: #e9ecef;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+        }
+        .result-item {
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+        .timestamp {
+            font-size: 12px;
+            color: #888;
+        }
+        .board {
+            margin-top: 30px;
+            border-top: 1px solid #ddd;
+            padding-top: 10px;
+            max-height: 800px;
+            overflow-y: auto;
+        }
+        .board-item {
+            border-bottom: 1px solid #ddd;
+            padding: 10px 0;
+        }
+        .board-item:last-child {
+            border-bottom: none;
+        }
+        .grade-1 {
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+        .grade-2 {
+            background-color: #fff3cd;
+            border: 1px solid #ffeeba;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+        .grade-3 {
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+        .data-item {
+            margin-bottom: 10px;
+        }
+        #savedData {
+            margin-top: 20px;
+            padding: 15px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            background-color: #f9f9f9;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        .form-group input[type="text"],
+        .form-group textarea {
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>PARAMEDIC 응급환자 평가도구</h1>
+<br>
+        
+<!-- 공지사항 표시 섹션 -->
+<div class="section">
+    <h2>알림</h2>
+    <div class="result">
+                   
+        <div class="footer">
+            <p>© 2024 Paramedic Web Applications. EMT Ver. 0.9.28. Korea National Park Service Paramedic Lab.</p>
+        </div>
+        <h4>응급환자의 신속한 평가와 기록 및 응급구조사의 현장 대응력 향상을 위하여 본 페이지를 만들었습니다.</h4>
+    </div>
+</div>
+<br>
+
+<!-- 나이 계산기 섹션 -->
+<div class="section">
+  <h2>나이 계산기</h2>
+  <form id="ageForm">
+    <label for="birthdate">생년월일을 입력하세요 (YYYY-MM-DD):</label>
+    <input type="date" id="birthdate" required>
+    <button type="button" onclick="calculateAge()">나이 계산</button>
+    <p id="ageResult"></p>
+  </form>
+
+  <script>
+    function calculateAge() {
+      const birthdateInput = document.getElementById('birthdate').value;
+      if (!birthdateInput) {
+        document.getElementById('ageResult').innerText = '생년월일을 입력하세요.';
+        return;
+      }
+
+      const birthdate = new Date(birthdateInput);
+      const today = new Date();
+      let age = today.getFullYear() - birthdate.getFullYear();
+      const monthDifference = today.getMonth() - birthdate.getMonth();
+      
+      // 생일이 지나지 않았다면 나이를 하나 줄임
+      if (monthDifference < 0 || (monthDifference === 0 && today.getDate() < birthdate.getDate())) {
+        age--;
+      }
+
+      document.getElementById('ageResult').innerText = `당신의 나이는 ${age}세입니다.`;
+    }
+  </script>
+</div>
+  </br>      
+
+<!-- 뇌졸증 ROSIER 점수 계산기 섹션 -->
+<div class="section">
+  <h2>뇌졸증 ROSIER 점수 계산 - 환자평가</h2>
+  <form id="rosierForm">
+    <h3>증상</h3>
+    <label>
+      <input type="checkbox" name="symptoms" value="1"> 안면 비대칭 (+1점)
+    </label><br>
+    <label>
+      <input type="checkbox" name="symptoms" value="1"> 팔의 약화 (+1점)
+    </label><br>
+    <label>
+      <input type="checkbox" name="symptoms" value="1"> 다리의 약화 (+1점)
+    </label><br>
+    <label>
+      <input type="checkbox" name="symptoms" value="1"> 언어장애 (+1점)
+    </label><br>
+    <label>
+      <input type="checkbox" name="symptoms" value="1"> 시각장애 (+1점)
+    </label><br>
+
+    <h3>감점 항목</h3>
+    <label>
+      <input type="checkbox" name="deductions" value="-1"> 발작의 병력 (-1점)
+    </label><br>
+    <label>
+      <input type="checkbox" name="deductions" value="-1"> 혈당 수치가 낮음 (< 3.5 mmol/L) (-1점)
+    </label><br>
+
+     <button type="button" onclick="calculateROSIER()">계산</button>
+     </form>
+    <div class="result" id="rosierResult"></div>
+
+  <script>
+    function calculateROSIER() {
+      let score = 0;
+      const symptoms = document.querySelectorAll('input[name="symptoms"]:checked');
+      const deductions = document.querySelectorAll('input[name="deductions"]:checked');
+      
+      symptoms.forEach(symptom => {
+        score += parseInt(symptom.value);
+      });
+
+      deductions.forEach(deduction => {
+        score += parseInt(deduction.value);
+      });
+
+      let resultText = `뇌졸증 ROSIER 점수: ${score}`;
+      if (score > 0) {
+        resultText += " - 뇌졸중 가능성 높음";
+      } else if (score === 0) {
+        resultText += " - 뇌졸중 가능성 없음";
+      }
+
+      document.getElementById('rosierResult').textContent = resultText;
+    }
+  </script>
+</div>
+<br>
+      
+<!-- GCS 혼수척도 계산기 섹션 -->
+<div class="section">
+    <h2>Glasgow Coma Scale - 환자평가</h2>
+    <form id="gcsForm" onsubmit="return calculateGCS()">
+        <div class="form-group">
+            <label for="name">이름</label>
+            <input type="text" id="name" placeholder="이름을 입력하세요" required>
+        </div>
+        <div class="form-group">
+            <label for="age">나이</label>
+            <input type="number" id="age" placeholder="나이를 입력하세요" required>
+        </div>
+        <div class="form-group">
+            <label for="gender">성별</label>
+            <select id="gender" required>
+                <option value="">선택</option>
+                <option value="male">남성</option>
+                <option value="female">여성</option>
+                <option value="unknown">미상</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="eye">눈 반응 (E)</label>
+            <select id="eye" required>
+                <option value="4">자발적으로 열림</option>
+                <option value="3">소리 자극에 열림</option>
+                <option value="2">통증 자극에 열림</option>
+                <option value="1">전혀 열림 안함</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="verbal">언어 반응 (V)</label>
+            <select id="verbal" required>
+                <option value="5">정확한 대답</option>
+                <option value="4">혼잡한 대답</option>
+                <option value="3">혼미한 대답</option>
+                <option value="2">모호한 대답</option>
+                <option value="1">응답 없음</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="motor">운동 반응 (M)</label>
+            <select id="motor" required>
+                <option value="6">명령 수행</option>
+                <option value="5">통증 자극에 국소화</option>
+                <option value="4">통증 자극에 굴곡</option>
+                <option value="3">통증 자극에 구부리기</option>
+                <option value="2">경련</option>
+                <option value="1">운동 없음</option>
+            </select>
+        </div>
+        <button type="submit">계산</button>
+    </form>
+    <div class="result-container" id="gcsResultContainer" style="display: none;">
+        <div id="gcsResult"></div>
+    </div>
+</div>
+<br>
+
+<!-- OPQRST - 환자 평가 섹션 -->
+<div class="section">
+    <h2>OPQRST - 환자평가</h2>
+    <form id="opqrstForm">
+        <div class="form-group">
+            <label for="opqrst_patientName">이름</label>
+            <input type="text" id="opqrst_patientName" required>
+        </div>
+        <div class="form-group">
+            <label for="opqrst_patientAge">나이</label>
+            <input type="number" id="opqrst_patientAge" required>
+        </div>
+        <div class="form-group">
+            <label for="opqrst_patientGender">성별</label>
+            <select id="opqrst_patientGender" required>
+                <option value="">선택</option>
+                <option value="male">남성</option>
+                <option value="female">여성</option>
+                <option value="unknown">미상</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="onset">Onset (시작 시간):</label>
+            <input type="text" id="onset" placeholder="증상이 언제 시작되었나요?">
+        </div>
+        <div class="form-group">
+            <label for="provocation">Provocation (악화/완화 요인):</label>
+            <input type="text" id="provocation" placeholder="증상을 악화시키거나 완화시키는 요인은?">
+        </div>
+        <div class="form-group">
+            <label for="quality">Quality (증상 특성):</label>
+            <input type="text" id="quality" placeholder="증상의 특성은? (예: 날카로움, 둔함)">
+        </div>
+        <div class="form-group">
+            <label for="region">Region/Radiation (위치/방사):</label>
+            <input type="text" id="region" placeholder="통증이나 증상의 위치 또는 방사 위치">
+        </div>
+        <div class="form-group">
+            <label for="severity">Severity (강도):</label>
+            <input type="text" id="severity" placeholder="증상의 강도를 0~10으로 평가하세요">
+        </div>
+        <div class="form-group">
+            <label for="time">Time (기간):</label>
+            <input type="text" id="time" placeholder="증상이 얼마나 지속되었나요?">
+        </div>
+        <button type="button" onclick="saveOPQRSTData()">기록</button>
+    </form>
+    <div class="result" id="opqrstResults"></div>
+</div>
+<br>      
+
+<!-- 결과 및 기록된 데이터 섹션 -->
+<div class="section">
+    <h2>환자평가 기록 데이터</h2>
+    <div id="savedData" class="board"></div>
+</div>
+<script>
+   // Calculate GCS score and determine the state
+    function calculateGCS() {
+        const name = document.getElementById('name').value;
+        const age = document.getElementById('age').value;
+        const gender = document.getElementById('gender').value;
+        const eye = parseInt(document.getElementById('eye').value);
+        const verbal = parseInt(document.getElementById('verbal').value);
+        const motor = parseInt(document.getElementById('motor').value);
+        const totalScore = eye + verbal + motor;
+        let state;
+        if (totalScore === 15) {
+            state = '정상';
+        } else if (totalScore >= 13) {
+            state = '졸림 (Drowsy)';
+        } else if (totalScore >= 9) {
+            state = '혼미 (Stupor)';
+        } else if (totalScore >= 4) {
+            state = '반혼수 (Semicoma)';
+        } else if (totalScore >= 3) {
+            state = '혼수 (Coma)';
+        } else {
+            state = '심각한 상태';
+        }
+        let injurySeverity;
+        if (totalScore >= 13) {
+            injurySeverity = '경미한 손상';
+        } else if (totalScore >= 9) {
+            injurySeverity = '중등도 손상';
+        } else {
+            injurySeverity = '중증 손상';
+        }
+        const timestamp = new Date().toLocaleString();
+        const resultHTML = `
+            <div class="gcs-result">
+                <strong>[GCS 결과]</strong>
+                <strong>시간:</strong> ${timestamp}
+               <p><strong>이름:</strong> ${name}, <strong>나이:</strong> ${age}, <strong>성별:</strong> ${gender}</p>
+                <p><strong>GCS 점수:</strong> ${totalScore} (${state})</p>
+                <p><strong>부상 정도:</strong> ${injurySeverity}</p>
+            </div>
+        `;
+        document.getElementById('gcsResult').innerHTML = resultHTML;
+        document.getElementById('gcsResultContainer').style.display = 'block';
+        // 기록된 데이터 섹션에 추가
+        const savedData = document.getElementById('savedData');
+        savedData.innerHTML += `<div class="board-item">${resultHTML}<br></div>`;
+        return false; // 폼 제출 방지
+    }
+    
+    // Save trauma assessment data
+function saveTraumaAssessment() {
+    const name = document.getElementById('patientName').value;
+    const age = document.getElementById('patientAge').value;
+    const gender = document.getElementById('patientGender').value;
+    const airway = document.getElementById('airwayDetails').value;
+    const breathing = document.getElementById('breathingDetails').value;
+    const circulation = document.getElementById('circulationDetails').value;
+    const disability = document.getElementById('disabilityDetails').value;
+    const exposure = document.getElementById('exposureDetails').value;
+    const currentDate = new Date();
+    const timestamp = currentDate.toLocaleString();
+    const assessmentHTML = `
+        <div class="board-item">
+            <strong>[ABCDE]</strong>
+            <strong>${timestamp}</strong>
+            <p><strong>이름:</strong> ${name}, <strong>나이:</strong> ${age}, <strong>성별:</strong> ${gender}</p>
+            <p><strong>Airway (기도) :</strong> ${airway}</p>
+            <p><strong>Breathing (호흡) :</strong> ${breathing}</p>
+            <p><strong>Circulation (순환) :</strong> ${circulation}</p>
+            <p><strong>Disability (의식) :</strong> ${disability}</p>
+            <p><strong>Exposure (노출 및 환경) :</strong> ${exposure}</p>
+            <br>
+        </div>
+    `;
+    // Reset form fields
+    document.getElementById('traumaAssessmentForm').reset();
+    // Append assessment data to the saved data section
+    document.getElementById('traumaAssessmentResults').innerHTML += assessmentHTML;
+    // Reset form fields (중복 호출 제거)
+  
+    // document.getElementById('traumaAssessmentForm').reset(); 
+  document.getElementById('traumaAssessmentForm').reset(); // Reset form fields
+    // Append assessment data to the saved data section
+    document.getElementById('savedData').innerHTML += assessmentHTML;   
+}
+  
+   // Save OPQRST data
+    function saveOPQRSTData() {
+        const name = document.getElementById('opqrst_patientName').value;
+        const age = document.getElementById('opqrst_patientAge').value;
+        const gender = document.getElementById('opqrst_patientGender').value;
+        const onset = document.getElementById('onset').value;
+        const provocation = document.getElementById('provocation').value;
+        const quality = document.getElementById('quality').value;
+        const region = document.getElementById('region').value;
+        const severity = document.getElementById('severity').value;
+        const time = document.getElementById('time').value;
+        const timestamp = new Date().toLocaleString();
+        const opqrstHTML = `
+            <div class="board-item">
+                <strong>[OPQRST]</strong>
+                <strong>${timestamp}</strong>
+                <p><strong>이름:</strong> ${name}, <strong>나이:</strong> ${age}, <strong>성별:</strong> ${gender}</p>
+                <p><strong>Onset (시작 시간) :</strong> ${onset}</p>
+                <p><strong>Provocation (악화/완화 요인) :</strong> ${provocation}</p>
+                <p><strong>Quality (증상 특성) :</strong> ${quality}</p>
+                <p><strong>Region/Radiation (위치/방사) :</strong> ${region}</p>
+                <p><strong>Severity (강도) :</strong> ${severity}</p>
+                <p><strong>Time (기간) :</strong> ${time}</p>
+                <br>
+            </div>
+        `;
+        // Reset form fields
+        document.getElementById('opqrstForm').reset();
+        // Append OPQRST data to the saved data section
+        document.getElementById('opqrstResults').innerHTML += opqrstHTML;
+        document.getElementById('savedData').innerHTML += opqrstHTML;
+    }
+  
+    // Save AMPLE data
+    function saveAMPLEData() {
+        const name = document.getElementById('ample_patientName').value;
+        const age = document.getElementById('ample_patientAge').value;
+        const gender = document.getElementById('ample_patientGender').value;
+        const CC = document.getElementById('CC').value;
+        const allergy = document.getElementById('allergy').value;
+        const medications = document.getElementById('medications').value;
+        const pain = document.getElementById('pain').value;
+        const lastMeal = document.getElementById('lastMeal').value;
+        const event = document.getElementById('event').value;
+        const currentDate = new Date();
+        const timestamp = currentDate.toLocaleString();
+        const ampleHTML = `
+            <div class="board-item">
+                <strong>[SAMPLE]</strong>
+                <strong>${timestamp}</strong>
+                <p><strong>이름:</strong> ${name}, <strong>나이:</strong> ${age}, <strong>성별:</strong> ${gender}</p>
+                <p><strong>Signs and Symptoms (증상) :</strong> ${CC}</p>
+                <p><strong>Allergies (알레르기) :</strong> ${allergy}</p>
+                <p><strong>Medications (약물) :</strong> ${medications}</p>
+                <p><strong>Past Medical History (과거력) :</strong> ${pain}</p>
+                <p><strong>Last Oral Intake (최종 섭취) :</strong> ${lastMeal}</p>
+                <p><strong>Events (사건) :</strong> ${event}</p>
+                <br>
+            </div>
+        `;
+        // Append AMPLE data to the saved data section
+        document.getElementById('savedData').innerHTML += ampleHTML;
+        document.getElementById('ampleResults').innerHTML += ampleHTML;
+        document.getElementById('ampleForm').reset();
+    }
+  
+    // Save bprt data
+    function savebprtData() {
+        const name = document.getElementById('bprt_patientName').value;
+        const age = document.getElementById('bprt_patientAge').value;
+        const gender = document.getElementById('bprt_patientGender').value;        
+        const bloodPressure = document.getElementById('bloodPressure').value;
+        const pulse = document.getElementById('pulse').value;
+        const respiration = document.getElementById('respiration').value;
+        const temperature = document.getElementById('temperature').value;
+        const bloodsugar = document.getElementById('bloodsugar').value;
+         const oxygenSaturation = document.getElementById('oxygenSaturation').value;
+        const currentDate = new Date();
+        const timestamp = currentDate.toLocaleString();
+        const bprtHTML = `
+            <div class="board-item">
+                <strong>[BP.P.RR.T.BST.O₂]</strong>
+                <strong>${timestamp}</strong>
+                <p><strong>이름:</strong> ${name}, <strong>나이:</strong> ${age}, <strong>성별:</strong> ${gender}</p>
+                <p><strong>Blood Pressure (혈압) :</strong> ${bloodPressure}</p>
+                <p><strong>Pulse (맥박) :</strong> ${pulse}</p>
+                <p><strong>Respiratory Rate (호흡수) :</strong> ${respiration}</p>
+                <p><strong>Body Temperature (체온) :</strong> ${temperature}</p>
+                <p><strong>Blood sugar (혈당) :</strong> ${bloodsugar}</p>
+                <p><strong>Oxygen Saturation (산소포화도) :</strong> ${oxygenSaturation}</p>
+                <br>
+            </div>
+        `;
+        // Append bprt data to the saved data section
+        document.getElementById('savedData').innerHTML += bprtHTML;
+        document.getElementById('bprtResults').innerHTML += bprtHTML;
+        document.getElementById('bprtForm').reset();
+    }
+      // 메모 프린트
+  function printPage() {     
+    var memoContent = document.getElementById('savedData').innerHTML;
+
+    // 새 인쇄 창 열기
+    var printWindow = window.open('', '', 'height=600, width=800');
+    
+    // 인쇄 창에 HTML 콘텐츠 작성
+    printWindow.document.write('<html><head><title>PARAMEDIC 응급환자 평가도구</title>');
+    printWindow.document.write('<style> body { font-family: Arial, sans-serif; margin: 20px; } </style>');
+    printWindow.document.write('</head><body>');
+    printWindow.document.write('<h2>PARAMEDIC 응급환자 평가도구</h2>');
+    printWindow.document.write('<h4>📕 Emergency Patient Memo Record</h4>');
+    printWindow.document.write(memoContent);  // Memo content
+    printWindow.document.write('</body></html>');
+    
+    // 문서 닫기 후 인쇄
+    printWindow.document.close();
+    printWindow.print();
+  }
+  
+    // Function to download saved data as a text file
+    function downloadData() {
+        const savedDataText = document.getElementById('savedData').innerText;
+        const blob = new Blob([savedDataText], { type: 'text/plain' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'EMS_Saved_Data.txt';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    }
+  
+    // Function to share saved data using the Web Share API
+    function shareData() {
+        const savedDataText = document.getElementById('savedData').innerText;
+        if (navigator.share) {
+            navigator.share({
+                title: 'PARAMEDIC 기록된 데이터',
+                text: savedDataText,
+                url: window.location.href
+            })
+            .then(() => console.log('데이터가 공유되었습니다.'))
+            .catch((error) => console.error('공유 중 오류 발생:', error));
+        } else {
+            alert('이 브라우저는 공유 기능을 지원하지 않습니다. 기록한 데이터를 수동으로 복사하여 공유하세요.');
+        }
+      
+   
+    }
+</script>
+  
+  <!-- 인쇄 버튼 -->
+  <div class="section">
+    <h2>Data 저장</h2>
+  <button id="printButton" onclick="printPage()">환자평가 기록 프린터 저장</button>
+  </div>
+  
+<!-- Add this section in your existing HTML where you want the share button -->
+<div class="section">
+    <h2>Data 공유</h2>
+    <button type="button" onclick="shareData()">환자평가 기록 데이터 공유</button>
+</div>
+  
+<!-- PARAMEDIC 응급환자 평가도구 공지 게시판 표시 섹션 -->
+    <title>Discord 초대 링크</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 10px;
+        }
+        .discord-link {
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 10px;
+            margin: 10px 0;
+            text-align: center;
+            background-color: #f4f4f4;
+        }
+        a {
+            text-decoration: none;
+            color: #7289DA; /* Discord 블루 색상 */
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+<div class="discord-link">    
+    <p> Ver.0.9.26. E-mail: paramedic@knps.or.kr. </p> 
+    <a href="https://discord.gg/ryaMRTAhwP" target="_blank"> 문의: 🐸 국립공원 응급처치 연구회 </a>
+</div>
+    
+</body>
+</html>
