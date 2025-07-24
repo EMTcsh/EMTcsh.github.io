@@ -155,7 +155,7 @@
 </head>
 <body>
     <div class="container">
-        <h1>PARAMEDIC 응급환자 평가도구</h1>
+        <h1>특수산악구조대 응급환자 평가도구</h1>
 <br>
         
 <!-- 공지사항 표시 섹션 -->
@@ -362,54 +362,6 @@
     <div id="savedData" class="board"></div>
 </div>
 <script>
-   // Calculate GCS score and determine the state
-    function calculateGCS() {
-        const name = document.getElementById('name').value;
-        const age = document.getElementById('age').value;
-        const gender = document.getElementById('gender').value;
-        const eye = parseInt(document.getElementById('eye').value);
-        const verbal = parseInt(document.getElementById('verbal').value);
-        const motor = parseInt(document.getElementById('motor').value);
-        const totalScore = eye + verbal + motor;
-        let state;
-        if (totalScore === 15) {
-            state = '정상';
-        } else if (totalScore >= 13) {
-            state = '졸림 (Drowsy)';
-        } else if (totalScore >= 9) {
-            state = '혼미 (Stupor)';
-        } else if (totalScore >= 4) {
-            state = '반혼수 (Semicoma)';
-        } else if (totalScore >= 3) {
-            state = '혼수 (Coma)';
-        } else {
-            state = '심각한 상태';
-        }
-        let injurySeverity;
-        if (totalScore >= 13) {
-            injurySeverity = '경미한 손상';
-        } else if (totalScore >= 9) {
-            injurySeverity = '중등도 손상';
-        } else {
-            injurySeverity = '중증 손상';
-        }
-        const timestamp = new Date().toLocaleString();
-        const resultHTML = `
-            <div class="gcs-result">
-                <strong>[GCS 결과]</strong>
-                <strong>시간:</strong> ${timestamp}
-               <p><strong>이름:</strong> ${name}, <strong>나이:</strong> ${age}, <strong>성별:</strong> ${gender}</p>
-                <p><strong>GCS 점수:</strong> ${totalScore} (${state})</p>
-                <p><strong>부상 정도:</strong> ${injurySeverity}</p>
-            </div>
-        `;
-        document.getElementById('gcsResult').innerHTML = resultHTML;
-        document.getElementById('gcsResultContainer').style.display = 'block';
-        // 기록된 데이터 섹션에 추가
-        const savedData = document.getElementById('savedData');
-        savedData.innerHTML += `<div class="board-item">${resultHTML}<br></div>`;
-        return false; // 폼 제출 방지
-    }
     
     // Save trauma assessment data
 function saveTraumaAssessment() {
@@ -448,39 +400,7 @@ function saveTraumaAssessment() {
     document.getElementById('savedData').innerHTML += assessmentHTML;   
 }
   
-   // Save OPQRST data
-    function saveOPQRSTData() {
-        const name = document.getElementById('opqrst_patientName').value;
-        const age = document.getElementById('opqrst_patientAge').value;
-        const gender = document.getElementById('opqrst_patientGender').value;
-        const onset = document.getElementById('onset').value;
-        const provocation = document.getElementById('provocation').value;
-        const quality = document.getElementById('quality').value;
-        const region = document.getElementById('region').value;
-        const severity = document.getElementById('severity').value;
-        const time = document.getElementById('time').value;
-        const timestamp = new Date().toLocaleString();
-        const opqrstHTML = `
-            <div class="board-item">
-                <strong>[OPQRST]</strong>
-                <strong>${timestamp}</strong>
-                <p><strong>이름:</strong> ${name}, <strong>나이:</strong> ${age}, <strong>성별:</strong> ${gender}</p>
-                <p><strong>Onset (시작 시간) :</strong> ${onset}</p>
-                <p><strong>Provocation (악화/완화 요인) :</strong> ${provocation}</p>
-                <p><strong>Quality (증상 특성) :</strong> ${quality}</p>
-                <p><strong>Region/Radiation (위치/방사) :</strong> ${region}</p>
-                <p><strong>Severity (강도) :</strong> ${severity}</p>
-                <p><strong>Time (기간) :</strong> ${time}</p>
-                <br>
-            </div>
-        `;
-        // Reset form fields
-        document.getElementById('opqrstForm').reset();
-        // Append OPQRST data to the saved data section
-        document.getElementById('opqrstResults').innerHTML += opqrstHTML;
-        document.getElementById('savedData').innerHTML += opqrstHTML;
-    }
-  
+   
     // Save AMPLE data
     function saveAMPLEData() {
         const name = document.getElementById('ample_patientName').value;
