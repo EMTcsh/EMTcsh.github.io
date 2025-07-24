@@ -204,7 +204,53 @@
   </script>
 </div>
   </br>         
-          
+
+        <!-- 환자 평가 섹션 -->
+<div class="section">
+    <h2>ABCDE - 환자평가</h2>
+    <form id="traumaAssessmentForm">
+        <div class="form-group">
+            <label for="patientName">이름</label>
+            <input type="text" id="patientName" required>
+        </div>
+        <div class="form-group">
+            <label for="patientAge">나이</label>
+            <input type="number" id="patientAge" required>
+        </div>
+        <div class="form-group">
+            <label for="patientGender">성별</label>
+            <select id="patientGender" required>
+                <option value="">선택</option>
+                <option value="male">남성</option>
+                <option value="female">여성</option>
+                <option value="unknown">미상</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Airway (기도)</label>
+            <textarea id="airwayDetails" placeholder="기도 확보 여부, 관리 조치에 대한 세부 사항 입력"></textarea>
+        </div>
+        <div class="form-group">
+            <label>Breathing (호흡)</label>
+            <textarea id="breathingDetails" placeholder="호흡 상태, 호흡수, 호흡 노력에 대한 세부 사항 입력"></textarea>
+        </div>
+        <div class="form-group">
+            <label>Circulation (순환)</label>
+            <textarea id="circulationDetails" placeholder="순환 상태, 맥박, 혈압에 대한 세부 사항 입력"></textarea>
+        </div>
+        <div class="form-group">
+            <label>Disability (의식)</label>
+            <textarea id="disabilityDetails" placeholder="의식 상태, GCS, 동공 반응에 대한 세부 사항 입력"></textarea>
+        </div>
+        <div class="form-group">
+            <label>Exposure (노출 및 환경)</label>
+            <textarea id="exposureDetails" placeholder="체온, 부상 부위, 환경 관리 조치에 대한 세부 사항 입력"></textarea>
+        </div>
+        <button type="button" onclick="saveTraumaAssessment()">기록</button>
+    </form>
+    <div class="result" id="traumaAssessmentResults"></div>
+</div>
+<br>
 
 <!-- SAMPLE 입력 섹션 -->
 <div class="section">
