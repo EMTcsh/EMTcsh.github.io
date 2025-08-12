@@ -6,7 +6,7 @@
 <style>
     body { font-family: Arial, sans-serif; margin: 20px; }
     h1 { text-align: center; margin-bottom: 20px; }
-    table { width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 18px; }
+    table { width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 12px; }
     th, td { border: 1px solid #ccc; padding: 4px; text-align: center; vertical-align: middle; }
     th { background-color: #f2f2f2; }
     .section-title { background-color: #e0f7fa; font-weight: bold; text-align: left; }
@@ -15,6 +15,17 @@
     .btn-container { text-align: center; margin-top: 10px; }
     button { padding: 6px 12px; margin: 5px; font-size: 12px; cursor: pointer; }
 
+    /* 인쇄 전용 스타일 */
+    @media print {
+        body { margin: 5mm; }
+        h1 { font-size: 20px; margin-bottom: 20px; }
+        table { font-size: 18px; margin-bottom: 20px; }
+        th, td { padding: 3px; }
+        input[type="date"], input[type="text"], textarea { font-size: 12px; }
+        button, .btn-container { display: none; }
+        @page { size: A4; margin: 5mm; }
+    }
+    
 </style>
 </head>
 <body>
