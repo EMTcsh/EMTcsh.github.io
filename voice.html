@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>음성-텍스트 변환기</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+        }
+        #controls {
+            margin-bottom: 20px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            background-color: #007BFF;
+            color: white;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        #output {
+            width: 80%;
+            max-width: 600px;
+            min-height: 200px;
+            padding: 15px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            background-color: #fff;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            font-size: 18px;
+            line-height: 1.5;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+    <h1>실시간 음성-텍스트 변환</h1>
+    <div id="controls">
+        <button id="start-btn">변환 시작</button>
+        <button id="stop-btn" disabled>변환 중지</button>
+    </div>
+    <div id="output"></div>
+
+    <script>
+        const startBtn = document.getElementById('start-btn');
+        const stopBtn = document.getElementById('stop-btn');
+        const outputDiv = document.getElementById('output');
+
+        // Web Speech API가 지원되는지 확인합니다.
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+        if (SpeechRecognition) {
+            const recognition = new SpeechRecognition();
+            recognition.lang = 'ko-KR'; // 한국어 설정
+            recognition.continuous = true; // 대화가 끊이지 않고 계속 인식
+            recognition.interimResults = true; // 중간 결과 표시
+
+            // 음성 인식 시작
+            startBtn.addEventListener('click', () => {
+                recognition.start();
+                startBtn.disabled = true;
+                stopBtn.disabled = false;
+                outputDiv.innerHTML = '말씀하세요...';
+            });
+
+            // 음성 인식 중지
+            stopBtn.addEventListener('click', () => {
+                recognition.stop();
+                startBtn.disabled = false;
+                stopBtn.disabled = true;
+                outputDiv.innerHTML += '\n\n음성 인식이 중지되었습니다.';
+            });
+
+            // 음성 인식 결과가 나왔을 때
+            recognition.onresult = (event) => {
+                let transcript = '';
+                for (let i = event.resultIndex; i < event.results.length; i++) {
+                    // isFinal이 true이면 최종 결과, false이면 중간 결과입니다.
+                    if (event.results[i].isFinal) {
+                        transcript += event.results[i][0].transcript + ' ';
+                    }
+                }
+                // 기존 내용에 최종 결과 추가
+                outputDiv.innerHTML += transcript;
+            };
+
+            // 음성 인식이 끝났을 때 (continuous가 true일 때는 오류 또는 수동 중지 시 발생)
+            recognition.onend = () => {
+                console.log('음성 인식이 종료되었습니다.');
+                // 여기에 필요한 추가 동작을 넣을 수 있습니다.
+            };
+
+            // 음성 인식 오류 발생 시
+            recognition.onerror = (event) => {
+                console.error('음성 인식 오류:', event.error);
+                outputDiv.innerHTML = `오류 발생: ${event.error}`;
+                startBtn.disabled = false;
+                stopBtn.disabled = true;
+            };
+
+        } else {
+            // Web Speech API를 지원하지 않는 경우
+            outputDiv.innerHTML = '⚠️ 죄송합니다, 이 브라우저는 Web Speech API를 지원하지 않습니다. Chrome, Firefox 등의 최신 버전을 사용해주세요.';
+            startBtn.disabled = true;
+            stopBtn.disabled = true;
+        }
+    </script>
+</body>
+</html>
