@@ -32,6 +32,7 @@
             border-radius: 25px;
             color: white;
             transition: background-color 0.3s;
+            margin: 5px; /* 버튼 간격 추가 */
         }
         #start-btn { background-color: #28a745; }
         #start-btn:hover { background-color: #218838; }
@@ -43,6 +44,7 @@
         }
         .output-section {
             margin-top: 20px;
+            text-align: center; /* 버튼 정렬을 위해 추가 */
         }
         .output-section h2 { color: #555; border-bottom: 2px solid #eee; padding-bottom: 5px; margin-bottom: 10px; }
         #output-full, #output-summary {
@@ -55,6 +57,7 @@
             line-height: 1.6;
             white-space: pre-wrap;
             word-wrap: break-word;
+            text-align: left; /* 텍스트는 왼쪽 정렬 */
         }
     </style>
 </head>
@@ -68,10 +71,14 @@
         <div class="output-section">
             <h2>💬 원문 (Full Text)</h2>
             <div id="output-full">음성을 인식하면 여기에 텍스트가 나타납니다.</div>
+            <button id="save-full-btn">💾 원문 저장</button>
+            <button id="share-full-btn">🔗 원문 공유</button>
         </div>
         <div class="output-section">
             <h2>📝 요약 (Summary)</h2>
             <div id="output-summary">요약된 내용이 여기에 나타납니다.</div>
+            <button id="save-summary-btn">💾 요약 저장</button>
+            <button id="share-summary-btn">🔗 요약 공유</button>
         </div>
     </div>
 
@@ -80,11 +87,29 @@
         const stopBtn = document.getElementById('stop-btn');
         const outputFull = document.getElementById('output-full');
         const outputSummary = document.getElementById('output-summary');
+        const saveFullBtn = document.getElementById('save-full-btn');
+        const saveSummaryBtn = document.getElementById('save-summary-btn');
+        const shareFullBtn = document.getElementById('share-full-btn');
+        const shareSummaryBtn = document.getElementById('share-summary-btn');
 
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 
         const stopWords = ['은', '는', '이', '가', '을', '를', '에', '에서', '와', '과', '그리고', '그래서', '하지만', '또', '으로', '부터', '합니다', '했습니다', '했다', '이에요', '입니다', '것입니다', '수', '있는', '있습니다', '있어요'];
 
+        // 의학 용어 사전 (정적 데이터)
+        const medicalTerms = {
+            'myocardium': '심근',
+            'hypertension': '고혈압',
+            'diabetes mellitus': '당뇨병',
+            'cardiology': '심장학',
+            'dermatology': '피부과',
+            'neurology': '신경과',
+            'fracture': '골절',
+            'anemia': '빈혈'
+            // 여기에 더 많은 용어를 추가할 수 있습니다.
+        };
+
+        // 텍스트 요약 함수
         function summarizeText(text) {
             const words = text.split(/\s+/);
             const wordCounts = {};
@@ -98,11 +123,56 @@
             return '핵심 키워드: ' + sortedWords.slice(0, 5).join(', ');
         }
         
+        // 의학 용어 및 영어 단어 변환 함수
+        function translateTerms(text) {
+            let translatedText = text;
+            for (const term in medicalTerms) {
+                const regex = new RegExp(`\\b${term}\\b`, 'gi');
+                translatedText = translatedText.replace(regex, medicalTerms[term]);
+            }
+            return translatedText;
+        }
+
+        // 텍스트를 파일로 저장하는 범용 함수
+        function saveTextAsFile(text, filename) {
+            const blob = new Blob([text], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        // 공유 기능 함수
+        async function shareText(text, title) {
+            if (navigator.share) {
+                try {
+                    await navigator.share({
+                        title: title,
+                        text: text
+                    });
+                    console.log('공유 성공!');
+                } catch (error) {
+                    console.error('공유 실패:', error);
+                }
+            } else {
+                navigator.clipboard.writeText(text).then(() => {
+                    alert('이 브라우저는 공유 기능을 지원하지 않습니다. 텍스트가 클립보드에 복사되었습니다.');
+                }).catch(err => {
+                    console.error('클립보드 복사 실패:', err);
+                    alert('클립보드 복사에 실패했습니다.');
+                });
+            }
+        }
+
         if (SpeechRecognition) {
             const recognition = new SpeechRecognition();
             recognition.lang = 'ko-KR';
             recognition.continuous = true;
-            recognition.interimResults = false; // 중간 결과는 표시하지 않음 (최종 결과만)
+            recognition.interimResults = false;
 
             let fullTranscript = '';
 
@@ -127,12 +197,14 @@
                     currentTranscript += event.results[i][0].transcript;
                 }
                 fullTranscript += currentTranscript + ' ';
-                outputFull.textContent = fullTranscript;
+                outputFull.textContent = translateTerms(fullTranscript);
             };
 
             recognition.onend = () => {
                 if (fullTranscript.length > 0) {
-                    const summary = summarizeText(fullTranscript);
+                    const translatedText = translateTerms(fullTranscript);
+                    const summary = summarizeText(translatedText);
+                    outputFull.textContent = translatedText;
                     outputSummary.textContent = summary;
                 } else {
                     outputSummary.textContent = '요약할 내용이 없습니다.';
@@ -146,6 +218,46 @@
                 startBtn.disabled = false;
                 stopBtn.disabled = true;
             };
+
+            // 저장 버튼 이벤트 리스너
+            saveFullBtn.addEventListener('click', () => {
+                const textToSave = outputFull.textContent;
+                if (textToSave && textToSave !== '음성을 인식하면 여기에 텍스트가 나타납니다.') {
+                    const timestamp = new Date().toISOString().slice(0, 19).replace(/T|:/g, '-');
+                    saveTextAsFile(textToSave, `음성_원문_${timestamp}.txt`);
+                } else {
+                    alert('저장할 내용이 없습니다.');
+                }
+            });
+
+            saveSummaryBtn.addEventListener('click', () => {
+                const textToSave = outputSummary.textContent;
+                if (textToSave && textToSave !== '요약된 내용이 여기에 나타납니다.') {
+                    const timestamp = new Date().toISOString().slice(0, 19).replace(/T|:/g, '-');
+                    saveTextAsFile(textToSave, `음성_요약_${timestamp}.txt`);
+                } else {
+                    alert('저장할 내용이 없습니다.');
+                }
+            });
+
+            // 공유 버튼 이벤트 리스너
+            shareFullBtn.addEventListener('click', () => {
+                const textToShare = outputFull.textContent;
+                if (textToShare && textToShare !== '음성을 인식하면 여기에 텍스트가 나타납니다.') {
+                    shareText(textToShare, '음성 변환 원문');
+                } else {
+                    alert('공유할 내용이 없습니다.');
+                }
+            });
+
+            shareSummaryBtn.addEventListener('click', () => {
+                const textToShare = outputSummary.textContent;
+                if (textToShare && textToShare !== '요약된 내용이 여기에 나타납니다.') {
+                    shareText(textToShare, '음성 변환 요약');
+                } else {
+                    alert('공유할 내용이 없습니다.');
+                }
+            });
 
         } else {
             outputFull.textContent = '⚠️ 이 브라우저는 Web Speech API를 지원하지 않습니다.';
