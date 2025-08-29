@@ -3,116 +3,152 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>음성-텍스트 변환기</title>
+    <title>향상된 음성-텍스트 변환기</title>
     <style>
         body {
             font-family: Arial, sans-serif;
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
-            height: 100vh;
-            margin: 0;
-            background-color: #f0f0f0;
+            padding: 20px;
+            background-color: #f0f2f5;
+            min-height: 100vh;
         }
-        #controls {
-            margin-bottom: 20px;
+        .container {
+            width: 100%;
+            max-width: 800px;
+            background: #fff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
         }
+        h1 { color: #333; margin-bottom: 20px; }
+        #controls { margin-bottom: 20px; }
         button {
-            padding: 10px 20px;
+            padding: 12px 25px;
             font-size: 16px;
             cursor: pointer;
             border: none;
-            border-radius: 5px;
-            background-color: #007BFF;
+            border-radius: 25px;
             color: white;
+            transition: background-color 0.3s;
         }
-        button:hover {
-            background-color: #0056b3;
+        #start-btn { background-color: #28a745; }
+        #start-btn:hover { background-color: #218838; }
+        #stop-btn { background-color: #dc3545; }
+        #stop-btn:hover { background-color: #c82333; }
+        #stop-btn:disabled, #start-btn:disabled {
+            background-color: #6c757d;
+            cursor: not-allowed;
         }
-        #output {
-            width: 80%;
-            max-width: 600px;
-            min-height: 200px;
+        .output-section {
+            margin-top: 20px;
+        }
+        .output-section h2 { color: #555; border-bottom: 2px solid #eee; padding-bottom: 5px; margin-bottom: 10px; }
+        #output-full, #output-summary {
+            min-height: 100px;
             padding: 15px;
-            border: 1px solid #ccc;
+            border: 1px solid #ddd;
             border-radius: 8px;
-            background-color: #fff;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            font-size: 18px;
-            line-height: 1.5;
+            background-color: #fafafa;
+            font-size: 1rem;
+            line-height: 1.6;
             white-space: pre-wrap;
+            word-wrap: break-word;
         }
     </style>
 </head>
 <body>
-    <h1>실시간 음성-텍스트 변환</h1>
-    <div id="controls">
-        <button id="start-btn">변환 시작</button>
-        <button id="stop-btn" disabled>변환 중지</button>
+    <div class="container">
+        <h1>음성-텍스트 변환 및 요약</h1>
+        <div id="controls">
+            <button id="start-btn">🎙️ 변환 시작</button>
+            <button id="stop-btn" disabled>⏹️ 변환 중지</button>
+        </div>
+        <div class="output-section">
+            <h2>💬 원문 (Full Text)</h2>
+            <div id="output-full">음성을 인식하면 여기에 텍스트가 나타납니다.</div>
+        </div>
+        <div class="output-section">
+            <h2>📝 요약 (Summary)</h2>
+            <div id="output-summary">요약된 내용이 여기에 나타납니다.</div>
+        </div>
     </div>
-    <div id="output"></div>
 
     <script>
         const startBtn = document.getElementById('start-btn');
         const stopBtn = document.getElementById('stop-btn');
-        const outputDiv = document.getElementById('output');
+        const outputFull = document.getElementById('output-full');
+        const outputSummary = document.getElementById('output-summary');
 
-        // Web Speech API가 지원되는지 확인합니다.
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 
+        const stopWords = ['은', '는', '이', '가', '을', '를', '에', '에서', '와', '과', '그리고', '그래서', '하지만', '또', '으로', '부터', '합니다', '했습니다', '했다', '이에요', '입니다', '것입니다', '수', '있는', '있습니다', '있어요'];
+
+        function summarizeText(text) {
+            const words = text.split(/\s+/);
+            const wordCounts = {};
+            words.forEach(word => {
+                const cleanedWord = word.replace(/[.,?!'"‘’“”]/g, '').toLowerCase().trim();
+                if (cleanedWord.length > 1 && !stopWords.includes(cleanedWord)) {
+                    wordCounts[cleanedWord] = (wordCounts[cleanedWord] || 0) + 1;
+                }
+            });
+            const sortedWords = Object.keys(wordCounts).sort((a, b) => wordCounts[b] - wordCounts[a]);
+            return '핵심 키워드: ' + sortedWords.slice(0, 5).join(', ');
+        }
+        
         if (SpeechRecognition) {
             const recognition = new SpeechRecognition();
-            recognition.lang = 'ko-KR'; // 한국어 설정
-            recognition.continuous = true; // 대화가 끊이지 않고 계속 인식
-            recognition.interimResults = true; // 중간 결과 표시
+            recognition.lang = 'ko-KR';
+            recognition.continuous = true;
+            recognition.interimResults = false; // 중간 결과는 표시하지 않음 (최종 결과만)
 
-            // 음성 인식 시작
+            let fullTranscript = '';
+
             startBtn.addEventListener('click', () => {
+                fullTranscript = '';
+                outputFull.textContent = '말씀하세요...';
+                outputSummary.textContent = '';
                 recognition.start();
                 startBtn.disabled = true;
                 stopBtn.disabled = false;
-                outputDiv.innerHTML = '말씀하세요...';
             });
 
-            // 음성 인식 중지
             stopBtn.addEventListener('click', () => {
                 recognition.stop();
                 startBtn.disabled = false;
                 stopBtn.disabled = true;
-                outputDiv.innerHTML += '\n\n음성 인식이 중지되었습니다.';
             });
 
-            // 음성 인식 결과가 나왔을 때
             recognition.onresult = (event) => {
-                let transcript = '';
+                let currentTranscript = '';
                 for (let i = event.resultIndex; i < event.results.length; i++) {
-                    // isFinal이 true이면 최종 결과, false이면 중간 결과입니다.
-                    if (event.results[i].isFinal) {
-                        transcript += event.results[i][0].transcript + ' ';
-                    }
+                    currentTranscript += event.results[i][0].transcript;
                 }
-                // 기존 내용에 최종 결과 추가
-                outputDiv.innerHTML += transcript;
+                fullTranscript += currentTranscript + ' ';
+                outputFull.textContent = fullTranscript;
             };
 
-            // 음성 인식이 끝났을 때 (continuous가 true일 때는 오류 또는 수동 중지 시 발생)
             recognition.onend = () => {
+                if (fullTranscript.length > 0) {
+                    const summary = summarizeText(fullTranscript);
+                    outputSummary.textContent = summary;
+                } else {
+                    outputSummary.textContent = '요약할 내용이 없습니다.';
+                }
                 console.log('음성 인식이 종료되었습니다.');
-                // 여기에 필요한 추가 동작을 넣을 수 있습니다.
             };
 
-            // 음성 인식 오류 발생 시
             recognition.onerror = (event) => {
                 console.error('음성 인식 오류:', event.error);
-                outputDiv.innerHTML = `오류 발생: ${event.error}`;
+                outputFull.textContent = `오류 발생: ${event.error}`;
                 startBtn.disabled = false;
                 stopBtn.disabled = true;
             };
 
         } else {
-            // Web Speech API를 지원하지 않는 경우
-            outputDiv.innerHTML = '⚠️ 죄송합니다, 이 브라우저는 Web Speech API를 지원하지 않습니다. Chrome, Firefox 등의 최신 버전을 사용해주세요.';
+            outputFull.textContent = '⚠️ 이 브라우저는 Web Speech API를 지원하지 않습니다.';
             startBtn.disabled = true;
             stopBtn.disabled = true;
         }
