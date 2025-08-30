@@ -5,33 +5,48 @@
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>KTAS (세분화된 증상군·수정지표 적용) — 교육용</title>
 <style>
-  /* (간단한 스타일 — 이전 파일과 비슷한 테마 유지) */
-  :root{--bg:#0b1020;--card:#111722;--fg:#e9f0ff;--muted:#9fb8ff;
-    --k1:#ff3b30;--k2:#ff9500;--k3:#ffd60a;--k4:#34c759;--k5:#30b0ff}
+  :root{
+    --bg:#0b1020; --card:#121933; --muted:#8ea0c6; --fg:#e8eeff;
+    --ktas1:#ff3b30; --ktas2:#ff9500; --ktas3:#ffcc00; --ktas4:#34c759; --ktas5:#30b0ff;
+    --accent:#7aa2ff;
+  }
   *{box-sizing:border-box}
-  body{margin:0;font-family:system-ui,-apple-system,'Malgun Gothic',Arial;background:linear-gradient(180deg,#051025,#07122b);color:var(--fg);padding:18px}
-  .wrap{max-width:1200px;margin:0 auto}
-  header{margin-bottom:14px}
-  h1{font-size:20px;margin:0 0 6px}
-  .grid{display:grid;grid-template-columns:1fr;gap:12px}
-  @media(min-width:980px){.grid{grid-template-columns:1fr 420px}}
-  section{background:var(--card);padding:14px;border-radius:12px;border:1px solid rgba(255,255,255,0.04)}
-  label{display:block;font-size:13px;color:var(--muted);margin-bottom:6px}
-  input,select,textarea,button{width:100%;padding:8px 10px;border-radius:10px;border:1px solid rgba(255,255,255,0.06);background:#071331;color:var(--fg)}
-  .row{display:flex;gap:10px}
-  .row .col{flex:1}
+  body{margin:0;background:linear-gradient(180deg,#0a0f1e 0%,#0b1020 100%);color:var(--fg);font-family:system-ui,Segoe UI,Apple SD Gothic Neo,Malgun Gothic,Arial,sans-serif;line-height:1.35}
+  header{position:sticky;top:0;background:rgba(10,15,30,.7);backdrop-filter:blur(8px);border-bottom:1px solid rgba(255,255,255,.06);z-index:10}
+  .wrap{max-width:1100px;margin:0 auto;padding:18px}
+  h1{margin:8px 0 4px;font-size:22px;font-weight:800;letter-spacing:.2px}
+  .sub{color:var(--muted);font-size:13px;margin-bottom:10px}
+  .grid{display:grid;gap:14px}
+  @media (min-width:900px){.grid-2{grid-template-columns:1fr 1fr}}
+  section{background:var(--card);border:1px solid rgba(255,255,255,.06);border-radius:16px;padding:16px}
+  section h2{margin:0 0 10px;font-size:15px;color:#bfd0ff;font-weight:700}
+  label{display:block;font-size:13px;color:#cbd8ff;margin:8px 0 6px}
+  input,select,textarea{width:100%;padding:10px 12px;border-radius:12px;border:1px solid rgba(255,255,255,.12);background:#0d1530;color:var(--fg);font-size:14px}
+  input[type="number"]{appearance:textfield}
+  .row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+  .row-2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .row-4{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
   .chips{display:flex;flex-wrap:wrap;gap:8px}
-  .chip{padding:7px 9px;border-radius:999px;border:1px solid rgba(255,255,255,0.06);cursor:pointer;background:transparent}
-  .chip.active{background:rgba(255,255,255,0.03)}
-  .badge{display:inline-block;padding:8px 12px;border-radius:999px;font-weight:800}
-  .k1{background:var(--k1)}.k2{background:var(--k2)}.k3{background:var(--k3);color:#2a2100}
-  .k4{background:var(--k4);color:#01210f}.k5{background:var(--k5);color:#00131d}
+  .chip{padding:8px 10px;border-radius:999px;border:1px solid rgba(255,255,255,.12);cursor:pointer;user-select:none}
+  .chip input{display:none}
+  .chip.active{background:#16224a;border-color:#3b5bd6}
+  .btns{display:flex;gap:10px;flex-wrap:wrap}
+  button{padding:10px 14px;border-radius:12px;border:1px solid rgba(255,255,255,.14);background:#152150;color:var(--fg);cursor:pointer;font-weight:600}
+  button.primary{background:var(--accent);color:#0a0f1e;border:none}
+  button.warn{background:#26314f;border-color:#ff7a7a;color:#ffdede}
+  .result{display:flex;flex-direction:column;gap:10px}
+  .badge{display:inline-flex;align-items:center;gap:8px;border-radius:999px;padding:8px 12px;font-weight:800}
+  .k1{background:var(--ktas1)}.k2{background:var(--ktas2)}.k3{background:var(--ktas3);color:#2a2100}
+  .k4{background:var(--ktas4);color:#001a05}.k5{background:var(--ktas5);color:#00131d}
   .muted{color:var(--muted);font-size:13px}
-  ul{margin:8px 0 0 18px}
-  .small{font-size:13px;color:var(--muted)}
-  .btn-row{display:flex;gap:8px}
-  button.primary{background:#4d76ff;color:#fff;border:none;padding:10px 12px;border-radius:10px}
-  .note{font-size:12px;color:#a8c1ff}
+  ul{margin:0 0 0 18px}
+  .footer{color:#9fb2e6;font-size:12px;margin-top:10px}
+  .timebox{display:flex;gap:8px;flex-wrap:wrap}
+  .pill{border:1px solid rgba(255,255,255,.14);padding:6px 10px;border-radius:999px;font-size:12px}
+  .danger{color:#ff9fa3}
+  .ok{color:#aaf0c9}
+  .flex{display:flex;gap:12px;flex-wrap:wrap}
+  .hint{font-size:12px;color:#9fb2e6}
 </style>
 </head>
 <body>
