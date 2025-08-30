@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>KTAS (세분화된 증상군·수정지표 적용) — 교육용</title>
+<style>
+  /* (간단한 스타일 — 이전 파일과 비슷한 테마 유지) */
+  :root{--bg:#0b1020;--card:#111722;--fg:#e9f0ff;--muted:#9fb8ff;
+    --k1:#ff3b30;--k2:#ff9500;--k3:#ffd60a;--k4:#34c759;--k5:#30b0ff}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:system-ui,-apple-system,'Malgun Gothic',Arial;background:linear-gradient(180deg,#051025,#07122b);color:var(--fg);padding:18px}
+  .wrap{max-width:1200px;margin:0 auto}
+  header{margin-bottom:14px}
+  h1{font-size:20px;margin:0 0 6px}
+  .grid{display:grid;grid-template-columns:1fr;gap:12px}
+  @media(min-width:980px){.grid{grid-template-columns:1fr 420px}}
+  section{background:var(--card);padding:14px;border-radius:12px;border:1px solid rgba(255,255,255,0.04)}
+  label{display:block;font-size:13px;color:var(--muted);margin-bottom:6px}
+  input,select,textarea,button{width:100%;padding:8px 10px;border-radius:10px;border:1px solid rgba(255,255,255,0.06);background:#071331;color:var(--fg)}
+  .row{display:flex;gap:10px}
+  .row .col{flex:1}
+  .chips{display:flex;flex-wrap:wrap;gap:8px}
+  .chip{padding:7px 9px;border-radius:999px;border:1px solid rgba(255,255,255,0.06);cursor:pointer;background:transparent}
+  .chip.active{background:rgba(255,255,255,0.03)}
+  .badge{display:inline-block;padding:8px 12px;border-radius:999px;font-weight:800}
+  .k1{background:var(--k1)}.k2{background:var(--k2)}.k3{background:var(--k3);color:#2a2100}
+  .k4{background:var(--k4);color:#01210f}.k5{background:var(--k5);color:#00131d}
+  .muted{color:var(--muted);font-size:13px}
+  ul{margin:8px 0 0 18px}
+  .small{font-size:13px;color:var(--muted)}
+  .btn-row{display:flex;gap:8px}
+  button.primary{background:#4d76ff;color:#fff;border:none;padding:10px 12px;border-radius:10px}
+  .note{font-size:12px;color:#a8c1ff}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>KTAS (세분화 버전) — 교육/시뮬레이션용</h1>
+    <div class="small">PedKTAS(소아) 보정, 증상군별 1·2차 트리거, 활력징후 임계값을 더 세분화하여 적용합니다. (실제 진료 전 기관 매뉴얼 확인 필수)</div>
+  </header>
+
+  <main class="grid">
+    <!-- 입력 영역 -->
+    <section>
+      <h2>1. 환자 정보 / 도착</h2>
+      <div class="row">
+        <div class="col">
+          <label>이름</label><input id="ptName" placeholder="홍길동">
+        </div>
+        <div class="col">
+          <label>성별</label>
+          <select id="ptSex"><option>남</option><option>여</option><option>기타/미상</option></select>
+        </div>
+      </div>
+      <div style="margin-top:8px" class="row">
+        <div class="col"><label>나이(년)</label><input id="ptAge" type="number" min="0" placeholder="35"></div>
+        <div class="col"><label>체중(kg)</label><input id="ptWt" type="number" step="0.1" placeholder="70"></div>
+        <div class="col"><label>도착일시</label><input id="arrTime" type="datetime-local"></div>
+      </div>
+
+      <h2 style="margin-top:12px">2. 활력징후 / 의식</h2>
+      <div class="row">
+        <div class="col"><label>호흡수 (RR / rpm)</label><input id="rr" type="number" placeholder="16"></div>
+        <div class="col"><label>산소포화도 SpO₂ (%)</label><input id="spo2" type="number" min="0" max="100" placeholder="98"></div>
+        <div class="col"><label>심박수 HR (/min)</label><input id="hr" type="number" placeholder="82"></div>
+      </div>
+      <div class="row" style="margin-top:8px">
+        <div class="col"><label>수축기혈압 SBP (mmHg)</label><input id="sbp" type="number" placeholder="120"></div>
+        <div class="col"><label>체온 (℃)</label><input id="temp" type="number" step="0.1" placeholder="36.8"></div>
+        <div class="col"><label>AVPU</label>
+          <select id="avpu"><option value="A">A</option><option value="V">V</option><option value="P">P</option><option value="U">U</option></select>
+        </div>
+      </div>
+      <div style="margin-top:8px" class="row">
+        <div class="col"><label>GCS 합</label><input id="gcs" type="number" min="3" max="15" placeholder="15"></div>
+        <div class="col"><label>통증 NRS (0-10)</label><input id="pain" type="number" min="0" max="10" placeholder="0"></div>
+        <div class="col"><label>호흡지원(산소, 기도치료 등)</label>
+          <select id="oxygen"><option value="">없음</option><option value="nasal">비강캐뉼라/산소</option><option value="nonrebreather">NRB</option><option value="intub">기도삽관/인공호흡</option></select>
+        </div>
+      </div>
+
+      <h2 style="margin-top:12px">3. 주요 증상군 (세분화)</h2>
+      <label>증상군 선택 (주증상)</label>
+      <select id="cc">
+        <option value="respiratory">호흡곤란 / 저산소</option>
+        <option value="chest">흉통 / 심계</option>
+        <option value="neuro">신경학적 증상 (급성 편마비/언어장애/혼동)</option>
+        <option value="gi">복통 / 구토 / 위장출혈</option>
+        <option value="trauma_head">외상 - 머리(의식변화/두부손상)</option>
+        <option value="trauma_thorax">외상 - 흉복부/골반 (내장손상 의심)</option>
+        <option value="trauma_extrem">외상 - 사지/연부조직</option>
+        <option value="sepsis">패혈증 의심(감염+저혈압/빈호흡 등)</option>
+        <option value="burn">화상</option>
+        <option value="poison">중독/약물</option>
+        <option value="obstetrics">산부인과(임신/출혈)</option>
+        <option value="psy">정신과(자해위험/급성정신병)</option>
+        <option value="fever_ped">소아 발열</option>
+        <option value="other">기타</option>
+      </select>
+
+      <label style="margin-top:8px">증상 상세 (메모)</label>
+      <input id="ccNote" placeholder="증상 경과, 발병시간, 외상 기전 등">
+
+      <h2 style="margin-top:12px">4. 수정지표 (보조 항목 — 해당 시 선택)</h2>
+      <div class="chips" id="modifiers">
+        <button type="button" class="chip" data-val="cardiac_arrest">무호흡/심정지</button>
+        <button type="button" class="chip" data-val="severe_resp">심한 호흡곤란(호흡곤란+청색증/기침불가)</button>
+        <button type="button" class="chip" data-val="massive_bleed">활동성 대량출혈</button>
+        <button type="button" class="chip" data-val="highenergy">고에너지 외상(추락>5m/고속충돌 등)</button>
+        <button type="button" class="chip" data-val="neuro_deficit">급성 신경학적 결손(편마비/언어장애)</button>
+        <button type="button" class="chip" data-val="chest_isch">흉통: 좌측방사통/심전도변화/허혈의심</button>
+        <button type="button" class="chip" data-val="sepsis_suspect">감염 의심 + 저혈압/빈호흡</button>
+        <button type="button" class="chip" data-val="pregnancy">임신/분만관련</button>
+        <button type="button" class="chip" data-val="ped_lt3m">소아: 3개월 미만 발열</button>
+        <button type="button" class="chip" data-val="immuno">면역저하(화학요법 등)</button>
+        <button type="button" class="chip" data-val="selfharm_risk">자해 또는 타해 위험</button>
+      </div>
+
+      <h2 style="margin-top:12px">5. 출혈/기전/탈수 선택</h2>
+      <div class="row">
+        <div class="col"><label>출혈</label>
+          <select id="bleed"><option value="">선택</option><option value="massive">활동성(대량)</option><option value="moderate">중등도</option><option value="minor">경미</option></select>
+        </div>
+        <div class="col"><label>손상기전</label>
+          <select id="mech"><option value="">선택</option><option value="high">고에너지</option><option value="mid">중간</option><option value="low">저에너지</option></select>
+        </div>
+        <div class="col"><label>탈수/순환</label>
+          <select id="dehyd"><option value="">선택</option><option value="severe">중증(창백/냉감/CRT지연)</option><option value="moderate">중등도</option><option value="mild">경미</option></select>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- 결과/사유 영역 -->
+    <section>
+      <h2>결과</h2>
+      <div style="margin-bottom:8px">
+        <div id="badge" class="badge k5">KTAS 5 (비응급)</div>
+      </div>
+      <div class="small">목표 진료 시간: <span id="target">≤ 120분</span></div>
+      <div style="margin-top:8px">
+        <div class="small">선택된 수정지표:</div>
+        <div id="selectedMods" class="muted">-</div>
+      </div>
+      <div style="margin-top:10px">
+        <div class="small">근거(트리거):</div>
+        <ul id="rationale"></ul>
+      </div>
+      <div style="margin-top:10px" class="btn-row">
+        <button class="primary" id="calcBtn">중증도 산출</button>
+        <button id="resetBtn">초기화</button>
+        <button id="saveBtn">JSON 저장</button>
+      </div>
+
+      <div style="margin-top:12px" class="note">
+        주의: 이 도구는 교육/시뮬레이션용입니다. 실제 임상에서 적용하기 전 기관별 KTAS 매뉴얼을 반드시 확인하십시오.
+      </div>
+
+      <hr style="margin:12px 0;border:none;border-top:1px solid rgba(255,255,255,0.04)">
+
+      <div class="small" style="margin-top:8px">
+        참조: KTAS/PedKTAS 가이드라인·국가 고시·학술문헌을 기반으로 임계값을 세분화했습니다. (법정 고시 및 PedKTAS 권고를 참조하여 구현)
+      </div>
+    </section>
+  </main>
+</div>
+
+<script>
+  // --- 유틸 / 초기값 ---
+  const $ = q=>document.querySelector(q);
+  const $$ = q=>Array.from(document.querySelectorAll(q));
+  $("#arrTime").value = new Date().toISOString().slice(0,16);
+
+  // 칩 토글
+  $$("#modifiers .chip").forEach(c=>{
+    c.addEventListener("click", ()=>{ c.classList.toggle("active"); renderSelectedMods(); });
+  });
+  function selectedModifiers(){ return $$("#modifiers .chip.active").map(c=>c.dataset.val); }
+  function renderSelectedMods(){ const s = selectedModifiers(); $("#selectedMods").textContent = s.length? s.join(", ") : "-"; }
+
+  // 소아 정상범위(참고용, 연령 구간별 단순화)
+  // 이 값들은 PedKTAS/CTAS 계열의 권고를 참고하여 교육용으로 단순화한 범위입니다.
+  const pediatrics = [
+    {maxAgeMonths:3, hr:[90,205], rr:[30,60]},   // 0-3 months (대략)
+    {maxAgeMonths:12, hr:[80,180], rr:[25,50]},  // 3-12 months
+    {maxAgeMonths:36, hr:[70,160], rr:[20,40]},  // 1-3 years
+    {maxAgeMonths:72, hr:[60,140], rr:[20,30]},  // 3-6 years
+    {maxAgeMonths:144, hr:[50,120], rr:[16,25]}, // 6-12 years
+  ];
+  function getPediatricRanges(ageYears){
+    if (ageYears===null || ageYears===undefined) return null;
+    const months = ageYears*12;
+    for (let r of pediatrics) if (months <= r.maxAgeMonths) return r;
+    return {hr:[50,110], rr:[12,20]}; // 12세 이상은 성인 기준 유사
+  }
+
+  // --- 핵심 중증도 계산(세분화 로직) ---
+  function computeKTAS(){
+    const reasons = [];
+    let level = 5; // 1이 가장 중증
+
+    const age = Number($("#ptAge").value) || 0;
+    const rr = Number($("#rr").value) || null;
+    const spo2 = Number($("#spo2").value) || null;
+    const hr = Number($("#hr").value) || null;
+    const sbp = Number($("#sbp").value) || null;
+    const temp = Number($("#temp").value) || null;
+    const avpu = $("#avpu").value;
+    const gcs = Number($("#gcs").value) || null;
+    const pain = Number($("#pain").value) || 0;
+    const cc = $("#cc").value;
+    const mods = selectedModifiers();
+    const bleed = $("#bleed").value;
+    const mech = $("#mech").value;
+    const dehyd = $("#dehyd").value;
+
+    // 즉시치료/심정지
+    if (mods.includes("cardiac_arrest")){
+      reasons.push("[Critical] 무호흡/심정지 감지 — KTAS 1");
+      return {level:1, reasons};
+    }
+    if (avpu==="U" || gcs<=8){
+      reasons.push("[Critical] 의식 소실(GCS ≤ 8 / AVPU=U) — KTAS 1");
+      return {level:1, reasons};
+    }
+
+    // 중증 호흡곤란 / 산소화 저하
+    if (mods.includes("severe_resp") || $("#oxygen").value==="intub"){
+      level = Math.min(level,1);
+      reasons.push("[Critical] 심한 호흡곤란 또는 기도삽관/인공호흡 필요 — KTAS 1");
+      return {level:1, reasons};
+    }
+    if (spo2 !== null && spo2 < 85){
+      level = Math.min(level,1);
+      reasons.push("[Critical] SpO₂ < 85% — 즉시 개입(호흡/기도) 고려 — KTAS 1");
+    } else if (spo2 !== null && spo2 < 90){
+      level = Math.min(level,2);
+      reasons.push("[High] SpO₂ < 90% — 고위험(산소치료 필요) — KTAS 2");
+    } else if (spo2 !== null && spo2 <= 92){
+      level = Math.min(level,3);
+      reasons.push("[Moderate] SpO₂ 90–92% — 산소보조/재평가 — KTAS 3");
+    }
+
+    // 호흡수 — 성인/소아 구분
+    if (age < 15){ // 소아 (PedKTAS 반영)
+      const ranges = getPediatricRanges(age);
+      if (ranges){
+        if (rr && rr > ranges.rr[1]*1.3){ level = Math.min(level,2); reasons.push("[High] 소아 RR 현저한 상승 → 중증 가능성"); }
+        else if (rr && rr > ranges.rr[1]){ level = Math.min(level,3); reasons.push("[Moderate] 소아 RR 상승"); }
+        else if (rr && rr < ranges.rr[0]){ level = Math.min(level,3); reasons.push("[Moderate] 소아 저호흡"); }
+      }
+    } else { // 성인
+      if (rr && (rr>30 || rr<8)){ level = Math.min(level,2); reasons.push("[High] RR >30 또는 <8"); }
+      else if (rr && (rr>=24)){ level = Math.min(level,3); reasons.push("[Moderate] RR 24–30"); }
+    }
+
+    // 순환/혈압
+    if (sbp && sbp < 70){
+      level = Math.min(level,1); reasons.push("[Critical] SBP < 70 mmHg — 즉시 소생술/쇼크관리"); 
+    } else if (sbp && sbp < 90){
+      level = Math.min(level,2); reasons.push("[High] SBP < 90 mmHg — 쇼크 의심"); 
+    } else if (sbp && sbp <= 100){
+      level = Math.min(level,3); reasons.push("[Moderate] SBP 90–100 mmHg"); 
+    }
+
+    // 심박수 (성인/소아)
+    if (age < 15){
+      const ranges = getPediatricRanges(age);
+      if (hr && hr > ranges.hr[1]*1.2){ level = Math.min(level,2); reasons.push("[High] 소아 HR 현저한 상승"); }
+      else if (hr && hr > ranges.hr[1]){ level = Math.min(level,3); reasons.push("[Moderate] 소아 HR 상승"); }
+      else if (hr && hr < ranges.hr[0]){ level = Math.min(level,3); reasons.push("[Moderate] 소아 서맥"); }
+    } else {
+      if (hr && hr >= 130){ level = Math.min(level,2); reasons.push("[High] HR ≥ 130"); }
+      else if (hr && hr >= 110){ level = Math.min(level,3); reasons.push("[Moderate] HR 110–129"); }
+    }
+
+    // 신경학적 증상
+    if (mods.includes("neuro_deficit") || cc==="neuro"){
+      level = Math.min(level,2);
+      reasons.push("[High] 급성 신경학적 결손(편마비/언어장애/의식변화) — 뇌졸중·출혈 의심");
+    }
+    if (cc==="trauma_head" && (mods.includes("cardiac_arrest") || mech==="high" || gcs<=13)){
+      level = Math.min(level,2); reasons.push("[High] 두부손상 + 의식저하/고에너지 → CT/수술 가능성");
+    }
+
+    // 흉통 — 심근허혈/ACS 관련 트리거
+    if (mods.includes("chest_isch") || cc==="chest"){
+      // 심전도/허혈 의심(교육용: 흉통 + 왼쪽 팔 방사통/식은땀/호흡곤란/불안감 등)
+      level = Math.min(level,2);
+      reasons.push("[High] 흉통: 심근허혈/급성관상동맥증후군 의심 → 빠른 평가(ECG, 트로포닌) 권고");
+    }
+
+    // 출혈/대량출혈
+    if (bleed === "massive" || mods.includes("massive_bleed")){
+      level = Math.min(level,1); reasons.push("[Critical] 활동성 대량출혈 — 즉시 지혈/수혈 준비"); 
+    } else if (bleed === "moderate") {
+      level = Math.min(level,2); reasons.push("[High] 중등도 출혈"); 
+    }
+
+    // 고에너지 외상
+    if (mech === "high" || mods.includes("highenergy")){
+      level = Math.min(level,2); reasons.push("[High] 고에너지 외상 — 다발손상·내부손상 의심");
+    }
+
+    // 패혈증 의심
+    if (cc==="sepsis" || mods.includes("sepsis_suspect")){
+      if (sbp && sbp < 90) { level = Math.min(level,2); reasons.push("[High] 감염 + 저혈압(Sepsis/Septic shock 의심)"); }
+      else if (rr && rr>22){ level = Math.min(level,2); reasons.push("[High] 감염 + 빈호흡(Sepsis 의심)"); }
+      else { level = Math.min(level,3); reasons.push("[Moderate] 감염 의심(Sepsis 규칙 적용 필요)"); }
+    }
+
+    // 산부인과/임신
+    if (mods.includes("pregnancy") || cc==="obstetrics"){
+      // 임신 관련 출혈·통증·분만징후는 최소 KTAS 2-3으로 고려
+      level = Math.min(level,3);
+      reasons.push("[Moderate] 임신/산과 관련 환자 — 분만/자궁출혈 등 특수관리 필요");
+    }
+
+    // 소아 발열 보정 (3개월 미만은 higher)
+    if (mods.includes("ped_lt3m") || cc==="fever_ped"){
+      if (mods.includes("ped_lt3m") || age>0 && age < 0.25){
+        level = Math.min(level,2);
+        reasons.push("[High] 소아 3개월 미만 발열(≥38℃) — 소아중환자나 입원 고려");
+      } else {
+        // 소아 발열(>=3개월) : 증상/평소상태에 따라 3~4
+        level = Math.min(level,3);
+        reasons.push("[Moderate] 소아 발열(3개월 이상) — 증상기반 재평가 필요");
+      }
+    }
+
+    // 통증 보정 (성인)
+    if (age >= 15){
+      if (pain >= 8){ level = Math.min(level,2); reasons.push("[High] 통증 NRS 8–10"); }
+      else if (pain >= 4){ level = Math.min(level,3); reasons.push("[Moderate] 통증 NRS 4–7"); }
+      else if (pain >= 1){ level = Math.min(level,4); reasons.push("[Low] 통증 NRS 1–3"); }
+    }
+
+    // 탈수/순환 보정
+    if (dehyd === "severe"){ level = Math.min(level,2); reasons.push("[High] 중증 탈수/순환부전"); }
+    else if (dehyd === "moderate"){ level = Math.min(level,3); reasons.push("[Moderate] 중등도 탈수"); }
+
+    // 정신과 자해위험
+    if (mods.includes("selfharm_risk") || cc==="psy"){
+      level = Math.min(level,2);
+      reasons.push("[High] 자해/타해 위험 — 안전조치 필요");
+    }
+
+    // 기본 증상군 최소값 (교육용 권장)
+    const ccMin = {
+      "respiratory":2, "chest":2, "neuro":2, "sepsis":2,
+      "trauma_thorax":2, "trauma_head":3, "burn":3,
+      "poison":3, "obstetrics":3, "fever_ped":3, "gi":4, "trauma_extrem":4, "psy":3, "other":5
+    };
+    if (ccMin[cc]) {
+      level = Math.min(level, ccMin[cc]);
+      reasons.push("[Info] 증상군 권장 최소중증도: " + cc + " → KTAS ≥ " + ccMin[cc]);
+    }
+
+    // 최종 보정(예: KTAS 1 우선)
+    if (level <= 1) level = 1;
+    if (level > 5) level = 5;
+
+    return {level, reasons};
+  }
+
+  // --- 렌더링 ---
+  function setBadge(level){
+    const badge = $("#badge");
+    badge.className = "badge k"+level;
+    const labels = {1:"KTAS 1 (즉시)",2:"KTAS 2 (응급, ≤15분)",3:"KTAS 3 (준응급, ≤30분)",4:"KTAS 4 (≤60분)",5:"KTAS 5 (비응급, ≤120분)"};
+    badge.textContent = labels[level];
+    $("#target").textContent = ({1:"즉시",2:"≤ 15분",3:"≤ 30분",4:"≤ 60분",5:"≤ 120분"})[level];
+  }
+
+  function render(){
+    const res = computeKTAS();
+    setBadge(res.level);
+    const ul = $("#rationale");
+    ul.innerHTML = "";
+    if (res.reasons.length === 0) {
+      const li = document.createElement("li"); li.textContent = "특이 트리거 없음 → 기본 KTAS 5 유지"; ul.appendChild(li);
+    } else {
+      res.reasons.forEach(r=>{
+        const li = document.createElement("li"); li.textContent = r; ul.appendChild(li);
+      });
+    }
+  }
+
+  // 버튼 이벤트
+  $("#calcBtn").addEventListener("click", ()=>{ render(); });
+  $("#resetBtn").addEventListener("click", ()=>{
+    document.querySelectorAll("input,select,textarea").forEach(el=>{
+      if (el.type === "datetime-local") el.value = new Date().toISOString().slice(0,16);
+      else el.value = "";
+    });
+    $$("#modifiers .chip").forEach(c=>c.classList.remove("active"));
+    $("#selectedMods").textContent = "-";
+    setBadge(5);
+    $("#rationale").innerHTML = "";
+  });
+
+  // JSON 저장
+  $("#saveBtn").addEventListener("click", ()=>{
+    const data = {
+      patient:{name:$("#ptName").value, age:$("#ptAge").value, sex:$("#ptSex").value, weight:$("#ptWt").value},
+      arrival:{time:$("#arrTime").value},
+      vitals:{rr:$("#rr").value, spo2:$("#spo2").value, hr:$("#hr").value, sbp:$("#sbp").value, temp:$("#temp").value, avpu:$("#avpu").value, gcs:$("#gcs").value, pain:$("#pain").value},
+      complaint:{cc:$("#cc").value, note:$("#ccNote").value},
+      modifiers:selectedModifiers(),
+      bleed:$("#bleed").value, mech:$("#mech").value, dehyd:$("#dehyd").value,
+      result: computeKTAS()
+    };
+    const blob = new Blob([JSON.stringify(data,null,2)], {type:"application/json"});
+    const a = document.createElement("a"); a.href = URL.createObjectURL(blob);
+    a.download = `KTAS_detail_${new Date().toISOString().slice(0,19).replace(/[:.]/g,'-')}.json`;
+    a.click();
+    URL.revokeObjectURL(a.href);
+  });
+
+  // 초기 세팅
+  setBadge(5);
+</script>
+</body>
+</html>
