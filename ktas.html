@@ -69,7 +69,7 @@
       <div>
         <label>성별</label>
         <select id="ptSex">
-          <option>남</option><option>여</option><option>기타/미상</option>
+          <option>선택</option><option>남</option><option>여</option><option>기타/미상</option>
         </select>
       </div>
     </div>
@@ -107,7 +107,7 @@
     <div class="row-4" style="margin-top:8px">
       <div><label>체온(℃)</label><input id="temp" type="number" step="0.1" placeholder="36.8"></div>
       <div><label>AVPU</label>
-        <select id="avpu"><option value="A">A</option><option value="V">V</option><option value="P">P</option><option value="U">U</option></select>
+        <select id="avpu"><option value="선택">선택</option><option value="A">A</option><option value="V">V</option><option value="P">P</option><option value="U">U</option></select>
       </div>
       <div><label>GCS 합</label><input id="gcs" type="number" min="3" max="15" placeholder="15"></div>
       <div><label>통증 NRS(0-10)</label><input id="pain" type="number" min="0" max="10" placeholder="0"></div>
@@ -138,6 +138,7 @@
       <div>
         <label>증상군</label>
         <select id="cc">
+          <option>선택</option>
           <option>호흡곤란</option><option>흉통</option><option>복통</option><option>발열</option>
           <option>신경학적/의식변화</option><option>외상-머리</option><option>외상-흉복부/골반</option>
           <option>외상-사지/연부</option><option>화상</option><option>중독/약물</option>
@@ -153,6 +154,7 @@
     <div class="row-4">
       <div>
         <select id="bleed">
+          <option value="">선택</option>
           <option value="">출혈 정도 선택</option>
           <option value="severe">활동성 대량출혈</option>
           <option value="moderate">중등도 출혈</option>
@@ -161,6 +163,7 @@
       </div>
       <div>
         <select id="mech">
+          <option value="">선택</option>
           <option value="">손상 기전</option>
           <option value="high">고에너지(고속충돌/추락&gt;5m 등)</option>
           <option value="mid">중등도</option>
@@ -169,6 +172,7 @@
       </div>
       <div>
         <select id="dehyd">
+          <option value="">선택</option>
           <option value="">탈수/순환</option>
           <option value="severe">중증 탈수/냉감 창백/지연 CRT</option>
           <option value="moderate">중등도</option>
@@ -177,6 +181,7 @@
       </div>
       <div>
         <select id="feverChild">
+          <option value="">선택</option>
           <option value="">소아 발열 보정</option>
           <option value="lt3m">3개월 미만 발열(≥38℃)</option>
           <option value="immu">면역저하/중증질환 의심</option>
