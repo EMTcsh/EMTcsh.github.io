@@ -82,10 +82,10 @@
         <label>체중(kg)</label>
         <input id="ptWt" type="number" min="0" step="0.1" placeholder="" />
       </div>
-      <div>
-        <label>도착일시</label>
-        <input id="arrTime" type="datetime-local" />
-      </div>
+     <div class="col">
+  <label>도착일시</label>
+  <input id="arrTime" type="datetime-local">
+</div>
       <div>
         <label>내원경로</label>
         <select id="arrival">
@@ -492,6 +492,13 @@
 
   // 첫 계산 미리
   setBadge(5);
+</script>
+   <script>
+  // 현재 시간을 input에 기본값으로 설정
+  const now = new Date();
+  const offset = now.getTimezoneOffset() * 60000; // 타임존 보정
+  const localISOTime = new Date(now - offset).toISOString().slice(0,16);
+  document.getElementById("arrTime").value = localISOTime;
 </script>
 </body>
 </html>
