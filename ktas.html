@@ -53,7 +53,7 @@
 <header>
   <div class="wrap">
     <h1>📌 국립공원 특수구조대 중증도 분류도구 <span class="hint">(교육/시뮬레이션용)</span></h1>
-    <div class="sub">입력값을 기반으로 규칙적용 → KTAS 1~5 산출 · 근거 표시 · 인쇄/JSON 저장</div>
+    <div class="sub">입력값을 기반으로 규칙적용 → 환자상태 1~5 산출 · 근거 표시 · 인쇄/JSON 저장</div>
   </div>
 </header>
 
@@ -117,7 +117,7 @@
 
   <!-- 즉시 생명위협 -->
   <section>
-    <h2>③ 즉시 위협(있으면 KTAS 1)</h2>
+    <h2>③ 즉시 위협(있으면 환자상태 1)</h2>
     <div class="chips" id="redFlags">
       <!-- 체크 토글 -->
       <label class="chip"><input type="checkbox" value="무호흡/기도폐쇄"><span>무호흡/기도폐쇄</span></label>
@@ -195,7 +195,7 @@
   <section>
     <h2>⑤ 분류 결과</h2>
     <div class="result" id="resultBox">
-      <div id="badge" class="badge k5">KTAS 5 (비응급)</div>
+      <div id="badge" class="badge k5">환자상태 5 (비응급)</div>
       <div class="timebox">
         <div class="pill">목표 진료 대기: <span id="target">≤ 120분</span></div>
         <div class="pill">증상군: <span id="ccOut">-</span></div>
@@ -206,7 +206,7 @@
         <ul id="rationale"></ul>
       </div>
       <div class="footer">
-        ※ 본 도구는 교육·훈련 및 시뮬레이션 목적입니다. 실제 진료 시 기관 프로토콜/공식 KTAS 매뉴얼을 우선 적용하세요.
+        ※ 본 도구는 교육·훈련 및 시뮬레이션 목적입니다. 실제 진료 시 기관 프로토콜/공식 환자상태 매뉴얼을 우선 적용하세요.
       </div>
     </div>
     <div class="btns" style="margin-top:12px">
@@ -247,11 +247,11 @@
     const badge = $("#badge");
     badge.className = "badge k"+level;
     const labels = {
-      1:"KTAS 1 (최중증·즉시)",
-      2:"KTAS 2 (응급·15분)",
-      3:"KTAS 3 (준응급·30분)",
-      4:"KTAS 4 (경증·60분)",
-      5:"KTAS 5 (비응급·120분)"
+      1:"환자상태 1 (최중증·즉시)",
+      2:"환자상태 2 (응급·15분)",
+      3:"환자상태 3 (준응급·30분)",
+      4:"환자상태 4 (경증·60분)",
+      5:"환자상태 5 (비응급·120분)"
     };
     badge.textContent = labels[level];
     $("#target").textContent = ({
@@ -407,7 +407,7 @@
     };
     if (ccMinLevel[cc]){
       level = Math.min(level, ccMinLevel[cc]);
-      pushReason(reasons, `증상군 최소 중증도: ${cc} → KTAS ≥ ${ccMinLevel[cc]}`, ccMinLevel[cc]);
+      pushReason(reasons, `증상군 최소 중증도: ${cc} → 환자상태 ≥ ${ccMinLevel[cc]}`, ccMinLevel[cc]);
     }
 
     // 의식 V/P는 최소 2~3 보정
@@ -435,7 +435,7 @@
     ul.innerHTML = "";
     if (reasons.length===0){
       const li = document.createElement("li");
-      li.textContent = "특이 트리거 없음 → 기본 KTAS 5 유지";
+      li.textContent = "특이 트리거 없음 → 기본 환자상태 5 유지";
       ul.appendChild(li);
     } else {
       reasons.forEach(r=>{
