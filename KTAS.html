@@ -70,7 +70,7 @@
           <label>성별</label>
           <select id="ptSex"><option>선택</option><option>남</option><option>여</option><option>기타/미상</option></select>
         </div>
-         <div class="col">
+        <div class="col">
   <label>신고접수 시간</label>
   <input id="arrTime" type="datetime-local">
 </div>
@@ -208,11 +208,26 @@
 </div>
 
 <script>
- // 현재 시간을 input에 기본값으로 설정
-  const now = new Date();
-  const offset = now.getTimezoneOffset() * 60000; // 타임존 보정
-  const localISOTime = new Date(now - offset).toISOString().slice(0,16);
-  document.getElementById("arrTime").value = localISOTime;
+  // 현재 시간으로 기본값 설정하는 함수
+  function setNow(id, type="datetime") {
+    const now = new Date();
+    const offset = now.getTimezoneOffset() * 60000; // 타임존 보정
+    if (type === "datetime") {
+      document.getElementById(id).value =
+        new Date(now - offset).toISOString().slice(0, 16);
+    } else if (type === "time") {
+      document.getElementById(id).value =
+        new Date(now - offset).toISOString().slice(11, 16);
+    }
+  }
+
+  // 최초 로딩 시 자동 입력
+  setNow("reportTime", "datetime");
+  setNow("arrivalTime", "time");
+  setNow("treatmentStart", "time");
+  setNow("treatmentEnd", "time");
+  setNow("transferDone", "datetime");
+</script>
   
   // --- 유틸 / 초기값 ---
   const $ = q=>document.querySelector(q);
@@ -551,18 +566,16 @@ window.addEventListener("DOMContentLoaded", () => {
   }
 });
 </script>
+  
    <script>
     const printBtn = document.getElementById('printBtn');
     printBtn.addEventListener('click', () => {
       window.print();
     });
   </script>
-   <script>
-  // 현재 시간을 input에 기본값으로 설정
-  const now = new Date();
-  const offset = now.getTimezoneOffset() * 60000; // 타임존 보정
-  const localISOTime = new Date(now - offset).toISOString().slice(0,16);
-  document.getElementById("arrTime").value = localISOTime;
-</script>
+  
+</body>
+</html>
+
 </body>
 </html>
