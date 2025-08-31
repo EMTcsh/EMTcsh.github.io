@@ -162,7 +162,7 @@
     <section>
       <h2>결과</h2>
       <div style="margin-bottom:8px">
-        <div id="badge" class="badge k5">KTAS 5 (비응급)</div>
+        <div id="badge" class="badge k5">환자상태 5 (비응급)</div>
       </div>
       <div class="small">목표 진료 시간: <span id="target">≤ 120분</span></div>
       <div style="margin-top:8px">
@@ -181,7 +181,7 @@
       </div>
 
       <div style="margin-top:12px" class="note">
-        주의: 이 도구는 교육/시뮬레이션용입니다. 실제 임상에서 적용하기 전 기관별 KTAS 매뉴얼을 반드시 확인하십시오.
+        주의: 이 도구는 교육/시뮬레이션용입니다. 실제 임상에서 적용하기 전 기관별 환자상태 매뉴얼을 반드시 확인하십시오.
       </div>
 
       <hr style="margin:12px 0;border:none;border-top:1px solid rgba(255,255,255,0.04)">
@@ -264,29 +264,29 @@
 
     // 즉시치료/심정지
     if (mods.includes("cardiac_arrest")){
-      reasons.push("[Critical] 무호흡/심정지 감지 — KTAS 1");
+      reasons.push("[Critical] 무호흡/심정지 감지 — 환자상태 1");
       return {level:1, reasons};
     }
     if (avpu==="U" || gcs<=8){
-      reasons.push("[Critical] 의식 소실(GCS ≤ 8 / AVPU=U) — KTAS 1");
+      reasons.push("[Critical] 의식 소실(GCS ≤ 8 / AVPU=U) — 환자상태 1");
       return {level:1, reasons};
     }
 
     // 중증 호흡곤란 / 산소화 저하
     if (mods.includes("severe_resp") || $("#oxygen").value==="intub"){
       level = Math.min(level,1);
-      reasons.push("[Critical] 심한 호흡곤란 또는 기도삽관/인공호흡 필요 — KTAS 1");
+      reasons.push("[Critical] 심한 호흡곤란 또는 기도삽관/인공호흡 필요 — 환자상태 1");
       return {level:1, reasons};
     }
     if (spo2 !== null && spo2 < 85){
       level = Math.min(level,1);
-      reasons.push("[Critical] SpO₂ < 85% — 즉시 개입(호흡/기도) 고려 — KTAS 1");
+      reasons.push("[Critical] SpO₂ < 85% — 즉시 개입(호흡/기도) 고려 — 환자상태 1");
     } else if (spo2 !== null && spo2 < 90){
       level = Math.min(level,2);
-      reasons.push("[High] SpO₂ < 90% — 고위험(산소치료 필요) — KTAS 2");
+      reasons.push("[High] SpO₂ < 90% — 고위험(산소치료 필요) — 환자상태 2");
     } else if (spo2 !== null && spo2 <= 92){
       level = Math.min(level,3);
-      reasons.push("[Moderate] SpO₂ 90–92% — 산소보조/재평가 — KTAS 3");
+      reasons.push("[Moderate] SpO₂ 90–92% — 산소보조/재평가 — 환자상태 3");
     }
 
     // 호흡수 — 성인/소아 구분
@@ -359,7 +359,7 @@
 
     // 산부인과/임신
     if (mods.includes("pregnancy") || cc==="obstetrics"){
-      // 임신 관련 출혈·통증·분만징후는 최소 KTAS 2-3으로 고려
+      // 임신 관련 출혈·통증·분만징후는 최소 환자상태 2-3으로 고려
       level = Math.min(level,3);
       reasons.push("[Moderate] 임신/산과 관련 환자 — 분만/자궁출혈 등 특수관리 필요");
     }
@@ -401,10 +401,10 @@
     };
     if (ccMin[cc]) {
       level = Math.min(level, ccMin[cc]);
-      reasons.push("[Info] 증상군 권장 최소중증도: " + cc + " → KTAS ≥ " + ccMin[cc]);
+      reasons.push("[Info] 증상군 권장 최소중증도: " + cc + " → 환자상태 ≥ " + ccMin[cc]);
     }
 
-    // 최종 보정(예: KTAS 1 우선)
+    // 최종 보정(예: 환자상태 1 우선)
     if (level <= 1) level = 1;
     if (level > 5) level = 5;
 
@@ -415,7 +415,7 @@
   function setBadge(level){
     const badge = $("#badge");
     badge.className = "badge k"+level;
-    const labels = {1:"KTAS 1 (즉시)",2:"KTAS 2 (응급, ≤15분)",3:"KTAS 3 (준응급, ≤30분)",4:"KTAS 4 (≤60분)",5:"KTAS 5 (비응급, ≤120분)"};
+    const labels = {1:"환자상태 1 (즉시)",2:"환자상태 2 (응급, ≤15분)",3:"환자상태 3 (준응급, ≤30분)",4:"환자상태 4 (≤60분)",5:"환자상태 5 (비응급, ≤120분)"};
     badge.textContent = labels[level];
     $("#target").textContent = ({1:"즉시",2:"≤ 15분",3:"≤ 30분",4:"≤ 60분",5:"≤ 120분"})[level];
   }
@@ -426,7 +426,7 @@
     const ul = $("#rationale");
     ul.innerHTML = "";
     if (res.reasons.length === 0) {
-      const li = document.createElement("li"); li.textContent = "특이 트리거 없음 → 기본 KTAS 5 유지"; ul.appendChild(li);
+      const li = document.createElement("li"); li.textContent = "특이 트리거 없음 → 기본 환자상태 5 유지"; ul.appendChild(li);
     } else {
       res.reasons.forEach(r=>{
         const li = document.createElement("li"); li.textContent = r; ul.appendChild(li);
@@ -460,7 +460,7 @@
     };
     const blob = new Blob([JSON.stringify(data,null,2)], {type:"application/json"});
     const a = document.createElement("a"); a.href = URL.createObjectURL(blob);
-    a.download = `KTAS_detail_${new Date().toISOString().slice(0,19).replace(/[:.]/g,'-')}.json`;
+    a.download = `환자상태_detail_${new Date().toISOString().slice(0,19).replace(/[:.]/g,'-')}.json`;
     a.click();
     URL.revokeObjectURL(a.href);
   });
