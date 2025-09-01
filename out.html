@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>무등산 탐방로 통제</title>
+    <script type="text/javascript" src="https://oapi.map.naver.com/openapi/v3/maps.js?ncpClientId=YOUR_CLIENT_ID"></script>
+</head>
+<body>
+    <div id="map" style="width:100%;height:500px;"></div>
+    <script>
+        var map = new naver.maps.Map('map', {
+            center: new naver.maps.LatLng(35.1325, 126.9658),
+            zoom: 12
+        });
+
+        // 통제 정보 데이터 (예시)
+        var restrictions = [
+            {
+                name: "서석대 탐방로",
+                lat: 35.1228,
+                lng: 126.9802,
+                status: "통제 중",
+                reason: "낙석 위험"
+            },
+            {
+                name: "입석대 탐방로",
+                lat: 35.1261,
+                lng: 126.9749,
+                status: "부분 통제",
+                reason: "겨울철 빙판길"
+            }
+        ];
+
+        // 마커 및 정보창 생성
+        restrictions.forEach(function(item) {
+            var marker = new naver.maps.Marker({
+                position: new naver.maps.LatLng(item.lat, item.lng),
+                map: map,
+                title: item.name
+            });
+
+            var infoWindow = new naver.maps.InfoWindow({
+                content: '<div style="padding:10px;">' +
+                         '<h4>' + item.name + '</h4>' +
+                         '<p><b>상태:</b> ' + item.status + '</p>' +
+                         '<p><b>사유:</b> ' + item.reason + '</p>' +
+                         '</div>'
+            });
+
+            naver.maps.Event.addListener(marker, 'click', function(e) {
+                if (infoWindow.getMap()) {
+                    infoWindow.close();
+                } else {
+                    infoWindow.open(map, marker);
+                }
+            });
+        });
+    </script>
+</body>
+</html>
