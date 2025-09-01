@@ -2,99 +2,60 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>등산로 갈림길 경로 표시</title>
-    <script type="text/javascript" src="https://oapi.map.naver.com/openapi/v3/maps.js?ncpClientId=YOUR_CLIENT_ID"></script>
-    <style>
-        html, body {
-            width: 100%;
-            height: 100%;
-            margin: 0;
-            padding: 0;
-        }
-        #map {
-            width: 100%;
-            height: 100%;
-        }
-    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>무등산 탐방로 통제</title>
+    <script type="text/javascript" src="https://oapi.map.naver.com/openapi/v3/maps.js?ncpClientId=g2u4orbiqf"></script>
 </head>
 <body>
-    <div id="map"></div>
+    <div id="map" style="width:100%;height:500px;"></div>
     <script>
-        // 지도를 초기화합니다.
         var map = new naver.maps.Map('map', {
-            center: new naver.maps.LatLng(35.1325, 126.9658), // 무등산 국립공원 중심 좌표
+            center: new naver.maps.LatLng(35.1325, 126.9658),
             zoom: 12
         });
 
-        // 폴리라인을 담을 전역 변수
-        var currentPolyline = null;
-
-
-    // 등산로 갈림길 정보 및 경로 데이터
-    var junctions = [
-        {
-            name: "중머리재 갈림길",
-            lat: 35.122,
-            lng: 126.965,
-            paths: {
-                toJangbuljae: [
-                    new naver.maps.LatLng(35.122, 126.965),
-                    new naver.maps.LatLng(35.120, 126.968),
-                    new naver.maps.LatLng(35.118, 126.972),
-                    new naver.maps.LatLng(35.116, 126.979) // 장불재
-                ],
-                toSeoseokdae: [
-                    new naver.maps.LatLng(35.122, 126.965),
-                    new naver.maps.LatLng(35.125, 126.970),
-                    new naver.maps.LatLng(35.127, 126.975),
-                    new naver.maps.LatLng(35.128, 126.9802) // 서석대
-                ]
+        // 통제 정보 데이터 (예시)
+        var restrictions = [
+            {
+                name: "서석대 탐방로",
+                lat: 35.1228,
+                lng: 126.9802,
+                status: "통제 중",
+                reason: "낙석 위험"
+            },
+            {
+                name: "입석대 탐방로",
+                lat: 35.1261,
+                lng: 126.9749,
+                status: "부분 통제",
+                reason: "겨울철 빙판길"
             }
-        },
-        {
-            name: "장불재 갈림길",
-            lat: 35.116,
-            lng: 126.979,
-            paths: {
-                toSeoseokdae: [
-                    new naver.maps.LatLng(35.116, 126.979),
-                    new naver.maps.LatLng(35.118, 126.9795),
-                    new naver.maps.LatLng(35.122, 126.980),
-                    new naver.maps.LatLng(35.128, 126.9802) // 서석대
-                ]
-            }
-        }
-    ];
+        ];
 
-    // 마커 생성 및 이벤트 리스너 추가
-    junctions.forEach(function(item) {
-        var marker = new naver.maps.Marker({
-            position: new naver.maps.LatLng(item.lat, item.lng),
-            map: map,
-            title: item.name
-        });
-
-        naver.maps.Event.addListener(marker, 'click', function(e) {
-            // 기존에 표시된 폴리라인이 있으면 삭제
-            if (currentPolyline) {
-                currentPolyline.setMap(null);
-            }
-
-            // 클릭된 마커에 해당하는 경로를 표시
-            // 여기서는 첫 번째 경로(toJangbuljae)를 기본으로 표시합니다.
-            // 사용자가 선택할 수 있는 UI를 추가하면 더 좋습니다.
-            var pathCoords = item.paths.toJangbuljae;
-            
-            currentPolyline = new naver.maps.Polyline({
+        // 마커 및 정보창 생성
+        restrictions.forEach(function(item) {
+            var marker = new naver.maps.Marker({
+                position: new naver.maps.LatLng(item.lat, item.lng),
                 map: map,
-                path: pathCoords,
-                strokeColor: '#5347AA', // 선 색상
-                strokeOpacity: 0.8,    // 투명도
-                strokeWeight: 4        // 선 굵기
+                title: item.name
+            });
+
+            var infoWindow = new naver.maps.InfoWindow({
+                content: '<div style="padding:10px;">' +
+                         '<h4>' + item.name + '</h4>' +
+                         '<p><b>상태:</b> ' + item.status + '</p>' +
+                         '<p><b>사유:</b> ' + item.reason + '</p>' +
+                         '</div>'
+            });
+
+            naver.maps.Event.addListener(marker, 'click', function(e) {
+                if (infoWindow.getMap()) {
+                    infoWindow.close();
+                } else {
+                    infoWindow.open(map, marker);
+                }
             });
         });
-    });
-</script>
-    
+    </script>
 </body>
 </html>
