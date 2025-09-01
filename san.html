@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>산사태 관리 시스템</title>
+    <title>무등산 산사태 관리 시스템</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -34,7 +34,7 @@
     <div class="p-4 sm:p-8">
         <!-- 헤더 -->
         <header class="text-center">
-            <h1 class="text-3xl sm:text-4xl font-extrabold text-gray-800 tracking-tight">산사태 관리 시스템</h1>
+            <h1 class="text-3xl sm:text-4xl font-extrabold text-gray-800 tracking-tight">무등산 산사태 관리 시스템</h1>
             <p class="mt-2 text-lg text-gray-600">위성 지도를 통해 산사태 위험 지역을 모니터링하고 관리합니다.</p>
         </header>
     </div>
@@ -107,7 +107,7 @@
         function initMap() {
             // 지도 초기화
             map = new naver.maps.Map('map', {
-                center: new naver.maps.LatLng(37.5665, 126.9780), // 서울 중심
+                center: new naver.maps.LatLng(35.119158, 127.003814), // 서석대 중심
                 zoom: 12,
                 zoomControl: true,
                 mapTypeControl: true
