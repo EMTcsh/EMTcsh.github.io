@@ -5,9 +5,43 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>무등산 탐방로 통제</title>
     <script type="text/javascript" src="https://oapi.map.naver.com/openapi/v3/maps.js?ncpClientId=g2u4orbiqf"></script>
+    <style>
+        html, body {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+        #map {
+            width: 100%;
+            height: 500px; /* 고정된 높이를 줬습니다. */
+        }
+        .info-window-content {
+            padding: 10px;
+            font-family: 'Malgun Gothic', '맑은 고딕', sans-serif;
+            font-size: 14px;
+        }
+        .info-window-content h4 {
+            margin-top: 0;
+            margin-bottom: 5px;
+            color: #333;
+        }
+        .info-window-content p {
+            margin: 0;
+            line-height: 1.5;
+        }
+        .info-status-red {
+            color: #D32F2F;
+            font-weight: bold;
+        }
+        .info-status-orange {
+            color: #FFA000;
+            font-weight: bold;
+        }
+    </style>
 </head>
 <body>
-    <div id="map" style="width:100%;height:500px;"></div>
+    <div id="map"></div>
     <script>
         var map = new naver.maps.Map('map', {
             center: new naver.maps.LatLng(35.1325, 126.9658),
@@ -29,18 +63,18 @@
                 lng: 126.9749,
                 status: "부분 통제",
                 reason: "겨울철 빙판길"
-            }
+            },
             {
                 name: "제2수원지 입구",
                 lat: 35.101442,
-                lng: 126.964564
+                lng: 126.964564,
                 status: "통제",
                 reason: "시설물 정비중"
-            }
-         {
+            },
+            {
                 name: "용추계곡 입구",
                 lat: 35.115544,
-                lng: 126.987214
+                lng: 126.987214,
                 status: "통제",
                 reason: "시설물 정비중"
             }
@@ -55,7 +89,7 @@
             });
 
             var infoWindow = new naver.maps.InfoWindow({
-                content: '<div style="padding:10px;">' +
+                content: '<div class="info-window-content">' +
                          '<h4>' + item.name + '</h4>' +
                          '<p><b>상태:</b> ' + item.status + '</p>' +
                          '<p><b>사유:</b> ' + item.reason + '</p>' +
