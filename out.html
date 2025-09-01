@@ -2,48 +2,137 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>무등산 탐방로 통제</title>
+    <title>등산로 통제 정보</title>
     <script type="text/javascript" src="https://oapi.map.naver.com/openapi/v3/maps.js?ncpClientId=g2u4orbiqf"></script>
+    <style>
+        html, body {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+        #map {
+            width: 100%;
+            height: 100%;
+        }
+    </style>
 </head>
 <body>
-    <div id="map" style="width:100%;height:500px;"></div>
+    <div id="map"></div>
+    <script>
+        // 지도를 표시할 div와 지도의 초기 옵션을 설정합니다.
+        var map = new naver.maps.Map('map', {
+            center: new naver.maps.LatLng(37.5665, 126.9780), // 지도의 초기 중심 좌표 (예: 서울)
+            zoom: 12
+        });
+    </script>
+</body>
+</html>
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>등산로 통제 정보</title>
+    <script type="text/javascript" src="https://oapi.map.naver.com/openapi/v3/maps.js?ncpClientId=g2u4orbiqf"></script>
+    <style>
+        html, body {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+        #map {
+            width: 100%;
+            height: 100%;
+        }
+        .info-window-content {
+            padding: 10px;
+            font-family: 'Malgun Gothic', '맑은 고딕', sans-serif;
+            font-size: 14px;
+        }
+        .info-window-content h4 {
+            margin-top: 0;
+            margin-bottom: 5px;
+            color: #333;
+        }
+        .info-window-content p {
+            margin: 0;
+            line-height: 1.5;
+        }
+        .info-status-red {
+            color: #D32F2F;
+            font-weight: bold;
+        }
+        .info-status-orange {
+            color: #FFA000;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div id="map"></div>
     <script>
         var map = new naver.maps.Map('map', {
-            center: new naver.maps.LatLng(35.1325, 126.9658),
+            center: new naver.maps.LatLng(35.1325, 126.9658), // 무등산 국립공원 중심 좌표
             zoom: 12
         });
 
-        // 통제 정보 데이터 (예시)
+        // 등산로 통제 정보 데이터 (예시)
         var restrictions = [
             {
-                name: "서석대 탐방로",
-                lat: 35.1228,
-                lng: 126.9802,
+                name: "장불재~서석대 구간",
+                lat: 35.116,
+                lng: 126.979,
                 status: "통제 중",
-                reason: "낙석 위험"
+                reason: "낙석 위험",
+                color: "red"
             },
             {
-                name: "입석대 탐방로",
-                lat: 35.1261,
-                lng: 126.9749,
+                name: "중머리재~장불재 구간",
+                lat: 35.122,
+                lng: 126.965,
                 status: "부분 통제",
-                reason: "겨울철 빙판길"
+                reason: "시설 보수",
+                color: "orange"
+            },
+            {
+                name: "원효사~무등산 정상부",
+                lat: 35.128,
+                lng: 126.995,
+                status: "개방",
+                reason: "정상 운영",
+                color: "green"
             }
         ];
 
-        // 마커 및 정보창 생성
+        // 마커 및 정보창 생성 및 표시
         restrictions.forEach(function(item) {
+            // 통제 상태에 따라 마커 아이콘을 다르게 설정할 수 있습니다.
+            var iconUrl = '';
+            if (item.color === 'red') {
+                iconUrl = 'http://maps.google.com/mapfiles/ms/icons/red-dot.png';
+            } else if (item.color === 'orange') {
+                iconUrl = 'http://maps.google.com/mapfiles/ms/icons/orange-dot.png';
+            } else {
+                iconUrl = 'http://maps.google.com/mapfiles/ms/icons/green-dot.png';
+            }
+            
             var marker = new naver.maps.Marker({
                 position: new naver.maps.LatLng(item.lat, item.lng),
                 map: map,
-                title: item.name
+                title: item.name,
+                icon: {
+                    url: iconUrl,
+                    size: new naver.maps.Size(32, 32),
+                    scaledSize: new naver.maps.Size(32, 32)
+                }
             });
 
             var infoWindow = new naver.maps.InfoWindow({
-                content: '<div style="padding:10px;">' +
+                content: '<div class="info-window-content">' +
                          '<h4>' + item.name + '</h4>' +
-                         '<p><b>상태:</b> ' + item.status + '</p>' +
+                         '<p><b>상태:</b> <span class="info-status-' + item.color + '">' + item.status + '</span></p>' +
                          '<p><b>사유:</b> ' + item.reason + '</p>' +
                          '</div>'
             });
