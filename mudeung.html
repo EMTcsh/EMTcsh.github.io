@@ -22,32 +22,90 @@
     <div id="map"></div>
     <script>
         var map = new naver.maps.Map('map', {
-            center: new naver.maps.LatLng(35.1325, 126.9658),
-            zoom: 12
+            center: new naver.maps.LatLng(35.1195, 126.9370), // 중심 좌표
+            zoom: 15
         });
 
-        // 가상의 무등산 국립공원 경계선 좌표
-        // 실제 경계선 좌표가 아니므로 주의 바랍니다.
+        // 무등산 국립공원 경계선 좌표 (일부 발췌)
         var polygonPath = [
-            new naver.maps.LatLng(35.15, 126.95),
-            new naver.maps.LatLng(35.16, 127.00),
-            new naver.maps.LatLng(35.13, 127.02),
-            new naver.maps.LatLng(35.10, 127.00),
-            new naver.maps.LatLng(35.11, 126.97),
-            new naver.maps.LatLng(35.12, 126.95),
+            new naver.maps.LatLng(35.11959024361393, 126.9370379312559),
+            new naver.maps.LatLng(35.11952055553925, 126.937393642958),
+            new naver.maps.LatLng(35.11940276326162, 126.9378642353),
+            new naver.maps.LatLng(35.11932985174769, 126.938146276489),
+            new naver.maps.LatLng(35.11924306123832, 126.9385483100869),
+            new naver.maps.LatLng(35.11911432894167, 126.9388336111392),
+            new naver.maps.LatLng(35.1190717658361, 126.9392809463921),
+            new naver.maps.LatLng(35.11925614498416, 126.939541555271),
+            new naver.maps.LatLng(35.11946296325194, 126.9398050565316),
+            new naver.maps.LatLng(35.11963840819004, 126.9400036224119),
+            new naver.maps.LatLng(35.11976293181161, 126.9401609894445),
+            new naver.maps.LatLng(35.11983472446326, 126.9403439694464),
+            new naver.maps.LatLng(35.11990697920491, 126.9406799575438),
+            new naver.maps.LatLng(35.11963823972261, 126.9409566509023),
+            new naver.maps.LatLng(35.11925654167679, 126.9410657278546),
+            new naver.maps.LatLng(35.1184907570008, 126.9407415006577),
+            new naver.maps.LatLng(35.11809158823441, 126.9404659651702),
+            new naver.maps.LatLng(35.11778040400613, 126.940317267428),
+            new naver.maps.LatLng(35.11754973726941, 126.9401779505243),
+            new naver.maps.LatLng(35.11732437685429, 126.9404283423562),
+            new naver.maps.LatLng(35.1173382896033, 126.9406228626296),
+            new naver.maps.LatLng(35.11721361617831, 126.9408395696986),
+            new naver.maps.LatLng(35.11690224062788, 126.9411852692091),
+            new naver.maps.LatLng(35.11671777432913, 126.9415482735622),
+            new naver.maps.LatLng(35.11656260824684, 126.9416996131255),
+            new naver.maps.LatLng(35.11634718419823, 126.9417006732356),
+            new naver.maps.LatLng(35.11622447521616, 126.9418969090054),
+            new naver.maps.LatLng(35.11619985294489, 126.9420629674214),
+            new naver.maps.LatLng(35.11605359282135, 126.9421832731616),
+            new naver.maps.LatLng(35.11600535713096, 126.9422977756902),
+            new naver.maps.LatLng(35.11568205518032, 126.9424603155554),
+            new naver.maps.LatLng(35.11535847251946, 126.9423541501174),
+            new naver.maps.LatLng(35.11506080450799, 126.9422661186463),
+            new naver.maps.LatLng(35.11464532238101, 126.9425759347001),
+            new naver.maps.LatLng(35.11435203925522, 126.942784128394),
+            new naver.maps.LatLng(35.11433681759517, 126.9430088354276),
+            new naver.maps.LatLng(35.11411147662967, 126.9435074122167),
+            new naver.maps.LatLng(35.11412633700454, 126.944046742166),
+            new naver.maps.LatLng(35.1138480880575, 126.9443169512776),
+            new naver.maps.LatLng(35.11338292093158, 126.9444697703425),
+            new naver.maps.LatLng(35.11312943160085, 126.9447146786539),
+            new naver.maps.LatLng(35.11291693807625, 126.9449917963109),
+            new naver.maps.LatLng(35.11248911811936, 126.9453486931142),
+            new naver.maps.LatLng(35.1122893465252, 126.9456743148569),
+            new naver.maps.LatLng(35.11182847793614, 126.9462926975105),
+            new naver.maps.LatLng(35.11152809093232, 126.9467208260197),
+            new naver.maps.LatLng(35.11130532614286, 126.9469605734032),
+            new naver.maps.LatLng(35.11095405526571, 126.9474796127138),
+            new naver.maps.LatLng(35.110822368116, 126.9476202654345),
+            new naver.maps.LatLng(35.1101663454666, 126.9481064197244),
+            new naver.maps.LatLng(35.10989755784156, 126.9483966012351),
+            new naver.maps.LatLng(35.10956219665768, 126.9488051059635),
+            new naver.maps.LatLng(35.10918654146432, 126.9492089816117),
+            new naver.maps.LatLng(35.10861532905891, 126.94923635959),
+            new naver.maps.LatLng(35.10836437416818, 126.9492331001494),
+            new naver.maps.LatLng(35.10799924511329, 126.9491407828388),
+            new naver.maps.LatLng(35.10771930837584, 126.9494914697518),
+            new naver.maps.LatLng(35.10712807930347, 126.9502857240287),
+            new naver.maps.LatLng(35.10676663748036, 126.9507956605607),
+            new naver.maps.LatLng(35.10658451667545, 126.9514078346945),
+            new naver.maps.LatLng(35.1063681251396, 126.9518713406445),
+            new naver.maps.LatLng(35.10604681228589, 126.9524037540957),
+            new naver.maps.LatLng(35.10592165974248, 126.9526676348209),
+            new naver.maps.LatLng(35.10580427829189, 126.9529233377808),
+            new naver.maps.LatLng(35.10572032292484, 126.9533018582525),
+            new naver.maps.LatLng(35.10572026287404, 126.9536260270378),
+            new naver.maps.LatLng(35.10564895455263, 126.9537904941495),
         ];
 
-        // 폴리곤(Polygon) 객체 생성
         var polygon = new naver.maps.Polygon({
             map: map,
             paths: [polygonPath],
-            fillColor: '#007BFF',   // 내부 색상 (파란색)
-            fillOpacity: 0.1,       // 내부 투명도
-            strokeColor: '#007BFF', // 선 색상 (파란색)
-            strokeOpacity: 0.6,     // 선 투명도
-            strokeWeight: 3         // 선 굵기
+            fillColor: '#007BFF',
+            fillOpacity: 0.2,
+            strokeColor: '#007BFF',
+            strokeOpacity: 0.8,
+            strokeWeight: 2
         });
-
     </script>
 </body>
 </html>
