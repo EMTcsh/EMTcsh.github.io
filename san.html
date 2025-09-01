@@ -6,17 +6,33 @@
     <title>무등산 산사태 관리 시스템</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        body { font-family: 'Inter', sans-serif; }
+     <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center; /* Add this to center the content */
+            background-color: #f3f4f6;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+        }
         #map {
-            height: 60vh;
+            height: 100%; /* 부모 컨테이너에 맞춰 100% */
             width: 100%;
             border-radius: 0.5rem;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
         .info-panel {
-            max-height: 40vh;
+            max-height: 100%; /* 부모 컨테이너에 맞춰 100% */
             overflow-y: auto;
+        }
+        /* Fixed size container for the main content */
+        .fixed-container {
+            width: 1024px;
+            height: 768px;
         }
     </style>
 </head>
