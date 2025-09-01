@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>산사태 관리 시스템</title>
+    <title>무등산 산사태 관리 시스템</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -75,6 +75,7 @@
         let map;
         let markers = [];
         let isSatellite = false;
+        let isAddingPoint = false; // 새로운 상태 변수
 
         function initMap() {
             // 지도 초기화
@@ -88,9 +89,32 @@
             // 초기 마커 렌더링
             renderMarkers();
 
-            // 지도 클릭 이벤트 (추가 기능 구현을 위해 남겨둠)
+            // 지도 클릭 이벤트
             naver.maps.Event.addListener(map, 'click', function(e) {
-                console.log(`클릭 위치: ${e.coord.y}, ${e.coord.x}`);
+                if (isAddingPoint) {
+                    const newLat = e.coord.y;
+                    const newLng = e.coord.x;
+
+                    // 새로운 더미 데이터 추가
+                    const newPoint = {
+                        lat: newLat,
+                        lng: newLng,
+                        risk: "보통", // 기본값 설정
+                        date: new Date().toISOString().slice(0, 10),
+                        description: "새롭게 추가된 위험 지역"
+                    };
+                    landslideData.push(newPoint);
+
+                    // 마커 다시 렌더링
+                    renderMarkers();
+                    isAddingPoint = false; // 상태 초기화
+
+                    // 버튼 및 패널 텍스트 복구
+                    document.getElementById("addPointBtn").textContent = "위험 지역 추가";
+                    document.getElementById("addPointBtn").classList.remove("bg-red-500", "hover:bg-red-600");
+                    document.getElementById("addPointBtn").classList.add("bg-blue-600", "hover:bg-blue-700");
+                    document.getElementById("infoPanel").innerHTML = "새로운 위험 지점이 추가되었습니다. 마커를 클릭하여 상세 정보를 확인하세요.";
+                }
             });
         }
 
@@ -128,6 +152,8 @@
                 case "낮음": color = "yellow"; break;
                 default: color = "grey"; break;
             }
+            // 위험도에 따라 다른 아이콘 사용 (Naver Maps는 별도의 아이콘 URL 제공)
+            // 여기서는 임시로 기본 아이콘을 사용하고, 위험도를 색상으로만 구분합니다.
             return {
                 url: `https://naver-maps.github.io/maps.js/docs/img/example/pin_default.png`,
                 size: new naver.maps.Size(32, 50),
@@ -148,7 +174,11 @@
 
         // 이벤트 리스너
         document.getElementById("addPointBtn").addEventListener("click", () => {
-            alert("지도를 클릭하여 새로운 산사태 지점을 추가하세요. (이 기능은 개발 중입니다.)");
+            isAddingPoint = true;
+            document.getElementById("addPointBtn").textContent = "지도에서 위치를 클릭하세요...";
+            document.getElementById("addPointBtn").classList.remove("bg-blue-600", "hover:bg-blue-700");
+            document.getElementById("addPointBtn").classList.add("bg-red-500", "hover:bg-red-600");
+            document.getElementById("infoPanel").innerHTML = "<strong class='text-red-500'>지도 클릭 모드 활성화됨.</strong><br>지도에서 마커를 추가할 위치를 클릭하세요.";
         });
 
         document.getElementById("toggleMapTypeBtn").addEventListener("click", () => {
