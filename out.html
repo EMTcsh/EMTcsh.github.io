@@ -52,8 +52,8 @@
             zoom: 12
         });
 
+        // 현재 지도에 그려진 폴리라인을 저장하는 변수
         var currentPolyline = null;
-        var markers = {}; // 마커 객체를 저장할 딕셔너리
 
         // 등산로 구간 정보 (마커 및 경로 포함)
         var hikingRoutes = [
@@ -65,9 +65,7 @@
                 reason: "시설물 정비중",
                 path: [
                     new naver.maps.LatLng(35.101442, 126.964564),
-                    new naver.maps.LatLng(35.105, 126.968),
-                    new naver.maps.LatLng(35.110, 126.970),
-                    new naver.maps.LatLng(35.116, 126.979)
+                    new naver.maps.LatLng(35.115544, 126.987214) // 용추계곡 입구로 연결하는 경로
                 ],
                 connectedTo: "용추계곡 입구"
             },
@@ -79,9 +77,7 @@
                 reason: "시설물 정비중",
                 path: [
                     new naver.maps.LatLng(35.115544, 126.987214),
-                    new naver.maps.LatLng(35.118, 126.985),
-                    new naver.maps.LatLng(35.122, 126.982),
-                    new naver.maps.LatLng(35.128, 126.9802)
+                    new naver.maps.LatLng(35.101442, 126.964564) // 제2수원지 입구로 연결하는 경로
                 ],
                 connectedTo: "제2수원지 입구"
             },
@@ -89,14 +85,9 @@
                 name: "서석대",
                 lat: 35.121206,
                 lng: 127.002936,
-                status: "부분 통제",
-                reason: "겨울철 빙판길",
-                path: [
-                    new naver.maps.LatLng(35.121206, 127.002936),
-                    new naver.maps.LatLng(35.121206, 127.002936),
-                    new naver.maps.LatLng(35.121206, 127.002936)
-                ],
-                connectedTo: "서석대"
+                status: "개방",
+                reason: "정상 운영",
+                path: null
             },
             {
                 name: "인왕봉",
@@ -104,7 +95,11 @@
                 lng: 127.004656,
                 status: "부분 통제",
                 reason: "낙석 위험",
-                path: null
+                path: [
+                    new naver.maps.LatLng(35.122144, 127.004656),
+                    new naver.maps.LatLng(35.121206, 127.002936) // 인왕봉에서 서석대로 연결하는 경로
+                ],
+                connectedTo: "서석대"
             },
             {
                 name: "장불재",
@@ -113,19 +108,12 @@
                 status: "개방",
                 reason: "정상 운영",
                 path: null
-            },
-            {
-                name: "서석대",
-                lat: 35.121206,
-                lng: 127.002936,
-                status: "개방",
-                reason: "정상 운영",
-                path: null
             }
         ];
 
-        // 마커 생성 및 이벤트 리스너 추가
+        // 마커 및 정보창 생성 및 이벤트 연결
         hikingRoutes.forEach(function(item) {
+            // 마커 아이콘 설정 (통제 상태에 따라 색상 변경)
             var markerIcon = {
                 content: '<div style="width:24px;height:24px;border-radius:50%;background-color:' +
                          (item.status === "통제" || item.status === "통제 중" ? 'red' : item.status === "부분 통제" ? 'orange' : 'green') +
@@ -141,9 +129,6 @@
                 icon: markerIcon
             });
 
-            // 마커 딕셔너리에 저장
-            markers[item.name] = marker;
-
             var infoWindow = new naver.maps.InfoWindow({
                 content: '<div class="info-window-content">' +
                          '<h4>' + item.name + '</h4>' +
@@ -155,7 +140,7 @@
                          '</div>'
             });
 
-            // 마커 클릭 시 정보창 및 폴리라인 표시
+            // 마커 클릭 이벤트 리스너
             naver.maps.Event.addListener(marker, 'click', function(e) {
                 // 정보창 토글
                 if (infoWindow.getMap()) {
