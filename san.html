@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>무등산 산사태 관리 시스템</title>
+    <title>산사태 관리 시스템</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -30,55 +30,55 @@
         }
     </style>
 </head>
-<body class="bg-gray-100 p-4 sm:p-8">
-    <div class="max-w-7xl mx-auto space-y-8">
+<body class="bg-gray-100">
+    <div class="p-4 sm:p-8">
         <!-- 헤더 -->
         <header class="text-center">
-            <h1 class="text-3xl sm:text-4xl font-extrabold text-gray-800 tracking-tight">무등산 산사태 관리 시스템</h1>
+            <h1 class="text-3xl sm:text-4xl font-extrabold text-gray-800 tracking-tight">산사태 관리 시스템</h1>
             <p class="mt-2 text-lg text-gray-600">위성 지도를 통해 산사태 위험 지역을 모니터링하고 관리합니다.</p>
         </header>
-
-        <!-- 지도 및 제어판 -->
-        <main class="flex flex-col lg:flex-row gap-8">
-            <!-- 지도 컨테이너 -->
-            <div id="map-container" class="lg:w-3/4">
-                <div id="map"></div>
-            </div>
-
-            <!-- 제어판 & 정보 패널 -->
-            <div class="lg:w-1/4 bg-white p-6 rounded-xl shadow-lg space-y-6">
-                <div class="space-y-4">
-                    <h2 class="text-2xl font-bold text-gray-800">지도 제어</h2>
-                    <!-- 좌표 입력 기능 추가 -->
-                    <div>
-                        <input type="text" id="latInput" placeholder="위도 (예: 37.5)" class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                        <input type="text" id="lngInput" placeholder="경도 (예: 127.0)" class="w-full mt-2 px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                        <button id="addByCoordBtn" class="w-full mt-2 bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition-colors duration-200">
-                            좌표로 위험 지역 추가
-                        </button>
-                    </div>
-
-                    <hr class="border-gray-200">
-                    
-                    <button id="addPointBtn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition-colors duration-200">
-                        지도에서 클릭하여 추가
-                    </button>
-                    <button id="toggleMapTypeBtn" class="w-full bg-gray-500 hover:bg-gray-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition-colors duration-200">
-                        지도/위성 전환
-                    </button>
-                </div>
-                
-                <hr class="border-gray-200">
-
-                <div class="space-y-4">
-                    <h2 class="text-2xl font-bold text-gray-800">산사태 지정 정보</h2>
-                    <div id="infoPanel" class="info-panel bg-gray-50 p-4 rounded-lg border border-gray-200 text-gray-700">
-                        마커를 클릭하여 상세 정보를 확인하세요.
-                    </div>
-                </div>
-            </div>
-        </main>
     </div>
+
+    <!-- 지도 및 제어판 (화면의 남은 공간을 차지하도록 flex-1 적용) -->
+    <main class="flex flex-col lg:flex-row p-4 sm:p-8 pt-0 gap-8 overflow-hidden fixed-container">
+        <!-- 지도 컨테이너 -->
+        <div id="map-container" class="w-5/6 h-full">
+            <div id="map"></div>
+        </div>
+
+        <!-- 제어판 & 정보 패널 -->
+        <div class="w-1/6 bg-white p-6 rounded-xl shadow-lg space-y-6 flex-shrink-0">
+            <div class="space-y-4">
+                <h2 class="text-2xl font-bold text-gray-800">지도 제어</h2>
+                <!-- 좌표 입력 기능 추가 -->
+                <div>
+                    <input type="text" id="latInput" placeholder="위도 (예: 37.5)" class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <input type="text" id="lngInput" placeholder="경도 (예: 127.0)" class="w-full mt-2 px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-2 focus:ring-blue-500">
+                    <button id="addByCoordBtn" class="w-full mt-2 bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition-colors duration-200">
+                        좌표로 위험 지역 추가
+                    </button>
+                </div>
+
+                <hr class="border-gray-200">
+                
+                <button id="addPointBtn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition-colors duration-200">
+                    지도에서 클릭하여 추가
+                </button>
+                <button id="toggleMapTypeBtn" class="w-full bg-gray-500 hover:bg-gray-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition-colors duration-200">
+                    지도/위성 전환
+                </button>
+            </div>
+            
+            <hr class="border-gray-200">
+
+            <div class="space-y-4">
+                <h2 class="text-2xl font-bold text-gray-800">산사태 정보</h2>
+                <div id="infoPanel" class="info-panel bg-gray-50 p-4 rounded-lg border border-gray-200 text-gray-700">
+                    마커를 클릭하여 상세 정보를 확인하세요.
+                </div>
+            </div>
+        </div>
+    </main>
 
     <!-- Naver Maps API 로드 -->
     <script src="https://oapi.map.naver.com/openapi/v3/maps.js?ncpClientId=g2u4orbiqf"></script>
@@ -88,7 +88,7 @@
 
         // 더미 데이터: 실제로는 백엔드나 데이터베이스에서 가져와야 합니다.
         const landslideData = [
-          { lat: 35.129108, lng: 126.970008, risk: "보통", date: "2014-11-28", description: "동구 운림동 산 143-1 임." },
+            { lat: 35.129108, lng: 126.970008, risk: "보통", date: "2014-11-28", description: "동구 운림동 산 143-1 임." },
             { lat: 35.123325, lng: 126.960225, risk: "보통", date: "2024-07-15", description: "동구 운림동 산 212 임." },
             { lat: 35.167692, lng: 126.977608, risk: "보통", date: "2024-07-15", description: "북구 금곡동 994 답." },
             { lat: 35.162464, lng: 126.963142, risk: "보통", date: "2024-07-15", description: "북구 청풍동 179-3 답." },
@@ -98,7 +98,7 @@
             { lat: 35.155253, lng: 126.956025, risk: "보통", date: "2015-08-18", description: "화암동 산 95 임." },
             { lat: 35.154136, lng: 126.957417, risk: "보통", date: "2015-08-18", description: "화암동 산 97 임." },
         ];
-    
+
         let map;
         let markers = [];
         let isSatellite = false;
@@ -107,8 +107,8 @@
         function initMap() {
             // 지도 초기화
             map = new naver.maps.Map('map', {
-                center: new naver.maps.LatLng(35.119158, 127.003814), // 서석대 중심
-                zoom: 11,
+                center: new naver.maps.LatLng(37.5665, 126.9780), // 서울 중심
+                zoom: 12,
                 zoomControl: true,
                 mapTypeControl: true
             });
