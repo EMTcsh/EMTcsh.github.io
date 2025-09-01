@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>산사태 관리 시스템</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        #map {
+            height: 60vh;
+            width: 100%;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .info-panel {
+            max-height: 40vh;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 p-4 sm:p-8">
+    <div class="max-w-7xl mx-auto space-y-8">
+        <!-- 헤더 -->
+        <header class="text-center">
+            <h1 class="text-3xl sm:text-4xl font-extrabold text-gray-800 tracking-tight">산사태 관리 시스템</h1>
+            <p class="mt-2 text-lg text-gray-600">위성 지도를 통해 산사태 위험 지역을 모니터링하고 관리합니다.</p>
+        </header>
+
+        <!-- 지도 및 제어판 -->
+        <main class="flex flex-col lg:flex-row gap-8">
+            <!-- 지도 컨테이너 -->
+            <div id="map-container" class="lg:w-3/4">
+                <div id="map"></div>
+            </div>
+
+            <!-- 제어판 & 정보 패널 -->
+            <div class="lg:w-1/4 bg-white p-6 rounded-xl shadow-lg space-y-6">
+                <div class="space-y-4">
+                    <h2 class="text-2xl font-bold text-gray-800">지도 제어</h2>
+                    <button id="addPointBtn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition-colors duration-200">
+                        위험 지역 추가
+                    </button>
+                    <button id="toggleMapTypeBtn" class="w-full bg-gray-500 hover:bg-gray-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition-colors duration-200">
+                        지도/위성 전환
+                    </button>
+                </div>
+                
+                <hr class="border-gray-200">
+
+                <div class="space-y-4">
+                    <h2 class="text-2xl font-bold text-gray-800">산사태 정보</h2>
+                    <div id="infoPanel" class="info-panel bg-gray-50 p-4 rounded-lg border border-gray-200 text-gray-700">
+                        마커를 클릭하여 상세 정보를 확인하세요.
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Naver Maps API 로드 -->
+    <script src="https://oapi.map.naver.com/openapi/v3/maps.js?ncpClientId=g2u4orbiqf"></script>
+    <script>
+        // 이 부분을 실제 Naver Maps API 클라이언트 ID로 교체하세요.
+        const naverClientId = "g2u4orbiqf";
+
+        // 더미 데이터: 실제로는 백엔드나 데이터베이스에서 가져와야 합니다.
+        const landslideData = [
+            { lat: 37.842, lng: 128.001, risk: "높음", date: "2024-08-20", description: "강원도 지역 집중호우로 인한 대규모 산사태." },
+            { lat: 37.585, lng: 127.050, risk: "보통", date: "2024-07-15", description: "서울 북한산 인근 소규모 붕괴 발생." },
+            { lat: 36.634, lng: 127.491, risk: "낮음", date: "2024-06-05", description: "충북 청주 지역 도로 옆 사면 일부 유실." },
+        ];
+
+        let map;
+        let markers = [];
+        let isSatellite = false;
+
+        function initMap() {
+            // 지도 초기화
+            map = new naver.maps.Map('map', {
+                center: new naver.maps.LatLng(37.5665, 126.9780), // 서울 중심
+                zoom: 8,
+                zoomControl: true,
+                mapTypeControl: true
+            });
+
+            // 초기 마커 렌더링
+            renderMarkers();
+
+            // 지도 클릭 이벤트 (추가 기능 구현을 위해 남겨둠)
+            naver.maps.Event.addListener(map, 'click', function(e) {
+                console.log(`클릭 위치: ${e.coord.y}, ${e.coord.x}`);
+            });
+        }
+
+        function renderMarkers() {
+            markers.forEach(marker => marker.setMap(null));
+            markers = [];
+
+            landslideData.forEach(data => {
+                const marker = new naver.maps.Marker({
+                    position: new naver.maps.LatLng(data.lat, data.lng),
+                    map: map,
+                    title: `위험도: ${data.risk}`,
+                    icon: getMarkerIcon(data.risk)
+                });
+
+                // 마커 클릭 시 정보 패널 업데이트
+                naver.maps.Event.addListener(marker, 'click', () => {
+                    const infoPanel = document.getElementById("infoPanel");
+                    infoPanel.innerHTML = `
+                        <h3 class="text-xl font-semibold">${data.date}</h3>
+                        <p class="mt-2 text-base"><strong>위험도:</strong> <span class="font-bold text-${getRiskColor(data.risk)}-600">${data.risk}</span></p>
+                        <p class="mt-1 text-base"><strong>위치:</strong> ${data.lat}, ${data.lng}</p>
+                        <p class="mt-1 text-base"><strong>설명:</strong> ${data.description}</p>
+                    `;
+                });
+                markers.push(marker);
+            });
+        }
+
+        function getMarkerIcon(risk) {
+            let color = "";
+            switch(risk) {
+                case "높음": color = "red"; break;
+                case "보통": color = "orange"; break;
+                case "낮음": color = "yellow"; break;
+                default: color = "grey"; break;
+            }
+            return {
+                url: `https://naver-maps.github.io/maps.js/docs/img/example/pin_default.png`,
+                size: new naver.maps.Size(32, 50),
+                origin: new naver.maps.Point(0, 0),
+                anchor: new naver.maps.Point(16, 50)
+            };
+        }
+        
+        // Tailwind CSS 클래스를 위한 위험도 색상 매핑
+        function getRiskColor(risk) {
+            switch(risk) {
+                case "높음": return "red";
+                case "보통": return "orange";
+                case "낮음": return "yellow";
+                default: return "gray";
+            }
+        }
+
+        // 이벤트 리스너
+        document.getElementById("addPointBtn").addEventListener("click", () => {
+            alert("지도를 클릭하여 새로운 산사태 지점을 추가하세요. (이 기능은 개발 중입니다.)");
+        });
+
+        document.getElementById("toggleMapTypeBtn").addEventListener("click", () => {
+            isSatellite = !isSatellite;
+            if (isSatellite) {
+                map.setMapTypeId(naver.maps.MapTypeId.SATELLITE);
+            } else {
+                map.setMapTypeId(naver.maps.MapTypeId.NORMAL);
+            }
+        });
+
+        // 페이지 로드 시 지도 초기화
+        window.addEventListener('DOMContentLoaded', initMap);
+    </script>
+</body>
+</html>
