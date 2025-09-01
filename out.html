@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>무등산 탐방로 통제</title>
+    <title>무등산 탐방로 통제 및 경로</title>
     <script type="text/javascript" src="https://oapi.map.naver.com/openapi/v3/maps.js?ncpClientId=g2u4orbiqf"></script>
     <style>
         html, body {
@@ -14,7 +14,7 @@
         }
         #map {
             width: 100%;
-            height: 500px; /* 고정된 높이를 줬습니다. */
+            height: 100%; /* 전체 화면을 사용하도록 높이를 100%로 설정 */
         }
         .info-window-content {
             padding: 10px;
@@ -38,69 +38,136 @@
             color: #FFA000;
             font-weight: bold;
         }
+        .info-status-green {
+            color: #2E7D32;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
     <div id="map"></div>
     <script>
         var map = new naver.maps.Map('map', {
-            center: new naver.maps.LatLng(35.1325, 126.9658),
+            center: new naver.maps.LatLng(35.1325, 126.9658), // 무등산 국립공원 중심 좌표
             zoom: 12
         });
 
-        // 통제 정보 데이터 (예시)
-        var restrictions = [
-            {
-                name: "인왕봉 탐방로",
-                lat: 35.122144,
-                lng: 127.004656,
-                status: "통제 중",
-                reason: "낙석 위험"
-            },
-            {
-                name: "입석대 탐방로",
-                lat: 35.1261,
-                lng: 126.9749,
-                status: "부분 통제",
-                reason: "겨울철 빙판길"
-            },
+        // 현재 지도에 그려진 폴리라인을 저장하는 변수
+        var currentPolyline = null;
+
+        // 등산로 구간 정보 (마커 및 경로 포함)
+        var hikingRoutes = [
             {
                 name: "제2수원지 입구",
                 lat: 35.101442,
                 lng: 126.964564,
                 status: "통제",
-                reason: "시설물 정비중"
+                reason: "시설물 정비중",
+                path: [
+                    new naver.maps.LatLng(35.101442, 126.964564), // 제2수원지 입구
+                    new naver.maps.LatLng(35.105, 126.968),
+                    new naver.maps.LatLng(35.110, 126.970),
+                    new naver.maps.LatLng(35.116, 126.979)  // 장불재로 가는 가상 경로
+                ],
+                connectedTo: "장불재" // 이 마커가 연결되는 목적지 (정보창에 표시)
             },
             {
                 name: "용추계곡 입구",
                 lat: 35.115544,
                 lng: 126.987214,
                 status: "통제",
-                reason: "시설물 정비중"
+                reason: "시설물 정비중",
+                path: [
+                    new naver.maps.LatLng(35.115544, 126.987214), // 용추계곡 입구
+                    new naver.maps.LatLng(35.118, 126.985),
+                    new naver.maps.LatLng(35.122, 126.982),
+                    new naver.maps.LatLng(35.128, 126.9802) // 서석대 방면 가상 경로
+                ],
+                connectedTo: "서석대"
+            },
+            {
+                name: "입석대",
+                lat: 35.1261,
+                lng: 126.9749,
+                status: "부분 통제",
+                reason: "겨울철 빙판길",
+                path: [
+                    new naver.maps.LatLng(35.1261, 126.9749), // 입석대
+                    new naver.maps.LatLng(35.127, 126.977),
+                    new naver.maps.LatLng(35.128, 126.9802) // 서석대 방면 가상 경로
+                ],
+                connectedTo: "서석대"
+            },
+            {
+                name: "인왕봉",
+                lat: 35.122144,
+                lng: 127.004656,
+                status: "통제 중",
+                reason: "낙석 위험",
+                path: null // 이 마커는 경로가 없거나 종점일 수 있습니다.
             }
         ];
 
-        // 마커 및 정보창 생성
-        restrictions.forEach(function(item) {
+        // 마커 및 정보창 생성 및 폴리라인 이벤트 연결
+        hikingRoutes.forEach(function(item) {
+            // 마커 아이콘 설정 (통제 상태에 따라 색상 변경 가능)
+            var markerIcon = {
+                content: '<div style="width:24px;height:24px;border-radius:50%;background-color:' +
+                         (item.status === "통제" || item.status === "통제 중" ? 'red' : item.status === "부분 통제" ? 'orange' : 'green') +
+                         ';border:2px solid white;text-align:center;line-height:20px;color:white;font-weight:bold;">!</div>',
+                size: new naver.maps.Size(24, 24),
+                anchor: new naver.maps.Point(12, 12)
+            };
+
             var marker = new naver.maps.Marker({
                 position: new naver.maps.LatLng(item.lat, item.lng),
                 map: map,
-                title: item.name
+                title: item.name,
+                icon: markerIcon // 커스텀 아이콘 적용
             });
 
             var infoWindow = new naver.maps.InfoWindow({
                 content: '<div class="info-window-content">' +
                          '<h4>' + item.name + '</h4>' +
-                         '<p><b>상태:</b> ' + item.status + '</p>' +
+                         '<p><b>상태:</b> <span class="info-status-' +
+                         (item.status === "통제" || item.status === "통제 중" ? 'red' : item.status === "부분 통제" ? 'orange' : 'green') +
+                         '">' + item.status + '</span></p>' +
                          '<p><b>사유:</b> ' + item.reason + '</p>' +
+                         (item.connectedTo ? '<p><b>경로:</b> ' + item.connectedTo + ' 방면</p>' : '') +
                          '</div>'
             });
 
+            // 마커 클릭 시 정보창 열기/닫기 및 폴리라인 표시
             naver.maps.Event.addListener(marker, 'click', function(e) {
+                // 정보창 토글
                 if (infoWindow.getMap()) {
                     infoWindow.close();
                 } else {
                     infoWindow.open(map, marker);
+                }
+
+                // 폴리라인 표시/제거
+                if (item.path) { // 경로 데이터가 있는 경우에만 처리
+                    if (currentPolyline) { // 이전에 그려진 선이 있으면 제거
+                        currentPolyline.setMap(null);
+                        currentPolyline = null; // 초기화
+                    }
+
+                    // 클릭된 마커의 경로를 지도에 새로 그립니다.
+                    currentPolyline = new naver.maps.Polyline({
+                        map: map,
+                        path: item.path,
+                        strokeColor: '#007BFF', // 선 색상 (파란색)
+                        strokeOpacity: 0.8,
+                        strokeWeight: 5,
+                        strokeStyle: 'solid'
+                    });
+                } else {
+                    // 경로가 없는 마커를 클릭했을 때 기존 폴리라인 제거
+                    if (currentPolyline) {
+                        currentPolyline.setMap(null);
+                        currentPolyline = null;
+                    }
                 }
             });
         });
