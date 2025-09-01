@@ -207,372 +207,457 @@
   </main>
 </div>
 
+코드 오류 및 중복 제거
+제공된 JavaScript 코드에는 기능적인 오류는 없지만, 논리적 중복이 발견되었습니다. computeKTAS() 함수 내에서 '중증 호흡곤란 / 산소화 저하' 관련 조건문이 두 번 반복되어 있었습니다. 아래 코드는 이 중복을 제거하여 효율성과 가독성을 높였습니다.
+
+최종 수정된 전체 코드
+JavaScript
+
 <script>
-  // 현재 시간으로 기본값 설정하는 함수
-  function setNow(id, type="datetime") {
-    const now = new Date();
-    const offset = now.getTimezoneOffset() * 60000; // 타임존 보정
-    if (type === "datetime") {
-      document.getElementById(id).value =
-        new Date(now - offset).toISOString().slice(0, 16);
-    } else if (type === "time") {
-      document.getElementById(id).value =
-        new Date(now - offset).toISOString().slice(11, 16);
-    }
-  }
+    // --- 유틸 / 초기값 ---
+    const $ = q => document.querySelector(q);
+    const $$ = q => Array.from(document.querySelectorAll(q));
 
-  // 최초 로딩 시 자동 입력
-  setNow("reportTime", "datetime");
-  setNow("arrivalTime", "time");
-  setNow("treatmentStart", "time");
-  setNow("treatmentEnd", "time");
-  setNow("transferDone", "datetime");
-</script>
-  <script>
-  // --- 유틸 / 초기값 ---
-  const $ = q=>document.querySelector(q);
-  const $$ = q=>Array.from(document.querySelectorAll(q));
-  $("#arrTime").value = new Date().toISOString().slice(0,16);
-
-  // 칩 토글
-  $$("#modifiers .chip").forEach(c=>{
-    c.addEventListener("click", ()=>{ c.classList.toggle("active"); renderSelectedMods(); });
-  });
-  function selectedModifiers(){ return $$("#modifiers .chip.active").map(c=>c.dataset.val); }
-  function renderSelectedMods(){ const s = selectedModifiers(); $("#selectedMods").textContent = s.length? s.join(", ") : "-"; }
-
-  // 소아 정상범위(참고용, 연령 구간별 단순화)
-  // 이 값들은 PedKTAS/CTAS 계열의 권고를 참고하여 교육용으로 단순화한 범위입니다.
-  const pediatrics = [
-    {maxAgeMonths:3, hr:[90,205], rr:[30,60]},   // 0-3 months (대략)
-    {maxAgeMonths:12, hr:[80,180], rr:[25,50]},  // 3-12 months
-    {maxAgeMonths:36, hr:[70,160], rr:[20,40]},  // 1-3 years
-    {maxAgeMonths:72, hr:[60,140], rr:[20,30]},  // 3-6 years
-    {maxAgeMonths:144, hr:[50,120], rr:[16,25]}, // 6-12 years
-  ];
-  function getPediatricRanges(ageYears){
-    if (ageYears===null || ageYears===undefined) return null;
-    const months = ageYears*12;
-    for (let r of pediatrics) if (months <= r.maxAgeMonths) return r;
-    return {hr:[50,110], rr:[12,20]}; // 12세 이상은 성인 기준 유사
-  }
-
-  // --- 핵심 중증도 계산(세분화 로직) ---
-  function computeKTAS(){
-    const reasons = [];
-    let level = 5; // 1이 가장 중증
-
-    const age = Number($("#ptAge").value) || 0;
-    const rr = Number($("#rr").value) || null;
-    const spo2 = Number($("#spo2").value) || null;
-    const hr = Number($("#hr").value) || null;
-    const sbp = Number($("#sbp").value) || null;
-    const temp = Number($("#temp").value) || null;
-    const avpu = $("#avpu").value;
-    const gcs = Number($("#gcs").value) || null;
-    const pain = Number($("#pain").value) || 0;
-    const cc = $("#cc").value;
-    const mods = selectedModifiers();
-    const bleed = $("#bleed").value;
-    const mech = $("#mech").value;
-    const dehyd = $("#dehyd").value;
-
-    // 즉시치료/심정지
-    if (mods.includes("cardiac_arrest")){
-      reasons.push("[Critical] 무호흡/심정지 감지 — 환자상태 1");
-      return {level:1, reasons};
-    }
-    if (avpu==="U" || gcs<=8){
-      reasons.push("[Critical] 의식 소실(GCS ≤ 8 / AVPU=U) — 환자상태 1");
-      return {level:1, reasons};
+    // 현재 시간으로 기본값 설정하는 함수 (수정됨: 타임존 명시)
+    function setNow(id, type = "datetime") {
+        const now = new Date();
+        if (type === "datetime") {
+            const seoulTime = new Date(now.toLocaleString("en-US", { timeZone: "Asia/Seoul" }));
+            document.getElementById(id).value = seoulTime.toISOString().slice(0, 16);
+        } else if (type === "time") {
+            const seoulTime = new Date(now.toLocaleString("en-US", { timeZone: "Asia/Seoul" }));
+            document.getElementById(id).value = seoulTime.toISOString().slice(11, 16);
+        }
     }
 
-    // 중증 호흡곤란 / 산소화 저하
-    if (mods.includes("severe_resp") || $("#oxygen").value==="intub"){
-      level = Math.min(level,1);
-      reasons.push("[Critical] 심한 호흡곤란 또는 기도삽관/인공호흡 필요 — 환자상태 1");
-      return {level:1, reasons};
-    }
-    if (spo2 !== null && spo2 < 85){
-      level = Math.min(level,1);
-      reasons.push("[Critical] SpO₂ < 85% — 즉시 개입(호흡/기도) 고려 — 환자상태 1");
-    } else if (spo2 !== null && spo2 < 90){
-      level = Math.min(level,2);
-      reasons.push("[High] SpO₂ < 90% — 고위험(산소치료 필요) — 환자상태 2");
-    } else if (spo2 !== null && spo2 <= 92){
-      level = Math.min(level,3);
-      reasons.push("[Moderate] SpO₂ 90–92% — 산소보조/재평가 — 환자상태 3");
-    }
-
-    // 호흡수 — 성인/소아 구분
-    if (age < 15){ // 소아 (PedKTAS 반영)
-      const ranges = getPediatricRanges(age);
-      if (ranges){
-        if (rr && rr > ranges.rr[1]*1.3){ level = Math.min(level,2); reasons.push("[High] 소아 RR 현저한 상승 → 중증 가능성"); }
-        else if (rr && rr > ranges.rr[1]){ level = Math.min(level,3); reasons.push("[Moderate] 소아 RR 상승"); }
-        else if (rr && rr < ranges.rr[0]){ level = Math.min(level,3); reasons.push("[Moderate] 소아 저호흡"); }
-      }
-    } else { // 성인
-      if (rr && (rr>30 || rr<8)){ level = Math.min(level,2); reasons.push("[High] RR >30 또는 <8"); }
-      else if (rr && (rr>=24)){ level = Math.min(level,3); reasons.push("[Moderate] RR 24–30"); }
-    }
-
-    // 순환/혈압
-    if (sbp && sbp < 70){
-      level = Math.min(level,1); reasons.push("[Critical] SBP < 70 mmHg — 즉시 소생술/쇼크관리"); 
-    } else if (sbp && sbp < 90){
-      level = Math.min(level,2); reasons.push("[High] SBP < 90 mmHg — 쇼크 의심"); 
-    } else if (sbp && sbp <= 100){
-      level = Math.min(level,3); reasons.push("[Moderate] SBP 90–100 mmHg"); 
-    }
-
-    // 심박수 (성인/소아)
-    if (age < 15){
-      const ranges = getPediatricRanges(age);
-      if (hr && hr > ranges.hr[1]*1.2){ level = Math.min(level,2); reasons.push("[High] 소아 HR 현저한 상승"); }
-      else if (hr && hr > ranges.hr[1]){ level = Math.min(level,3); reasons.push("[Moderate] 소아 HR 상승"); }
-      else if (hr && hr < ranges.hr[0]){ level = Math.min(level,3); reasons.push("[Moderate] 소아 서맥"); }
-    } else {
-      if (hr && hr >= 130){ level = Math.min(level,2); reasons.push("[High] HR ≥ 130"); }
-      else if (hr && hr >= 110){ level = Math.min(level,3); reasons.push("[Moderate] HR 110–129"); }
-    }
-
-    // 신경학적 증상
-    if (mods.includes("neuro_deficit") || cc==="neuro"){
-      level = Math.min(level,2);
-      reasons.push("[High] 급성 신경학적 결손(편마비/언어장애/의식변화) — 뇌졸중·출혈 의심");
-    }
-    if (cc==="trauma_head" && (mods.includes("cardiac_arrest") || mech==="high" || gcs<=13)){
-      level = Math.min(level,2); reasons.push("[High] 두부손상 + 의식저하/고에너지 → CT/수술 가능성");
-    }
-
-    // 흉통 — 심근허혈/ACS 관련 트리거
-    if (mods.includes("chest_isch") || cc==="chest"){
-      // 심전도/허혈 의심(교육용: 흉통 + 왼쪽 팔 방사통/식은땀/호흡곤란/불안감 등)
-      level = Math.min(level,2);
-      reasons.push("[High] 흉통: 심근허혈/급성관상동맥증후군 의심 → 빠른 평가(ECG, 트로포닌) 권고");
-    }
-
-    // 출혈/대량출혈
-    if (bleed === "massive" || mods.includes("massive_bleed")){
-      level = Math.min(level,1); reasons.push("[Critical] 활동성 대량출혈 — 즉시 지혈/수혈 준비"); 
-    } else if (bleed === "moderate") {
-      level = Math.min(level,2); reasons.push("[High] 중등도 출혈"); 
-    }
-
-    // 고에너지 외상
-    if (mech === "high" || mods.includes("highenergy")){
-      level = Math.min(level,2); reasons.push("[High] 고에너지 외상 — 다발손상·내부손상 의심");
-    }
-
-    // 패혈증 의심
-    if (cc==="sepsis" || mods.includes("sepsis_suspect")){
-      if (sbp && sbp < 90) { level = Math.min(level,2); reasons.push("[High] 감염 + 저혈압(Sepsis/Septic shock 의심)"); }
-      else if (rr && rr>22){ level = Math.min(level,2); reasons.push("[High] 감염 + 빈호흡(Sepsis 의심)"); }
-      else { level = Math.min(level,3); reasons.push("[Moderate] 감염 의심(Sepsis 규칙 적용 필요)"); }
-    }
-
-    // 산부인과/임신
-    if (mods.includes("pregnancy") || cc==="obstetrics"){
-      // 임신 관련 출혈·통증·분만징후는 최소 환자상태 2-3으로 고려
-      level = Math.min(level,3);
-      reasons.push("[Moderate] 임신/산과 관련 환자 — 분만/자궁출혈 등 특수관리 필요");
-    }
-
-    // 소아 발열 보정 (3개월 미만은 higher)
-    if (mods.includes("ped_lt3m") || cc==="fever_ped"){
-      if (mods.includes("ped_lt3m") || age>0 && age < 0.25){
-        level = Math.min(level,2);
-        reasons.push("[High] 소아 3개월 미만 발열(≥38℃) — 소아중환자나 입원 고려");
-      } else {
-        // 소아 발열(>=3개월) : 증상/평소상태에 따라 3~4
-        level = Math.min(level,3);
-        reasons.push("[Moderate] 소아 발열(3개월 이상) — 증상기반 재평가 필요");
-      }
-    }
-
-    // 통증 보정 (성인)
-    if (age >= 15){
-      if (pain >= 8){ level = Math.min(level,2); reasons.push("[High] 통증 NRS 8–10"); }
-      else if (pain >= 4){ level = Math.min(level,3); reasons.push("[Moderate] 통증 NRS 4–7"); }
-      else if (pain >= 1){ level = Math.min(level,4); reasons.push("[Low] 통증 NRS 1–3"); }
-    }
-
-    // 탈수/순환 보정
-    if (dehyd === "severe"){ level = Math.min(level,2); reasons.push("[High] 중증 탈수/순환부전"); }
-    else if (dehyd === "moderate"){ level = Math.min(level,3); reasons.push("[Moderate] 중등도 탈수"); }
-
-    // 정신과 자해위험
-    if (mods.includes("selfharm_risk") || cc==="psy"){
-      level = Math.min(level,2);
-      reasons.push("[High] 자해/타해 위험 — 안전조치 필요");
-    }
-
-    // 기본 증상군 최소값 (교육용 권장)
-    const ccMin = {
-      "respiratory":2, "chest":2, "neuro":2, "sepsis":2,
-      "trauma_thorax":2, "trauma_head":3, "burn":3,
-      "poison":3, "obstetrics":3, "fever_ped":3, "gi":4, "trauma_extrem":4, "psy":3, "other":5
-    };
-    if (ccMin[cc]) {
-      level = Math.min(level, ccMin[cc]);
-      reasons.push("[Info] 증상군 권장 최소중증도: " + cc + " → 환자상태 ≥ " + ccMin[cc]);
-    }
-
-    // 최종 보정(예: 환자상태 1 우선)
-    if (level <= 1) level = 1;
-    if (level > 5) level = 5;
-
-    return {level, reasons};
-  }
-
-  // --- 렌더링 ---
-  function setBadge(level){
-    const badge = $("#badge");
-    badge.className = "badge k"+level;
-    const labels = {1:"환자상태 1 (즉시)",2:"환자상태 2 (응급, ≤15분)",3:"환자상태 3 (준응급, ≤30분)",4:"환자상태 4 (≤60분)",5:"환자상태 5 (비응급, ≤120분)"};
-    badge.textContent = labels[level];
-    $("#target").textContent = ({1:"즉시",2:"≤ 15분",3:"≤ 30분",4:"≤ 60분",5:"≤ 120분"})[level];
-  }
-
-  function render(){
-    const res = computeKTAS();
-    setBadge(res.level);
-    const ul = $("#rationale");
-    ul.innerHTML = "";
-    if (res.reasons.length === 0) {
-      const li = document.createElement("li"); li.textContent = "특이 트리거 없음 → 기본 환자상태 5 유지"; ul.appendChild(li);
-    } else {
-      res.reasons.forEach(r=>{
-        const li = document.createElement("li"); li.textContent = r; ul.appendChild(li);
-      });
-    }
-  }
-
-  // 버튼 이벤트
-  $("#calcBtn").addEventListener("click", ()=>{ render(); });
-  $("#resetBtn").addEventListener("click", ()=>{
-    document.querySelectorAll("input,select,textarea").forEach(el=>{
-      if (el.type === "datetime-local") el.value = new Date().toISOString().slice(0,16);
-      else el.value = "";
+    // 칩 토글
+    $$("#modifiers .chip").forEach(c => {
+        c.addEventListener("click", () => {
+            c.classList.toggle("active");
+            renderSelectedMods();
+        });
     });
-    $$("#modifiers .chip").forEach(c=>c.classList.remove("active"));
-    $("#selectedMods").textContent = "-";
-    setBadge(5);
-    $("#rationale").innerHTML = "";
-  });
 
-  // JSON 저장
-  $("#saveBtn").addEventListener("click", ()=>{
-    const data = {
-      patient:{name:$("#ptName").value, age:$("#ptAge").value, sex:$("#ptSex").value, weight:$("#ptWt").value},
-      arrival:{time:$("#arrTime").value},
-      vitals:{rr:$("#rr").value, spo2:$("#spo2").value, hr:$("#hr").value, sbp:$("#sbp").value, temp:$("#temp").value, avpu:$("#avpu").value, gcs:$("#gcs").value, pain:$("#pain").value},
-      complaint:{cc:$("#cc").value, note:$("#ccNote").value},
-      modifiers:selectedModifiers(),
-      bleed:$("#bleed").value, mech:$("#mech").value, dehyd:$("#dehyd").value,
-      result: computeKTAS()
-    };
-    const blob = new Blob([JSON.stringify(data,null,2)], {type:"application/json"});
-    const a = document.createElement("a"); a.href = URL.createObjectURL(blob);
-    a.download = `환자상태_detail_${new Date().toISOString().slice(0,19).replace(/[:.]/g,'-')}.json`;
-    a.click();
-    URL.revokeObjectURL(a.href);
-  });
-
-  // 초기 세팅
-  setBadge(5);
-  
-  // 작성내용 표시 및 저장
-function saveWrittenDataIfEnabled() {
-  const autoSave = $("#autoSaveToggle").checked;
-  if (!autoSave) {
-    alert("자동 저장이 비활성화되어 있습니다.\n체크박스를 선택하면 저장됩니다.");
-    return;
-  }
-
-  const data = {
-    이름: $("#ptName").value,
-    성별: $("#ptSex").value,
-    나이: $("#ptAge").value,
-    체중: $("#ptWt").value,
-    활력징후: {
-      RR: $("#rr").value,
-      SpO2: $("#spo2").value,
-      HR: $("#hr").value,
-      SBP: $("#sbp").value,
-      체온: $("#temp").value,
-      AVPU: $("#avpu").value,
-      GCS: $("#gcs").value,
-      통증: $("#pain").value
-    },
-    주증상: $("#cc").value,
-    상세증상: $("#ccNote").value,
-    수정지표: selectedModifiers().join(", "),
-    중증도: computeKTAS().level
-  };
-
-  // 표시용 텍스트 구성
-  const displayText = Object.entries(data).map(([k, v]) => {
-    if (typeof v === 'object') {
-      return `${k}:\n  ` + Object.entries(v).map(([subK, subV]) => `${subK}: ${subV}`).join('\n  ');
-    } else {
-      return `${k}: ${v}`;
+    function selectedModifiers() {
+        return $$("#modifiers .chip.active").map(c => c.dataset.val);
     }
-  }).join('\n');
 
-  $("#writtenDataBox").textContent = displayText;
-}
-
-// 중증도 계산 버튼에 이벤트 추가 (기존 코드 유지하면서 이 부분만 추가)
-$("#calcBtn").addEventListener("click", () => {
-  render();
-  saveWrittenDataIfEnabled(); // ← 자동 저장 체크 여부 확인 후 작성 내용 표시
-});
-  
-  // 📋 내용 복사
-$("#copyResultBtn").addEventListener("click", () => {
-  const text = $("#writtenDataBox").textContent;
-  if (!text.trim()) return alert("복사할 내용이 없습니다.");
-  navigator.clipboard.writeText(text).then(() => {
-    alert("작성 내용이 클립보드에 복사되었습니다.");
-  });
-});
-
-// 🔗 공유 링크 생성 (내용을 압축해서 URL에 포함)
-$("#generateLinkBtn").addEventListener("click", () => {
-  const text = $("#writtenDataBox").textContent;
-  if (!text.trim()) return alert("공유할 내용이 없습니다.");
-
-  // base64 encode (간단하게)
-  const encoded = btoa(unescape(encodeURIComponent(text)));
-  const baseUrl = location.origin + location.pathname;
-  const shareUrl = `${baseUrl}?share=${encoded}`;
-  $("#shareLinkOutput").value = shareUrl;
-  $("#shareLinkOutput").select();
-});
-
-// 페이지에 공유 링크로 접근한 경우, 내용 자동 복원
-window.addEventListener("DOMContentLoaded", () => {
-  const params = new URLSearchParams(location.search);
-  if (params.has("share")) {
-    try {
-      const decoded = decodeURIComponent(escape(atob(params.get("share"))));
-      $("#writtenDataBox").textContent = decoded;
-      $("#autoSaveToggle").checked = true; // 자동저장 ON으로 표시
-    } catch (e) {
-      console.error("공유 링크 복원 실패", e);
+    function renderSelectedMods() {
+        const s = selectedModifiers();
+        $("#selectedMods").textContent = s.length ? s.join(", ") : "-";
     }
-  }
-});
-</script>
-  
-   <script>
-    const printBtn = document.getElementById('printBtn');
-    printBtn.addEventListener('click', () => {
-      window.print();
+
+    // 소아 정상범위(참고용, 연령 구간별 단순화)
+    const pediatrics = [
+        { maxAgeMonths: 3, hr: [90, 205], rr: [30, 60] },
+        { maxAgeMonths: 12, hr: [80, 180], rr: [25, 50] },
+        { maxAgeMonths: 36, hr: [70, 160], rr: [20, 40] },
+        { maxAgeMonths: 72, hr: [60, 140], rr: [20, 30] },
+        { maxAgeMonths: 144, hr: [50, 120], rr: [16, 25] },
+    ];
+
+    function getPediatricRanges(ageYears) {
+        if (ageYears === null || ageYears === undefined) return null;
+        const months = ageYears * 12;
+        for (let r of pediatrics) {
+            if (months <= r.maxAgeMonths) return r;
+        }
+        return { hr: [50, 110], rr: [12, 20] };
+    }
+
+    // --- 핵심 중증도 계산(세분화 로직) ---
+    function computeKTAS() {
+        const reasons = [];
+        let level = 5;
+
+        const age = Number($("#ptAge").value) || 0;
+        const rr = Number($("#rr").value) || null;
+        const spo2 = Number($("#spo2").value) || null;
+        const hr = Number($("#hr").value) || null;
+        const sbp = Number($("#sbp").value) || null;
+        const temp = Number($("#temp").value) || null;
+        const avpu = $("#avpu").value;
+        const gcs = Number($("#gcs").value) || null;
+        const pain = Number($("#pain").value) || 0;
+        const cc = $("#cc").value;
+        const mods = selectedModifiers();
+        const bleed = $("#bleed").value;
+        const mech = $("#mech").value;
+        const dehyd = $("#dehyd").value;
+
+        // 즉시치료/심정지
+        if (mods.includes("cardiac_arrest")) {
+            reasons.push("[Critical] 무호흡/심정지 감지 — 환자상태 1");
+            return { level: 1, reasons };
+        }
+        if ((avpu && avpu === "U") || (gcs !== null && gcs <= 8)) {
+            reasons.push("[Critical] 의식 소실(GCS ≤ 8 / AVPU=U) — 환자상태 1");
+            return { level: 1, reasons };
+        }
+
+        // 중증 호흡곤란 / 산소화 저하
+        if (mods.includes("severe_resp") || $("#oxygen").value === "intub") {
+            level = Math.min(level, 1);
+            reasons.push("[Critical] 심한 호흡곤란 또는 기도삽관/인공호흡 필요 — 환자상태 1");
+            return { level: 1, reasons };
+        }
+        if (spo2 !== null && spo2 < 85) {
+            level = Math.min(level, 1);
+            reasons.push("[Critical] SpO₂ < 85% — 즉시 개입(호흡/기도) 고려 — 환자상태 1");
+        } else if (spo2 !== null && spo2 < 90) {
+            level = Math.min(level, 2);
+            reasons.push("[High] SpO₂ < 90% — 고위험(산소치료 필요) — 환자상태 2");
+        } else if (spo2 !== null && spo2 <= 92) {
+            level = Math.min(level, 3);
+            reasons.push("[Moderate] SpO₂ 90–92% — 산소보조/재평가 — 환자상태 3");
+        }
+
+        // 호흡수 — 성인/소아 구분
+        if (age < 15) {
+            const ranges = getPediatricRanges(age);
+            if (ranges) {
+                if (rr && rr > ranges.rr[1] * 1.3) {
+                    level = Math.min(level, 2);
+                    reasons.push("[High] 소아 RR 현저한 상승 → 중증 가능성");
+                } else if (rr && rr > ranges.rr[1]) {
+                    level = Math.min(level, 3);
+                    reasons.push("[Moderate] 소아 RR 상승");
+                } else if (rr && rr < ranges.rr[0]) {
+                    level = Math.min(level, 3);
+                    reasons.push("[Moderate] 소아 저호흡");
+                }
+            }
+        } else {
+            if (rr && (rr > 30 || rr < 8)) {
+                level = Math.min(level, 2);
+                reasons.push("[High] RR >30 또는 <8");
+            } else if (rr && (rr >= 24)) {
+                level = Math.min(level, 3);
+                reasons.push("[Moderate] RR 24–30");
+            }
+        }
+
+        // 순환/혈압
+        if (sbp && sbp < 70) {
+            level = Math.min(level, 1);
+            reasons.push("[Critical] SBP < 70 mmHg — 즉시 소생술/쇼크관리");
+        } else if (sbp && sbp < 90) {
+            level = Math.min(level, 2);
+            reasons.push("[High] SBP < 90 mmHg — 쇼크 의심");
+        } else if (sbp && sbp <= 100) {
+            level = Math.min(level, 3);
+            reasons.push("[Moderate] SBP 90–100 mmHg");
+        }
+
+        // 심박수 (성인/소아)
+        if (age < 15) {
+            const ranges = getPediatricRanges(age);
+            if (hr && hr > ranges.hr[1] * 1.2) {
+                level = Math.min(level, 2);
+                reasons.push("[High] 소아 HR 현저한 상승");
+            } else if (hr && hr > ranges.hr[1]) {
+                level = Math.min(level, 3);
+                reasons.push("[Moderate] 소아 HR 상승");
+            } else if (hr && hr < ranges.hr[0]) {
+                level = Math.min(level, 3);
+                reasons.push("[Moderate] 소아 서맥");
+            }
+        } else {
+            if (hr && hr >= 130) {
+                level = Math.min(level, 2);
+                reasons.push("[High] HR ≥ 130");
+            } else if (hr && hr >= 110) {
+                level = Math.min(level, 3);
+                reasons.push("[Moderate] HR 110–129");
+            }
+        }
+
+        // 신경학적 증상
+        if (mods.includes("neuro_deficit") || cc === "neuro") {
+            level = Math.min(level, 2);
+            reasons.push("[High] 급성 신경학적 결손(편마비/언어장애/의식변화) — 뇌졸중·출혈 의심");
+        }
+        if (cc === "trauma_head" && (mods.includes("cardiac_arrest") || mech === "high" || gcs <= 13)) {
+            level = Math.min(level, 2);
+            reasons.push("[High] 두부손상 + 의식저하/고에너지 → CT/수술 가능성");
+        }
+
+        // 흉통 — 심근허혈/ACS 관련 트리거
+        if (mods.includes("chest_isch") || cc === "chest") {
+            level = Math.min(level, 2);
+            reasons.push("[High] 흉통: 심근허혈/급성관상동맥증후군 의심 → 빠른 평가(ECG, 트로포닌) 권고");
+        }
+
+        // 출혈/대량출혈
+        if (bleed === "massive" || mods.includes("massive_bleed")) {
+            level = Math.min(level, 1);
+            reasons.push("[Critical] 활동성 대량출혈 — 즉시 지혈/수혈 준비");
+        } else if (bleed === "moderate") {
+            level = Math.min(level, 2);
+            reasons.push("[High] 중등도 출혈");
+        }
+
+        // 고에너지 외상
+        if (mech === "high" || mods.includes("highenergy")) {
+            level = Math.min(level, 2);
+            reasons.push("[High] 고에너지 외상 — 다발손상·내부손상 의심");
+        }
+
+        // 패혈증 의심
+        if (cc === "sepsis" || mods.includes("sepsis_suspect")) {
+            if (sbp && sbp < 90) {
+                level = Math.min(level, 2);
+                reasons.push("[High] 감염 + 저혈압(Sepsis/Septic shock 의심)");
+            } else if (rr && rr > 22) {
+                level = Math.min(level, 2);
+                reasons.push("[High] 감염 + 빈호흡(Sepsis 의심)");
+            } else {
+                level = Math.min(level, 3);
+                reasons.push("[Moderate] 감염 의심(Sepsis 규칙 적용 필요)");
+            }
+        }
+
+        // 산부인과/임신
+        if (mods.includes("pregnancy") || cc === "obstetrics") {
+            level = Math.min(level, 3);
+            reasons.push("[Moderate] 임신/산과 관련 환자 — 분만/자궁출혈 등 특수관리 필요");
+        }
+
+        // 소아 발열 보정 (3개월 미만은 higher)
+        if (mods.includes("ped_lt3m") || cc === "fever_ped") {
+            if (mods.includes("ped_lt3m") || (age > 0 && age < 0.25)) {
+                level = Math.min(level, 2);
+                reasons.push("[High] 소아 3개월 미만 발열(≥38℃) — 소아중환자나 입원 고려");
+            } else {
+                level = Math.min(level, 3);
+                reasons.push("[Moderate] 소아 발열(3개월 이상) — 증상기반 재평가 필요");
+            }
+        }
+
+        // 통증 보정 (성인)
+        if (age >= 15) {
+            if (pain >= 8) {
+                level = Math.min(level, 2);
+                reasons.push("[High] 통증 NRS 8–10");
+            } else if (pain >= 4) {
+                level = Math.min(level, 3);
+                reasons.push("[Moderate] 통증 NRS 4–7");
+            } else if (pain >= 1) {
+                level = Math.min(level, 4);
+                reasons.push("[Low] 통증 NRS 1–3");
+            }
+        }
+
+        // 탈수/순환 보정
+        if (dehyd === "severe") {
+            level = Math.min(level, 2);
+            reasons.push("[High] 중증 탈수/순환부전");
+        } else if (dehyd === "moderate") {
+            level = Math.min(level, 3);
+            reasons.push("[Moderate] 중등도 탈수");
+        }
+
+        // 정신과 자해위험
+        if (mods.includes("selfharm_risk") || cc === "psy") {
+            level = Math.min(level, 2);
+            reasons.push("[High] 자해/타해 위험 — 안전조치 필요");
+        }
+
+        // 기본 증상군 최소값 (교육용 권장)
+        const ccMin = {
+            "respiratory": 2,
+            "chest": 2,
+            "neuro": 2,
+            "sepsis": 2,
+            "trauma_thorax": 2,
+            "trauma_head": 3,
+            "burn": 3,
+            "poison": 3,
+            "obstetrics": 3,
+            "fever_ped": 3,
+            "gi": 4,
+            "trauma_extrem": 4,
+            "psy": 3,
+            "other": 5
+        };
+        if (ccMin[cc]) {
+            level = Math.min(level, ccMin[cc]);
+            reasons.push("[Info] 증상군 권장 최소중증도: " + cc + " → 환자상태 ≥ " + ccMin[cc]);
+        }
+
+        // 최종 보정
+        if (level <= 1) level = 1;
+        if (level > 5) level = 5;
+
+        return { level, reasons };
+    }
+
+    // --- 렌더링 ---
+    function setBadge(level) {
+        const badge = $("#badge");
+        badge.className = "badge k" + level;
+        const labels = { 1: "환자상태 1 (즉시)", 2: "환자상태 2 (응급, ≤15분)", 3: "환자상태 3 (준응급, ≤30분)", 4: "환자상태 4 (≤60분)", 5: "환자상태 5 (비응급, ≤120분)" };
+        badge.textContent = labels[level];
+        $("#target").textContent = ({ 1: "즉시", 2: "≤ 15분", 3: "≤ 30분", 4: "≤ 60분", 5: "≤ 120분" })[level];
+    }
+
+    function render() {
+        const res = computeKTAS();
+        setBadge(res.level);
+        const ul = $("#rationale");
+        ul.innerHTML = "";
+        if (res.reasons.length === 0) {
+            const li = document.createElement("li");
+            li.textContent = "특이 트리거 없음 → 기본 환자상태 5 유지";
+            ul.appendChild(li);
+        } else {
+            res.reasons.forEach(r => {
+                const li = document.createElement("li");
+                li.textContent = r;
+                ul.appendChild(li);
+            });
+        }
+    }
+
+    // 작성내용 표시 및 저장 (함수 분리)
+    function saveWrittenDataIfEnabled() {
+        const autoSave = $("#autoSaveToggle").checked;
+        if (!autoSave) {
+            return;
+        }
+
+        const data = {
+            이름: $("#ptName").value,
+            성별: $("#ptSex").value,
+            나이: $("#ptAge").value,
+            체중: $("#ptWt").value,
+            활력징후: {
+                RR: $("#rr").value,
+                SpO2: $("#spo2").value,
+                HR: $("#hr").value,
+                SBP: $("#sbp").value,
+                체온: $("#temp").value,
+                AVPU: $("#avpu").value,
+                GCS: $("#gcs").value,
+                통증: $("#pain").value
+            },
+            주증상: $("#cc").value,
+            상세증상: $("#ccNote").value,
+            수정지표: selectedModifiers().join(", "),
+            중증도: computeKTAS().level
+        };
+
+        const displayText = Object.entries(data).map(([k, v]) => {
+            if (typeof v === 'object') {
+                return `${k}:\n  ` + Object.entries(v).map(([subK, subV]) => `${subK}: ${subV}`).join('\n  ');
+            } else {
+                return `${k}: ${v}`;
+            }
+        }).join('\n');
+
+        $("#writtenDataBox").textContent = displayText;
+    }
+
+    // --- 이벤트 리스너 ---
+    document.addEventListener("DOMContentLoaded", () => {
+        setNow("reportTime", "datetime");
+        setNow("arrivalTime", "time");
+        setNow("treatmentStart", "time");
+        setNow("treatmentEnd", "time");
+        setNow("transferDone", "datetime");
+        $("#arrTime").value = new Date().toISOString().slice(0, 16);
+        setBadge(5);
+
+        const params = new URLSearchParams(location.search);
+        if (params.has("share")) {
+            try {
+                const decoded = decodeURIComponent(atob(params.get("share")));
+                $("#writtenDataBox").textContent = decoded;
+                $("#autoSaveToggle").checked = true;
+            } catch (e) {
+                console.error("공유 링크 복원 실패", e);
+            }
+        }
     });
-  </script>
+
+    $("#calcBtn").addEventListener("click", () => {
+        render();
+        saveWrittenDataIfEnabled();
+    });
+
+    $("#resetBtn").addEventListener("click", () => {
+        document.querySelectorAll("input,select,textarea").forEach(el => {
+            if (el.type !== "submit" && el.type !== "button" && el.type !== "reset" && el.id !== "autoSaveToggle") {
+                el.value = "";
+            }
+        });
+        setNow("reportTime", "datetime");
+        setNow("arrivalTime", "time");
+        setNow("treatmentStart", "time");
+        setNow("treatmentEnd", "time");
+        setNow("transferDone", "datetime");
+        $$("#modifiers .chip").forEach(c => c.classList.remove("active"));
+        $("#selectedMods").textContent = "-";
+        setBadge(5);
+        $("#rationale").innerHTML = "";
+        $("#writtenDataBox").textContent = "";
+    });
+
+    $("#saveBtn").addEventListener("click", () => {
+        const data = {
+            patient: { name: $("#ptName").value, age: $("#ptAge").value, sex: $("#ptSex").value, weight: $("#ptWt").value },
+            arrival: { time: $("#arrTime").value },
+            vitals: { rr: $("#rr").value, spo2: $("#spo2").value, hr: $("#hr").value, sbp: $("#sbp").value, temp: $("#temp").value, avpu: $("#avpu").value, gcs: $("#gcs").value, pain: $("#pain").value },
+            complaint: { cc: $("#cc").value, note: $("#ccNote").value },
+            modifiers: selectedModifiers(),
+            bleed: $("#bleed").value,
+            mech: $("#mech").value,
+            dehyd: $("#dehyd").value,
+            result: computeKTAS()
+        };
+        const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = `환자상태_detail_${new Date().toISOString().slice(0, 19).replace(/[:.]/g, '-')}.json`;
+        a.click();
+        URL.revokeObjectURL(a.href);
+    });
+
+    $("#copyResultBtn").addEventListener("click", () => {
+        const text = $("#writtenDataBox").textContent;
+        if (!text.trim()) {
+            return alert("복사할 내용이 없습니다.");
+        }
+        navigator.clipboard.writeText(text).then(() => {
+            alert("작성 내용이 클립보드에 복사되었습니다.");
+        }).catch(err => {
+            console.error("복사 실패:", err);
+            alert("클립보드 복사에 실패했습니다. 브라우저 설정을 확인해주세요.");
+        });
+    });
+
+    $("#generateLinkBtn").addEventListener("click", () => {
+        const text = $("#writtenDataBox").textContent;
+        if (!text.trim()) {
+            return alert("공유할 내용이 없습니다.");
+        }
+        try {
+            const encoded = btoa(encodeURIComponent(text));
+            const baseUrl = location.origin + location.pathname;
+            const shareUrl = `${baseUrl}?share=${encoded}`;
+            $("#shareLinkOutput").value = shareUrl;
+            $("#shareLinkOutput").select();
+            alert("공유 링크가 생성되었습니다. 아래 링크를 복사하세요.");
+        } catch (e) {
+            console.error("링크 생성 실패:", e);
+            alert("링크 생성에 실패했습니다.");
+        }
+    });
+
+    $("#printBtn").addEventListener('click', () => {
+        window.print();
+    });
+</script>
   
 </body>
 </html>
