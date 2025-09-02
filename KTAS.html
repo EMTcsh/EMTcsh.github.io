@@ -178,6 +178,8 @@
         <button id="resetBtn">초기화</button>
         <button id="saveBtn">JSON 저장</button>
         <button id="printBtn">인쇄하기</button>
+        <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+        <button id="saveExcelBtn">📊 엑셀 저장</button>
       </div>
 
       <div style="margin-top:12px" class="note">
@@ -657,6 +659,47 @@ JavaScript
     $("#printBtn").addEventListener('click', () => {
         window.print();
     });
+
+
+    //엓셀 저장
+$("#saveExcelBtn").addEventListener("click", () => {
+    const comp = computeKTAS();
+
+    // 엑셀 데이터 구성 (가로 2열: 항목, 값)
+    const data = [
+        ["이름", $("#ptName").value],
+        ["성별", $("#ptSex").value],
+        ["나이", $("#ptAge").value],
+        ["체중", $("#ptWt").value],
+        ["도착시간", $("#arrTime").value],
+        ["RR", $("#rr").value],
+        ["SpO2", $("#spo2").value],
+        ["HR", $("#hr").value],
+        ["SBP", $("#sbp").value],
+        ["체온", $("#temp").value],
+        ["AVPU", $("#avpu").value],
+        ["GCS", $("#gcs").value],
+        ["통증(NRS)", $("#pain").value],
+        ["주증상", $("#cc").value],
+        ["상세증상", $("#ccNote").value],
+        ["출혈", $("#bleed").value],
+        ["손상기전", $("#mech").value],
+        ["탈수", $("#dehyd").value],
+        ["수정지표", selectedModifiers().join(", ")],
+        ["중증도", comp.level],
+        ["판정 사유", comp.reasons.join(" / ")]
+    ];
+
+    // 워크북 생성
+    const ws = XLSX.utils.aoa_to_sheet(data);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "환자상태");
+
+    // 파일명에 타임스탬프 넣기
+    const ts = new Date().toISOString().replace(/[:.]/g,"-").slice(0,19);
+    XLSX.writeFile(wb, `환자상태_${ts}.xlsx`);
+});
+  
 </script>
   
 </body>
