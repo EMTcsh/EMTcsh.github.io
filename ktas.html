@@ -232,380 +232,374 @@
 
 <script>
 /* ------------------------------------------
-   유틸: 선택자, 초기값 세팅
+   유틸: 선택자
 -------------------------------------------*/
 const $ = (q)=>document.querySelector(q);
 const $$ = (q)=>Array.from(document.querySelectorAll(q));
+const on = (el, evt, fn)=> el && el.addEventListener(evt, fn);
 
-// arrTime 초기값 (로컬 타임존 반영)
-(function setInitialArrTime(){
-  const el = $("#arrTime");
-  if (!el) return;
-  const now = new Date();
-  const tzOffset = now.getTimezoneOffset() * 60000;
-  const localISO = new Date(now - tzOffset).toISOString().slice(0,16);
-  el.value = localISO;
-})();
+/* 모든 바인딩은 DOMContentLoaded 이후에 */
+document.addEventListener("DOMContentLoaded", ()=>{
 
-/* ------------------------------------------
-   UI: chip 토글
--------------------------------------------*/
-const chipWrap = $("#redFlags");
-chipWrap.addEventListener("click", (e)=>{
-  const lab = e.target.closest(".chip");
-  if(!lab) return;
-  lab.classList.toggle("active");
-  const cb = lab.querySelector("input[type=checkbox]");
-  if(cb) cb.checked = lab.classList.contains("active");
-});
+  // arrTime 초기값 (로컬 타임존 반영)
+  (function setInitialArrTime(){
+    const el = $("#arrTime");
+    if (!el) return;
+    const now = new Date();
+    const tzOffset = now.getTimezoneOffset() * 60000;
+    const localISO = new Date(now - tzOffset).toISOString().slice(0,16);
+    el.value = localISO;
+  })();
 
-/* ------------------------------------------
-   중증도 계산 로직 (원본 유지)
--------------------------------------------*/
-function setBadge(level){
-  const badge = $("#badge");
-  badge.className = "badge k"+level;
-  const labels = {
-    1:"환자상태 1 (최중증·즉시)",
-    2:"환자상태 2 (응급·15분)",
-    3:"환자상태 3 (준응급·30분)",
-    4:"환자상태 4 (경증·60분)",
-    5:"환자상태 5 (비응급·120분)"
-  };
-  badge.textContent = labels[level];
-  $("#target").textContent = ( {1:"즉시",2:"≤ 15분",3:"≤ 30분",4:"≤ 60분",5:"≤ 120분"} )[level];
-}
-
-function pushReason(reasons, text, minLevel){
-  reasons.push("[" + (minLevel===1?"Critical":minLevel===2?"High":minLevel===3?"Moderate":minLevel===4?"Low":"Info") + "] " + text);
-}
-
-function computeLevel(){
-  const reasons = [];
-  let level = 5; // 낮을수록 위중
-
-  const age = +($("#ptAge").value||0);
-  const rr = +($("#rr").value||0);
-  const spo2 = +($("#spo2").value||0);
-  const hr = +($("#hr").value||0);
-  const sbp = +($("#sbp").value||0);
-  const temp = +($("#temp").value||0);
-  const avpu = $("#avpu").value;
-  const gcs = +($("#gcs").value||15);
-  const pain = +($("#pain").value||0);
-
-  const bleed = $("#bleed").value;
-  const mech = $("#mech").value;
-  const dehyd = $("#dehyd").value;
-  const feverChild = $("#feverChild").value;
-  const cc = $("#cc").value;
-
-  // 1) 즉시 위협
-  const redFlags = $$("#redFlags input:checked").map(i=>i.value);
-  if (redFlags.length>0 || avpu==="U" || gcs<=8){
-    pushReason(reasons, "즉시 생명위협/반응없음/중증의식저하", 1);
-    return {level:1, reasons};
-  }
-
-  // 2) 호흡/산소화
-  if ((rr>30 && rr<300) || (rr>0 && rr<8)){
-    level = Math.min(level, 2);
-    pushReason(reasons, "호흡수 RR >30 또는 <8", 2);
-  } else if (rr>=24){
-    level = Math.min(level, 3);
-    pushReason(reasons, "호흡수 RR 24~30", 3);
-  }
-
-  if (spo2 && spo2<90){
-    level = Math.min(level, 2);
-    pushReason(reasons, "SpO₂ < 90%", 2);
-  } else if (spo2 && spo2>=90 && spo2<=92){
-    level = Math.min(level, 3);
-    pushReason(reasons, "SpO₂ 90~92%", 3);
-  }
-
-  // 3) 순환
-  if (sbp && sbp<90){
-    level = Math.min(level, 2);
-    pushReason(reasons, "SBP < 90 mmHg", 2);
-  } else if (sbp && sbp<=100){
-    level = Math.min(level, 3);
-    pushReason(reasons, "SBP 90~100 mmHg", 3);
-  }
-
-  if (hr && hr>=130){
-    level = Math.min(level, 2);
-    pushReason(reasons, "HR ≥130", 2);
-  } else if (hr && hr>=110){
-    level = Math.min(level, 3);
-    pushReason(reasons, "HR 110~129", 3);
-  }
-
-  // 4) 체온/연령 보정
-  if (temp){
-    if (temp>=41 || temp<35){
-      level = Math.min(level, 2);
-      pushReason(reasons, "고열(≥41℃) 또는 저체온(<35℃)", 2);
-    }
-    if (age>0 && age<0.25 && temp>=38.0){ // 3개월 미만
-      level = Math.min(level, 2);
-      pushReason(reasons, "3개월 미만 발열 ≥38.0℃", 2);
-    }
-  }
-  if (feverChild==="lt3m"){
-    level = Math.min(level, 2);
-    pushReason(reasons, "소아 발열 보정: 3개월 미만", 2);
-  }
-  if (feverChild==="immu"){
-    level = Math.min(level, 2);
-    pushReason(reasons, "면역저하/중증 감염 의심", 2);
-  }
-
-  // 5) 통증 보정 (NRS)
-  if (pain>=8){
-    level = Math.min(level, 2);
-    pushReason(reasons, "극심한 통증(NRS 8~10)", 2);
-  } else if (pain>=4){
-    level = Math.min(level, 3);
-    pushReason(reasons, "중등도 통증(NRS 4~7)", 3);
-  } else if (pain>=1){
-    level = Math.min(level, 4);
-    pushReason(reasons, "경미한 통증(NRS 1~3)", 4);
-  }
-
-  // 6) 출혈/손상기전/탈수
-  if (bleed==="severe"){
-    level = Math.min(level, 2);
-    pushReason(reasons, "활동성 대량 출혈", 2);
-  } else if (bleed==="moderate"){
-    level = Math.min(level, 3);
-    pushReason(reasons, "중등도 출혈", 3);
-  } else if (bleed==="minor"){
-    level = Math.min(level, 4);
-    pushReason(reasons, "경미한 출혈", 4);
-  }
-
-  if (mech==="high"){
-    level = Math.min(level, 2);
-    pushReason(reasons, "고에너지 손상 기전", 2);
-  } else if (mech==="mid"){
-    level = Math.min(level, 3);
-    pushReason(reasons, "중등도 손상 기전", 3);
-  }
-
-  if (dehyd==="severe"){
-    level = Math.min(level, 2);
-    pushReason(reasons, "중증 탈수/말초순환 저하", 2);
-  } else if (dehyd==="moderate"){
-    level = Math.min(level, 3);
-    pushReason(reasons, "중등도 탈수", 3);
-  }
-
-  // 7) 증상군별 최소 레벨 힌트
-  const ccMinLevel = {
-    "호흡곤란": 2,
-    "흉통": 3,
-    "복통": 4,
-    "발열": 4,
-    "신경학적/의식변화": 2,
-    "외상-머리": 3,
-    "외상-흉복부/골반": 2,
-    "외상-사지/연부": 4,
-    "화상": 3,
-    "중독/약물": 3,
-    "정신과": 4,
-    "산부인과": 3,
-    "소아 발열": 4,
-    "기타": 5
-  };
-  if (ccMinLevel[cc]){
-    level = Math.min(level, ccMinLevel[cc]);
-    pushReason(reasons, `증상군 최소 중증도: ${cc} → 환자상태 ≥ ${ccMinLevel[cc]}`, ccMinLevel[cc]);
-  }
-
-  // 의식 V/P는 최소 2~3 보정
-  if (avpu==="P"){
-    level = Math.min(level, 2);
-    pushReason(reasons, "AVPU = P (통증에만 반응)", 2);
-  } else if (avpu==="V"){
-    level = Math.min(level, 3);
-    pushReason(reasons, "AVPU = V (음성자극 반응)", 3);
-  }
-  if (gcs && gcs<=12){
-    level = Math.min(level, 3);
-    pushReason(reasons, "GCS ≤ 12", 3);
-  }
-
-  return {level, reasons};
-}
-
-/* ------------------------------------------
-   렌더/이벤트
--------------------------------------------*/
-function render(){
-  const {level, reasons} = computeLevel();
-  setBadge(level);
-  $("#ccOut").textContent = $("#cc").value || "-";
-  const arr = $("#arrTime").value || "-";
-  $("#timeOut").textContent = arr.replace ? arr.replace("T"," ") : arr;
-  const ul = $("#rationale");
-  ul.innerHTML = "";
-  if (reasons.length===0){
-    const li = document.createElement("li");
-    li.textContent = "특이 트리거 없음 → 기본 환자상태 5 유지";
-    ul.appendChild(li);
-  } else {
-    reasons.forEach(r=>{
-      const li = document.createElement("li"); li.textContent = r; ul.appendChild(li);
-    });
-  }
-}
-
-$("#calcBtn").addEventListener("click", render);
-
-$("#resetBtn").addEventListener("click", ()=>{
-  document.querySelectorAll("input, select, textarea").forEach(el=>{
-    if (el.type==="checkbox") el.checked=false;
-    else if (el.type==="datetime-local") {
-      const now = new Date(); const tzOffset = now.getTimezoneOffset()*60000;
-      el.value = new Date(now - tzOffset).toISOString().slice(0,16);
-    }
-    else el.value="";
+  /* ------------------------------------------
+     UI: chip 토글 (가드 추가)
+  -------------------------------------------*/
+  const chipWrap = $("#redFlags");
+  on(chipWrap, "click", (e)=>{
+    const lab = e.target.closest?.(".chip");
+    if(!lab) return;
+    lab.classList.toggle("active");
+    const cb = lab.querySelector("input[type=checkbox]");
+    if(cb) cb.checked = lab.classList.contains("active");
   });
-  $$("#redFlags .chip").forEach(c=>c.classList.remove("active"));
-  setBadge(5);
-  $("#rationale").innerHTML="";
-  $("#ccOut").textContent="-"; $("#timeOut").textContent="-";
-});
 
-$("#saveBtn").addEventListener("click", ()=>{
-  const data = {
-    patient:{
-      name: $("#ptName").value, sex: $("#ptSex").value, age: $("#ptAge").value, weight: $("#ptWt").value
-    },
-    arrival: {time: $("#arrTime").value, route: $("#arrival").value},
-    vitals:{
-      rr: $("#rr").value, spo2: $("#spo2").value, hr: $("#hr").value, sbp: $("#sbp").value, temp: $("#temp").value,
-      avpu: $("#avpu").value, gcs: $("#gcs").value, pain: $("#pain").value
-    },
-    flags: $$("#redFlags input:checked").map(i=>i.value),
-    complaint: {cc: $("#cc").value, onset: $("#onset").value, bleed: $("#bleed").value, mech: $("#mech").value, dehyd: $("#dehyd").value, feverChild: $("#feverChild").value},
-    notes: $("#notes").value
-  };
-  const comp = computeLevel();
-  data.result = comp;
-  const blob = new Blob([JSON.stringify(data,null,2)], {type:"application/json"});
-  const a = document.createElement("a");
-  a.href = URL.createObjectURL(blob);
-  const ts = new Date().toISOString().replace(/[:.]/g,"-").slice(0,19);
-  a.download = `KTAS_${ts}.json`;
-  a.click();
-  URL.revokeObjectURL(a.href);
-});
-
-$("#printBtn").addEventListener("click", ()=>window.print());
-
-// ctrl/cmd + Enter 로도 계산
-document.addEventListener("keydown", (e)=>{
-  if (e.key==="Enter" && (e.metaKey || e.ctrlKey)) render();
-});
-
-// 초기 배지
-setBadge(5);
-
-/* ------------------------------------------
-   원격 저장 (날짜별 누적 저장)
-   - WORKER_URL 을 Cloudflare Worker 등으로 배포한 엔드포인트로 교체하세요.
-   - Worker는 { date, result } 형태의 POST를 받아 GitHub API로 누적 저장해야 합니다.
--------------------------------------------*/
-const WORKER_URL = "https://your-worker-id.workers.dev"; // <-- 배포한 Worker URL로 바꾸세요
-
-async function saveResult(){
-  // 계산 먼저 (렌더 포함)
-  const comp = computeLevel();
-  render();
-
-  // 저장할 데이터 구성 (기존 로컬 JSON과 동일한 구조)
-  const data = {
-    patient:{
-      name: $("#ptName").value, sex: $("#ptSex").value, age: $("#ptAge").value, weight: $("#ptWt").value
-    },
-    arrival: {time: $("#arrTime").value, route: $("#arrival").value},
-    vitals:{
-      rr: $("#rr").value, spo2: $("#spo2").value, hr: $("#hr").value, sbp: $("#sbp").value, temp: $("#temp").value,
-      avpu: $("#avpu").value, gcs: $("#gcs").value, pain: $("#pain").value
-    },
-    flags: $$("#redFlags input:checked").map(i=>i.value),
-    complaint: {cc: $("#cc").value, onset: $("#onset").value, bleed: $("#bleed").value, mech: $("#mech").value, dehyd: $("#dehyd").value, feverChild: $("#feverChild").value},
-    notes: $("#notes").value,
-    result: comp
-  };
-
-  const today = new Date().toISOString().slice(0,10); // YYYY-MM-DD
-
-  try {
-    const resp = await fetch(WORKER_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ date: today, result: data })
-    });
-
-    const text = await resp.text();
-    if (resp.ok) {
-      alert("✅ 저장 성공: GitHub에 오늘자 파일에 누적되었습니다.");
-      console.log("Worker response:", text);
-    } else {
-      alert("⚠️ 저장 실패: " + text);
-      console.error("Worker error:", text);
+  /* ------------------------------------------
+     중증도 계산 로직 (원본 유지)
+  -------------------------------------------*/
+  function setBadge(level){
+    const badge = $("#badge");
+    if (badge){
+      badge.className = "badge k"+level;
+      const labels = {
+        1:"환자상태 1 (최중증·즉시)",
+        2:"환자상태 2 (응급·15분)",
+        3:"환자상태 3 (준응급·30분)",
+        4:"환자상태 4 (경증·60분)",
+        5:"환자상태 5 (비응급·120분)"
+      };
+      badge.textContent = labels[level] || `환자상태 ${level}`;
     }
-  } catch (err) {
-    alert("🚨 저장 중 오류 발생: " + err.message);
-    console.error(err);
+    const tgt = $("#target");
+    if (tgt){
+      tgt.textContent = ( {1:"즉시",2:"≤ 15분",3:"≤ 30분",4:"≤ 60분",5:"≤ 120분"} )[level] || "-";
+    }
   }
-}
 
- //엑셀 저장 
-$("#saveExcelBtn").addEventListener("click", ()=>{
-  const comp = computeLevel();
-  render();
+  function pushReason(reasons, text, minLevel){
+    reasons.push("[" + (minLevel===1?"Critical":minLevel===2?"High":minLevel===3?"Moderate":minLevel===4?"Low":"Info") + "] " + text);
+  }
 
-  // 엑셀에 넣을 데이터 구성
-  const data = [
-    ["환자명", $("#ptName").value],
-    ["성별", $("#ptSex").value],
-    ["나이", $("#ptAge").value],
-    ["체중", $("#ptWt").value],
-    ["도착시간", $("#arrTime").value],
-    ["이송경로", $("#arrival").value],
-    ["RR", $("#rr").value],
-    ["SpO2", $("#spo2").value],
-    ["HR", $("#hr").value],
-    ["SBP", $("#sbp").value],
-    ["체온", $("#temp").value],
-    ["AVPU", $("#avpu").value],
-    ["GCS", $("#gcs").value],
-    ["통증(NRS)", $("#pain").value],
-    ["주증상", $("#cc").value],
-    ["출혈", $("#bleed").value],
-    ["손상기전", $("#mech").value],
-    ["탈수", $("#dehyd").value],
-    ["소아발열/면역", $("#feverChild").value],
-    ["RedFlags", $$("#redFlags input:checked").map(i=>i.value).join(", ")],
-    ["메모", $("#notes").value],
-    ["최종 환자상태", comp.level],
-    ["사유", comp.reasons.join(" / ")]
-  ];
+  function computeLevel(){
+    const reasons = [];
+    let level = 5; // 낮을수록 위중
 
-  // SheetJS로 워크북 생성
-  const ws = XLSX.utils.aoa_to_sheet(data);
-  const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, "KTAS");
+    const age = +($("#ptAge")?.value||0);
+    const rr = +($("#rr")?.value||0);
+    const spo2 = +($("#spo2")?.value||0);
+    const hr = +($("#hr")?.value||0);
+    const sbp = +($("#sbp")?.value||0);
+    const temp = +($("#temp")?.value||0);
+    const avpu = $("#avpu")?.value || "";
+    const gcs = +($("#gcs")?.value||15);
+    const pain = +($("#pain")?.value||0);
 
-  // 저장 (엑셀 파일 다운로드)
-  const ts = new Date().toISOString().replace(/[:.]/g,"-").slice(0,19);
-  XLSX.writeFile(wb, `KTAS_${ts}.xlsx`);
-});
-  
+    const bleed = $("#bleed")?.value || "";
+    const mech = $("#mech")?.value || "";
+    const dehyd = $("#dehyd")?.value || "";
+    const feverChild = $("#feverChild")?.value || "";
+    const cc = $("#cc")?.value || "";
+
+    // 1) 즉시 위협
+    const redFlags = $$("#redFlags input:checked").map(i=>i.value);
+    if (redFlags.length>0 || avpu==="U" || gcs<=8){
+      pushReason(reasons, "즉시 생명위협/반응없음/중증의식저하", 1);
+      return {level:1, reasons};
+    }
+
+    // 2) 호흡/산소화
+    if ((rr>30 && rr<300) || (rr>0 && rr<8)){
+      level = Math.min(level, 2);
+      pushReason(reasons, "호흡수 RR >30 또는 <8", 2);
+    } else if (rr>=24){
+      level = Math.min(level, 3);
+      pushReason(reasons, "호흡수 RR 24~30", 3);
+    }
+
+    if (spo2 && spo2<90){
+      level = Math.min(level, 2);
+      pushReason(reasons, "SpO₂ < 90%", 2);
+    } else if (spo2 && spo2>=90 && spo2<=92){
+      level = Math.min(level, 3);
+      pushReason(reasons, "SpO₂ 90~92%", 3);
+    }
+
+    // 3) 순환
+    if (sbp && sbp<90){
+      level = Math.min(level, 2);
+      pushReason(reasons, "SBP < 90 mmHg", 2);
+    } else if (sbp && sbp<=100){
+      level = Math.min(level, 3);
+      pushReason(reasons, "SBP 90~100 mmHg", 3);
+    }
+
+    if (hr && hr>=130){
+      level = Math.min(level, 2);
+      pushReason(reasons, "HR ≥130", 2);
+    } else if (hr && hr>=110){
+      level = Math.min(level, 3);
+      pushReason(reasons, "HR 110~129", 3);
+    }
+
+    // 4) 체온/연령 보정
+    if (temp){
+      if (temp>=41 || temp<35){
+        level = Math.min(level, 2);
+        pushReason(reasons, "고열(≥41℃) 또는 저체온(<35℃)", 2);
+      }
+      if (age>0 && age<0.25 && temp>=38.0){ // 3개월 미만
+        level = Math.min(level, 2);
+        pushReason(reasons, "3개월 미만 발열 ≥38.0℃", 2);
+      }
+    }
+    if (feverChild==="lt3m"){
+      level = Math.min(level, 2);
+      pushReason(reasons, "소아 발열 보정: 3개월 미만", 2);
+    }
+    if (feverChild==="immu"){
+      level = Math.min(level, 2);
+      pushReason(reasons, "면역저하/중증 감염 의심", 2);
+    }
+
+    // 5) 통증 보정 (NRS)
+    if (pain>=8){
+      level = Math.min(level, 2);
+      pushReason(reasons, "극심한 통증(NRS 8~10)", 2);
+    } else if (pain>=4){
+      level = Math.min(level, 3);
+      pushReason(reasons, "중등도 통증(NRS 4~7)", 3);
+    } else if (pain>=1){
+      level = Math.min(level, 4);
+      pushReason(reasons, "경미한 통증(NRS 1~3)", 4);
+    }
+
+    // 6) 출혈/손상기전/탈수
+    if (bleed==="severe"){
+      level = Math.min(level, 2);
+      pushReason(reasons, "활동성 대량 출혈", 2);
+    } else if (bleed==="moderate"){
+      level = Math.min(level, 3);
+      pushReason(reasons, "중등도 출혈", 3);
+    } else if (bleed==="minor"){
+      level = Math.min(level, 4);
+      pushReason(reasons, "경미한 출혈", 4);
+    }
+
+    if (mech==="high"){
+      level = Math.min(level, 2);
+      pushReason(reasons, "고에너지 손상 기전", 2);
+    } else if (mech==="mid"){
+      level = Math.min(level, 3);
+      pushReason(reasons, "중등도 손상 기전", 3);
+    }
+
+    if (dehyd==="severe"){
+      level = Math.min(level, 2);
+      pushReason(reasons, "중증 탈수/말초순환 저하", 2);
+    } else if (dehyd==="moderate"){
+      level = Math.min(level, 3);
+      pushReason(reasons, "중등도 탈수", 3);
+    }
+
+    // 7) 증상군별 최소 레벨 힌트
+    const ccMinLevel = {
+      "호흡곤란": 2,
+      "흉통": 3,
+      "복통": 4,
+      "발열": 4,
+      "신경학적/의식변화": 2,
+      "외상-머리": 3,
+      "외상-흉복부/골반": 2,
+      "외상-사지/연부": 4,
+      "화상": 3,
+      "중독/약물": 3,
+      "정신과": 4,
+      "산부인과": 3,
+      "소아 발열": 4,
+      "기타": 5
+    };
+    if (cc && ccMinLevel[cc]!=null){
+      level = Math.min(level, ccMinLevel[cc]);
+      pushReason(reasons, `증상군 최소 중증도: ${cc} → 환자상태 ≥ ${ccMinLevel[cc]}`, ccMinLevel[cc]);
+    }
+
+    // 의식 V/P는 최소 2~3 보정
+    if (avpu==="P"){
+      level = Math.min(level, 2);
+      pushReason(reasons, "AVPU = P (통증에만 반응)", 2);
+    } else if (avpu==="V"){
+      level = Math.min(level, 3);
+      pushReason(reasons, "AVPU = V (음성자극 반응)", 3);
+    }
+    if (gcs && gcs<=12){
+      level = Math.min(level, 3);
+      pushReason(reasons, "GCS ≤ 12", 3);
+    }
+
+    return {level, reasons};
+  }
+
+  /* ------------------------------------------
+     렌더/이벤트 (가드 추가)
+  -------------------------------------------*/
+  function render(){
+    const {level, reasons} = computeLevel();
+    setBadge(level);
+
+    const ccEl = $("#ccOut");
+    if (ccEl) ccEl.textContent = $("#cc")?.value || "-";
+
+    const timeEl = $("#timeOut");
+    if (timeEl){
+      const arr = $("#arrTime")?.value || "-";
+      timeEl.textContent = typeof arr === "string" ? arr.replace("T"," ") : arr;
+    }
+
+    const ul = $("#rationale");
+    if (!ul) return;
+    ul.innerHTML = "";
+    if (reasons.length===0){
+      const li = document.createElement("li");
+      li.textContent = "특이 트리거 없음 → 기본 환자상태 5 유지";
+      ul.appendChild(li);
+    } else {
+      reasons.forEach(r=>{
+        const li = document.createElement("li");
+        li.textContent = r;
+        ul.appendChild(li);
+      });
+    }
+  }
+
+  on($("#calcBtn"), "click", render);
+
+  on($("#resetBtn"), "click", ()=>{
+    document.querySelectorAll("input, select, textarea").forEach(el=>{
+      if (el.type==="checkbox") el.checked=false;
+      else if (el.type==="datetime-local") {
+        const now = new Date(); const tzOffset = now.getTimezoneOffset()*60000;
+        el.value = new Date(now - tzOffset).toISOString().slice(0,16);
+      } else {
+        el.value="";
+      }
+    });
+    $$("#redFlags .chip").forEach(c=>c.classList.remove("active"));
+    setBadge(5);
+    const r = $("#rationale"); if (r) r.innerHTML="";
+    const co = $("#ccOut"); if (co) co.textContent="-";
+    const to = $("#timeOut"); if (to) to.textContent="-";
+  });
+
+  on($("#printBtn"), "click", ()=>window.print());
+
+  // 초기 배지 (가드)
+  setBadge(5);
+
+  /* ------------------------------------------
+     원격 저장 함수 (전역 노출 그대로, 내부는 변경 없음)
+  -------------------------------------------*/
+  window.saveResult = async function saveResult(){
+    const comp = computeLevel();
+    render();
+
+    const data = {
+      patient:{
+        name: $("#ptName")?.value, sex: $("#ptSex")?.value, age: $("#ptAge")?.value, weight: $("#ptWt")?.value
+      },
+      arrival: {time: $("#arrTime")?.value, route: $("#arrival")?.value},
+      vitals:{
+        rr: $("#rr")?.value, spo2: $("#spo2")?.value, hr: $("#hr")?.value, sbp: $("#sbp")?.value, temp: $("#temp")?.value,
+        avpu: $("#avpu")?.value, gcs: $("#gcs")?.value, pain: $("#pain")?.value
+      },
+      flags: $$("#redFlags input:checked").map(i=>i.value),
+      complaint: {cc: $("#cc")?.value, onset: $("#onset")?.value, bleed: $("#bleed")?.value, mech: $("#mech")?.value, dehyd: $("#dehyd")?.value, feverChild: $("#feverChild")?.value},
+      notes: $("#notes")?.value,
+      result: comp
+    };
+
+    const today = new Date().toISOString().slice(0,10); // YYYY-MM-DD
+    const WORKER_URL = "https://your-worker-id.workers.dev"; // 배포 URL로 교체
+
+    try {
+      const resp = await fetch(WORKER_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ date: today, result: data })
+      });
+
+      const text = await resp.text();
+      if (resp.ok) {
+        alert("✅ 저장 성공: GitHub에 오늘자 파일에 누적되었습니다.");
+        console.log("Worker response:", text);
+      } else {
+        alert("⚠️ 저장 실패: " + text);
+        console.error("Worker error:", text);
+      }
+    } catch (err) {
+      alert("🚨 저장 중 오류 발생: " + err.message);
+      console.error(err);
+    }
+  };
+
+  // 엑셀 저장 (XLSX 가드)
+  on($("#saveExcelBtn"), "click", ()=>{
+    if (typeof XLSX === "undefined"){
+      alert("엑셀 저장을 사용하려면 SheetJS(XLSX) 스크립트를 먼저 포함하세요.\n예) <script src=\"https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js\"></script>");
+      return;
+    }
+    const comp = computeLevel();
+    render();
+
+    const data = [
+      ["환자명", $("#ptName")?.value || ""],
+      ["성별", $("#ptSex")?.value || ""],
+      ["나이", $("#ptAge")?.value || ""],
+      ["체중", $("#ptWt")?.value || ""],
+      ["도착시간", $("#arrTime")?.value || ""],
+      ["이송경로", $("#arrival")?.value || ""],
+      ["RR", $("#rr")?.value || ""],
+      ["SpO2", $("#spo2")?.value || ""],
+      ["HR", $("#hr")?.value || ""],
+      ["SBP", $("#sbp")?.value || ""],
+      ["체온", $("#temp")?.value || ""],
+      ["AVPU", $("#avpu")?.value || ""],
+      ["GCS", $("#gcs")?.value || ""],
+      ["통증(NRS)", $("#pain")?.value || ""],
+      ["주증상", $("#cc")?.value || ""],
+      ["출혈", $("#bleed")?.value || ""],
+      ["손상기전", $("#mech")?.value || ""],
+      ["탈수", $("#dehyd")?.value || ""],
+      ["소아발열/면역", $("#feverChild")?.value || ""],
+      ["RedFlags", $$("#redFlags input:checked").map(i=>i.value).join(", ")],
+      ["메모", $("#notes")?.value || ""],
+      ["최종 환자상태", comp.level],
+      ["사유", comp.reasons.join(" / ")]
+    ];
+
+    const ws = XLSX.utils.aoa_to_sheet(data);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "KTAS");
+
+    const ts = new Date().toISOString().replace(/[:.]/g,"-").slice(0,19);
+    XLSX.writeFile(wb, `KTAS_${ts}.xlsx`);
+  });
+
+  // ctrl/cmd + Enter 로도 계산
+  on(document, "keydown", (e)=>{
+    if (e.key==="Enter" && (e.metaKey || e.ctrlKey)) render();
+  });
+
+}); // DOMContentLoaded end
 </script>
+
 </body>
 </html>
