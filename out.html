@@ -57,15 +57,27 @@
 
         // 등산로 구간 정보 (마커 및 경로 포함)
         var hikingRoutes = [
-            {
+             {
                 name: "제2수원지 입구",
+                lat: 35.099349,
+                lng: 126.964130,
+                status: "통제",
+                reason: "시설물 정비중",
+                path: [
+                    new naver.maps.LatLng(35.099349, 126.964130),
+                    new naver.maps.LatLng(35.101815, 126.964148) // 제2수원지 시작으로 연결하는 경로
+                ],
+                connectedTo: "용추계곡 입구"
+            },
+            {
+                name: "제2수원지 시작",
                 lat: 35.101815,
                 lng: 126.964148,
                 status: "통제",
                 reason: "시설물 정비중",
                 path: [
                     new naver.maps.LatLng(35.101442, 126.964564),
-                    new naver.maps.LatLng(35.115544, 126.987214) // 용추계곡 입구로 연결하는 경로
+                    new naver.maps.LatLng(35.114588, 126.987298) // 용추계곡 입구로 연결하는 경로
                 ],
                 connectedTo: "용추계곡 입구"
             },
@@ -76,8 +88,8 @@
                 status: "통제",
                 reason: "시설물 정비중",
                 path: [
-                    new naver.maps.LatLng(35.115544, 126.987214),
-                    new naver.maps.LatLng(35.101442, 126.964564) // 제2수원지 입구로 연결하는 경로
+                    new naver.maps.LatLng(35.114588, 126.987298),
+                    new naver.maps.LatLng(35.101442, 126.964564) // 제2수원지 시작으로 연결하는 경로
                 ],
                 connectedTo: "제2수원지 입구"
             },
@@ -163,14 +175,6 @@
                 lng: 126.966494,
                 status: "개방",
                 reason: "정상 운영",
-                path: null
-            },
-             {
-                name: "제2수원지",
-                lat: 35.099349,
-                lng: 126.964130,
-                status: "통제",
-                reason: "시설물 정비중",
                 path: null
             },
             {
