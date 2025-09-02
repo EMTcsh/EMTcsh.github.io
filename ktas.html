@@ -250,7 +250,6 @@ const $$ = (q)=>Array.from(document.querySelectorAll(q));
 /* ------------------------------------------
    UI: chip 토글
 -------------------------------------------*/
-const chipWrap = $("#redFlags");
 chipWrap.addEventListener("click", (e)=>{
   const lab = e.target.closest(".chip");
   if(!lab) return;
@@ -258,6 +257,27 @@ chipWrap.addEventListener("click", (e)=>{
   const cb = lab.querySelector("input[type=checkbox]");
   if(cb) cb.checked = lab.classList.contains("active");
 });
+
+  .chip {
+  padding: 8px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,.12);
+  cursor: pointer;
+  user-select: none;
+  transition: all .2s ease;
+}
+
+.chip.active {
+  background: #2b3e8f;   /* 더 진하게 */
+  border-color: #7aa2ff; /* 포인트 색상 */
+  color: #fff;           /* 글자 흰색 */
+  font-weight: 700;      /* 강조 */
+  box-shadow: 0 0 8px rgba(122,162,255,0.5);
+}
+  
+ .chip:hover {
+  background: rgba(255,255,255,.08);
+} 
 
 /* ------------------------------------------
    중증도 계산 로직 (원본 유지)
