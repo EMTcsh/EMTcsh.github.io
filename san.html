@@ -41,10 +41,15 @@
 
     <!-- 지도 및 제어판 (화면의 남은 공간을 차지하도록 flex-1 적용) -->
     <main class="flex flex-col lg:flex-row p-4 sm:p-8 pt-0 gap-8 overflow-hidden fixed-container">
-        <!-- 지도 컨테이너 -->
-        <div id="map-container" class="w-5/6 h-full">
-            <div id="map"></div>
-        </div>
+         <!-- 지도 컨테이너 -->
+<div id="map-container" class="relative w-full h-screen">
+    <div id="map" class="w-full h-full"></div>
+
+    <!-- 패널을 지도 위에 띄우기 -->
+    <div class="absolute top-4 right-4 w-72 bg-white p-6 rounded-xl shadow-lg space-y-6">
+        * 무등산 산사태 관리 현황
+    </div>
+</div>
 
         <!-- 제어판 & 정보 패널 -->
         <div class="w-1/6 bg-white p-6 rounded-xl shadow-lg space-y-6 flex-shrink-0">
