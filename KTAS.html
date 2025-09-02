@@ -221,16 +221,17 @@ JavaScript
     const $$ = q => Array.from(document.querySelectorAll(q));
 
     // 현재 시간으로 기본값 설정하는 함수 (수정됨: 타임존 명시)
-    function setNow(id, type = "datetime") {
-        const now = new Date();
-        if (type === "datetime") {
-            const seoulTime = new Date(now.toLocaleString("en-US", { timeZone: "Asia/Seoul" }));
-            document.getElementById(id).value = seoulTime.toISOString().slice(0, 16);
-        } else if (type === "time") {
-            const seoulTime = new Date(now.toLocaleString("en-US", { timeZone: "Asia/Seoul" }));
-            document.getElementById(id).value = seoulTime.toISOString().slice(11, 16);
-        }
+  function setNow(id, type = "datetime") {
+    const el = document.getElementById(id);
+    if (!el) return; // 요소 없으면 그냥 무시
+    const now = new Date();
+    const seoulTime = new Date(now.toLocaleString("en-US", { timeZone: "Asia/Seoul" }));
+    if (type === "datetime") {
+        el.value = seoulTime.toISOString().slice(0, 16);
+    } else if (type === "time") {
+        el.value = seoulTime.toISOString().slice(11, 16);
     }
+}
 
     // 칩 토글
     $$("#modifiers .chip").forEach(c => {
@@ -661,7 +662,7 @@ JavaScript
     });
 
 
-    //엓셀 저장
+    //엑셀 저장
 $("#saveExcelBtn").addEventListener("click", () => {
     const comp = computeKTAS();
 
