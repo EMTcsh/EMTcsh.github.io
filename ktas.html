@@ -564,8 +564,6 @@ async function saveResult(){
 }
 
  //엑셀 저장 
-$("#saveRemoteBtn").addEventListener("click", saveResult);
-
 $("#saveExcelBtn").addEventListener("click", ()=>{
   const comp = computeLevel();
   render();
@@ -606,7 +604,6 @@ $("#saveExcelBtn").addEventListener("click", ()=>{
   const ts = new Date().toISOString().replace(/[:.]/g,"-").slice(0,19);
   XLSX.writeFile(wb, `KTAS_${ts}.xlsx`);
 });
-
   
 </script>
 </body>
