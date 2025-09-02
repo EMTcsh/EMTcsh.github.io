@@ -218,6 +218,7 @@
       <button id="resetBtn">입력 초기화</button>
       <button id="saveBtn">JSON 저장</button>
       <button class="warn" id="printBtn">인쇄/PDF</button>
+      <button id="saveExcelBtn">💾 엑셀로 저장</button>
      </div>
   </section>
 
@@ -562,7 +563,51 @@ async function saveResult(){
   }
 }
 
+ //엑셀 저장 
 $("#saveRemoteBtn").addEventListener("click", saveResult);
+
+$("#saveExcelBtn").addEventListener("click", ()=>{
+  const comp = computeLevel();
+  render();
+
+  // 엑셀에 넣을 데이터 구성
+  const data = [
+    ["환자명", $("#ptName").value],
+    ["성별", $("#ptSex").value],
+    ["나이", $("#ptAge").value],
+    ["체중", $("#ptWt").value],
+    ["도착시간", $("#arrTime").value],
+    ["이송경로", $("#arrival").value],
+    ["RR", $("#rr").value],
+    ["SpO2", $("#spo2").value],
+    ["HR", $("#hr").value],
+    ["SBP", $("#sbp").value],
+    ["체온", $("#temp").value],
+    ["AVPU", $("#avpu").value],
+    ["GCS", $("#gcs").value],
+    ["통증(NRS)", $("#pain").value],
+    ["주증상", $("#cc").value],
+    ["출혈", $("#bleed").value],
+    ["손상기전", $("#mech").value],
+    ["탈수", $("#dehyd").value],
+    ["소아발열/면역", $("#feverChild").value],
+    ["RedFlags", $$("#redFlags input:checked").map(i=>i.value).join(", ")],
+    ["메모", $("#notes").value],
+    ["최종 환자상태", comp.level],
+    ["사유", comp.reasons.join(" / ")]
+  ];
+
+  // SheetJS로 워크북 생성
+  const ws = XLSX.utils.aoa_to_sheet(data);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, "KTAS");
+
+  // 저장 (엑셀 파일 다운로드)
+  const ts = new Date().toISOString().replace(/[:.]/g,"-").slice(0,19);
+  XLSX.writeFile(wb, `KTAS_${ts}.xlsx`);
+});
+
+  
 </script>
 </body>
 </html>
