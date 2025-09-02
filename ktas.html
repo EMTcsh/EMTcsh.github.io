@@ -234,73 +234,69 @@
 /* ------------------------------------------
    유틸: 선택자, 초기값 세팅
 -------------------------------------------*/
-const $ = (q)=>document.querySelector(q);
-const $$ = (q)=>Array.from(document.querySelectorAll(q));
+const $ = (q) => document.querySelector(q);
+const $$ = (q) => Array.from(document.querySelectorAll(q));
 
 // arrTime 초기값 (로컬 타임존 반영)
-(function setInitialArrTime(){
+(function setInitialArrTime() {
   const el = $("#arrTime");
   if (!el) return;
   const now = new Date();
   const tzOffset = now.getTimezoneOffset() * 60000;
-  const localISO = new Date(now - tzOffset).toISOString().slice(0,16);
+  const localISO = new Date(now - tzOffset).toISOString().slice(0, 16);
   el.value = localISO;
 })();
 
 /* ------------------------------------------
    UI: chip 토글
 -------------------------------------------*/
-chipWrap.addEventListener("click", (e)=>{
-  const lab = e.target.closest(".chip");
-  if(!lab) return;
-  lab.classList.toggle("active");
-  const cb = lab.querySelector("input[type=checkbox]");
-  if(cb) cb.checked = lab.classList.contains("active");
-});
-
-  .chip {
-  padding: 8px 10px;
-  border-radius: 999px;
-  border: 1px solid rgba(255,255,255,.12);
-  cursor: pointer;
-  user-select: none;
-  transition: all .2s ease;
+const redFlagsContainer = document.getElementById('redFlags');
+if (redFlagsContainer) {
+  redFlagsContainer.addEventListener("click", (e) => {
+    const chipLabel = e.target.closest(".chip");
+    if (!chipLabel) return;
+    const checkbox = chipLabel.querySelector("input[type=checkbox]");
+    if (checkbox) {
+      // Toggle the checkbox state
+      checkbox.checked = !checkbox.checked;
+      // Update the active class based on the new checkbox state
+      if (checkbox.checked) {
+        chipLabel.classList.add("active");
+      } else {
+        chipLabel.classList.remove("active");
+      }
+    }
+  });
 }
-
-.chip.active {
-  background: #2b3e8f;   /* 더 진하게 */
-  border-color: #7aa2ff; /* 포인트 색상 */
-  color: #fff;           /* 글자 흰색 */
-  font-weight: 700;      /* 강조 */
-  box-shadow: 0 0 8px rgba(122,162,255,0.5);
-}
-  
- .chip:hover {
-  background: rgba(255,255,255,.08);
-} 
 
 /* ------------------------------------------
    중증도 계산 로직 (원본 유지)
 -------------------------------------------*/
-function setBadge(level){
+function setBadge(level) {
   const badge = $("#badge");
-  badge.className = "badge k"+level;
+  badge.className = "badge k" + level;
   const labels = {
-    1:"환자상태 1 (최중증·즉시)",
-    2:"환자상태 2 (응급·15분)",
-    3:"환자상태 3 (준응급·30분)",
-    4:"환자상태 4 (경증·60분)",
-    5:"환자상태 5 (비응급·120분)"
+    1: "환자상태 1 (최중증·즉시)",
+    2: "환자상태 2 (응급·15분)",
+    3: "환자상태 3 (준응급·30분)",
+    4: "환자상태 4 (경증·60분)",
+    5: "환자상태 5 (비응급·120분)"
   };
   badge.textContent = labels[level];
-  $("#target").textContent = ( {1:"즉시",2:"≤ 15분",3:"≤ 30분",4:"≤ 60분",5:"≤ 120분"} )[level];
+  $("#target").textContent = ({
+    1: "즉시",
+    2: "≤ 15분",
+    3: "≤ 30분",
+    4: "≤ 60분",
+    5: "≤ 120분"
+  })[level];
 }
 
-function pushReason(reasons, text, minLevel){
-  reasons.push("[" + (minLevel===1?"Critical":minLevel===2?"High":minLevel===3?"Moderate":minLevel===4?"Low":"Info") + "] " + text);
+function pushReason(reasons, text, minLevel) {
+  reasons.push("[" + (minLevel === 1 ? "Critical" : minLevel === 2 ? "High" : minLevel === 3 ? "Moderate" : minLevel === 4 ? "Low" : "Info") + "] " + text);
 }
 
-function computeLevel(){
+function computeLevel() {
   const reasons = [];
   let level = 5; // 낮을수록 위중
 
