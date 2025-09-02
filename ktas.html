@@ -528,7 +528,51 @@ document.addEventListener("keydown", (e)=>{
 
 // 초기 배지
 setBadge(5);
+  
+// 안전하게 요소 얻기
+const chipWrap = document.getElementById("redFlags");
+if (chipWrap) {
+  // 초기 동기화: checkbox.checked -> .active / aria-checked 반영
+  chipWrap.querySelectorAll(".chip").forEach(label => {
+    const cb = label.querySelector('input[type="checkbox"]');
+    const checked = !!(cb && cb.checked);
+    label.classList.toggle("active", checked);
+    label.setAttribute("aria-checked", checked ? "true" : "false");
+  });
 
+  // 클릭(또는 포커스된 칩에서 스페이스/엔터)으로 토글
+  function toggleLabel(label) {
+    const cb = label.querySelector('input[type="checkbox"]');
+    if (!cb) return;
+    const newState = !label.classList.contains("active"); // 반전
+    // prevent default 동작을 사용할 경우 click handler에서만 호출하면 됨
+    // 상태 동기화(클래스, input.checked, aria)
+    label.classList.toggle("active", newState);
+    cb.checked = newState;
+    label.setAttribute("aria-checked", newState ? "true" : "false");
+  }
+
+  // 이벤트 위임(마우스)
+  chipWrap.addEventListener("click", (e) => {
+    const label = e.target.closest?.(".chip");
+    if (!label || !chipWrap.contains(label)) return;
+    e.preventDefault(); // 라벨의 기본 토글 동작을 막고 JS에서 일관되게 제어
+    toggleLabel(label);
+  });
+
+  // 키보드: Enter / Space
+  chipWrap.addEventListener("keydown", (e) => {
+    // 스페이스와 엔터를 처리 (포커스가 .chip 위에 있을 때)
+    if (e.key === " " || e.key === "Enter") {
+      const label = e.target.closest?.(".chip");
+      if (!label || !chipWrap.contains(label)) return;
+      e.preventDefault();
+      toggleLabel(label);
+    }
+  });
+}
+추가 권장사항 (선택)
+  
 /* ------------------------------------------
    원격 저장 (날짜별 누적 저장)
    - WORKER_URL 을 Cloudflare Worker 등으로 배포한 엔드포인트로 교체하세요.
