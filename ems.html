@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>MIST/SBAR/활력징후 기록 및 저장</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 700px;
+      margin: 20px auto;
+      padding: 20px;
+      background: #f7f7f7;
+      border-radius: 8px;
+    }
+    h1, h2 {
+      color: #333;
+    }
+    label {
+      display: block;
+      margin-top: 15px;
+      font-weight: bold;
+    }
+    input[type="text"],
+    input[type="number"],
+    input[type="time"],
+    textarea {
+      width: 100%;
+      padding: 8px;
+      margin-top: 6px;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+      box-sizing: border-box;
+      font-size: 1rem;
+    }
+    textarea {
+      resize: vertical;
+      min-height: 80px;
+    }
+    button {
+      margin-top: 10px;
+      padding: 10px 16px;
+      background-color: #007bff;
+      border: none;
+      color: white;
+      font-size: 1rem;
+      border-radius: 5px;
+      cursor: pointer;
+      margin-right: 8px;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+    .section {
+      margin-bottom: 30px;
+      padding: 15px;
+      background: #e9ecef;
+      border-radius: 6px;
+    }
+    .output {
+      margin-top: 10px;
+      padding: 12px;
+      background: #fff;
+      border-radius: 4px;
+      font-family: monospace;
+      white-space: pre-wrap;
+      border: 1px solid #ccc;
+    }
+    .button-group {
+      margin-top: 8px;
+    }
+  </style>
+</head>
+<body>
+  <h1>MIST / SBAR / 활력징후 기록 및 저장</h1>
+
+  <form id="recordForm">
+    <label for="recordTime">기록 시간</label>
+    <input type="time" id="recordTime" name="recordTime" required />
+
+    <!-- MIST -->
+    <section class="section" id="mistSection">
+      <h2>MIST 보고</h2>
+      <label for="mechanism">Mechanism (기전)</label>
+      <textarea id="mechanism" name="mechanism" placeholder="예: 교통사고, 낙상 등" required></textarea>
+
+      <label for="injury">Injury (손상부위)</label>
+      <textarea id="injury" name="injury" placeholder="손상 부위 및 상태" required></textarea>
+
+      <label for="signs">Signs (증상)</label>
+      <textarea id="signs" name="signs" placeholder="환자 증상" required></textarea>
+
+      <label for="treatment">Treatment (처치 내용)</label>
+      <textarea id="treatment" name="treatment" placeholder="지금까지 시행된 처치" required></textarea>
+
+      <div class="button-group">
+        <button type="button" id="saveMist">MIST 저장</button>
+        <button type="button" id="copyMist">MIST 복사</button>
+        <button type="button" id="pdfMist">MIST PDF 저장</button>
+      </div>
+      <pre id="mistOutput" class="output" style="display:none;"></pre>
+    </section>
+
+    <!-- SBAR -->
+    <section class="section" id="sbarSection">
+      <h2>SBAR 보고</h2>
+      <label for="situation">Situation (상황)</label>
+      <textarea id="situation" name="situation" placeholder="현재 상황 설명" required></textarea>
+
+      <label for="background">Background (배경)</label>
+      <textarea id="background" name="background" placeholder="환자 배경 및 병력" required></textarea>
+
+      <label for="assessment">Assessment (평가)</label>
+      <textarea id="assessment" name="assessment" placeholder="진단 및 평가 내용" required></textarea>
+
+      <label for="recommendation">Recommendation (권고)</label>
+      <textarea id="recommendation" name="recommendation" placeholder="의료 지도 및 권고사항" required></textarea>
+
+      <div class="button-group">
+        <button type="button" id="saveSbar">SBAR 저장</button>
+        <button type="button" id="copySbar">SBAR 복사</button>
+        <button type="button" id="pdfSbar">SBAR PDF 저장</button>
+      </div>
+      <pre id="sbarOutput" class="output" style="display:none;"></pre>
+    </section>
+
+    <!-- 활력징후 -->
+    <section class="section" id="vitalsSection">
+      <h2>활력징후 기록</h2>
+      <label for="bp">혈압 (mmHg)</label>
+      <input type="text" id="bp" name="bp" placeholder="예: 120/80" required />
+
+      <label for="hr">심박수 (회/분)</label>
+      <input type="number" id="hr" name="hr" min="30" max="200" required />
+
+      <label for="rr">호흡수 (회/분)</label>
+      <input type="number" id="rr" name="rr" min="5" max="50" required />
+
+      <label for="temp">체온 (℃)</label>
+      <input type="number" step="0.1" id="temp" name="temp" min="30" max="45" required />
+
+      <div class="button-group">
+        <button type="button" id="saveVitals">활력징후 저장</button>
+        <button type="button" id="copyVitals">활력징후 복사</button>
+        <button type="button" id="pdfVitals">활력징후 PDF 저장</button>
+      </div>
+      <pre id="vitalsOutput" class="output" style="display:none;"></pre>
+    </section>
+
+    <!-- 의료 지도 -->
+    <section class="section" id="medicalSection">
+      <h2>의료 지도</h2>
+      <label for="medicalInstruction">의료 지도 내용</label>
+      <textarea id="medicalInstruction" name="medicalInstruction" placeholder="의료 지시 및 추가 처치 내용" required></textarea>
+    </section>
+
+    <button type="submit" style="background-color:#28a745;">전체 기록 저장 및 요약 생성</button>
+  </form>
+
+  <div id="overallOutput" class="output" style="display:none; margin-top: 30px;"></div>
+
+  <h2>의료지도 요청 요약</h2>
+  <div id="summary" class="output" style="display:none;"></div>
+  <div style="margin-top:10px; display:none;" id="summaryButtons">
+    <button id="copySummary">요약 복사</button>
+    <button id="saveSummaryPdf">요약 PDF 저장</button>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script>
+    const { jsPDF } = window.jspdf;
+
+    // MIST 저장
+    const mistFields = ['mechanism', 'injury', 'signs', 'treatment'];
+    const mistOutput = document.getElementById('mistOutput');
+    document.getElementById('saveMist').addEventListener('click', () => {
+      const values = mistFields.map(id => document.getElementById(id).value.trim());
+      if (values.some(v => v === '')) {
+        alert('MIST 모든 항목을 입력해주세요.');
+        return;
+      }
+      const text = `=== MIST 보고 ===
+Mechanism: ${values[0]}
+Injury: ${values[1]}
+Signs: ${values[2]}
+Treatment: ${values[3]}`;
+      mistOutput.textContent = text;
+      mistOutput.style.display = 'block';
+    });
+    document.getElementById('copyMist').addEventListener('click', () => {
+      if (mistOutput.style.display === 'none') {
+        alert('먼저 MIST 저장 버튼을 눌러주세요.');
+        return;
+      }
+      navigator.clipboard.writeText(mistOutput.textContent).then(() => alert('MIST 내용이 복사되었습니다.'));
+    });
+    document.getElementById('pdfMist').addEventListener('click', () => {
+      if (mistOutput.style.display === 'none') {
+        alert('먼저 MIST 저장 버튼을 눌러주세요.');
+        return;
+      }
+      const doc = new jsPDF();
+      doc.setFontSize(16);
+      doc.text('MIST 보고', 10, 20);
+      doc.setFontSize(12);
+      const splitText = doc.splitTextToSize(mistOutput.textContent, 180);
+      doc.text(splitText, 10, 30);
+      doc.save('MIST_보고.pdf');
+    });
+
+    // SBAR 저장
+    const sbarFields = ['situation', 'background', 'assessment', 'recommendation'];
+    const sbarOutput = document.getElementById('sbarOutput');
+    document.getElementById('saveSbar').addEventListener('click', () => {
+      const values = sbarFields.map(id => document.getElementById(id).value.trim());
+      if (values.some(v => v === '')) {
+        alert('SBAR 모든 항목을 입력해주세요.');
+        return;
+      }
+      const text = `=== SBAR 보고 ===
+Situation: ${values[0]}
+Background: ${values[1]}
+Assessment: ${values[2]}
+Recommendation: ${values[3]}`;
+      sbarOutput.textContent = text;
+      sbarOutput.style.display = 'block';
+    });
+    document.getElementById('copySbar').addEventListener('click', () => {
+      if (sbarOutput.style.display === 'none') {
+        alert('먼저 SBAR 저장 버튼을 눌러주세요.');
+        return;
+      }
+      navigator.clipboard.writeText(sbarOutput.textContent).then(() => alert('SBAR 내용이 복사되었습니다.'));
+    });
+    document.getElementById('pdfSbar').addEventListener('click', () => {
+      if (sbarOutput.style.display === 'none') {
+        alert('먼저 SBAR 저장 버튼을 눌러주세요.');
+        return;
+      }
+      const doc = new jsPDF();
+      doc.setFontSize(16);
+      doc.text('SBAR 보고', 10, 20);
+      doc.setFontSize(12);
+      const splitText = doc.splitTextToSize(sbarOutput.textContent, 180);
+      doc.text(splitText, 10, 30);
+      doc.save('SBAR_보고.pdf');
+    });
+
+    // 활력징후 저장
+    const vitalsFields = ['bp', 'hr', 'rr', 'temp'];
+    const vitalsOutput = document.getElementById('vitalsOutput');
+    document.getElementById('saveVitals').addEventListener('click', () => {
+      const bp = document.getElementById('bp').value.trim();
+      const hr = document.getElementById('hr').value.trim();
+      const rr = document.getElementById('rr').value.trim();
+      const temp = document.getElementById('temp').value.trim();
+
+      if ([bp, hr, rr, temp].some(v => v === '')) {
+        alert('활력징후 모든 항목을 입력해주세요.');
+        return;
+      }
+      const text = `=== 활력징후 기록 ===
+혈압: ${bp} mmHg
+심박수: ${hr} 회/분
+호흡수: ${rr} 회/분
+체온: ${temp} ℃`;
+      vitalsOutput.textContent = text;
+      vitalsOutput.style.display = 'block';
+    });
+    document.getElementById('copyVitals').addEventListener('click', () => {
+      if (vitalsOutput.style.display === 'none') {
+        alert('먼저 활력징후 저장 버튼을 눌러주세요.');
+        return;
+      }
+      navigator.clipboard.writeText(vitalsOutput.textContent).then(() => alert('활력징후 내용이 복사되었습니다.'));
+    });
+    document.getElementById('pdfVitals').addEventListener('click', () => {
+      if (vitalsOutput.style.display === 'none') {
+        alert('먼저 활력징후 저장 버튼을 눌러주세요.');
+        return;
+      }
+      const doc = new jsPDF();
+      doc.setFontSize(16);
+      doc.text('활력징후 기록', 10, 20);
+      doc.setFontSize(12);
+      const splitText = doc.splitTextToSize(vitalsOutput.textContent, 180);
+      doc.text(splitText, 10, 30);
+      doc.save('활력징후_기록.pdf');
+    });
+
+    // 전체 폼 제출 및 의료지도 요약
+    const form = document.getElementById('recordForm');
+    const overallOutput = document.getElementById('overallOutput');
+    const summaryDiv = document.getElementById('summary');
+    const summaryButtons = document.getElementById('summaryButtons');
+    const copySummaryBtn = document.getElementById('copySummary');
+    const saveSummaryPdfBtn = document.getElementById('saveSummaryPdf');
+
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+
+      // 시간
+      const recordTime = form.recordTime.value;
+
+      // MIST
+      const mist = mistFields.map(id => document.getElementById(id).value.trim());
+
+      // SBAR
+      const sbar = sbarFields.map(id => document.getElementById(id).value.trim());
+
+      // 활력징후
+      const bp = document.getElementById('bp').value.trim();
+      const hr = document.getElementById('hr').value.trim();
+      const rr = document.getElementById('rr').value.trim();
+      const temp = document.getElementById('temp').value.trim();
+
+      // 의료 지도
+      const medicalInstruction = document.getElementById('medicalInstruction').value.trim();
+
+      // 전체 텍스트 구성
+      const fullText = `
+=== 기록 시간 ===
+${recordTime}
+
+=== MIST 보고 ===
+Mechanism: ${mist[0]}
+Injury: ${mist[1]}
+Signs: ${mist[2]}
+Treatment: ${mist[3]}
+
+=== SBAR 보고 ===
+Situation: ${sbar[0]}
+Background: ${sbar[1]}
+Assessment: ${sbar[2]}
+Recommendation: ${sbar[3]}
+
+=== 활력징후 기록 ===
+혈압: ${bp} mmHg
+심박수: ${hr} 회/분
+호흡수: ${rr} 회/분
+체온: ${temp} ℃
+
+=== 의료 지도 ===
+${medicalInstruction}
+      `.trim();
+
+      overallOutput.textContent = fullText;
+      overallOutput.style.display = 'block';
+
+      // 의료지도 요약 100자 이내 (간단하게 medicalInstruction 만)
+      let summaryText = medicalInstruction;
+      if (summaryText.length > 100) {
+        summaryText = summaryText.substring(0, 97) + '...';
+      }
+      summaryDiv.textContent = summaryText;
+      summaryDiv.style.display = 'block';
+      summaryButtons.style.display = 'block';
+
+      alert('전체 기록이 저장되었습니다.');
+    });
+
+    // 요약 복사
+    copySummaryBtn.addEventListener('click', () => {
+      navigator.clipboard.writeText(summaryDiv.textContent).then(() => {
+        alert('요약문이 복사되었습니다.');
+      });
+    });
+
+    // 요약 PDF 저장
+    saveSummaryPdfBtn.addEventListener('click', () => {
+      const doc = new jsPDF();
+      doc.setFontSize(16);
+      doc.text("의료지도 요청 요약", 10, 20);
+      doc.setFontSize(12);
+      const splitText = doc.splitTextToSize(summaryDiv.textContent, 180);
+      doc.text(splitText, 10, 30);
+      doc.save('의료지도_요청_요약.pdf');
+    });
+  </script>
+</body>
+</html>
