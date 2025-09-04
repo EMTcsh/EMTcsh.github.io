@@ -166,216 +166,166 @@
     <button id="saveSummaryPdf">요약 PDF 저장</button>
   </div>
 
+  <!-- 최근 기록 표시 -->
+  <div id="recentBox" style="display:none; margin-top:30px;">
+    <h2>📌 최근 기록</h2>
+    <table id="recentTable" border="1" cellpadding="5"></table>
+  </div>
+
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script>
     const { jsPDF } = window.jspdf;
 
-    // MIST 저장
+    // 필드 정의
     const mistFields = ['mechanism', 'injury', 'signs', 'treatment'];
-    const mistOutput = document.getElementById('mistOutput');
-    document.getElementById('saveMist').addEventListener('click', () => {
-      const values = mistFields.map(id => document.getElementById(id).value.trim());
-      if (values.some(v => v === '')) {
-        alert('MIST 모든 항목을 입력해주세요.');
-        return;
-      }
-      const text = `=== MIST 보고 ===
-Mechanism: ${values[0]}
-Injury: ${values[1]}
-Signs: ${values[2]}
-Treatment: ${values[3]}`;
-      mistOutput.textContent = text;
-      mistOutput.style.display = 'block';
-    });
-    document.getElementById('copyMist').addEventListener('click', () => {
-      if (mistOutput.style.display === 'none') {
-        alert('먼저 MIST 저장 버튼을 눌러주세요.');
-        return;
-      }
-      navigator.clipboard.writeText(mistOutput.textContent).then(() => alert('MIST 내용이 복사되었습니다.'));
-    });
-    document.getElementById('pdfMist').addEventListener('click', () => {
-      if (mistOutput.style.display === 'none') {
-        alert('먼저 MIST 저장 버튼을 눌러주세요.');
-        return;
-      }
-      const doc = new jsPDF();
-      doc.setFontSize(16);
-      doc.text('MIST 보고', 10, 20);
-      doc.setFontSize(12);
-      const splitText = doc.splitTextToSize(mistOutput.textContent, 180);
-      doc.text(splitText, 10, 30);
-      doc.save('MIST_보고.pdf');
-    });
-
-    // SBAR 저장
     const sbarFields = ['situation', 'background', 'assessment', 'recommendation'];
-    const sbarOutput = document.getElementById('sbarOutput');
-    document.getElementById('saveSbar').addEventListener('click', () => {
-      const values = sbarFields.map(id => document.getElementById(id).value.trim());
-      if (values.some(v => v === '')) {
-        alert('SBAR 모든 항목을 입력해주세요.');
-        return;
-      }
-      const text = `=== SBAR 보고 ===
-Situation: ${values[0]}
-Background: ${values[1]}
-Assessment: ${values[2]}
-Recommendation: ${values[3]}`;
-      sbarOutput.textContent = text;
-      sbarOutput.style.display = 'block';
-    });
-    document.getElementById('copySbar').addEventListener('click', () => {
-      if (sbarOutput.style.display === 'none') {
-        alert('먼저 SBAR 저장 버튼을 눌러주세요.');
-        return;
-      }
-      navigator.clipboard.writeText(sbarOutput.textContent).then(() => alert('SBAR 내용이 복사되었습니다.'));
-    });
-    document.getElementById('pdfSbar').addEventListener('click', () => {
-      if (sbarOutput.style.display === 'none') {
-        alert('먼저 SBAR 저장 버튼을 눌러주세요.');
-        return;
-      }
-      const doc = new jsPDF();
-      doc.setFontSize(16);
-      doc.text('SBAR 보고', 10, 20);
-      doc.setFontSize(12);
-      const splitText = doc.splitTextToSize(sbarOutput.textContent, 180);
-      doc.text(splitText, 10, 30);
-      doc.save('SBAR_보고.pdf');
-    });
-
-    // 활력징후 저장
     const vitalsFields = ['bp', 'hr', 'rr', 'temp'];
-    const vitalsOutput = document.getElementById('vitalsOutput');
-    document.getElementById('saveVitals').addEventListener('click', () => {
-      const bp = document.getElementById('bp').value.trim();
-      const hr = document.getElementById('hr').value.trim();
-      const rr = document.getElementById('rr').value.trim();
-      const temp = document.getElementById('temp').value.trim();
 
-      if ([bp, hr, rr, temp].some(v => v === '')) {
-        alert('활력징후 모든 항목을 입력해주세요.');
-        return;
-      }
-      const text = `=== 활력징후 기록 ===
-혈압: ${bp} mmHg
-심박수: ${hr} 회/분
-호흡수: ${rr} 회/분
-체온: ${temp} ℃`;
-      vitalsOutput.textContent = text;
-      vitalsOutput.style.display = 'block';
-    });
-    document.getElementById('copyVitals').addEventListener('click', () => {
-      if (vitalsOutput.style.display === 'none') {
-        alert('먼저 활력징후 저장 버튼을 눌러주세요.');
-        return;
-      }
-      navigator.clipboard.writeText(vitalsOutput.textContent).then(() => alert('활력징후 내용이 복사되었습니다.'));
-    });
-    document.getElementById('pdfVitals').addEventListener('click', () => {
-      if (vitalsOutput.style.display === 'none') {
-        alert('먼저 활력징후 저장 버튼을 눌러주세요.');
-        return;
-      }
-      const doc = new jsPDF();
-      doc.setFontSize(16);
-      doc.text('활력징후 기록', 10, 20);
-      doc.setFontSize(12);
-      const splitText = doc.splitTextToSize(vitalsOutput.textContent, 180);
-      doc.text(splitText, 10, 30);
-      doc.save('활력징후_기록.pdf');
-    });
-
-    // 전체 폼 제출 및 의료지도 요약
     const form = document.getElementById('recordForm');
     const overallOutput = document.getElementById('overallOutput');
     const summaryDiv = document.getElementById('summary');
     const summaryButtons = document.getElementById('summaryButtons');
     const copySummaryBtn = document.getElementById('copySummary');
     const saveSummaryPdfBtn = document.getElementById('saveSummaryPdf');
+    const recentBox = document.getElementById('recentBox');
+    const recentTable = document.getElementById('recentTable');
 
-    form.addEventListener('submit', (e) => {
+    // ✅ Apps Script 배포 URL 입력
+    const SCRIPT_URL = "YOUR_APPS_SCRIPT_URL_HERE";
+
+    // ===================== MIST 저장/복사/PDF =====================
+    const mistOutput = document.getElementById('mistOutput');
+    document.getElementById('saveMist').addEventListener('click', () => {
+      const values = mistFields.map(id => document.getElementById(id).value.trim());
+      if (values.some(v => v === '')) return alert('MIST 모든 항목을 입력해주세요.');
+      mistOutput.textContent = `=== MIST 보고 ===\nMechanism: ${values[0]}\nInjury: ${values[1]}\nSigns: ${values[2]}\nTreatment: ${values[3]}`;
+      mistOutput.style.display = 'block';
+    });
+    document.getElementById('copyMist').addEventListener('click', () => {
+      if (mistOutput.style.display === 'none') return alert('먼저 MIST 저장 버튼을 눌러주세요.');
+      navigator.clipboard.writeText(mistOutput.textContent).then(() => alert('MIST 내용이 복사되었습니다.'));
+    });
+    document.getElementById('pdfMist').addEventListener('click', () => {
+      if (mistOutput.style.display === 'none') return alert('먼저 MIST 저장 버튼을 눌러주세요.');
+      const doc = new jsPDF();
+      doc.text('MIST 보고', 10, 20);
+      doc.text(doc.splitTextToSize(mistOutput.textContent, 180), 10, 30);
+      doc.save('MIST_보고.pdf');
+    });
+
+    // ===================== SBAR 저장/복사/PDF =====================
+    const sbarOutput = document.getElementById('sbarOutput');
+    document.getElementById('saveSbar').addEventListener('click', () => {
+      const values = sbarFields.map(id => document.getElementById(id).value.trim());
+      if (values.some(v => v === '')) return alert('SBAR 모든 항목을 입력해주세요.');
+      sbarOutput.textContent = `=== SBAR 보고 ===\nSituation: ${values[0]}\nBackground: ${values[1]}\nAssessment: ${values[2]}\nRecommendation: ${values[3]}`;
+      sbarOutput.style.display = 'block';
+    });
+    document.getElementById('copySbar').addEventListener('click', () => {
+      if (sbarOutput.style.display === 'none') return alert('먼저 SBAR 저장 버튼을 눌러주세요.');
+      navigator.clipboard.writeText(sbarOutput.textContent).then(() => alert('SBAR 내용이 복사되었습니다.'));
+    });
+    document.getElementById('pdfSbar').addEventListener('click', () => {
+      if (sbarOutput.style.display === 'none') return alert('먼저 SBAR 저장 버튼을 눌러주세요.');
+      const doc = new jsPDF();
+      doc.text('SBAR 보고', 10, 20);
+      doc.text(doc.splitTextToSize(sbarOutput.textContent, 180), 10, 30);
+      doc.save('SBAR_보고.pdf');
+    });
+
+    // ===================== 활력징후 저장/복사/PDF =====================
+    const vitalsOutput = document.getElementById('vitalsOutput');
+    document.getElementById('saveVitals').addEventListener('click', () => {
+      const [bp, hr, rr, temp] = vitalsFields.map(id => document.getElementById(id).value.trim());
+      if ([bp, hr, rr, temp].some(v => v === '')) return alert('활력징후 모든 항목을 입력해주세요.');
+      vitalsOutput.textContent = `=== 활력징후 기록 ===\n혈압: ${bp} mmHg\n심박수: ${hr} 회/분\n호흡수: ${rr} 회/분\n체온: ${temp} ℃`;
+      vitalsOutput.style.display = 'block';
+    });
+    document.getElementById('copyVitals').addEventListener('click', () => {
+      if (vitalsOutput.style.display === 'none') return alert('먼저 활력징후 저장 버튼을 눌러주세요.');
+      navigator.clipboard.writeText(vitalsOutput.textContent).then(() => alert('활력징후 내용이 복사되었습니다.'));
+    });
+    document.getElementById('pdfVitals').addEventListener('click', () => {
+      if (vitalsOutput.style.display === 'none') return alert('먼저 활력징후 저장 버튼을 눌러주세요.');
+      const doc = new jsPDF();
+      doc.text('활력징후 기록', 10, 20);
+      doc.text(doc.splitTextToSize(vitalsOutput.textContent, 180), 10, 30);
+      doc.save('활력징후_기록.pdf');
+    });
+
+    // ===================== 전체 폼 제출 =====================
+    form.addEventListener('submit', async (e) => {
       e.preventDefault();
 
-      // 시간
       const recordTime = form.recordTime.value;
-
-      // MIST
       const mist = mistFields.map(id => document.getElementById(id).value.trim());
-
-      // SBAR
       const sbar = sbarFields.map(id => document.getElementById(id).value.trim());
-
-      // 활력징후
-      const bp = document.getElementById('bp').value.trim();
-      const hr = document.getElementById('hr').value.trim();
-      const rr = document.getElementById('rr').value.trim();
-      const temp = document.getElementById('temp').value.trim();
-
-      // 의료 지도
+      const [bp, hr, rr, temp] = vitalsFields.map(id => document.getElementById(id).value.trim());
       const medicalInstruction = document.getElementById('medicalInstruction').value.trim();
 
-      // 전체 텍스트 구성
-      const fullText = `
-=== 기록 시간 ===
-${recordTime}
+      const recordData = {
+        recordTime,
+        mist: { mechanism: mist[0], injury: mist[1], signs: mist[2], treatment: mist[3] },
+        sbar: { situation: sbar[0], background: sbar[1], assessment: sbar[2], recommendation: sbar[3] },
+        vitals: { bp, hr, rr, temp },
+        medicalInstruction
+      };
 
-=== MIST 보고 ===
-Mechanism: ${mist[0]}
-Injury: ${mist[1]}
-Signs: ${mist[2]}
-Treatment: ${mist[3]}
+      // 화면 출력
+      overallOutput.textContent = "✅ 저장 완료\n" + JSON.stringify(recordData, null, 2);
+      overallOutput.style.display = "block";
 
-=== SBAR 보고 ===
-Situation: ${sbar[0]}
-Background: ${sbar[1]}
-Assessment: ${sbar[2]}
-Recommendation: ${sbar[3]}
-
-=== 활력징후 기록 ===
-혈압: ${bp} mmHg
-심박수: ${hr} 회/분
-호흡수: ${rr} 회/분
-체온: ${temp} ℃
-
-=== 의료 지도 ===
-${medicalInstruction}
-      `.trim();
-
-      overallOutput.textContent = fullText;
-      overallOutput.style.display = 'block';
-
-      // 의료지도 요약 100자 이내 (간단하게 medicalInstruction 만)
+      // 요약
       let summaryText = medicalInstruction;
-      if (summaryText.length > 100) {
-        summaryText = summaryText.substring(0, 97) + '...';
-      }
+      if (summaryText.length > 100) summaryText = summaryText.substring(0, 97) + '...';
       summaryDiv.textContent = summaryText;
       summaryDiv.style.display = 'block';
       summaryButtons.style.display = 'block';
 
-      alert('전체 기록이 저장되었습니다.');
+      // Google Apps Script 저장
+      try {
+        const response = await fetch(SCRIPT_URL, {
+          method: "POST",
+          body: JSON.stringify(recordData),
+          headers: { "Content-Type": "application/json" }
+        });
+        const result = await response.json();
+        if (result.status === "success") {
+          alert("스프레드시트에 기록되었습니다!");
+          fetch(SCRIPT_URL + "?action=getRecent")
+            .then(res => res.json())
+            .then(data => {
+              renderRecentTable(data);
+              recentBox.style.display = "block";
+            });
+        } else {
+          alert("저장 실패: " + result.message);
+        }
+      } catch (err) {
+        console.error(err);
+        alert("저장 중 오류 발생");
+      }
     });
 
-    // 요약 복사
+    // 요약 복사 & PDF
     copySummaryBtn.addEventListener('click', () => {
-      navigator.clipboard.writeText(summaryDiv.textContent).then(() => {
-        alert('요약문이 복사되었습니다.');
-      });
+      navigator.clipboard.writeText(summaryDiv.textContent).then(() => alert('요약문이 복사되었습니다.'));
     });
-
-    // 요약 PDF 저장
     saveSummaryPdfBtn.addEventListener('click', () => {
       const doc = new jsPDF();
-      doc.setFontSize(16);
       doc.text("의료지도 요청 요약", 10, 20);
-      doc.setFontSize(12);
-      const splitText = doc.splitTextToSize(summaryDiv.textContent, 180);
-      doc.text(splitText, 10, 30);
+      doc.text(doc.splitTextToSize(summaryDiv.textContent, 180), 10, 30);
       doc.save('의료지도_요청_요약.pdf');
     });
+
+    // 최근 기록 테이블 렌더링
+    function renderRecentTable(data) {
+      recentTable.innerHTML = "";
+      let headerRow = "<tr>" + Object.keys(data).map(k => `<th>${k}</th>`).join("") + "</tr>";
+      let valueRow = "<tr>" + Object.values(data).map(v => `<td>${v}</td>`).join("") + "</tr>";
+      recentTable.innerHTML = headerRow + valueRow;
+    }
+    
   </script>
 </body>
 </html>
