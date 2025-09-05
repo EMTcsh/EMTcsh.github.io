@@ -72,13 +72,12 @@
   </style>
 </head>
 <body>
-  <h1>MIST / SBAR / 활력징후 기록 및 저장</h1>
+  <h1>MIST/SBAR/활력징후 기록 및 저장</h1>
 
   <form id="recordForm">
     <label for="recordTime">기록 시간</label>
     <input type="time" id="recordTime" name="recordTime" required />
 
-    <!-- MIST -->
     <section class="section" id="mistSection">
       <h2>MIST 보고</h2>
       <label for="mechanism">Mechanism (기전)</label>
@@ -94,14 +93,13 @@
       <textarea id="treatment" name="treatment" placeholder="지금까지 시행된 처치" required></textarea>
 
       <div class="button-group">
-        <button type="button" id="saveMist">MIST 저장</button>
-        <button type="button" id="copyMist">MIST 복사</button>
-        <button type="button" id="pdfMist">MIST PDF 저장</button>
+        <button type="button" id="saveMist">💾 MIST 저장</button>
+        <button type="button" id="copyMist">📋 MIST 복사</button>
+        <button type="button" id="pdfMist">📄 MIST PDF 저장</button>
       </div>
       <pre id="mistOutput" class="output" style="display:none;"></pre>
     </section>
 
-    <!-- SBAR -->
     <section class="section" id="sbarSection">
       <h2>SBAR 보고</h2>
       <label for="situation">Situation (상황)</label>
@@ -117,14 +115,13 @@
       <textarea id="recommendation" name="recommendation" placeholder="의료 지도 및 권고사항" required></textarea>
 
       <div class="button-group">
-        <button type="button" id="saveSbar">SBAR 저장</button>
-        <button type="button" id="copySbar">SBAR 복사</button>
-        <button type="button" id="pdfSbar">SBAR PDF 저장</button>
+        <button type="button" id="saveSbar">💾 SBAR 저장</button>
+        <button type="button" id="copySbar">📋 SBAR 복사</button>
+        <button type="button" id="pdfSbar">📄 SBAR PDF 저장</button>
       </div>
       <pre id="sbarOutput" class="output" style="display:none;"></pre>
     </section>
 
-    <!-- 활력징후 -->
     <section class="section" id="vitalsSection">
       <h2>활력징후 기록</h2>
       <label for="bp">혈압 (mmHg)</label>
@@ -140,21 +137,22 @@
       <input type="number" step="0.1" id="temp" name="temp" min="30" max="45" required />
 
       <div class="button-group">
-        <button type="button" id="saveVitals">활력징후 저장</button>
-        <button type="button" id="copyVitals">활력징후 복사</button>
-        <button type="button" id="pdfVitals">활력징후 PDF 저장</button>
+        <button type="button" id="saveVitals">💾 활력징후 저장</button>
+        <button type="button" id="copyVitals">📋 활력징후 복사</button>
+        <button type="button" id="pdfVitals">📄 활력징후 PDF 저장</button>
       </div>
       <pre id="vitalsOutput" class="output" style="display:none;"></pre>
     </section>
 
-    <!-- 의료 지도 -->
     <section class="section" id="medicalSection">
       <h2>의료 지도</h2>
       <label for="medicalInstruction">의료 지도 내용</label>
       <textarea id="medicalInstruction" name="medicalInstruction" placeholder="의료 지시 및 추가 처치 내용" required></textarea>
     </section>
 
-    <button type="submit" style="background-color:#28a745;">전체 기록 저장 및 요약 생성</button>
+    <button type="submit" id="submitForm">
+        <i class="fas fa-file-excel"></i> 전체 기록 Google Sheets에 저장 및 요약 생성
+    </button>
   </form>
 
   <div id="overallOutput" class="output" style="display:none; margin-top: 30px;"></div>
@@ -162,14 +160,13 @@
   <h2>의료지도 요청 요약</h2>
   <div id="summary" class="output" style="display:none;"></div>
   <div style="margin-top:10px; display:none;" id="summaryButtons">
-    <button id="copySummary">요약 복사</button>
-    <button id="saveSummaryPdf">요약 PDF 저장</button>
+    <button id="copySummary">📋 요약 복사</button>
+    <button id="saveSummaryPdf">📄 요약 PDF 저장</button>
   </div>
 
-  <!-- 최근 기록 표시 -->
   <div id="recentBox" style="display:none; margin-top:30px;">
     <h2>📌 최근 기록</h2>
-    <table id="recentTable" border="1" cellpadding="5"></table>
+    <table id="recentTable"></table>
   </div>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -190,15 +187,9 @@
     const recentBox = document.getElementById('recentBox');
     const recentTable = document.getElementById('recentTable');
 
-    // ✅ Apps Script 배포 URL 입력
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx6-RQ5MoCfw-HUbolrndGNdAlyPUriyaUvmy5AtGJm3_iJHCGXxl4UcOZsVhMYNKIa/exec";
-   
-    // 저장 함수
-  document.getElementById("reportForm").addEventListener("submit", async (e) => {
-    e.preventDefault();
-    ...
-  });
-    
+    // ✅ Apps Script 배포 URL 입력 - 여기에 실제 URL을 넣으세요!
+    const SCRIPT_URL = "YOUR_APPS_SCRIPT_URL_HERE";
+
     // ===================== MIST 저장/복사/PDF =====================
     const mistOutput = document.getElementById('mistOutput');
     document.getElementById('saveMist').addEventListener('click', () => {
@@ -282,8 +273,7 @@
       overallOutput.style.display = "block";
 
       // 요약
-      let summaryText = medicalInstruction;
-      if (summaryText.length > 100) summaryText = summaryText.substring(0, 97) + '...';
+      let summaryText = `의료지도 요청: ${medicalInstruction}`;
       summaryDiv.textContent = summaryText;
       summaryDiv.style.display = 'block';
       summaryButtons.style.display = 'block';
@@ -298,18 +288,19 @@
         const result = await response.json();
         if (result.status === "success") {
           alert("스프레드시트에 기록되었습니다!");
-          fetch(SCRIPT_URL + "?action=getRecent")
-            .then(res => res.json())
-            .then(data => {
-              renderRecentTable(data);
+          // 최근 기록을 가져와 테이블을 렌더링
+          const recentResponse = await fetch(SCRIPT_URL + "?action=getRecent");
+          const recentData = await recentResponse.json();
+          if (recentData.length > 0) {
+              renderRecentTable(recentData);
               recentBox.style.display = "block";
-            });
+          }
         } else {
           alert("저장 실패: " + result.message);
         }
       } catch (err) {
-        console.error(err);
-        alert("저장 중 오류 발생");
+        console.error("저장 중 오류 발생:", err);
+        alert("저장 중 오류 발생: 네트워크 문제 또는 URL 오류");
       }
     });
 
@@ -324,14 +315,27 @@
       doc.save('의료지도_요청_요약.pdf');
     });
 
-    // 최근 기록 테이블 렌더링
+    // 최근 기록 테이블 렌더링 함수 (수정됨)
     function renderRecentTable(data) {
-      recentTable.innerHTML = "";
-      let headerRow = "<tr>" + Object.keys(data).map(k => `<th>${k}</th>`).join("") + "</tr>";
-      let valueRow = "<tr>" + Object.values(data).map(v => `<td>${v}</td>`).join("") + "</tr>";
-      recentTable.innerHTML = headerRow + valueRow;
+      if (!Array.isArray(data) || data.length === 0) {
+          recentTable.innerHTML = "<tr><td>최근 기록이 없습니다.</td></tr>";
+          return;
+      }
+      
+      let html = "";
+      // 테이블 헤더 생성
+      const headers = Object.keys(data[0]);
+      html += "<thead><tr>" + headers.map(h => `<th>${h}</th>`).join("") + "</tr></thead>";
+      
+      // 테이블 바디 생성 (최근 5개 기록)
+      html += "<tbody>";
+      data.slice(0, 5).forEach(record => {
+          html += "<tr>" + headers.map(h => `<td>${record[h] || ''}</td>`).join("") + "</tr>";
+      });
+      html += "</tbody>";
+      
+      recentTable.innerHTML = html;
     }
-    
   </script>
 </body>
 </html>
