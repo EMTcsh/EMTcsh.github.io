@@ -192,7 +192,13 @@
 
     // ✅ Apps Script 배포 URL 입력
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx6-RQ5MoCfw-HUbolrndGNdAlyPUriyaUvmy5AtGJm3_iJHCGXxl4UcOZsVhMYNKIa/exec";
-
+   
+    // 저장 함수
+  document.getElementById("reportForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    ...
+  });
+    
     // ===================== MIST 저장/복사/PDF =====================
     const mistOutput = document.getElementById('mistOutput');
     document.getElementById('saveMist').addEventListener('click', () => {
