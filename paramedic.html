@@ -177,11 +177,14 @@ copyBtn.addEventListener('click', () => {
 savePdfBtn.addEventListener('click', () => {
     const { jsPDF } = window.jspdf;
     
-    // 폰트 파일을 가져와서 Base64로 변환하는 함수
+    // 폰트 파일을 가져와서 Base64로 변환하고 PDF를 생성하는 함수
     const fetchFontAndCreatePDF = async () => {
         try {
             const fontUrl = 'NotoSansKR-Regular.ttf'; // 한글 폰트 파일 경로
             const fontResponse = await fetch(fontUrl);
+            if (!fontResponse.ok) {
+                throw new Error(`폰트 파일을 찾을 수 없습니다: ${fontResponse.statusText}`);
+            }
             const fontArrayBuffer = await fontResponse.arrayBuffer();
             const fontBase64 = btoa(String.fromCharCode(...new Uint8Array(fontArrayBuffer)));
 
@@ -204,8 +207,8 @@ savePdfBtn.addEventListener('click', () => {
             
             doc.save('의료지도_요청_요약.pdf');
         } catch (error) {
-            alert("PDF 저장 중 오류 발생: " + error.message);
-            console.error(error);
+            alert("PDF 저장 중 오류 발생. 폰트 파일이 올바른 위치에 있는지 확인해 주세요.");
+            console.error("PDF 저장 오류:", error);
         }
     };
 
