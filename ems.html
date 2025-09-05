@@ -1,250 +1,159 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>응급 기록지</title>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
-<style>
-    body { font-family: Arial, sans-serif; margin: 20px; background-color: #f4f7f9; color: #333; }
-    h1, h2 { color: #004085; }
-    .section { background-color: #fff; padding: 20px; margin-bottom: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-    label { display: block; margin-top: 10px; font-weight: bold; }
-    input[type="time"], input[type="text"], input[type="number"], textarea { width: 100%; padding: 8px; margin-top: 5px; border: 1px solid #ccc; border-radius: 4px; font-size: 16px; box-sizing: border-box; }
-    textarea { resize: vertical; min-height: 80px; }
-    .button-group { margin-top: 15px; display: flex; gap: 10px; }
-    button { padding: 10px 15px; border: none; border-radius: 5px; cursor: pointer; font-size: 14px; font-weight: bold; color: #fff; flex-grow: 1; transition: background-color 0.3s; }
-    button:hover { filter: brightness(0.9); }
-    button#saveMist, button#saveSbar, button#saveVitals { background-color: #28a745; }
-    button#copyMist, button#copySbar, button#copyVitals { background-color: #17a2b8; }
-    button#pdfMist, button#pdfSbar, button#pdfVitals { background-color: #dc3545; }
-    button#copySummary { background-color: #17a2b8; }
-    button#saveSummaryPdf { background-color: #dc3545; }
-    button#submitForm { background-color: #28a745; margin-top: 20px; width: 100%; font-size: 18px; padding: 15px; display: flex; align-items: center; justify-content: center; gap: 10px; }
-    button#submitForm:hover { background-color: #218838; }
-    .output { background-color: #e9ecef; padding: 15px; margin-top: 15px; border-radius: 5px; white-space: pre-wrap; word-wrap: break-word; font-family: 'Courier New', Courier, monospace; }
-    #recentBox { margin-top: 30px; background-color: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-    #recentTable { width: 100%; border-collapse: collapse; margin-top: 15px; }
-    #recentTable th, #recentTable td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-    #recentTable th { background-color: #f2f2f2; }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>응급구조사 의료지도 기록</title>
+    <!-- Inter 폰트와 Tailwind CSS 로딩 -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+        }
+        .form-container {
+            max-width: 800px;
+            margin: 2rem auto;
+        }
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+        input, textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #d1d5db;
+            border-radius: 0.5rem;
+            transition: border-color 0.2s ease-in-out;
+        }
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25);
+        }
+    </style>
 </head>
-<body>
-<h1>MIST/SBAR/활력징후 기록 및 저장</h1>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen p-4">
 
-<form id="recordForm">
-    <label for="recordTime">기록 시간</label>
-    <input type="time" id="recordTime" name="recordTime" required />
+<div class="form-container bg-white p-8 rounded-2xl shadow-xl">
+    <h1 class="text-3xl font-bold text-center text-gray-800 mb-6">응급구조사 의료지도 기록</h1>
+    <p class="text-center text-gray-500 mb-8">지도의사에게 받은 의료지도 내용을 기록하고 저장합니다.</p>
 
-    <!-- MIST Section -->
-    <section class="section" id="mistSection">
-        <h2>MIST 보고</h2>
-        <label for="mechanism">Mechanism (기전)</label>
-        <textarea id="mechanism" name="mechanism" placeholder="예: 교통사고, 낙상 등" required></textarea>
-        <label for="injury">Injury (손상부위)</label>
-        <textarea id="injury" name="injury" placeholder="손상 부위 및 상태" required></textarea>
-        <label for="signs">Signs (증상)</label>
-        <textarea id="signs" name="signs" placeholder="환자 증상" required></textarea>
-        <label for="treatment">Treatment (처치 내용)</label>
-        <textarea id="treatment" name="treatment" placeholder="지금까지 시행된 처치" required></textarea>
-        <div class="button-group">
-            <button type="button" id="saveMist">💾 MIST 저장</button>
-            <button type="button" id="copyMist">📋 MIST 복사</button>
-            <button type="button" id="pdfMist">📄 MIST PDF 저장</button>
+    <form id="recordForm">
+        <div class="grid md:grid-cols-2 gap-6 mb-6">
+            <!-- 환자 정보 -->
+            <div>
+                <h2 class="text-xl font-semibold text-gray-700 mb-4">환자 정보</h2>
+                <div class="mb-4">
+                    <label for="patientName" class="text-gray-600">환자 이름</label>
+                    <input type="text" id="patientName" name="patientName" placeholder="환자 이름" required class="rounded-lg">
+                </div>
+                <div>
+                    <label for="dob" class="text-gray-600">생년월일</label>
+                    <input type="date" id="dob" name="dob" required class="rounded-lg">
+                </div>
+            </div>
+
+            <!-- 상황 정보 -->
+            <div>
+                <h2 class="text-xl font-semibold text-gray-700 mb-4">상황 정보</h2>
+                <div class="mb-4">
+                    <label for="incidentTime" class="text-gray-600">발생 시간</label>
+                    <input type="datetime-local" id="incidentTime" name="incidentTime" required class="rounded-lg">
+                </div>
+                <div class="mb-4">
+                    <label for="location" class="text-gray-600">장소</label>
+                    <input type="text" id="location" name="location" placeholder="예: OO동 123-45" required class="rounded-lg">
+                </div>
+                <div>
+                    <label for="chiefComplaint" class="text-gray-600">주 증상</label>
+                    <input type="text" id="chiefComplaint" name="chiefComplaint" placeholder="예: 호흡곤란, 가슴 통증" required class="rounded-lg">
+                </div>
+            </div>
         </div>
-        <pre id="mistOutput" class="output" style="display:none;"></pre>
-    </section>
 
-    <!-- SBAR Section -->
-    <section class="section" id="sbarSection">
-        <h2>SBAR 보고</h2>
-        <label for="situation">Situation (상황)</label>
-        <textarea id="situation" name="situation" placeholder="현재 상황 설명" required></textarea>
-        <label for="background">Background (배경)</label>
-        <textarea id="background" name="background" placeholder="환자 배경 및 병력" required></textarea>
-        <label for="assessment">Assessment (평가)</label>
-        <textarea id="assessment" name="assessment" placeholder="진단 및 평가 내용" required></textarea>
-        <label for="recommendation">Recommendation (권고)</label>
-        <textarea id="recommendation" name="recommendation" placeholder="의료 지도 및 권고사항" required></textarea>
-        <div class="button-group">
-            <button type="button" id="saveSbar">💾 SBAR 저장</button>
-            <button type="button" id="copySbar">📋 SBAR 복사</button>
-            <button type="button" id="pdfSbar">📄 SBAR PDF 저장</button>
+        <!-- 의료지도 내용 -->
+        <div class="mb-6">
+            <h2 class="text-xl font-semibold text-gray-700 mb-4">의료지도 내용</h2>
+            <div class="mb-4">
+                <label for="doctorName" class="text-gray-600">지도의사 이름</label>
+                <input type="text" id="doctorName" name="doctorName" placeholder="지도의사 성명" required class="rounded-lg">
+            </div>
+            <div>
+                <label for="guidanceContent" class="text-gray-600">지도 내용</label>
+                <textarea id="guidanceContent" name="guidanceContent" rows="4" placeholder="지도의사에게 받은 구체적인 지도 내용" required class="rounded-lg"></textarea>
+            </div>
         </div>
-        <pre id="sbarOutput" class="output" style="display:none;"></pre>
-    </section>
 
-    <!-- Vitals Section -->
-    <section class="section" id="vitalsSection">
-        <h2>활력징후 기록</h2>
-        <label for="bp">혈압 (mmHg)</label>
-        <input type="text" id="bp" name="bp" placeholder="예: 120/80" required />
-        <label for="hr">심박수 (회/분)</label>
-        <input type="number" id="hr" name="hr" min="30" max="200" required />
-        <label for="rr">호흡수 (회/분)</label>
-        <input type="number" id="rr" name="rr" min="5" max="50" required />
-        <label for="temp">체온 (℃)</label>
-        <input type="number" step="0.1" id="temp" name="temp" min="30" max="45" required />
-        <div class="button-group">
-            <button type="button" id="saveVitals">💾 활력징후 저장</button>
-            <button type="button" id="copyVitals">📋 활력징후 복사</button>
-            <button type="button" id="pdfVitals">📄 활력징후 PDF 저장</button>
+        <!-- 기록자 정보 -->
+        <div class="mb-8">
+            <h2 class="text-xl font-semibold text-gray-700 mb-4">기록자</h2>
+            <div>
+                <label for="emtName" class="text-gray-600">응급구조사 이름</label>
+                <input type="text" id="emtName" name="emtName" placeholder="응급구조사 성명" required class="rounded-lg">
+            </div>
         </div>
-        <pre id="vitalsOutput" class="output" style="display:none;"></pre>
-    </section>
 
-    <!-- Medical Instruction -->
-    <section class="section" id="medicalSection">
-        <h2>의료 지도</h2>
-        <label for="medicalInstruction">의료 지도 내용</label>
-        <textarea id="medicalInstruction" name="medicalInstruction" placeholder="의료 지시 및 추가 처치 내용" required></textarea>
-    </section>
+        <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition duration-200">
+            기록 저장하기
+        </button>
 
-    <button type="submit" id="submitForm">
-        <i class="fas fa-file-excel"></i> 전체 기록 Google Sheets에 저장 및 요약 생성
-    </button>
-</form>
-
-<div id="overallOutput" class="output" style="display:none; margin-top: 30px;"></div>
-
-<h2>의료지도 요청 요약</h2>
-<div id="summary" class="output" style="display:none;"></div>
-<div style="margin-top:10px; display:none;" id="summaryButtons">
-    <button id="copySummary">📋 요약 복사</button>
-    <button id="saveSummaryPdf">📄 요약 PDF 저장</button>
+        <!-- 결과 메시지 표시 영역 -->
+        <div id="resultMessage" class="mt-4 text-center"></div>
+    </form>
 </div>
 
-<div id="recentBox" style="display:none; margin-top:30px;">
-    <h2>📌 최근 기록</h2>
-    <table id="recentTable"></table>
-</div>
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script>
-const { jsPDF } = window.jspdf;
-const mistFields = ['mechanism','injury','signs','treatment'];
-const sbarFields = ['situation','background','assessment','recommendation'];
-const vitalsFields = ['bp','hr','rr','temp'];
-const form = document.getElementById('recordForm');
-const overallOutput = document.getElementById('overallOutput');
-const summaryDiv = document.getElementById('summary');
-const summaryButtons = document.getElementById('summaryButtons');
-const copySummaryBtn = document.getElementById('copySummary');
-const saveSummaryPdfBtn = document.getElementById('saveSummaryPdf');
-const recentBox = document.getElementById('recentBox');
-const recentTable = document.getElementById('recentTable');
+    // 이 URL을 Google Apps Script를 웹 앱으로 게시한 후 얻은 URL로 바꿔주세요.
+    const SCRIPT_URL = 'YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE'; 
 
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz0ltlL0jlS-sbtMWMnvMZTiO7i0uWLGph1f8R8e8xPyrwo_9CP4WOX2rOz5rUuRXnF5g/exec";
+    const form = document.getElementById('recordForm');
+    const resultMessage = document.getElementById('resultMessage');
 
-// ----------- 공통 함수 -------------
-async function saveToGoogleSheet(dataType, data){
-    if(!data) return;
-    try{
-        const response = await fetch(SCRIPT_URL,{
-            method:"POST",
-            body: JSON.stringify({dataType, ...data}),
-            headers: {"Content-Type": "application/json"}
-        });
-        const result = await response.json();
-        if(result.status==="success"){
-            alert(`${dataType} 기록이 스프레드시트에 저장되었습니다!`);
-            if(dataType==='all'){
-                const recentResponse = await fetch(SCRIPT_URL+"?action=getRecent");
-                const recentData = await recentResponse.json();
-                if(recentData.length>0){
-                    renderRecentTable(recentData);
-                    recentBox.style.display="block";
-                }
-            }
-        } else { alert(`저장 실패: ${result.message}`); }
-    } catch(err){
-        console.error(err);
-        alert("저장 중 오류 발생: 네트워크 문제 또는 URL 오류");
-    }
-}
+    form.addEventListener('submit', async function(event) {
+        event.preventDefault(); // 폼 제출 기본 동작 방지
 
-function copyToClipboard(text){
-    navigator.clipboard.writeText(text).then(()=>alert("복사 완료"));
-}
+        resultMessage.textContent = '데이터를 저장하는 중입니다...';
+        resultMessage.className = 'mt-4 text-center text-gray-500';
 
-function savePdf(title,text){
-    const doc = new jsPDF();
-    const lines = doc.splitTextToSize(text,180);
-    doc.text(lines,10,10);
-    doc.save(title);
-}
+        // 폼 데이터를 객체로 변환
+        const formData = {
+            patientName: form.patientName.value,
+            dob: form.dob.value,
+            incidentTime: form.incidentTime.value,
+            location: form.location.value,
+            chiefComplaint: form.chiefComplaint.value,
+            doctorName: form.doctorName.value,
+            guidanceContent: form.guidanceContent.value,
+            emtName: form.emtName.value,
+            timestamp: new Date().toLocaleString('ko-KR', { timeZone: 'Asia/Seoul' })
+        };
 
-function renderRecentTable(data){
-    recentTable.innerHTML="";
-    const headers = Object.keys(data[0]);
-    let thead="<tr>"+headers.map(h=>`<th>${h}</th>`).join('')+"</tr>";
-    recentTable.innerHTML=thead;
-    data.forEach(row=>{
-        let tr="<tr>"+headers.map(h=>`<td>${row[h]}</td>`).join('')+"</tr>";
-        recentTable.innerHTML+=tr;
+        try {
+            const response = await fetch(SCRIPT_URL, {
+                method: 'POST',
+                mode: 'no-cors', // CORS 문제 방지를 위해 no-cors 모드 사용
+                cache: 'no-cache',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(formData)
+            });
+
+            // no-cors 모드는 응답 상태를 확인할 수 없으므로, 메시지를 긍정적으로 표시
+            resultMessage.textContent = '✅ 기록이 성공적으로 저장되었습니다!';
+            resultMessage.className = 'mt-4 text-center text-green-600 font-medium';
+            form.reset(); // 폼 초기화
+
+        } catch (error) {
+            console.error('Error:', error);
+            resultMessage.textContent = '🚨 기록 저장 중 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.';
+            resultMessage.className = 'mt-4 text-center text-red-600 font-medium';
+        }
     });
-}
-
-// ---------------- MIST ----------------
-const mistOutput = document.getElementById('mistOutput');
-document.getElementById('saveMist').addEventListener('click',()=>{
-    const values = mistFields.map(id=>document.getElementById(id).value.trim());
-    if(values.some(v=>v==='')) return alert("MIST 모든 항목 입력필요");
-    const data = {recordTime: form.recordTime.value, mist:{mechanism:values[0], injury:values[1], signs:values[2], treatment:values[3]}};
-    mistOutput.textContent = `=== MIST 보고 ===\nMechanism: ${values[0]}\nInjury: ${values[1]}\nSigns: ${values[2]}\nTreatment: ${values[3]}`;
-    mistOutput.style.display="block";
-    saveToGoogleSheet("MIST",data);
-});
-document.getElementById('copyMist').addEventListener('click',()=>copyToClipboard(mistOutput.textContent));
-document.getElementById('pdfMist').addEventListener('click',()=>savePdf("MIST.pdf",mistOutput.textContent));
-
-// ---------------- SBAR ----------------
-const sbarOutput = document.getElementById('sbarOutput');
-document.getElementById('saveSbar').addEventListener('click',()=>{
-    const values = sbarFields.map(id=>document.getElementById(id).value.trim());
-    if(values.some(v=>v==='')) return alert("SBAR 모든 항목 입력필요");
-    const data = {recordTime: form.recordTime.value, sbar:{situation:values[0], background:values[1], assessment:values[2], recommendation:values[3]}};
-    sbarOutput.textContent = `=== SBAR 보고 ===\nSituation: ${values[0]}\nBackground: ${values[1]}\nAssessment: ${values[2]}\nRecommendation: ${values[3]}`;
-    sbarOutput.style.display="block";
-    saveToGoogleSheet("SBAR",data);
-});
-document.getElementById('copySbar').addEventListener('click',()=>copyToClipboard(sbarOutput.textContent));
-document.getElementById('pdfSbar').addEventListener('click',()=>savePdf("SBAR.pdf",sbarOutput.textContent));
-
-// ---------------- Vitals ----------------
-const vitalsOutput = document.getElementById('vitalsOutput');
-document.getElementById('saveVitals').addEventListener('click',()=>{
-    const values = vitalsFields.map(id=>document.getElementById(id).value.trim());
-    if(values.some(v=>v==='')) return alert("활력징후 모든 항목 입력필요");
-    const data = {recordTime: form.recordTime.value, vitals:{bp:values[0], hr:values[1], rr:values[2], temp:values[3]}};
-    vitalsOutput.textContent = `=== 활력징후 기록 ===\n혈압: ${values[0]}\n심박수: ${values[1]}\n호흡수: ${values[2]}\n체온: ${values[3]}`;
-    vitalsOutput.style.display="block";
-    saveToGoogleSheet("Vitals",data);
-});
-document.getElementById('copyVitals').addEventListener('click',()=>copyToClipboard(vitalsOutput.textContent));
-document.getElementById('pdfVitals').addEventListener('click',()=>savePdf("Vitals.pdf",vitalsOutput.textContent));
-
-// ---------------- 전체 제출 ----------------
-form.addEventListener('submit',(e)=>{
-    e.preventDefault();
-    const recordData = {
-        recordTime: form.recordTime.value,
-        mist: mistFields.reduce((acc,id)=>({...acc,[id]:document.getElementById(id).value.trim()}),{}),
-        sbar: sbarFields.reduce((acc,id)=>({...acc,[id]:document.getElementById(id).value.trim()}),{}),
-        vitals: vitalsFields.reduce((acc,id)=>({...acc,[id]:document.getElementById(id).value.trim()}),{}),
-        medicalInstruction: document.getElementById('medicalInstruction').value.trim()
-    };
-    overallOutput.textContent = "✅ 기록이 성공적으로 저장되었습니다.";
-    overallOutput.style.display="block";
-    summaryDiv.textContent = `의료지도 요청: ${recordData.medicalInstruction}`;
-    summaryDiv.style.display="block";
-    summaryButtons.style.display="block";
-    saveToGoogleSheet("all",recordData);
-});
-
-// ---------------- 의료지도 요약 ----------------
-copySummaryBtn.addEventListener('click',()=>copyToClipboard(summaryDiv.textContent));
-saveSummaryPdfBtn.addEventListener('click',()=>savePdf("MedicalSummary.pdf",summaryDiv.textContent));
 </script>
+
 </body>
 </html>
