@@ -74,7 +74,7 @@ button:hover { background-color: #0056b3; }
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script>
-const SCRIPT_URL = "여기에_웹앱_URL_입력"; // 구글 Apps Script 웹앱 URL
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw_w8mJQtg4LAmPkDCIjWjyQKwMPcaRJsF1DaBG_cTFMrN7m0h1I3wpZILrDOZx7qvKXg/exec"; // 구글 Apps Script 웹앱 URL
 
 const form = document.getElementById('recordForm');
 const outputDiv = document.getElementById('output');
@@ -183,65 +183,6 @@ savePdfBtn.addEventListener('click', () => {
     const splitText = doc.splitTextToSize(summaryDiv.textContent, 180);
     doc.text(splitText, 10, 30);
     doc.save('의료지도_요청_요약.pdf');
-});
-
-    //구글시트 연결
-  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw_w8mJQtg4LAmPkDCIjWjyQKwMPcaRJsF1DaBG_cTFMrN7m0h1I3wpZILrDOZx7qvKXg/exec";
-  
-  form.addEventListener('submit', function(event) {
-    event.preventDefault();
-
-    const data = {
-        recordTime: form.recordTime.value,
-        MIST: {
-            mechanism: form.mechanism.value.trim(),
-            injury: form.injury.value.trim(),
-            signs: form.signs.value.trim(),
-            treatment: form.treatment.value.trim()
-        },
-        SBAR: {
-            situation: form.situation.value.trim(),
-            background: form.background.value.trim(),
-            assessment: form.assessment.value.trim(),
-            recommendation: form.recommendation.value.trim()
-        },
-        vitals: {
-            bp: form.bp.value.trim(),
-            hr: form.hr.value.trim(),
-            rr: form.rr.value.trim(),
-            temp: form.temp.value.trim()
-        },
-        medicalInstruction: form.medicalInstruction.value.trim()
-    };
-
-    // 기록 출력
-    outputDiv.textContent = JSON.stringify(data, null, 2);
-    outputDiv.style.display = 'block';
-
-    // Google Sheets 전송
-    fetch(SCRIPT_URL, {
-        method: 'POST',
-        body: JSON.stringify(data),
-        headers: { "Content-Type": "application/json" }
-    })
-    .then(res => res.json())
-    .then(res => {
-        if(res.status === 'success'){
-            alert("Google Sheets에 저장되었습니다!");
-        } else {
-            alert("저장 실패: " + res.message);
-        }
-    })
-    .catch(err => {
-        console.error(err);
-        alert("저장 중 오류 발생");
-    });
-
-    // 요약 생성
-    const summaryText = data.medicalInstruction.length > 100 ? data.medicalInstruction.slice(0,97)+'...' : data.medicalInstruction;
-    summaryDiv.textContent = summaryText;
-    summaryDiv.style.display = 'block';
-    summaryButtons.style.display = 'block';
 });
 </script>
 </body>
