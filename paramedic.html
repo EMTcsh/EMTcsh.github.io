@@ -1,179 +1,314 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>활력징후 및 응급처치 기록 폼</title>
-<style>
-body { font-family: Arial, sans-serif; max-width: 700px; margin: 20px auto; padding: 20px; background: #f7f7f7; border-radius: 8px; }
-h1, h2 { color: #333; }
-label { display: block; margin-top: 15px; font-weight: bold; }
-input[type="text"], input[type="number"], input[type="time"], textarea { width: 100%; padding: 8px; margin-top: 6px; border-radius: 4px; border: 1px solid #ccc; font-size: 1rem; box-sizing: border-box; }
-textarea { resize: vertical; min-height: 80px; }
-button { margin-top: 20px; padding: 12px 20px; background-color: #007bff; border: none; color: white; font-size: 1.1rem; border-radius: 5px; cursor: pointer; }
-button:hover { background-color: #0056b3; }
-.record-output { margin-top: 30px; padding: 15px; background: #e9ecef; border-radius: 5px; white-space: pre-wrap; font-family: monospace; }
-.buttons-group { margin-top: 10px; }
-.buttons-group button { background-color: #28a745; margin-right: 10px; }
-.buttons-group button:hover { background-color: #1e7e34; }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>응급구조사 의료지도 기록</title>
+    <!-- Inter 폰트와 Tailwind CSS 로딩 -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+        }
+        .form-container {
+            max-width: 900px;
+            margin: 2rem auto;
+        }
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+        input, textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #d1d5db;
+            border-radius: 0.5rem;
+            transition: border-color 0.2s ease-in-out;
+        }
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25);
+        }
+        .vital-signs-entry {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 1rem;
+            align-items: center;
+        }
+        @media (max-width: 640px) {
+            .vital-signs-entry {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
 </head>
-<body>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen p-4">
 
-<h1>활력징후 및 응급처치 기록</h1>
+<div class="form-container bg-white p-8 rounded-2xl shadow-xl">
+    <h1 class="text-3xl font-bold text-center text-gray-800 mb-6">응급구조사 의료지도 기록</h1>
+    <p class="text-center text-gray-500 mb-8">지도의사에게 받은 의료지도 내용을 기록하고 저장합니다.</p>
 
-<form id="recordForm">
-    <label for="recordTime">기록 시간</label>
-    <input type="time" id="recordTime" name="recordTime" required />
+    <form id="recordForm">
+        <div class="grid md:grid-cols-2 gap-8 mb-8">
+            <!-- 환자 정보 -->
+            <div>
+                <h2 class="text-xl font-semibold text-gray-700 mb-4">환자 정보</h2>
+                <div class="mb-4">
+                    <label for="patientName" class="text-gray-600">환자 이름</label>
+                    <input type="text" id="patientName" name="patientName" placeholder="환자 이름" required class="rounded-lg">
+                </div>
+                <div>
+                    <label for="dob" class="text-gray-600">생년월일</label>
+                    <input type="date" id="dob" name="dob" required class="rounded-lg">
+                </div>
+            </div>
 
-    <h2>MIST 보고</h2>
-    <label for="mechanism">Mechanism (기전)</label>
-    <textarea id="mechanism" name="mechanism" placeholder="예: 교통사고, 낙상 등" required></textarea>
-    <label for="injury">Injury (손상부위)</label>
-    <textarea id="injury" name="injury" placeholder="손상 부위 및 상태" required></textarea>
-    <label for="signs">Signs (증상)</label>
-    <textarea id="signs" name="signs" placeholder="환자 증상" required></textarea>
-    <label for="treatment">Treatment (처치 내용)</label>
-    <textarea id="treatment" name="treatment" placeholder="지금까지 시행된 처치" required></textarea>
+            <!-- 상황 정보 -->
+            <div>
+                <h2 class="text-xl font-semibold text-gray-700 mb-4">상황 정보</h2>
+                <div class="mb-4">
+                    <label for="incidentTime" class="text-gray-600">발생 시간</label>
+                    <input type="datetime-local" id="incidentTime" name="incidentTime" required class="rounded-lg">
+                </div>
+                <div class="mb-4">
+                    <label for="location" class="text-gray-600">장소</label>
+                    <input type="text" id="location" name="location" placeholder="예: OO동 123-45" required class="rounded-lg">
+                </div>
+                <div>
+                    <label for="chiefComplaint" class="text-gray-600">주 증상</label>
+                    <input type="text" id="chiefComplaint" name="chiefComplaint" placeholder="예: 호흡곤란, 가슴 통증" required class="rounded-lg">
+                </div>
+            </div>
+        </div>
 
-    <h2>SBAR 보고</h2>
-    <label for="situation">Situation (상황)</label>
-    <textarea id="situation" name="situation" placeholder="현재 상황 설명" required></textarea>
-    <label for="background">Background (배경)</label>
-    <textarea id="background" name="background" placeholder="환자 배경 및 병력" required></textarea>
-    <label for="assessment">Assessment (평가)</label>
-    <textarea id="assessment" name="assessment" placeholder="진단 및 평가 내용" required></textarea>
-    <label for="recommendation">Recommendation (권고)</label>
-    <textarea id="recommendation" name="recommendation" placeholder="의료 지도 및 권고사항" required></textarea>
+        <!-- MIST 보고 -->
+        <div class="mb-8">
+            <h2 class="text-xl font-semibold text-gray-700 mb-4">MIST 보고</h2>
+            <div class="mb-4">
+                <label for="mechanism" class="text-gray-600">Mechanism (발생기전)</label>
+                <textarea id="mechanism" name="mechanism" rows="2" placeholder="사고 발생 기전, 환자 주변 환경 등" class="rounded-lg"></textarea>
+            </div>
+            <div class="mb-4">
+                <label for="injuries" class="text-gray-600">Injuries (손상)</label>
+                <textarea id="injuries" name="injuries" rows="2" placeholder="주요 손상 부위 및 양상" class="rounded-lg"></textarea>
+            </div>
+            <div class="mb-4">
+                <label for="signs" class="text-gray-600">Signs (징후)</label>
+                <textarea id="signs" name="signs" rows="2" placeholder="환자의 육안 관찰 징후" class="rounded-lg"></textarea>
+            </div>
+            <div>
+                <label for="treatment" class="text-gray-600">Treatment (처치)</label>
+                <textarea id="treatment" name="treatment" rows="2" placeholder="현장에서 시행한 응급처치 내역" class="rounded-lg"></textarea>
+            </div>
+        </div>
 
-    <h2>활력징후 기록</h2>
-    <label for="bp">혈압 (mmHg)</label>
-    <input type="text" id="bp" name="bp" placeholder="예: 120/80" required />
-    <label for="hr">심박수 (회/분)</label>
-    <input type="number" id="hr" name="hr" min="30" max="200" required />
-    <label for="rr">호흡수 (회/분)</label>
-    <input type="number" id="rr" name="rr" min="5" max="50" required />
-    <label for="temp">체온 (℃)</label>
-    <input type="number" step="0.1" id="temp" name="temp" min="30" max="45" required />
+        <!-- SBAR 보고 -->
+        <div class="mb-8">
+            <h2 class="text-xl font-semibold text-gray-700 mb-4">SBAR 보고</h2>
+            <div class="mb-4">
+                <label for="situation" class="text-gray-600">Situation (상황)</label>
+                <textarea id="situation" name="situation" rows="2" placeholder="환자의 현재 상태와 문제점" class="rounded-lg"></textarea>
+            </div>
+            <div class="mb-4">
+                <label for="background" class="text-gray-600">Background (배경)</label>
+                <textarea id="background" name="background" rows="2" placeholder="환자의 병력, 과거력, 현장 상황 등" class="rounded-lg"></textarea>
+            </div>
+            <div class="mb-4">
+                <label for="assessment" class="text-gray-600">Assessment (평가)</label>
+                <textarea id="assessment" name="assessment" rows="2" placeholder="현재까지의 평가 내용" class="rounded-lg"></textarea>
+            </div>
+            <div>
+                <label for="recommendation" class="text-gray-600">Recommendation (건의)</label>
+                <textarea id="recommendation" name="recommendation" rows="2" placeholder="지도의사에게 필요한 지시나 건의 사항" class="rounded-lg"></textarea>
+            </div>
+        </div>
 
-    <h2>의료 지도</h2>
-    <label for="medicalInstruction">의료 지도 내용</label>
-    <textarea id="medicalInstruction" name="medicalInstruction" placeholder="의료 지시 및 추가 처치 내용" required></textarea>
+        <!-- 활력징후 기록 -->
+        <div class="mb-8">
+            <h2 class="text-xl font-semibold text-gray-700 mb-4">활력징후 기록</h2>
+            <div id="vitalSignsContainer">
+                <!-- 활력징후 기록란이 여기에 추가됩니다 -->
+                <div class="vital-signs-entry mb-4 items-end">
+                    <div>
+                        <label for="vsTime0" class="text-gray-600">시간</label>
+                        <input type="time" id="vsTime0" name="vsTime" class="rounded-lg">
+                    </div>
+                    <div>
+                        <label for="bloodPressure0" class="text-gray-600">혈압</label>
+                        <input type="text" id="bloodPressure0" name="bloodPressure" placeholder="수축/이완" class="rounded-lg">
+                    </div>
+                    <div>
+                        <label for="pulse0" class="text-gray-600">맥박</label>
+                        <input type="number" id="pulse0" name="pulse" placeholder="회/분" class="rounded-lg">
+                    </div>
+                    <div>
+                        <label for="respiration0" class="text-gray-600">호흡</label>
+                        <input type="number" id="respiration0" name="respiration" placeholder="회/분" class="rounded-lg">
+                    </div>
+                    <div>
+                        <label for="temperature0" class="text-gray-600">체온</label>
+                        <input type="number" step="0.1" id="temperature0" name="temperature" placeholder="°C" class="rounded-lg">
+                    </div>
+                    <div>
+                        <label for="spo20" class="text-gray-600">SpO2</label>
+                        <input type="number" id="spo20" name="spo2" placeholder="%" class="rounded-lg">
+                    </div>
+                </div>
+            </div>
+            <button type="button" id="addVitalSign" class="mt-4 bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-2 px-4 rounded-lg transition duration-200 w-full md:w-auto">
+                활력징후 기록 추가
+            </button>
+        </div>
 
-    <button type="submit">기록 저장 및 텍스트 파일 생성</button>
-</form>
+        <!-- 의료지도 내용 -->
+        <div class="mb-8">
+            <h2 class="text-xl font-semibold text-gray-700 mb-4">의료지도 내용</h2>
+            <div class="mb-4">
+                <label for="doctorName" class="text-gray-600">지도의사 이름</label>
+                <input type="text" id="doctorName" name="doctorName" placeholder="지도의사 성명" required class="rounded-lg">
+            </div>
+            <div>
+                <label for="guidanceContent" class="text-gray-600">지도 내용</label>
+                <textarea id="guidanceContent" name="guidanceContent" rows="4" placeholder="지도의사에게 받은 구체적인 지도 내용" required class="rounded-lg"></textarea>
+            </div>
+        </div>
 
-<div id="output" class="record-output" style="display:none;"></div>
+        <!-- 기록자 정보 -->
+        <div class="mb-8">
+            <h2 class="text-xl font-semibold text-gray-700 mb-4">기록자</h2>
+            <div>
+                <label for="emtName" class="text-gray-600">응급구조사 이름</label>
+                <input type="text" id="emtName" name="emtName" placeholder="응급구조사 성명" required class="rounded-lg">
+            </div>
+        </div>
 
-<div class="buttons-group" style="display:none;" id="saveButton">
-    <button id="saveTextFile">텍스트 파일로 저장</button>
+        <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition duration-200">
+            기록 저장하기
+        </button>
+
+        <!-- 결과 메시지 표시 영역 -->
+        <div id="resultMessage" class="mt-4 text-center"></div>
+    </form>
 </div>
 
 <script>
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz_8gH8Ep3d-wDLAn2hSqTE35TCMxLbrmigSE8BSjK7vlFL4mCEfzd-TmR2Zgx6Xblx/exec"; // 시트 배포 웹 앱 ID.
-                 
-const form = document.getElementById('recordForm');
-const outputDiv = document.getElementById('output');
-const saveTextFileBtn = document.getElementById('saveTextFile');
-const saveButtonDiv = document.getElementById('saveButton');
+    const SCRIPT_URL = 'YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE';
+    const form = document.getElementById('recordForm');
+    const resultMessage = document.getElementById('resultMessage');
+    const vitalSignsContainer = document.getElementById('vitalSignsContainer');
+    const addVitalSignBtn = document.getElementById('addVitalSign');
+    let vitalSignCount = 1;
 
-form.addEventListener('submit', function(event) {
-    event.preventDefault();
-
-    const data = {
-        recordTime: form.recordTime.value,
-        MIST: {
-            mechanism: form.mechanism.value.trim(),
-            injury: form.injury.value.trim(),
-            signs: form.signs.value.trim(),
-            treatment: form.treatment.value.trim()
-        },
-        SBAR: {
-            situation: form.situation.value.trim(),
-            background: form.background.value.trim(),
-            assessment: form.assessment.value.trim(),
-            recommendation: form.recommendation.value.trim()
-        },
-        vitals: {
-            bp: form.bp.value.trim(),
-            hr: form.hr.value.trim(),
-            rr: form.rr.value.trim(),
-            temp: form.temp.value.trim()
-        },
-        medicalInstruction: form.medicalInstruction.value.trim()
-    };
-
-    // 전체 기록 출력
-    const recordText = `
-=== 기록 시간 ===
-${data.recordTime}
-
-=== MIST 보고 ===
-Mechanism(기전): ${data.MIST.mechanism}
-Injury(손상부위): ${data.MIST.injury}
-Signs(증상): ${data.MIST.signs}
-Treatment(처치내용): ${data.MIST.treatment}
-
-=== SBAR 보고 ===
-Situation(상황): ${data.SBAR.situation}
-Background(배경): ${data.SBAR.background}
-Assessment(평가): ${data.SBAR.assessment}
-Recommendation(권고): ${data.SBAR.recommendation}
-
-=== 활력징후 ===
-혈압 (mmHg): ${data.vitals.bp} mmHg
-심박수(회/분): ${data.vitals.hr} 회/분
-호흡수(회/분): ${data.vitals.rr} 회/분
-체온 (℃): ${data.vitals.temp} ℃
-
-=== 의료 지도 내용===
-${data.medicalInstruction}
-`.trim();
-
-    outputDiv.textContent = recordText;
-    outputDiv.style.display = 'block';
-    saveButtonDiv.style.display = 'block';
-
-    // Google Sheets 전송
-    fetch(SCRIPT_URL, {
-        method: 'POST',
-        body: JSON.stringify(data),
-        headers: { "Content-Type": "application/json" }
-    })
-    .then(res => res.json())
-    .then(res => {
-        if(res.status === 'success'){
-            alert("Google Sheets에 저장되었습니다!");
-        } else {
-            alert("저장 실패: " + res.message);
-        }
-    })
-    .catch(err => {
-        console.error(err);
-        alert("저장 중 오류 발생");
+    // 활력징후 기록란 추가
+    addVitalSignBtn.addEventListener('click', () => {
+        const newEntry = document.createElement('div');
+        newEntry.className = 'vital-signs-entry mb-4 items-end';
+        newEntry.innerHTML = `
+            <div>
+                <label for="vsTime${vitalSignCount}" class="text-gray-600">시간</label>
+                <input type="time" id="vsTime${vitalSignCount}" name="vsTime" class="rounded-lg">
+            </div>
+            <div>
+                <label for="bloodPressure${vitalSignCount}" class="text-gray-600">혈압</label>
+                <input type="text" id="bloodPressure${vitalSignCount}" name="bloodPressure" placeholder="수축/이완" class="rounded-lg">
+            </div>
+            <div>
+                <label for="pulse${vitalSignCount}" class="text-gray-600">맥박</label>
+                <input type="number" id="pulse${vitalSignCount}" name="pulse" placeholder="회/분" class="rounded-lg">
+            </div>
+            <div>
+                <label for="respiration${vitalSignCount}" class="text-gray-600">호흡</label>
+                <input type="number" id="respiration${vitalSignCount}" name="respiration" placeholder="회/분" class="rounded-lg">
+            </div>
+            <div>
+                <label for="temperature${vitalSignCount}" class="text-gray-600">체온</label>
+                <input type="number" step="0.1" id="temperature${vitalSignCount}" name="temperature" placeholder="°C" class="rounded-lg">
+            </div>
+            <div>
+                <label for="spo2${vitalSignCount}" class="text-gray-600">SpO2</label>
+                <input type="number" id="spo2${vitalSignCount}" name="spo2" placeholder="%" class="rounded-lg">
+            </div>
+        `;
+        vitalSignsContainer.appendChild(newEntry);
+        vitalSignCount++;
     });
-});
 
-// 텍스트 파일로 저장
-saveTextFileBtn.addEventListener('click', () => {
-    // 텍스트 내용 가져오기
-    const textContent = outputDiv.textContent;
+    form.addEventListener('submit', async function(event) {
+        event.preventDefault();
 
-    // Blob 객체 생성
-    const blob = new Blob([textContent], { type: 'text/plain;charset=utf-8' });
+        resultMessage.textContent = '데이터를 저장하는 중입니다...';
+        resultMessage.className = 'mt-4 text-center text-gray-500';
 
-    // a 태그를 생성하여 다운로드 링크 만들기
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = '활력징후_응급처치_기록.txt';
+        // 활력징후 데이터 수집
+        const vitalSignsData = [];
+        const vsEntries = vitalSignsContainer.querySelectorAll('.vital-signs-entry');
+        vsEntries.forEach(entry => {
+            const vsTime = entry.querySelector('input[name="vsTime"]').value;
+            const bloodPressure = entry.querySelector('input[name="bloodPressure"]').value;
+            const pulse = entry.querySelector('input[name="pulse"]').value;
+            const respiration = entry.querySelector('input[name="respiration"]').value;
+            const temperature = entry.querySelector('input[name="temperature"]').value;
+            const spo2 = entry.querySelector('input[name="spo2"]').value;
 
-    // 가상 클릭으로 다운로드 실행
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
+            if (vsTime || bloodPressure || pulse || respiration || temperature || spo2) {
+                vitalSignsData.push({
+                    vsTime,
+                    bloodPressure,
+                    pulse,
+                    respiration,
+                    temperature,
+                    spo2
+                });
+            }
+        });
 
-    alert('기록이 텍스트 파일로 저장되었습니다.');
-});
+        const formData = {
+            patientName: form.patientName.value,
+            dob: form.dob.value,
+            incidentTime: form.incidentTime.value,
+            location: form.location.value,
+            chiefComplaint: form.chiefComplaint.value,
+            mechanism: form.mechanism.value,
+            injuries: form.injuries.value,
+            signs: form.signs.value,
+            treatment: form.treatment.value,
+            situation: form.situation.value,
+            background: form.background.value,
+            assessment: form.assessment.value,
+            recommendation: form.recommendation.value,
+            vitalSigns: vitalSignsData, // 배열로 저장
+            doctorName: form.doctorName.value,
+            guidanceContent: form.guidanceContent.value,
+            emtName: form.emtName.value,
+            timestamp: new Date().toLocaleString('ko-KR', { timeZone: 'Asia/Seoul' })
+        };
+
+        try {
+            const response = await fetch(SCRIPT_URL, {
+                method: 'POST',
+                mode: 'no-cors',
+                cache: 'no-cache',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(formData)
+            });
+
+            resultMessage.textContent = '✅ 기록이 성공적으로 저장되었습니다!';
+            resultMessage.className = 'mt-4 text-center text-green-600 font-medium';
+            form.reset();
+
+        } catch (error) {
+            console.error('Error:', error);
+            resultMessage.textContent = '🚨 기록 저장 중 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.';
+            resultMessage.className = 'mt-4 text-center text-red-600 font-medium';
+        }
+    });
 </script>
+
 </body>
 </html>
