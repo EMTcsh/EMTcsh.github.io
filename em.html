@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>응급구조사 의료지도 기록</title>
+    <title>응급구조사 의료지도 상세</title>
     <!-- Inter 폰트와 Tailwind CSS 로딩 -->
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
     <script src="https://cdn.tailwindcss.com"></script>
@@ -49,68 +49,38 @@
 <body class="bg-gray-100 flex items-center justify-center min-h-screen p-4">
 
 <div class="form-container bg-white p-8 rounded-2xl shadow-xl">
-    <h1 class="text-3xl font-bold text-center text-gray-800 mb-6">응급구조사 의료지도 기록</h1>
+    <h1 class="text-3xl font-bold text-center text-gray-800 mb-6">응급구조사 의료지도 상세</h1>
     <p class="text-center text-gray-500 mb-8">지도의사에게 받은 의료지도 내용을 기록하고 저장합니다.</p>
 
     <form id="recordForm">
-        <!-- 사고 및 출동 정보 -->
-        <div class="mb-8">
-            <h2 class="text-xl font-semibold text-gray-700 mb-4">사고 및 출동 정보</h2>
-            <div class="grid md:grid-cols-2 gap-6 mb-4">
-                <div>
-                    <label for="receptionRoute" class="text-gray-600">접수 경로</label>
-                    <input type="text" id="receptionRoute" name="receptionRoute" placeholder="예: 119, 유선 등" class="rounded-lg">
-                </div>
-                <div>
-                    <label for="incidentTime" class="text-gray-600">사고 일시</label>
-                    <input type="datetime-local" id="incidentTime" name="incidentTime" class="rounded-lg">
-                </div>
-                <div>
-                    <label for="dispatchTime" class="text-gray-600">출동 시간</label>
-                    <input type="datetime-local" id="dispatchTime" name="dispatchTime" class="rounded-lg">
-                </div>
-                <div>
-                    <label for="completionTime" class="text-gray-600">완료 시간</label>
-                    <input type="datetime-local" id="completionTime" name="completionTime" class="rounded-lg">
-                </div>
-                <div>
-                    <label for="dispatchDistance" class="text-gray-600">출동 거리 (km)</label>
-                    <input type="number" step="0.1" id="dispatchDistance" name="dispatchDistance" placeholder="예: 5.2" class="rounded-lg">
-                </div>
-                <div>
-                    <label for="accidentLocation" class="text-gray-600">사고 장소</label>
-                    <input type="text" id="accidentLocation" name="accidentLocation" placeholder="예: OO동 123-45" class="rounded-lg">
-                </div>
-                <div>
-                    <label for="coordinates" class="text-gray-600">좌표</label>
-                    <input type="text" id="coordinates" name="coordinates" placeholder="위도, 경도" class="rounded-lg">
-                </div>
-            </div>
+        <div class="grid md:grid-cols-2 gap-8 mb-8">
+            <!-- 환자 정보 -->
             <div>
-                <label for="accidentCause" class="text-gray-600">사고 원인</label>
-                <textarea id="accidentCause" name="accidentCause" rows="2" placeholder="사고 발생 원인" class="rounded-lg"></textarea>
-            </div>
-        </div>
-
-        <!-- 사고자 인적사항 -->
-        <div class="mb-8">
-            <h2 class="text-xl font-semibold text-gray-700 mb-4">사고자 인적사항</h2>
-            <div class="grid md:grid-cols-2 gap-6 mb-4">
-                <div>
-                    <label for="patientName" class="text-gray-600">성명</label>
-                    <input type="text" id="patientName" name="patientName" placeholder="성명" class="rounded-lg">
-                </div>
-                <div>
-                    <label for="contact" class="text-gray-600">연락처</label>
-                    <input type="tel" id="contact" name="contact" placeholder="예: 010-1234-5678" class="rounded-lg">
+                <h2 class="text-xl font-semibold text-gray-700 mb-4">환자 정보</h2>
+                <div class="mb-4">
+                    <label for="patientName" class="text-gray-600">환자 이름</label>
+                    <input type="text" id="patientName" name="patientName" placeholder="환자 이름" required class="rounded-lg">
                 </div>
                 <div>
                     <label for="dob" class="text-gray-600">생년월일</label>
-                    <input type="date" id="dob" name="dob" class="rounded-lg">
+                    <input type="date" id="dob" name="dob" required class="rounded-lg">
+                </div>
+            </div>
+
+            <!-- 상황 정보 -->
+            <div>
+                <h2 class="text-xl font-semibold text-gray-700 mb-4">상황 정보</h2>
+                <div class="mb-4">
+                    <label for="incidentTime" class="text-gray-600">발생 시간</label>
+                    <input type="datetime-local" id="incidentTime" name="incidentTime" required class="rounded-lg">
+                </div>
+                <div class="mb-4">
+                    <label for="location" class="text-gray-600">장소</label>
+                    <input type="text" id="location" name="location" placeholder="예: OO동 123-45" required class="rounded-lg">
                 </div>
                 <div>
-                    <label for="residence" class="text-gray-600">거주지</label>
-                    <input type="text" id="residence" name="residence" placeholder="거주지 주소" class="rounded-lg">
+                    <label for="chiefComplaint" class="text-gray-600">주 증상</label>
+                    <input type="text" id="chiefComplaint" name="chiefComplaint" placeholder="예: 호흡곤란, 가슴 통증" required class="rounded-lg">
                 </div>
             </div>
         </div>
@@ -120,7 +90,7 @@
             <h2 class="text-xl font-semibold text-gray-700 mb-4">MIST 보고</h2>
             <div class="mb-4">
                 <label for="mechanism" class="text-gray-600">Mechanism (발생기전)</label>
-                <textarea id="mechanism" name="mechanism" rows="2" placeholder="사고 발생 기전" class="rounded-lg"></textarea>
+                <textarea id="mechanism" name="mechanism" rows="2" placeholder="사고 발생 기전, 환자 주변 환경 등" class="rounded-lg"></textarea>
             </div>
             <div class="mb-4">
                 <label for="injuries" class="text-gray-600">Injuries (손상)</label>
@@ -161,6 +131,7 @@
         <div class="mb-8">
             <h2 class="text-xl font-semibold text-gray-700 mb-4">활력징후 기록</h2>
             <div id="vitalSignsContainer">
+                <!-- 활력징후 기록란이 여기에 추가됩니다 -->
                 <div class="vital-signs-entry mb-4 items-end">
                     <div>
                         <label for="vsTime0" class="text-gray-600">시간</label>
@@ -193,47 +164,25 @@
             </button>
         </div>
 
-        <!-- 기타 정보 -->
+        <!-- 의료지도 내용 -->
         <div class="mb-8">
-            <h2 class="text-xl font-semibold text-gray-700 mb-4">기타 정보</h2>
-            <div class="grid md:grid-cols-2 gap-6 mb-4">
-                <div>
-                    <label for="detailedTreatment" class="text-gray-600">응급처치 세부내용</label>
-                    <textarea id="detailedTreatment" name="detailedTreatment" rows="3" placeholder="시간대별 응급처치 내역" class="rounded-lg"></textarea>
-                </div>
-                <div>
-                    <label for="personnel" class="text-gray-600">동원 인원</label>
-                    <input type="text" id="personnel" name="personnel" placeholder="예: 구급대원 2명, 소방관 1명" class="rounded-lg">
-                </div>
-                <div>
-                    <label for="hospitalTransport" class="text-gray-600">병원 이송</label>
-                    <input type="text" id="hospitalTransport" name="hospitalTransport" placeholder="예: OO병원 응급실" class="rounded-lg">
-                </div>
-                <div>
-                    <label for="alcohol" class="text-gray-600">음주 여부</label>
-                    <input type="text" id="alcohol" name="alcohol" placeholder="예: 해당 없음, 확인 불가" class="rounded-lg">
-                </div>
+            <h2 class="text-xl font-semibold text-gray-700 mb-4">의료지도 내용</h2>
+            <div class="mb-4">
+                <label for="doctorName" class="text-gray-600">지도의사 이름</label>
+                <input type="text" id="doctorName" name="doctorName" placeholder="지도의사 성명" required class="rounded-lg">
             </div>
             <div>
-                <label for="specialNotes" class="text-gray-600">특이사항</label>
-                <textarea id="specialNotes" name="specialNotes" rows="3" placeholder="기타 특이사항" class="rounded-lg"></textarea>
+                <label for="guidanceContent" class="text-gray-600">지도 내용</label>
+                <textarea id="guidanceContent" name="guidanceContent" rows="4" placeholder="지도의사에게 받은 구체적인 지도 내용" required class="rounded-lg"></textarea>
             </div>
         </div>
 
-        <!-- 의료지도 내용 및 기록자 -->
+        <!-- 기록자 정보 -->
         <div class="mb-8">
-            <h2 class="text-xl font-semibold text-gray-700 mb-4">의료지도 내용 및 기록자</h2>
-            <div class="mb-4">
-                <label for="doctorName" class="text-gray-600">지도의사 이름</label>
-                <input type="text" id="doctorName" name="doctorName" placeholder="지도의사 성명" class="rounded-lg">
-            </div>
-            <div class="mb-4">
-                <label for="guidanceContent" class="text-gray-600">지도 내용</label>
-                <textarea id="guidanceContent" name="guidanceContent" rows="4" placeholder="지도의사에게 받은 구체적인 지도 내용" class="rounded-lg"></textarea>
-            </div>
+            <h2 class="text-xl font-semibold text-gray-700 mb-4">기록자</h2>
             <div>
                 <label for="emtName" class="text-gray-600">응급구조사 이름</label>
-                <input type="text" id="emtName" name="emtName" placeholder="응급구조사 성명" class="rounded-lg">
+                <input type="text" id="emtName" name="emtName" placeholder="응급구조사 성명" required class="rounded-lg">
             </div>
         </div>
 
@@ -247,7 +196,7 @@
 </div>
 
 <script>
-    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyA36QNhB6xP5F3EJdXYQom3hujMPW89LxhkYPD9xGCmBj8zBBeO1yDOiEnq729x4X8uA/exec';
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzNvvR_xrCk3uRUZxGNStdBRdkdss0vUWInKK23NO0BqStYP-T1k0A8zdSPgSwvlTY/exec';
     const form = document.getElementById('recordForm');
     const resultMessage = document.getElementById('resultMessage');
     const vitalSignsContainer = document.getElementById('vitalSignsContainer');
@@ -318,18 +267,10 @@
         });
 
         const formData = {
-            receptionRoute: form.receptionRoute.value,
-            incidentTime: form.incidentTime.value,
-            dispatchTime: form.dispatchTime.value,
-            completionTime: form.completionTime.value,
-            dispatchDistance: form.dispatchDistance.value,
-            accidentLocation: form.accidentLocation.value,
-            coordinates: form.coordinates.value,
-            accidentCause: form.accidentCause.value,
             patientName: form.patientName.value,
-            contact: form.contact.value,
             dob: form.dob.value,
-            residence: form.residence.value,
+            incidentTime: form.incidentTime.value,
+            location: form.location.value,
             chiefComplaint: form.chiefComplaint.value,
             mechanism: form.mechanism.value,
             injuries: form.injuries.value,
@@ -339,12 +280,7 @@
             background: form.background.value,
             assessment: form.assessment.value,
             recommendation: form.recommendation.value,
-            vitalSigns: vitalSignsData,
-            detailedTreatment: form.detailedTreatment.value,
-            personnel: form.personnel.value,
-            hospitalTransport: form.hospitalTransport.value,
-            alcohol: form.alcohol.value,
-            specialNotes: form.specialNotes.value,
+            vitalSigns: vitalSignsData, // 배열로 저장
             doctorName: form.doctorName.value,
             guidanceContent: form.guidanceContent.value,
             emtName: form.emtName.value,
