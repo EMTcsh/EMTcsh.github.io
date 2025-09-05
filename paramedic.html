@@ -109,24 +109,24 @@ form.addEventListener('submit', function(event) {
 ${data.recordTime}
 
 === MIST 보고 ===
-Mechanism: ${data.MIST.mechanism}
-Injury: ${data.MIST.injury}
-Signs: ${data.MIST.signs}
-Treatment: ${data.MIST.treatment}
+Mechanism(기전): ${data.MIST.mechanism}
+Injury(손상부위): ${data.MIST.injury}
+Signs(증상): ${data.MIST.signs}
+Treatment(처치내용): ${data.MIST.treatment}
 
 === SBAR 보고 ===
-Situation: ${data.SBAR.situation}
-Background: ${data.SBAR.background}
-Assessment: ${data.SBAR.assessment}
-Recommendation: ${data.SBAR.recommendation}
+Situation(상황): ${data.SBAR.situation}
+Background(배경): ${data.SBAR.background}
+Assessment(평가): ${data.SBAR.assessment}
+Recommendation(권고): ${data.SBAR.recommendation}
 
 === 활력징후 ===
-혈압: ${data.vitals.bp} mmHg
-심박수: ${data.vitals.hr} 회/분
-호흡수: ${data.vitals.rr} 회/분
-체온: ${data.vitals.temp} ℃
+혈압 (mmHg): ${data.vitals.bp} mmHg
+심박수(회/분): ${data.vitals.hr} 회/분
+호흡수(회/분): ${data.vitals.rr} 회/분
+체온 (℃): ${data.vitals.temp} ℃
 
-=== 의료 지도 ===
+=== 의료 지도 내용===
 ${data.medicalInstruction}
 `.trim();
 
