@@ -242,6 +242,42 @@ ${data.medicalInstruction}
 
             doc.save('의료지도_요청_요약.pdf');
         });
+
+        // Google Sheets 연동용 Apps Script
+const SHEET_NAME = 'Sheet1'; // 저장할 시트 이름
+
+function doPost(e) {
+  try {
+    const data = JSON.parse(e.postData.contents);
+    const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(SHEET_NAME);
+
+    if (!sheet) return ContentService.createTextOutput(JSON.stringify({status:'error', message:'시트가 없습니다.'})).setMimeType(ContentService.MimeType.JSON);
+
+    const timestamp = new Date();
+    const row = [
+      timestamp,
+      data.recordTime || '',
+      data.MIST?.mechanism || '',
+      data.MIST?.injury || '',
+      data.MIST?.signs || '',
+      data.MIST?.treatment || '',
+      data.SBAR?.situation || '',
+      data.SBAR?.background || '',
+      data.SBAR?.assessment || '',
+      data.SBAR?.recommendation || '',
+      data.vitals?.bp || '',
+      data.vitals?.hr || '',
+      data.vitals?.rr || '',
+      data.vitals?.temp || '',
+      data.medicalInstruction || ''
+    ];
+
+    sheet.appendRow(row);
+    return ContentService.createTextOutput(JSON.stringify({status:'success'})).setMimeType(ContentService.MimeType.JSON);
+  } catch(err) {
+    return ContentService.createTextOutput(JSON.stringify({status:'error', message: err.message})).setMimeType(ContentService.MimeType.JSON);
+  }
+}
     </script>
 </body>
 </html>
