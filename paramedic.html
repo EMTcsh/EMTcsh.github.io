@@ -176,13 +176,40 @@ copyBtn.addEventListener('click', () => {
 // 요약 PDF 저장
 savePdfBtn.addEventListener('click', () => {
     const { jsPDF } = window.jspdf;
-    const doc = new jsPDF();
-    doc.setFontSize(16);
-    doc.text("의료지도 요청 요약", 10, 20);
-    doc.setFontSize(12);
-    const splitText = doc.splitTextToSize(summaryDiv.textContent, 180);
-    doc.text(splitText, 10, 30);
-    doc.save('의료지도_요청_요약.pdf');
+    
+    // 폰트 파일을 가져와서 Base64로 변환하는 함수
+    const fetchFontAndCreatePDF = async () => {
+        try {
+            const fontUrl = 'NotoSansKR-Regular.ttf'; // 한글 폰트 파일 경로
+            const fontResponse = await fetch(fontUrl);
+            const fontArrayBuffer = await fontResponse.arrayBuffer();
+            const fontBase64 = btoa(String.fromCharCode(...new Uint8Array(fontArrayBuffer)));
+
+            // jsPDF 객체 생성
+            const doc = new jsPDF();
+            
+            // 폰트 추가
+            doc.addFileToVFS('NotoSansKR-Regular.ttf', fontBase64);
+            doc.addFont('NotoSansKR-Regular.ttf', 'NotoSans', 'normal');
+            doc.setFont('NotoSans');
+
+            // 텍스트 추가
+            doc.setFontSize(16);
+            doc.text("의료지도 요청 요약", 10, 20);
+            doc.setFontSize(12);
+
+            // 텍스트가 잘리는 현상을 방지하기 위해 텍스트를 나눔
+            const splitText = doc.splitTextToSize(summaryDiv.textContent, 180);
+            doc.text(splitText, 10, 30);
+            
+            doc.save('의료지도_요청_요약.pdf');
+        } catch (error) {
+            alert("PDF 저장 중 오류 발생: " + error.message);
+            console.error(error);
+        }
+    };
+
+    fetchFontAndCreatePDF();
 });
 </script>
 </body>
