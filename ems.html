@@ -250,7 +250,7 @@
       doc.save('활력징후_기록.pdf');
     });
 
-    // ===================== 전체 폼 제출 =====================
+   // ===================== 전체 폼 제출 =====================
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
 
@@ -267,6 +267,42 @@
         vitals: { bp, hr, rr, temp },
         medicalInstruction
       };
+
+      // ✅ 수정된 부분: "✅ 저장 완료" 텍스트만 표시하고 JSON 데이터를 숨깁니다.
+      overallOutput.textContent = "✅ 기록이 성공적으로 저장되었습니다.";
+      overallOutput.style.display = "block";
+
+      // 요약
+      let summaryText = `의료지도 요청: ${medicalInstruction}`;
+      summaryDiv.textContent = summaryText;
+      summaryDiv.style.display = 'block';
+      summaryButtons.style.display = 'block';
+
+      // Google Apps Script 저장
+      try {
+        const response = await fetch(SCRIPT_URL, {
+          method: "POST",
+          body: JSON.stringify(recordData),
+          headers: { "Content-Type": "application/json" }
+        });
+        const result = await response.json();
+        if (result.status === "success") {
+          alert("스프레드시트에 기록되었습니다!");
+          // 최근 기록을 가져와 테이블을 렌더링
+          const recentResponse = await fetch(SCRIPT_URL + "?action=getRecent");
+          const recentData = await recentResponse.json();
+          if (recentData.length > 0) {
+              renderRecentTable(recentData);
+              recentBox.style.display = "block";
+          }
+        } else {
+          alert("저장 실패: " + result.message);
+        }
+      } catch (err) {
+        console.error("저장 중 오류 발생:", err);
+        alert("저장 중 오류 발생: 네트워크 문제 또는 URL 오류");
+      }
+    });
 
       // 화면 출력
       overallOutput.textContent = "✅ 저장 완료\n" + JSON.stringify(recordData, null, 2);
