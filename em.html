@@ -3,198 +3,376 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>응급상황 분류 체계</title>
+    <title>응급구조사 의료지도 기록</title>
+    <!-- Inter 폰트와 Tailwind CSS 로딩 -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body {
-            font-family: Arial, sans-serif;
-            line-height: 1.6;
-            margin: 20px;
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
         }
-        .triage-level {
-            border: 1px solid #ddd;
-            margin: 20px 0;
-            padding: 20px;
-            border-radius: 5px;
+        .form-container {
+            max-width: 900px;
+            margin: 2rem auto;
         }
-        .level-1 { background-color: #ff6666; }
-        .level-2 { background-color: #ffcc66; }
-        .level-3 { background-color: #ffff66; }
-        .level-4 { background-color: #ccff66; }
-        .level-5 { background-color: #66ff66; }
-        h2 {
-            margin-top: 0;
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
         }
-        ul {
-            list-style-type: disc;
-            padding-left: 20px;
+        input, textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #d1d5db;
+            border-radius: 0.5rem;
+            transition: border-color 0.2s ease-in-out;
         }
-        ul li {
-            cursor: pointer;
-            color: blue;
-            text-decoration: underline;
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25);
         }
-        .symptom-info {
-            display: none;
-            margin-top: 10px;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            background-color: #f9f9f9;
+        .vital-signs-entry {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 1rem;
+            align-items: center;
         }
-        .emergency-level {
-            font-weight: bold;
-            margin-bottom: 5px;
-        }
-    </style>
-    <script>
-        function showInfo(id) {
-            // 모든 증상 정보를 숨김
-            const allInfos = document.querySelectorAll('.symptom-info');
-            allInfos.forEach(info => info.style.display = 'none');
-            // 선택한 증상 정보 표시
-            const info = document.getElementById(id);
-            if (info) {
-                info.style.display = 'block';
+        @media (max-width: 640px) {
+            .vital-signs-entry {
+                grid-template-columns: 1fr;
             }
         }
-    </script>
+    </style>
 </head>
-<body>
-    <h1>응급상황 분류 체계</h1>
-    <!-- 1단계 - 최우선 응급 -->
-    <div class="triage-level level-1">
-        <h2>1단계 - 최우선 응급 (Critical)</h2>
-        <p>즉각적인 생명을 위협하는 상태로 즉각적인 처치가 필요합니다.</p>
-        <h3>예시 증상:</h3>
-        <ul>
-            <li onclick="showInfo('info1')">심정지 또는 무의식 상태</li>
-            <li onclick="showInfo('info2')">심한 출혈</li>
-            <li onclick="showInfo('info3')">심한 호흡곤란</li>
-            <li onclick="showInfo('info4')">중증 화상</li>
-        </ul>
-        <div id="info1" class="symptom-info">
-            <p class="emergency-level">응급 등급: 1단계 (최우선 응급)</p>
-            <p>환자가 호흡이 없고 맥박이 느껴지지 않을 경우 즉각적인 심폐소생술이 필요합니다.</p>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen p-4">
+
+<div class="form-container bg-white p-8 rounded-2xl shadow-xl">
+    <h1 class="text-3xl font-bold text-center text-gray-800 mb-6">응급구조사 의료지도 기록</h1>
+    <p class="text-center text-gray-500 mb-8">지도의사에게 받은 의료지도 내용을 기록하고 저장합니다.</p>
+
+    <form id="recordForm">
+        <!-- 사고 및 출동 정보 -->
+        <div class="mb-8">
+            <h2 class="text-xl font-semibold text-gray-700 mb-4">사고 및 출동 정보</h2>
+            <div class="grid md:grid-cols-2 gap-6 mb-4">
+                <div>
+                    <label for="receptionRoute" class="text-gray-600">접수 경로</label>
+                    <input type="text" id="receptionRoute" name="receptionRoute" placeholder="예: 119, 유선 등" class="rounded-lg">
+                </div>
+                <div>
+                    <label for="incidentTime" class="text-gray-600">사고 일시</label>
+                    <input type="datetime-local" id="incidentTime" name="incidentTime" class="rounded-lg">
+                </div>
+                <div>
+                    <label for="dispatchTime" class="text-gray-600">출동 시간</label>
+                    <input type="datetime-local" id="dispatchTime" name="dispatchTime" class="rounded-lg">
+                </div>
+                <div>
+                    <label for="completionTime" class="text-gray-600">완료 시간</label>
+                    <input type="datetime-local" id="completionTime" name="completionTime" class="rounded-lg">
+                </div>
+                <div>
+                    <label for="dispatchDistance" class="text-gray-600">출동 거리 (km)</label>
+                    <input type="number" step="0.1" id="dispatchDistance" name="dispatchDistance" placeholder="예: 5.2" class="rounded-lg">
+                </div>
+                <div>
+                    <label for="accidentLocation" class="text-gray-600">사고 장소</label>
+                    <input type="text" id="accidentLocation" name="accidentLocation" placeholder="예: OO동 123-45" class="rounded-lg">
+                </div>
+                <div>
+                    <label for="coordinates" class="text-gray-600">좌표</label>
+                    <input type="text" id="coordinates" name="coordinates" placeholder="위도, 경도" class="rounded-lg">
+                </div>
+            </div>
+            <div>
+                <label for="accidentCause" class="text-gray-600">사고 원인</label>
+                <textarea id="accidentCause" name="accidentCause" rows="2" placeholder="사고 발생 원인" class="rounded-lg"></textarea>
+            </div>
         </div>
-        <div id="info2" class="symptom-info">
-            <p class="emergency-level">응급 등급: 1단계 (최우선 응급)</p>
-            <p>절단, 대량의 외상성 출혈로 인해 쇼크가 발생할 수 있으므로 즉각적인 지혈과 수액 공급이 필요합니다.</p>
+
+        <!-- 사고자 인적사항 -->
+        <div class="mb-8">
+            <h2 class="text-xl font-semibold text-gray-700 mb-4">사고자 인적사항</h2>
+            <div class="grid md:grid-cols-2 gap-6 mb-4">
+                <div>
+                    <label for="patientName" class="text-gray-600">성명</label>
+                    <input type="text" id="patientName" name="patientName" placeholder="성명" class="rounded-lg">
+                </div>
+                <div>
+                    <label for="contact" class="text-gray-600">연락처</label>
+                    <input type="tel" id="contact" name="contact" placeholder="예: 010-1234-5678" class="rounded-lg">
+                </div>
+                <div>
+                    <label for="dob" class="text-gray-600">생년월일</label>
+                    <input type="date" id="dob" name="dob" class="rounded-lg">
+                </div>
+                <div>
+                    <label for="residence" class="text-gray-600">거주지</label>
+                    <input type="text" id="residence" name="residence" placeholder="거주지 주소" class="rounded-lg">
+                </div>
+            </div>
         </div>
-        <div id="info3" class="symptom-info">
-            <p class="emergency-level">응급 등급: 1단계 (최우선 응급)</p>
-            <p>산소 공급이 즉시 필요하며, 기도 확보를 위한 응급 처치가 요구됩니다.</p>
+
+        <!-- MIST 보고 -->
+        <div class="mb-8">
+            <h2 class="text-xl font-semibold text-gray-700 mb-4">MIST 보고</h2>
+            <div class="mb-4">
+                <label for="mechanism" class="text-gray-600">Mechanism (발생기전)</label>
+                <textarea id="mechanism" name="mechanism" rows="2" placeholder="사고 발생 기전" class="rounded-lg"></textarea>
+            </div>
+            <div class="mb-4">
+                <label for="injuries" class="text-gray-600">Injuries (손상)</label>
+                <textarea id="injuries" name="injuries" rows="2" placeholder="주요 손상 부위 및 양상" class="rounded-lg"></textarea>
+            </div>
+            <div class="mb-4">
+                <label for="signs" class="text-gray-600">Signs (징후)</label>
+                <textarea id="signs" name="signs" rows="2" placeholder="환자의 육안 관찰 징후" class="rounded-lg"></textarea>
+            </div>
+            <div>
+                <label for="treatment" class="text-gray-600">Treatment (처치)</label>
+                <textarea id="treatment" name="treatment" rows="2" placeholder="현장에서 시행한 응급처치 내역" class="rounded-lg"></textarea>
+            </div>
         </div>
-        <div id="info4" class="symptom-info">
-            <p class="emergency-level">응급 등급: 1단계 (최우선 응급)</p>
-            <p>화상 면적이 크거나 깊다면 응급처치와 함께 화상센터로의 이송이 필요합니다.</p>
+
+        <!-- SBAR 보고 -->
+        <div class="mb-8">
+            <h2 class="text-xl font-semibold text-gray-700 mb-4">SBAR 보고</h2>
+            <div class="mb-4">
+                <label for="situation" class="text-gray-600">Situation (상황)</label>
+                <textarea id="situation" name="situation" rows="2" placeholder="환자의 현재 상태와 문제점" class="rounded-lg"></textarea>
+            </div>
+            <div class="mb-4">
+                <label for="background" class="text-gray-600">Background (배경)</label>
+                <textarea id="background" name="background" rows="2" placeholder="환자의 병력, 과거력, 현장 상황 등" class="rounded-lg"></textarea>
+            </div>
+            <div class="mb-4">
+                <label for="assessment" class="text-gray-600">Assessment (평가)</label>
+                <textarea id="assessment" name="assessment" rows="2" placeholder="현재까지의 평가 내용" class="rounded-lg"></textarea>
+            </div>
+            <div>
+                <label for="recommendation" class="text-gray-600">Recommendation (건의)</label>
+                <textarea id="recommendation" name="recommendation" rows="2" placeholder="지도의사에게 필요한 지시나 건의 사항" class="rounded-lg"></textarea>
+            </div>
         </div>
-    </div>
-    <!-- 2단계 - 응급 -->
-    <div class="triage-level level-2">
-        <h2>2단계 - 응급 (Emergent)</h2>
-        <p>심각한 상태로 빠른 처치가 요구됩니다. 일반적으로 10분 이내에 치료가 시작되어야 합니다.</p>
-        <h3>예시 증상:</h3>
-        <ul>
-            <li onclick="showInfo('info5')">심한 흉통</li>
-            <li onclick="showInfo('info6')">고열(40도 이상)과 발작</li>
-            <li onclick="showInfo('info7')">중등도의 출혈</li>
-            <li onclick="showInfo('info8')">의식 혼미 또는 혼돈</li>
-        </ul>
-        <div id="info5" class="symptom-info">
-            <p class="emergency-level">응급 등급: 2단계 (응급)</p>
-            <p>협심증 또는 심근경색일 수 있으므로 심전도 및 혈액검사를 통한 진단이 필요합니다.</p>
+
+        <!-- 활력징후 기록 -->
+        <div class="mb-8">
+            <h2 class="text-xl font-semibold text-gray-700 mb-4">활력징후 기록</h2>
+            <div id="vitalSignsContainer">
+                <div class="vital-signs-entry mb-4 items-end">
+                    <div>
+                        <label for="vsTime0" class="text-gray-600">시간</label>
+                        <input type="time" id="vsTime0" name="vsTime" class="rounded-lg">
+                    </div>
+                    <div>
+                        <label for="bloodPressure0" class="text-gray-600">혈압</label>
+                        <input type="text" id="bloodPressure0" name="bloodPressure" placeholder="수축/이완" class="rounded-lg">
+                    </div>
+                    <div>
+                        <label for="pulse0" class="text-gray-600">맥박</label>
+                        <input type="number" id="pulse0" name="pulse" placeholder="회/분" class="rounded-lg">
+                    </div>
+                    <div>
+                        <label for="respiration0" class="text-gray-600">호흡</label>
+                        <input type="number" id="respiration0" name="respiration" placeholder="회/분" class="rounded-lg">
+                    </div>
+                    <div>
+                        <label for="temperature0" class="text-gray-600">체온</label>
+                        <input type="number" step="0.1" id="temperature0" name="temperature" placeholder="°C" class="rounded-lg">
+                    </div>
+                    <div>
+                        <label for="spo20" class="text-gray-600">SpO2</label>
+                        <input type="number" id="spo20" name="spo2" placeholder="%" class="rounded-lg">
+                    </div>
+                </div>
+            </div>
+            <button type="button" id="addVitalSign" class="mt-4 bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-2 px-4 rounded-lg transition duration-200 w-full md:w-auto">
+                활력징후 기록 추가
+            </button>
         </div>
-        <div id="info6" class="symptom-info">
-            <p class="emergency-level">응급 등급: 2단계 (응급)</p>
-            <p>심각한 감염이나 열성 경련일 수 있으며, 빠른 해열 및 항경련제 투여가 필요합니다.</p>
+
+        <!-- 기타 정보 -->
+        <div class="mb-8">
+            <h2 class="text-xl font-semibold text-gray-700 mb-4">기타 정보</h2>
+            <div class="grid md:grid-cols-2 gap-6 mb-4">
+                <div>
+                    <label for="detailedTreatment" class="text-gray-600">응급처치 세부내용</label>
+                    <textarea id="detailedTreatment" name="detailedTreatment" rows="3" placeholder="시간대별 응급처치 내역" class="rounded-lg"></textarea>
+                </div>
+                <div>
+                    <label for="personnel" class="text-gray-600">동원 인원</label>
+                    <input type="text" id="personnel" name="personnel" placeholder="예: 구급대원 2명, 소방관 1명" class="rounded-lg">
+                </div>
+                <div>
+                    <label for="hospitalTransport" class="text-gray-600">병원 이송</label>
+                    <input type="text" id="hospitalTransport" name="hospitalTransport" placeholder="예: OO병원 응급실" class="rounded-lg">
+                </div>
+                <div>
+                    <label for="alcohol" class="text-gray-600">음주 여부</label>
+                    <input type="text" id="alcohol" name="alcohol" placeholder="예: 해당 없음, 확인 불가" class="rounded-lg">
+                </div>
+            </div>
+            <div>
+                <label for="specialNotes" class="text-gray-600">특이사항</label>
+                <textarea id="specialNotes" name="specialNotes" rows="3" placeholder="기타 특이사항" class="rounded-lg"></textarea>
+            </div>
         </div>
-        <div id="info7" class="symptom-info">
-            <p class="emergency-level">응급 등급: 2단계 (응급)</p>
-            <p>압박 지혈로 출혈을 막아야 하며, 필요시 지혈대 사용과 수혈이 고려됩니다.</p>
+
+        <!-- 의료지도 내용 및 기록자 -->
+        <div class="mb-8">
+            <h2 class="text-xl font-semibold text-gray-700 mb-4">의료지도 내용 및 기록자</h2>
+            <div class="mb-4">
+                <label for="doctorName" class="text-gray-600">지도의사 이름</label>
+                <input type="text" id="doctorName" name="doctorName" placeholder="지도의사 성명" class="rounded-lg">
+            </div>
+            <div class="mb-4">
+                <label for="guidanceContent" class="text-gray-600">지도 내용</label>
+                <textarea id="guidanceContent" name="guidanceContent" rows="4" placeholder="지도의사에게 받은 구체적인 지도 내용" class="rounded-lg"></textarea>
+            </div>
+            <div>
+                <label for="emtName" class="text-gray-600">응급구조사 이름</label>
+                <input type="text" id="emtName" name="emtName" placeholder="응급구조사 성명" class="rounded-lg">
+            </div>
         </div>
-        <div id="info8" class="symptom-info">
-            <p class="emergency-level">응급 등급: 2단계 (응급)</p>
-            <p>뇌졸중, 당뇨병성 혼수, 저혈당 쇼크 등을 의심할 수 있으며, 신경학적 평가와 포도당 검사가 필요합니다.</p>
-        </div>
-    </div>
-    <!-- 3단계 - 중증 비응급 -->
-    <div class="triage-level level-3">
-        <h2>3단계 - 중증 비응급 (Urgent)</h2>
-        <p>빠른 진단과 처치가 필요하지만, 생명에 즉각적인 위협은 없는 상태입니다.</p>
-        <h3>예시 증상:</h3>
-        <ul>
-            <li onclick="showInfo('info9')">복통과 구토</li>
-            <li onclick="showInfo('info10')">현기증과 약한 탈수</li>
-            <li onclick="showInfo('info11')">중등도의 골절</li>
-        </ul>
-        <div id="info9" class="symptom-info">
-            <p class="emergency-level">응급 등급: 3단계 (중증 비응급)</p>
-            <p>위장관 질환이나 신장 결석을 의심할 수 있으며, 진통제와 검사가 필요할 수 있습니다.</p>
-        </div>
-        <div id="info10" class="symptom-info">
-            <p class="emergency-level">응급 등급: 3단계 (중증 비응급)</p>
-            <p>수분 공급과 휴식이 필요하며, 탈수 상태가 심각하지 않은 경우 경구 수분 보충이 권장됩니다.</p>
-        </div>
-        <div id="info11" class="symptom-info">
-            <p class="emergency-level">응급 등급: 3단계 (중증 비응급)</p>
-            <p>골절 부위를 고정하고 진통제를 투여하며, 엑스레이 검사 후 석고붕대나 수술이 필요할 수 있습니다.</p>
-        </div>
-    </div>
-<!-- 4단계 - 비응급 -->
-    <div class="triage-level level-4">
-        <h2>4단계 - 비응급 (Less Urgent)</h2>
-        <p>응급 상황은 아니지만, 불편함이 있어 진료가 필요한 상태입니다.</p>
-        <h3>예시 증상:</h3>
-        <ul>
-            <li onclick="showInfo('info12')">경미한 염좌</li>
-            <li onclick="showInfo('info13')">경미한 열과 기침</li>
-            <li onclick="showInfo('info14')">경미한 피부 감염</li>
-            <li onclick="showInfo('info15')">가벼운 복통</li>
-        </ul>
-        <div id="info12" class="symptom-info">
-            <p class="emergency-level">응급 등급: 4단계 (비응급)</p>
-            <p>발목이나 손목의 염좌로 부종과 통증이 있지만 자가 진료나 응급처치가 가능하며, 병원 방문을 권장합니다.</p>
-        </div>
-        <div id="info13" class="symptom-info">
-            <p class="emergency-level">응급 등급: 4단계 (비응급)</p>
-            <p>일반 감기나 가벼운 상기도 감염의 증상으로, 자가 관리와 휴식으로 회복이 가능합니다.</p>
-        </div>
-        <div id="info14" class="symptom-info">
-            <p class="emergency-level">응급 등급: 4단계 (비응급)</p>
-            <p>작은 농양이나 벌레 물림으로 인한 가벼운 피부 감염. 항생제 연고 처치가 필요할 수 있습니다.</p>
-        </div>
-        <div id="info15" class="symptom-info">
-            <p class="emergency-level">응급 등급: 4단계 (비응급)</p>
-            <p>소화불량이나 가벼운 위장염 증상으로, 식이요법이나 약물 처방으로 호전될 수 있습니다.</p>
-        </div>
-    </div>
-    <!-- 5단계 - 경증 비응급 -->
-    <div class="triage-level level-5">
-        <h2>5단계 - 경증 비응급 (Non-Urgent)</h2>
-        <p>응급 상황이 아니며, 외래 진료로 해결 가능한 상태입니다.</p>
-        <h3>예시 증상:</h3>
-        <ul>
-            <li onclick="showInfo('info16')">가벼운 피부 발진</li>
-            <li onclick="showInfo('info17')">경미한 두통</li>
-            <li onclick="showInfo('info18')">일시적인 변비</li>
-            <li onclick="showInfo('info19')">작은 상처</li>
-        </ul>
-        <div id="info16" class="symptom-info">
-            <p class="emergency-level">응급 등급: 5단계 (경증 비응급)</p>
-            <p>원인 불명의 가벼운 피부 발진으로, 항히스타민제나 스테로이드 크림으로 치료 가능합니다.</p>
-        </div>
-        <div id="info17" class="symptom-info">
-            <p class="emergency-level">응급 등급: 5단계 (경증 비응급)</p>
-            <p>스트레스나 피로로 인한 경미한 두통으로, 휴식이나 진통제로 완화될 수 있습니다.</p>
-        </div>
-        <div id="info18" class="symptom-info">
-            <p class="emergency-level">응급 등급: 5단계 (경증 비응급)</p>
-            <p>일시적인 변비로 인해 불편할 수 있으며, 식이 섬유 섭취와 수분 보충으로 해결 가능합니다.</p>
-        </div>
-        <div id="info19" class="symptom-info">
-            <p class="emergency-level">응급 등급: 5단계 (경증 비응급)</p>
-            <p>작은 상처는 소독과 밴드 처치로 충분하며, 감염 위험이 없으면 외래 진료가 필요하지 않습니다.</p>
-        </div>
-    </div>
+
+        <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition duration-200">
+            기록 저장하기
+        </button>
+
+        <!-- 결과 메시지 표시 영역 -->
+        <div id="resultMessage" class="mt-4 text-center"></div>
+    </form>
+</div>
+
+<script>
+    const SCRIPT_URL = 'YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE';
+    const form = document.getElementById('recordForm');
+    const resultMessage = document.getElementById('resultMessage');
+    const vitalSignsContainer = document.getElementById('vitalSignsContainer');
+    const addVitalSignBtn = document.getElementById('addVitalSign');
+    let vitalSignCount = 1;
+
+    // 활력징후 기록란 추가
+    addVitalSignBtn.addEventListener('click', () => {
+        const newEntry = document.createElement('div');
+        newEntry.className = 'vital-signs-entry mb-4 items-end';
+        newEntry.innerHTML = `
+            <div>
+                <label for="vsTime${vitalSignCount}" class="text-gray-600">시간</label>
+                <input type="time" id="vsTime${vitalSignCount}" name="vsTime" class="rounded-lg">
+            </div>
+            <div>
+                <label for="bloodPressure${vitalSignCount}" class="text-gray-600">혈압</label>
+                <input type="text" id="bloodPressure${vitalSignCount}" name="bloodPressure" placeholder="수축/이완" class="rounded-lg">
+            </div>
+            <div>
+                <label for="pulse${vitalSignCount}" class="text-gray-600">맥박</label>
+                <input type="number" id="pulse${vitalSignCount}" name="pulse" placeholder="회/분" class="rounded-lg">
+            </div>
+            <div>
+                <label for="respiration${vitalSignCount}" class="text-gray-600">호흡</label>
+                <input type="number" id="respiration${vitalSignCount}" name="respiration" placeholder="회/분" class="rounded-lg">
+            </div>
+            <div>
+                <label for="temperature${vitalSignCount}" class="text-gray-600">체온</label>
+                <input type="number" step="0.1" id="temperature${vitalSignCount}" name="temperature" placeholder="°C" class="rounded-lg">
+            </div>
+            <div>
+                <label for="spo2${vitalSignCount}" class="text-gray-600">SpO2</label>
+                <input type="number" id="spo2${vitalSignCount}" name="spo2" placeholder="%" class="rounded-lg">
+            </div>
+        `;
+        vitalSignsContainer.appendChild(newEntry);
+        vitalSignCount++;
+    });
+
+    form.addEventListener('submit', async function(event) {
+        event.preventDefault();
+
+        resultMessage.textContent = '데이터를 저장하는 중입니다...';
+        resultMessage.className = 'mt-4 text-center text-gray-500';
+
+        // 활력징후 데이터 수집
+        const vitalSignsData = [];
+        const vsEntries = vitalSignsContainer.querySelectorAll('.vital-signs-entry');
+        vsEntries.forEach(entry => {
+            const vsTime = entry.querySelector('input[name="vsTime"]').value;
+            const bloodPressure = entry.querySelector('input[name="bloodPressure"]').value;
+            const pulse = entry.querySelector('input[name="pulse"]').value;
+            const respiration = entry.querySelector('input[name="respiration"]').value;
+            const temperature = entry.querySelector('input[name="temperature"]').value;
+            const spo2 = entry.querySelector('input[name="spo2"]').value;
+
+            if (vsTime || bloodPressure || pulse || respiration || temperature || spo2) {
+                vitalSignsData.push({
+                    vsTime,
+                    bloodPressure,
+                    pulse,
+                    respiration,
+                    temperature,
+                    spo2
+                });
+            }
+        });
+
+        const formData = {
+            receptionRoute: form.receptionRoute.value,
+            incidentTime: form.incidentTime.value,
+            dispatchTime: form.dispatchTime.value,
+            completionTime: form.completionTime.value,
+            dispatchDistance: form.dispatchDistance.value,
+            accidentLocation: form.accidentLocation.value,
+            coordinates: form.coordinates.value,
+            accidentCause: form.accidentCause.value,
+            patientName: form.patientName.value,
+            contact: form.contact.value,
+            dob: form.dob.value,
+            residence: form.residence.value,
+            chiefComplaint: form.chiefComplaint.value,
+            mechanism: form.mechanism.value,
+            injuries: form.injuries.value,
+            signs: form.signs.value,
+            treatment: form.treatment.value,
+            situation: form.situation.value,
+            background: form.background.value,
+            assessment: form.assessment.value,
+            recommendation: form.recommendation.value,
+            vitalSigns: vitalSignsData,
+            detailedTreatment: form.detailedTreatment.value,
+            personnel: form.personnel.value,
+            hospitalTransport: form.hospitalTransport.value,
+            alcohol: form.alcohol.value,
+            specialNotes: form.specialNotes.value,
+            doctorName: form.doctorName.value,
+            guidanceContent: form.guidanceContent.value,
+            emtName: form.emtName.value,
+            timestamp: new Date().toLocaleString('ko-KR', { timeZone: 'Asia/Seoul' })
+        };
+
+        try {
+            const response = await fetch(SCRIPT_URL, {
+                method: 'POST',
+                mode: 'no-cors',
+                cache: 'no-cache',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(formData)
+            });
+
+            resultMessage.textContent = '✅ 기록이 성공적으로 저장되었습니다!';
+            resultMessage.className = 'mt-4 text-center text-green-600 font-medium';
+            form.reset();
+
+        } catch (error) {
+            console.error('Error:', error);
+            resultMessage.textContent = '🚨 기록 저장 중 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.';
+            resultMessage.className = 'mt-4 text-center text-red-600 font-medium';
+        }
+    });
+</script>
+
 </body>
 </html>
