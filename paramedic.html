@@ -13,9 +13,6 @@ textarea { resize: vertical; min-height: 80px; }
 button { margin-top: 20px; padding: 12px 20px; background-color: #007bff; border: none; color: white; font-size: 1.1rem; border-radius: 5px; cursor: pointer; }
 button:hover { background-color: #0056b3; }
 .record-output { margin-top: 30px; padding: 15px; background: #e9ecef; border-radius: 5px; white-space: pre-wrap; font-family: monospace; }
-.buttons-group { margin-top: 10px; }
-.buttons-group button { background-color: #28a745; margin-right: 10px; }
-.buttons-group button:hover { background-color: #1e7e34; }
 </style>
 </head>
 <body>
@@ -60,22 +57,16 @@ button:hover { background-color: #0056b3; }
     <label for="medicalInstruction">의료 지도 내용</label>
     <textarea id="medicalInstruction" name="medicalInstruction" placeholder="의료 지시 및 추가 처치 내용" required></textarea>
 
-    <button type="submit">기록 저장 및 텍스트 파일 생성</button>
+    <button type="submit">기록 저장</button>
 </form>
 
 <div id="output" class="record-output" style="display:none;"></div>
-
-<div class="buttons-group" style="display:none;" id="saveButton">
-    <button id="saveTextFile">텍스트 파일로 저장</button>
-</div>
 
 <script>
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwuZfV5krBT7y9ejFqCr-H3nbgsTacPZbiL5fuLNBL5hbJFxoF26ItMJU5e4L4HWMAX/exec";
                  
 const form = document.getElementById('recordForm');
 const outputDiv = document.getElementById('output');
-const saveTextFileBtn = document.getElementById('saveTextFile');
-const saveButtonDiv = document.getElementById('saveButton');
 
 form.addEventListener('submit', function(event) {
     event.preventDefault();
@@ -103,7 +94,7 @@ form.addEventListener('submit', function(event) {
         medicalInstruction: form.medicalInstruction.value.trim()
     };
 
-    // 전체 기록 출력
+    // 전체 기록 출력 (확인용)
     const recordText = `
 === 기록 시간 ===
 ${data.recordTime}
@@ -132,9 +123,8 @@ ${data.medicalInstruction}
 
     outputDiv.textContent = recordText;
     outputDiv.style.display = 'block';
-    saveButtonDiv.style.display = 'block';
 
-    // Google Sheets 전송
+    // Google Sheets로 데이터 전송
     fetch(SCRIPT_URL, {
         method: 'POST',
         body: JSON.stringify(data),
@@ -152,27 +142,6 @@ ${data.medicalInstruction}
         console.error(err);
         alert("저장 중 오류 발생");
     });
-});
-
-// 텍스트 파일로 저장
-saveTextFileBtn.addEventListener('click', () => {
-    // 텍스트 내용 가져오기
-    const textContent = outputDiv.textContent;
-
-    // Blob 객체 생성
-    const blob = new Blob([textContent], { type: 'text/plain;charset=utf-8' });
-
-    // a 태그를 생성하여 다운로드 링크 만들기
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = '활력징후_응급처치_기록.txt';
-
-    // 가상 클릭으로 다운로드 실행
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-
-    alert('기록이 텍스트 파일로 저장되었습니다.');
 });
 </script>
 </body>
