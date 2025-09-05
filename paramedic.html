@@ -185,10 +185,21 @@
                 <input type="text" id="emtName" name="emtName" placeholder="응급구조사 성명" required class="rounded-lg">
             </div>
         </div>
+        
+        <!-- 기타 참고사항 추가 -->
+        <div class="mb-8">
+            <h2 class="text-xl font-semibold text-gray-700 mb-4">기타 참고사항</h2>
+            <textarea id="additionalNotes" name="additionalNotes" rows="4" placeholder="기타 특이사항이나 상세 내용" class="rounded-lg"></textarea>
+        </div>
 
-        <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition duration-200">
-            기록 저장하기
-        </button>
+        <div class="flex flex-col md:flex-row gap-4">
+            <button type="submit" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition duration-200">
+                기록 저장하기 (구글 시트)
+            </button>
+            <button type="button" id="saveTxtButton" class="flex-1 bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 px-4 rounded-lg transition duration-200">
+                기록 저장하기 (텍스트 파일)
+            </button>
+        </div>
 
         <!-- 결과 메시지 표시 영역 -->
         <div id="resultMessage" class="mt-4 text-center"></div>
@@ -201,6 +212,7 @@
     const resultMessage = document.getElementById('resultMessage');
     const vitalSignsContainer = document.getElementById('vitalSignsContainer');
     const addVitalSignBtn = document.getElementById('addVitalSign');
+    const saveTxtButton = document.getElementById('saveTxtButton');
     let vitalSignCount = 1;
 
     // 활력징후 기록란 추가
@@ -284,6 +296,7 @@
             doctorName: form.doctorName.value,
             guidanceContent: form.guidanceContent.value,
             emtName: form.emtName.value,
+            additionalNotes: form.additionalNotes.value, // 추가된 필드
             timestamp: new Date().toLocaleString('ko-KR', { timeZone: 'Asia/Seoul' })
         };
 
@@ -307,6 +320,91 @@
             resultMessage.textContent = '🚨 기록 저장 중 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.';
             resultMessage.className = 'mt-4 text-center text-red-600 font-medium';
         }
+    });
+    
+    // 텍스트 파일 저장 기능 추가
+    saveTxtButton.addEventListener('click', () => {
+        const formData = {
+            patientName: form.patientName.value,
+            dob: form.dob.value,
+            incidentTime: form.incidentTime.value,
+            location: form.location.value,
+            chiefComplaint: form.chiefComplaint.value,
+            mechanism: form.mechanism.value,
+            injuries: form.injuries.value,
+            signs: form.signs.value,
+            treatment: form.treatment.value,
+            situation: form.situation.value,
+            background: form.background.value,
+            assessment: form.assessment.value,
+            recommendation: form.recommendation.value,
+            vitalSigns: [],
+            doctorName: form.doctorName.value,
+            guidanceContent: form.guidanceContent.value,
+            emtName: form.emtName.value,
+            additionalNotes: form.additionalNotes.value,
+            timestamp: new Date().toLocaleString('ko-KR', { timeZone: 'Asia/Seoul' })
+        };
+
+        // 활력징후 데이터 수집 및 형식 지정
+        const vsEntries = vitalSignsContainer.querySelectorAll('.vital-signs-entry');
+        vsEntries.forEach(entry => {
+            const vsTime = entry.querySelector('input[name="vsTime"]').value;
+            const bloodPressure = entry.querySelector('input[name="bloodPressure"]').value;
+            const pulse = entry.querySelector('input[name="pulse"]').value;
+            const respiration = entry.querySelector('input[name="respiration"]').value;
+            const temperature = entry.querySelector('input[name="temperature"]').value;
+            const spo2 = entry.querySelector('input[name="spo2"]').value;
+
+            if (vsTime || bloodPressure || pulse || respiration || temperature || spo2) {
+                formData.vitalSigns.push(`시간: ${vsTime}, 혈압: ${bloodPressure}, 맥박: ${pulse}, 호흡: ${respiration}, 체온: ${temperature}, SpO2: ${spo2}`);
+            }
+        });
+
+        // 텍스트 파일 내용 생성
+        let content = `응급구조사 의료지도 산악 기록\n\n`;
+        content += `기록 시각: ${formData.timestamp}\n\n`;
+        content += `[환자 정보]\n`;
+        content += `환자 이름: ${formData.patientName}\n`;
+        content += `생년월일: ${formData.dob}\n\n`;
+        content += `[상황 정보]\n`;
+        content += `발생 시간: ${formData.incidentTime}\n`;
+        content += `장소: ${formData.location}\n`;
+        content += `주 증상: ${formData.chiefComplaint}\n\n`;
+        content += `[MIST 보고]\n`;
+        content += `Mechanism (발생기전): ${formData.mechanism}\n`;
+        content += `Injuries (손상): ${formData.injuries}\n`;
+        content += `Signs (징후): ${formData.signs}\n`;
+        content += `Treatment (처치): ${formData.treatment}\n\n`;
+        content += `[SBAR 보고]\n`;
+        content += `Situation (상황): ${formData.situation}\n`;
+        content += `Background (배경): ${formData.background}\n`;
+        content += `Assessment (평가): ${formData.assessment}\n`;
+        content += `Recommendation (건의): ${formData.recommendation}\n\n`;
+        content += `[활력징후 기록]\n`;
+        if (formData.vitalSigns.length > 0) {
+            content += formData.vitalSigns.join('\n');
+        } else {
+            content += '기록된 활력징후 없음\n';
+        }
+        content += `\n[의료지도 내용]\n`;
+        content += `지도의사 이름: ${formData.doctorName}\n`;
+        content += `지도 내용: ${formData.guidanceContent}\n\n`;
+        content += `[기록자 정보]\n`;
+        content += `응급구조사 이름: ${formData.emtName}\n\n`;
+        content += `[기타 참고사항]\n`;
+        content += `${formData.additionalNotes}\n`;
+
+        // 텍스트 파일 다운로드
+        const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `응급구조사_의료지도_기록_${new Date().toISOString().slice(0, 10)}.txt`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
     });
 </script>
 
