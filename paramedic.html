@@ -12,7 +12,7 @@ input[type="text"], input[type="number"], input[type="time"], textarea { width: 
 textarea { resize: vertical; min-height: 80px; }
 button { margin-top: 20px; padding: 12px 20px; background-color: #007bff; border: none; color: white; font-size: 1.1rem; border-radius: 5px; cursor: pointer; }
 button:hover { background-color: #0056b3; }
-.record-output, .summary-output { margin-top: 30px; padding: 15px; background: #e9ecef; border-radius: 5px; white-space: pre-wrap; font-family: monospace; }
+.record-output { margin-top: 30px; padding: 15px; background: #e9ecef; border-radius: 5px; white-space: pre-wrap; font-family: monospace; }
 .buttons-group { margin-top: 10px; }
 .buttons-group button { background-color: #28a745; margin-right: 10px; }
 .buttons-group button:hover { background-color: #1e7e34; }
@@ -60,28 +60,22 @@ button:hover { background-color: #0056b3; }
     <label for="medicalInstruction">의료 지도 내용</label>
     <textarea id="medicalInstruction" name="medicalInstruction" placeholder="의료 지시 및 추가 처치 내용" required></textarea>
 
-    <button type="submit">기록 저장 및 요약 생성</button>
+    <button type="submit">기록 저장 및 텍스트 파일 생성</button>
 </form>
 
 <div id="output" class="record-output" style="display:none;"></div>
 
-<h2>의료지도 요청 요약</h2>
-<div id="summary" class="summary-output" style="display:none;"></div>
-<div class="buttons-group" style="display:none;" id="summaryButtons">
-    <button id="copySummary">복사</button>
-    <button id="savePdf">PDF 저장</button>
+<div class="buttons-group" style="display:none;" id="saveButton">
+    <button id="saveTextFile">텍스트 파일로 저장</button>
 </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script>
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxFZQmfaLUqxGPVr0Wvt5GJfvJ9vWZ9596-b3M0bk6yI0pJk8GXx7grm9G9sy8kgK6n/exec"; // 구글 Apps Script 웹앱 URL
-                    
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwevBZHBn0193hU47Ei1T1Yz7Ln4naZeuF3_7-ty_zR95PWXBLmjQRkSDXxAvq-TbIz/exec";
+                 
 const form = document.getElementById('recordForm');
 const outputDiv = document.getElementById('output');
-const summaryDiv = document.getElementById('summary');
-const summaryButtons = document.getElementById('summaryButtons');
-const copyBtn = document.getElementById('copySummary');
-const savePdfBtn = document.getElementById('savePdf');
+const saveTextFileBtn = document.getElementById('saveTextFile');
+const saveButtonDiv = document.getElementById('saveButton');
 
 form.addEventListener('submit', function(event) {
     event.preventDefault();
@@ -138,81 +132,47 @@ ${data.medicalInstruction}
 
     outputDiv.textContent = recordText;
     outputDiv.style.display = 'block';
+    saveButtonDiv.style.display = 'block';
 
-   // Google Sheets 전송
-fetch(SCRIPT_URL, {
-    method: 'POST',
-    body: JSON.stringify(data), // <-- 이 부분이 수정되었습니다.
-    headers: { "Content-Type": "application/json" }
-})
-.then(res => res.json())
-.then(res => {
-    if(res.status === 'success'){
-        alert("Google Sheets에 저장되었습니다!");
-    } else {
-        alert("저장 실패: " + res.message);
-    }
-})
-.catch(err => {
-    console.error(err);
-    alert("저장 중 오류 발생");
-});
-
-    // 의료지도 요약
-    let summaryText = data.medicalInstruction;
-    if(summaryText.length > 100) summaryText = summaryText.slice(0,97)+'...';
-    summaryDiv.textContent = summaryText;
-    summaryDiv.style.display = 'block';
-    summaryButtons.style.display = 'block';
-});
-
-// 요약 복사
-copyBtn.addEventListener('click', () => {
-    navigator.clipboard.writeText(summaryDiv.textContent)
-        .then(()=> alert('요약문이 복사되었습니다.'))
-        .catch(()=> alert('복사 실패'));
-});
-
-// 요약 PDF 저장
-savePdfBtn.addEventListener('click', () => {
-    const { jsPDF } = window.jspdf;
-    
-    // 폰트 파일을 가져와서 Base64로 변환하고 PDF를 생성하는 함수
-    const fetchFontAndCreatePDF = async () => {
-        try {
-            const fontUrl = 'NotoSansKR-Regular.ttf'; // 한글 폰트 파일 경로
-            const fontResponse = await fetch(fontUrl);
-            if (!fontResponse.ok) {
-                throw new Error(`폰트 파일을 찾을 수 없습니다: ${fontResponse.statusText}`);
-            }
-            const fontArrayBuffer = await fontResponse.arrayBuffer();
-            const fontBase64 = btoa(String.fromCharCode(...new Uint8Array(fontArrayBuffer)));
-
-            // jsPDF 객체 생성
-            const doc = new jsPDF();
-            
-            // 폰트 추가
-            doc.addFileToVFS('NotoSansKR-Regular.ttf', fontBase64);
-            doc.addFont('NotoSansKR-Regular.ttf', 'NotoSans', 'normal');
-            doc.setFont('NotoSans');
-
-            // 텍스트 추가
-            doc.setFontSize(16);
-            doc.text("의료지도 요청 요약", 10, 20);
-            doc.setFontSize(12);
-
-            // 텍스트가 잘리는 현상을 방지하기 위해 텍스트를 나눔
-            const splitText = doc.splitTextToSize(summaryDiv.textContent, 180);
-            doc.text(splitText, 10, 30);
-            
-            doc.save('의료지도_요청_요약.pdf');
-        } catch (error) {
-            alert("PDF 저장 중 오류 발생. 폰트 파일이 올바른 위치에 있는지 확인해 주세요.");
-            console.error("PDF 저장 오류:", error);
+    // Google Sheets 전송
+    fetch(SCRIPT_URL, {
+        method: 'POST',
+        body: JSON.stringify(data),
+        headers: { "Content-Type": "application/json" }
+    })
+    .then(res => res.json())
+    .then(res => {
+        if(res.status === 'success'){
+            alert("Google Sheets에 저장되었습니다!");
+        } else {
+            alert("저장 실패: " + res.message);
         }
-    };
+    })
+    .catch(err => {
+        console.error(err);
+        alert("저장 중 오류 발생");
+    });
+});
 
-    fetchFontAndCreatePDF();
+// 텍스트 파일로 저장
+saveTextFileBtn.addEventListener('click', () => {
+    // 텍스트 내용 가져오기
+    const textContent = outputDiv.textContent;
+
+    // Blob 객체 생성
+    const blob = new Blob([textContent], { type: 'text/plain;charset=utf-8' });
+
+    // a 태그를 생성하여 다운로드 링크 만들기
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = '활력징후_응급처치_기록.txt';
+
+    // 가상 클릭으로 다운로드 실행
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+
+    alert('기록이 텍스트 파일로 저장되었습니다.');
 });
 </script>
 </body>
