@@ -139,24 +139,24 @@ ${data.medicalInstruction}
     outputDiv.textContent = recordText;
     outputDiv.style.display = 'block';
 
-    // Google Sheets 전송
+   // Google Sheets 전송
 fetch(SCRIPT_URL, {
     method: 'POST',
-    body: JSON.stringify(data), // <-- 이렇게 수정해야 합니다.
+    body: JSON.stringify(data), // <-- 이 부분이 수정되었습니다.
     headers: { "Content-Type": "application/json" }
 })
-    .then(res => res.json())
-    .then(res => {
-        if(res.status === 'success'){
-            alert("Google Sheets에 저장되었습니다!");
-        } else {
-            alert("저장 실패: " + res.message);
-        }
-    })
-    .catch(err => {
-        console.error(err);
-        alert("저장 중 오류 발생");
-    });
+.then(res => res.json())
+.then(res => {
+    if(res.status === 'success'){
+        alert("Google Sheets에 저장되었습니다!");
+    } else {
+        alert("저장 실패: " + res.message);
+    }
+})
+.catch(err => {
+    console.error(err);
+    alert("저장 중 오류 발생");
+});
 
     // 의료지도 요약
     let summaryText = data.medicalInstruction;
