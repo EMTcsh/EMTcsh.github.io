@@ -142,7 +142,7 @@ ${data.medicalInstruction}
     // Google Sheets 전송
     fetch(SCRIPT_URL, {
         method: 'POST',
-        body: JSON.stringify(data),
+        body: JSON.parse(data),
         headers: { "Content-Type": "application/json" }
     })
     .then(res => res.json())
