@@ -3,27 +3,24 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>응급환자 기록 의료지도</title>
+<title>활력징후 및 응급처치 기록 폼</title>
 <style>
 body { font-family: Arial, sans-serif; max-width: 700px; margin: 20px auto; padding: 20px; background: #f7f7f7; border-radius: 8px; }
 h1, h2 { color: #333; }
 label { display: block; margin-top: 15px; font-weight: bold; }
 input[type="text"], input[type="number"], input[type="time"], textarea { width: 100%; padding: 8px; margin-top: 6px; border-radius: 4px; border: 1px solid #ccc; font-size: 1rem; box-sizing: border-box; }
 textarea { resize: vertical; min-height: 80px; }
-button { margin-top: 10px; padding: 10px 20px; border: none; color: white; border-radius: 5px; cursor: pointer; font-size: 1rem; }
-button.save { background-color: #28a745; }
-button.save:hover { background-color: #1e7e34; }
-button.submit { background-color: #007bff; }
-button.submit:hover { background-color: #0056b3; }
-.record-output, .summary-output { margin-top: 20px; padding: 15px; background: #e9ecef; border-radius: 5px; white-space: pre-wrap; font-family: monospace; }
+button { margin-top: 20px; padding: 12px 20px; background-color: #007bff; border: none; color: white; font-size: 1.1rem; border-radius: 5px; cursor: pointer; }
+button:hover { background-color: #0056b3; }
+.record-output, .summary-output { margin-top: 30px; padding: 15px; background: #e9ecef; border-radius: 5px; white-space: pre-wrap; font-family: monospace; }
 .buttons-group { margin-top: 10px; }
-.buttons-group button { margin-right: 10px; background-color: #17a2b8; }
-.buttons-group button:hover { background-color: #117a8b; }
+.buttons-group button { background-color: #28a745; margin-right: 10px; }
+.buttons-group button:hover { background-color: #1e7e34; }
 </style>
 </head>
 <body>
 
-<h1>응급환자 기록 의료지도</h1>
+<h1>활력징후 및 응급처치 기록</h1>
 
 <form id="recordForm">
     <label for="recordTime">기록 시간</label>
@@ -31,55 +28,53 @@ button.submit:hover { background-color: #0056b3; }
 
     <h2>MIST 보고</h2>
     <label for="mechanism">Mechanism (기전)</label>
-    <textarea id="mechanism" name="mechanism" required></textarea>
+    <textarea id="mechanism" name="mechanism" placeholder="예: 교통사고, 낙상 등" required></textarea>
     <label for="injury">Injury (손상부위)</label>
-    <textarea id="injury" name="injury" required></textarea>
+    <textarea id="injury" name="injury" placeholder="손상 부위 및 상태" required></textarea>
     <label for="signs">Signs (증상)</label>
-    <textarea id="signs" name="signs" required></textarea>
+    <textarea id="signs" name="signs" placeholder="환자 증상" required></textarea>
     <label for="treatment">Treatment (처치 내용)</label>
-    <textarea id="treatment" name="treatment" required></textarea>
-    <button type="button" class="save" id="saveMist">💾 MIST 저장</button>
+    <textarea id="treatment" name="treatment" placeholder="지금까지 시행된 처치" required></textarea>
 
     <h2>SBAR 보고</h2>
-    <label for="situation">Situation</label>
-    <textarea id="situation" name="situation" required></textarea>
-    <label for="background">Background</label>
-    <textarea id="background" name="background" required></textarea>
-    <label for="assessment">Assessment</label>
-    <textarea id="assessment" name="assessment" required></textarea>
-    <label for="recommendation">Recommendation</label>
-    <textarea id="recommendation" name="recommendation" required></textarea>
-    <button type="button" class="save" id="saveSbar">💾 SBAR 저장</button>
+    <label for="situation">Situation (상황)</label>
+    <textarea id="situation" name="situation" placeholder="현재 상황 설명" required></textarea>
+    <label for="background">Background (배경)</label>
+    <textarea id="background" name="background" placeholder="환자 배경 및 병력" required></textarea>
+    <label for="assessment">Assessment (평가)</label>
+    <textarea id="assessment" name="assessment" placeholder="진단 및 평가 내용" required></textarea>
+    <label for="recommendation">Recommendation (권고)</label>
+    <textarea id="recommendation" name="recommendation" placeholder="의료 지도 및 권고사항" required></textarea>
 
     <h2>활력징후 기록</h2>
     <label for="bp">혈압 (mmHg)</label>
-    <input type="text" id="bp" name="bp" required />
+    <input type="text" id="bp" name="bp" placeholder="예: 120/80" required />
     <label for="hr">심박수 (회/분)</label>
     <input type="number" id="hr" name="hr" min="30" max="200" required />
     <label for="rr">호흡수 (회/분)</label>
     <input type="number" id="rr" name="rr" min="5" max="50" required />
     <label for="temp">체온 (℃)</label>
     <input type="number" step="0.1" id="temp" name="temp" min="30" max="45" required />
-    <button type="button" class="save" id="saveVitals">💾 활력징후 저장</button>
 
     <h2>의료 지도</h2>
     <label for="medicalInstruction">의료 지도 내용</label>
-    <textarea id="medicalInstruction" name="medicalInstruction" required></textarea>
+    <textarea id="medicalInstruction" name="medicalInstruction" placeholder="의료 지시 및 추가 처치 내용" required></textarea>
 
-    <button type="submit" class="submit">💾 전체 기록 저장 및 요약 생성</button>
+    <button type="submit">기록 저장 및 요약 생성</button>
 </form>
 
 <div id="output" class="record-output" style="display:none;"></div>
+
 <h2>의료지도 요청 요약</h2>
 <div id="summary" class="summary-output" style="display:none;"></div>
-<div class="buttons-group" id="summaryButtons" style="display:none;">
+<div class="buttons-group" style="display:none;" id="summaryButtons">
     <button id="copySummary">복사</button>
     <button id="savePdf">PDF 저장</button>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script>
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw_w8mJQtg4LAmPkDCIjWjyQKwMPcaRJsF1DaBG_cTFMrN7m0h1I3wpZILrDOZx7qvKXg/exec"; // Apps Script 웹앱 URL
+const SCRIPT_URL = "여기에_웹앱_URL_입력"; // 구글 Apps Script 웹앱 URL
 
 const form = document.getElementById('recordForm');
 const outputDiv = document.getElementById('output');
@@ -88,65 +83,9 @@ const summaryButtons = document.getElementById('summaryButtons');
 const copyBtn = document.getElementById('copySummary');
 const savePdfBtn = document.getElementById('savePdf');
 
-function saveSection(section, data) {
-    fetch(SCRIPT_URL, {
-        method: 'POST',
-        headers: {"Content-Type":"application/json"},
-        body: JSON.stringify(data)
-    })
-    .then(res=>res.json())
-    .then(res=>{
-        if(res.status==='success') alert(`${section} 저장 완료!`);
-        else alert(`${section} 저장 실패: ${res.message}`);
-    })
-    .catch(err=>{ console.error(err); alert(`${section} 저장 중 오류 발생`); });
-}
+form.addEventListener('submit', function(event) {
+    event.preventDefault();
 
-// MIST 저장
-document.getElementById('saveMist').addEventListener('click', ()=>{
-    const data = {
-        recordTime: form.recordTime.value,
-        MIST: {
-            mechanism: form.mechanism.value.trim(),
-            injury: form.injury.value.trim(),
-            signs: form.signs.value.trim(),
-            treatment: form.treatment.value.trim()
-        }
-    };
-    saveSection('MIST', data);
-});
-
-// SBAR 저장
-document.getElementById('saveSbar').addEventListener('click', ()=>{
-    const data = {
-        recordTime: form.recordTime.value,
-        SBAR: {
-            situation: form.situation.value.trim(),
-            background: form.background.value.trim(),
-            assessment: form.assessment.value.trim(),
-            recommendation: form.recommendation.value.trim()
-        }
-    };
-    saveSection('SBAR', data);
-});
-
-// 활력징후 저장
-document.getElementById('saveVitals').addEventListener('click', ()=>{
-    const data = {
-        recordTime: form.recordTime.value,
-        vitals: {
-            bp: form.bp.value.trim(),
-            hr: form.hr.value.trim(),
-            rr: form.rr.value.trim(),
-            temp: form.temp.value.trim()
-        }
-    };
-    saveSection('활력징후', data);
-});
-
-// 전체 기록 제출
-form.addEventListener('submit', (e)=>{
-    e.preventDefault();
     const data = {
         recordTime: form.recordTime.value,
         MIST: {
@@ -171,24 +110,71 @@ form.addEventListener('submit', (e)=>{
     };
 
     // 전체 기록 출력
-    outputDiv.textContent = JSON.stringify(data, null, 2);
-    outputDiv.style.display='block';
+    const recordText = `
+=== 기록 시간 ===
+${data.recordTime}
 
-    saveSection('전체 기록', data);
+=== MIST 보고 ===
+Mechanism: ${data.MIST.mechanism}
+Injury: ${data.MIST.injury}
+Signs: ${data.MIST.signs}
+Treatment: ${data.MIST.treatment}
 
-    // 요약 생성
+=== SBAR 보고 ===
+Situation: ${data.SBAR.situation}
+Background: ${data.SBAR.background}
+Assessment: ${data.SBAR.assessment}
+Recommendation: ${data.SBAR.recommendation}
+
+=== 활력징후 ===
+혈압: ${data.vitals.bp} mmHg
+심박수: ${data.vitals.hr} 회/분
+호흡수: ${data.vitals.rr} 회/분
+체온: ${data.vitals.temp} ℃
+
+=== 의료 지도 ===
+${data.medicalInstruction}
+`.trim();
+
+    outputDiv.textContent = recordText;
+    outputDiv.style.display = 'block';
+
+    // Google Sheets 전송
+    fetch(SCRIPT_URL, {
+        method: 'POST',
+        body: JSON.stringify(data),
+        headers: { "Content-Type": "application/json" }
+    })
+    .then(res => res.json())
+    .then(res => {
+        if(res.status === 'success'){
+            alert("Google Sheets에 저장되었습니다!");
+        } else {
+            alert("저장 실패: " + res.message);
+        }
+    })
+    .catch(err => {
+        console.error(err);
+        alert("저장 중 오류 발생");
+    });
+
+    // 의료지도 요약
     let summaryText = data.medicalInstruction;
-    if(summaryText.length>100) summaryText = summaryText.slice(0,97)+'...';
+    if(summaryText.length > 100) summaryText = summaryText.slice(0,97)+'...';
     summaryDiv.textContent = summaryText;
-    summaryDiv.style.display='block';
-    summaryButtons.style.display='block';
+    summaryDiv.style.display = 'block';
+    summaryButtons.style.display = 'block';
 });
 
 // 요약 복사
-copyBtn.addEventListener('click', ()=>{ navigator.clipboard.writeText(summaryDiv.textContent).then(()=>alert('복사 완료')); });
+copyBtn.addEventListener('click', () => {
+    navigator.clipboard.writeText(summaryDiv.textContent)
+        .then(()=> alert('요약문이 복사되었습니다.'))
+        .catch(()=> alert('복사 실패'));
+});
 
-// 요약 PDF
-savePdfBtn.addEventListener('click', ()=>{
+// 요약 PDF 저장
+savePdfBtn.addEventListener('click', () => {
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
     doc.setFontSize(16);
@@ -198,7 +184,65 @@ savePdfBtn.addEventListener('click', ()=>{
     doc.text(splitText, 10, 30);
     doc.save('의료지도_요청_요약.pdf');
 });
-</script>
 
+    //구글시트 연결
+  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw_w8mJQtg4LAmPkDCIjWjyQKwMPcaRJsF1DaBG_cTFMrN7m0h1I3wpZILrDOZx7qvKXg/exec";
+  
+  form.addEventListener('submit', function(event) {
+    event.preventDefault();
+
+    const data = {
+        recordTime: form.recordTime.value,
+        MIST: {
+            mechanism: form.mechanism.value.trim(),
+            injury: form.injury.value.trim(),
+            signs: form.signs.value.trim(),
+            treatment: form.treatment.value.trim()
+        },
+        SBAR: {
+            situation: form.situation.value.trim(),
+            background: form.background.value.trim(),
+            assessment: form.assessment.value.trim(),
+            recommendation: form.recommendation.value.trim()
+        },
+        vitals: {
+            bp: form.bp.value.trim(),
+            hr: form.hr.value.trim(),
+            rr: form.rr.value.trim(),
+            temp: form.temp.value.trim()
+        },
+        medicalInstruction: form.medicalInstruction.value.trim()
+    };
+
+    // 기록 출력
+    outputDiv.textContent = JSON.stringify(data, null, 2);
+    outputDiv.style.display = 'block';
+
+    // Google Sheets 전송
+    fetch(SCRIPT_URL, {
+        method: 'POST',
+        body: JSON.stringify(data),
+        headers: { "Content-Type": "application/json" }
+    })
+    .then(res => res.json())
+    .then(res => {
+        if(res.status === 'success'){
+            alert("Google Sheets에 저장되었습니다!");
+        } else {
+            alert("저장 실패: " + res.message);
+        }
+    })
+    .catch(err => {
+        console.error(err);
+        alert("저장 중 오류 발생");
+    });
+
+    // 요약 생성
+    const summaryText = data.medicalInstruction.length > 100 ? data.medicalInstruction.slice(0,97)+'...' : data.medicalInstruction;
+    summaryDiv.textContent = summaryText;
+    summaryDiv.style.display = 'block';
+    summaryButtons.style.display = 'block';
+});
+</script>
 </body>
 </html>
