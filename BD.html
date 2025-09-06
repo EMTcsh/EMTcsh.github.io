@@ -1,30 +1,108 @@
-
 <!DOCTYPE html>
-<html>
+<html lang="ko">
 <head>
-  <title>이 페이지의 제목입니다</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>국립공원 응급구조사 현장대응 페이지</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      max-width: 100%;
+      margin: 20px auto;
+      padding: 0 15px;
+      background: #f9f9f9;
+      color: #333;
+      box-sizing: border-box;
+      text-align: center; /* 전체 가운데 정렬 */
+    }
+    h1 {
+      color: #0078d7;
+      font-size: 1.8rem;
+      margin-bottom: 25px;
+    }
+    h2 {
+      margin-top: 30px;
+      color: #005a9e;
+      font-size: 1.3rem;
+    }
+    .section {
+      background: #fff;
+      padding: 20px;
+      margin-bottom: 25px;
+      border-radius: 8px;
+      box-shadow: 0 3px 8px rgba(0,0,0,0.1);
+    }
+    button {
+      display: inline-block;
+      background-color: #0078d7;
+      color: white;
+      border: none;
+      padding: 12px 30px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 1rem;
+      transition: background-color 0.3s ease;
+      margin-top: 12px;
+    }
+    button:hover {
+      background-color: #005a9e;
+    }
+    /* 작은 화면 대응 */
+    @media (max-width: 480px) {
+      h1 {
+        font-size: 1.5rem;
+      }
+      h2 {
+        font-size: 1.1rem;
+      }
+      button {
+        padding: 14px 25px;
+        font-size: 1.1rem;
+      }
+    }
+  </style>
 </head>
 <body>
-  <h1>가장 큰 제목 (중요도 높음)</h1>
-  <h2>두 번째로 큰 제목</h2>
-  <h3>세 번째로 큰 제목</h3>
-  <h4>네 번째</h4>
-  <h5>다섯 번째</h5>
-  <h6>가장 작은 제목</h6>
-  <!-- 본문 내용 -->
+  <h1>국립공원 응급구조사 현장대응 페이지</h1>
+  
+  <div class="section">
+    <h2>구조대 환자평가</h2>
+    <button onclick="window.open('https://emtcsh.github.io/', '_blank', 'noopener')">바로가기</button>
+  </div>
+  
+  <div class="section">
+    <h2>구급대 환자평가</h2>
+    <button onclick="window.open('https://emtcsh.github.io/emt', '_blank', 'noopener')">바로가기</button>
+  </div>
+  
+  <div class="section">
+    <h2>국립공원 특수구조대 중증도 분류도구 (교육/시뮬레이션용)</h2>
+    <button onclick="window.open('https://emtcsh.github.io/ktas', '_blank', 'noopener')">바로가기</button>
+  </div>
+  
+  <div class="section">
+    <h2>국립공원 특수구조대 구급처치 세분화 버전 (교육/시뮬레이션용)</h2>
+    <button onclick="window.open('https://emtcsh.github.io/KTAS.html', '_blank', 'noopener')">바로가기</button>
+  </div>
+  
+  <div class="section">
+    <h2>응급구조사 구급기록</h2>
+    <button onclick="window.open('https://emtcsh.github.io/paramedic.html', '_blank', 'noopener')">바로가기</button>
+  </div>
+  
+  <div class="section">
+    <h2>병원 의료지도</h2>
+    <button onclick="window.open('https://emtcsh.github.io/em.html', '_blank', 'noopener')">바로가기</button>
+  </div>
+  
+  <div class="section">
+    <h2>의료지도 상황기록</h2>
+    <button onclick="window.open('https://emtcsh.github.io/ems.html', '_blank', 'noopener')">바로가기</button>
+  </div>  
+  
+  <div class="section">
+    <h2>구조요청 GPS 좌표</h2>
+    <button onclick="window.open('https://emtcsh.github.io/gps', '_blank', 'noopener')">바로가기</button>   
+  </div>
 </body>
 </html>
-
-
-<a href="https://www.example.com" target="_blank">이 링크를 공유하세요</a>
-
-
-<button onclick="copyURL()">링크 복사하기</button>
-
-<script>
-  function copyURL() {
-    navigator.clipboard.writeText(window.location.href)
-      .then(() => alert('링크가 복사되었습니다!'))
-      .catch(err => alert('복사에 실패했습니다.'));
-  }
-</script>
