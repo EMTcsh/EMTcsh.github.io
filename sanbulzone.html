@@ -1,195 +1,252 @@
 <!DOCTYPE html>
 <html lang="ko" class="h-full">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>무등산 산불관리 시스템</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <style>
-    html, body {
-      height: 100%;
-      margin: 0; padding: 0;
-      display: flex;
-      flex-direction: column;
-      background-color: #f3f4f6;
-    }
-    #map {
-      height: 100vh;
-      width: 100%;
-      border-radius: 0.5rem;
-      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-    }
-    .info-panel {
-      max-height: 100%;
-      overflow-y: auto;
-      font-size: 14px;
-    }
-    #popup {
-      position: absolute;
-      background: white;
-      border-radius: 0.5rem;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-      padding: 15px;
-      z-index: 1000;
-      width: 260px;
-      font-size: 14px;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>무등산 산불관리 시스템</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            background-color: #f3f4f6;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        #map {
+            height: 100%; /* 부모 컨테이너에 맞춰 100% */
+            width: 100%;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .info-panel {
+            max-height: 100%; /* 부모 컨테이너에 맞춰 100% */
+            overflow-y: auto;
+        }
+    </style>
 </head>
-<body>
-  <header class="p-4 text-center">
-    <h1 class="text-3xl font-extrabold text-gray-800 tracking-tight">무등산 산불관리 시스템</h1>
-    <p class="mt-2 text-lg text-gray-600">위성 지도를 통해 산사태 위험 지역을 모니터링하고 관리합니다.</p>
-  </header>
+<body class="bg-gray-100">
+    <div class="p-4 sm:p-8">
+        <!-- 헤더 -->
+        <header class="text-center">
+            <h1 class="text-3xl sm:text-4xl font-extrabold text-gray-800 tracking-tight">무등산 산불관리 시스템</h1>
+            <p class="mt-2 text-lg text-gray-600">위성 지도를 통해 산불불 위험 지역을 모니터링하고 관리합니다.</p>
+        </header>
+    </div>
 
-  <main class="flex gap-4 p-4" style="height: calc(100vh - 120px);">
-    <div id="map" class="flex-grow rounded-xl shadow-lg"></div>
+    <!-- 지도 및 제어판 (화면의 남은 공간을 차지하도록 flex-1 적용) -->
+    <main class="flex flex-col lg:flex-row p-4 sm:p-8 pt-0 gap-8 overflow-hidden fixed-container">
+         <!-- 지도 컨테이너 -->
+<div id="map-container" class="relative w-full h-screen">
+    <div id="map" class="w-full h-full"></div>
 
-    <aside class="w-72 bg-white p-6 rounded-xl shadow-lg flex flex-col">
-      <h2 class="text-2xl font-bold mb-4">정보 패널</h2>
-      <div id="infoPanel" class="info-panel text-gray-700">
-        마커를 클릭하여 상세 정보를 확인하세요.
+    <!-- 패널을 지도 위에 띄우기 -->
+    <div class="absolute top-4 right-4 w-72 bg-white p-6 rounded-xl shadow-lg space-y-6">
+        <h3>무등산국립공원 산불관리 현황</h3>
+        <p>총 탐방로: 38구간 99.4km<br></p>
+        <p>개방 탐방로: 35구간 95.5km<br></p>
+        <p>통제 탐방로: 3구간 3.9km<br></p>
+        <p>감시초소 1개/통제소 3개/ 인화물질보관함 8개<br></p>
       </div>
-    </aside>
-  </main>
+</div>
 
-  <!-- 네이버 지도 API -->
-  <script src="https://oapi.map.naver.com/openapi/v3/maps.js?ncpClientId=g2u4orbiqf"></script>
-  <script>
-    let map;
-    const markers = [];
-    const landslideData = [];
+        <!-- 제어판 & 정보 패널 -->
+        <div class="w-1/6 bg-white p-6 rounded-xl shadow-lg space-y-6 flex-shrink-0">
+            <div class="space-y-4">
+                <h2 class="text-2xl font-bold text-gray-800">지도 제어</h2>
+                <!-- 좌표 입력 기능 추가 -->
+                <div>
+                    <input type="text" id="latInput" placeholder="위도 (예: 37.5)" class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <input type="text" id="lngInput" placeholder="경도 (예: 127.0)" class="w-full mt-2 px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-2 focus:ring-blue-500">
+                    <button id="addByCoordBtn" class="w-full mt-2 bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition-colors duration-200">
+                        좌표로 위험 지역 표시
+                    </button>
+                </div>
 
-    // 아이콘 URL
-    const icons = {
-      person: 'https://cdn-icons-png.flaticon.com/512/847/847969.png',
-      firetruck: 'https://cdn-icons-png.flaticon.com/512/2966/2966489.png'
-    };
+                <hr class="border-gray-200">
+                
+                <button id="addPointBtn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition-colors duration-200">
+                    지도에서 클릭하여 표시
+                </button>
+                <button id="toggleMapTypeBtn" class="w-full bg-gray-500 hover:bg-gray-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition-colors duration-200">
+                    지도/위성 전환
+                </button>
+            </div>
+            
+            <hr class="border-gray-200">
 
-    function initMap() {
-      map = new naver.maps.Map('map', {
-        center: new naver.maps.LatLng(35.119158, 127.003814),
-        zoom: 13
-      });
-
-      // 지도 클릭 시 팝업 열기
-      naver.maps.Event.addListener(map, 'click', e => {
-        showPopup(e.coord);
-      });
-    }
-
-    function showPopup(latlng) {
-      closePopup();
-
-      // 팝업 위치 화면 좌표로 변환
-      const projection = map.getProjection();
-      const point = projection.fromCoordToPoint(latlng);
-      const scale = Math.pow(2, map.getZoom());
-      const pixelPoint = new naver.maps.Point(point.x * scale, point.y * scale);
-
-      // 화면 좌표 기준 팝업 위치 조정
-      const popup = document.createElement('div');
-      popup.id = 'popup';
-      popup.style.left = (pixelPoint.x + 10) + 'px';
-      popup.style.top = (pixelPoint.y + 10) + 'px';
-
-      popup.innerHTML = `
-        <div class="space-y-3">
-          <div><strong>아이콘 선택:</strong><br>
-            <label><input type="radio" name="iconType" value="person" checked> 사람</label>
-            <label class="ml-3"><input type="radio" name="iconType" value="firetruck"> 소방차</label>
-          </div>
-          <div><strong>위험도 선택:</strong><br>
-            <label><input type="radio" name="riskLevel" value="낮음"> 낮음</label>
-            <label class="ml-3"><input type="radio" name="riskLevel" value="보통" checked> 보통</label>
-            <label class="ml-3"><input type="radio" name="riskLevel" value="높음"> 높음</label>
-          </div>
-          <div class="text-right">
-            <button id="confirmBtn" class="bg-blue-600 text-white px-3 py-1 rounded">확인</button>
-            <button id="cancelBtn" class="bg-gray-400 text-white px-3 py-1 rounded ml-2">취소</button>
-          </div>
+            <div class="space-y-4">
+                <h3 class="text-2xl font-bold text-gray-800">산불 발생지지 정보</h3>
+                <div id="infoPanel" class="info-panel bg-gray-50 p-4 rounded-lg border border-gray-200 text-gray-700">
+                    마커를 클릭하여 상세 정보를 확인하세요.
+                </div>
+            </div>
         </div>
-      `;
+    </main>
 
-      document.body.appendChild(popup);
+    <!-- Naver Maps API 로드 -->
+    <script src="https://oapi.map.naver.com/openapi/v3/maps.js?ncpClientId=g2u4orbiqf"></script>
+    <script>
+        // 이 부분을 실제 Naver Maps API 클라이언트 ID로 교체하세요.
+        const naverClientId = "g2u4orbiqf";
 
-      // 확인 버튼 클릭
-      document.getElementById('confirmBtn').onclick = () => {
-        const iconType = document.querySelector('input[name="iconType"]:checked').value;
-        const risk = document.querySelector('input[name="riskLevel"]:checked').value;
+        // 더미 데이터: 실제로는 백엔드나 데이터베이스에서 가져와야 합니다.
+        const landslideData = [
+            { lat: 35.129108, lng: 126.970008, risk: "보통", date: "2014-11-28", description: "과거 산불발생 지역 증심사 " },
 
-        const iconUrl = icons[iconType];
-        const desc = iconType === 'person' ? '사람 아이콘' : '소방차 아이콘';
+        ];
 
-        addPoint(latlng, iconUrl, risk, desc);
-        closePopup();
-      };
+        let map;
+        let markers = [];
+        let isSatellite = false;
+        let isAddingPoint = false; // 새로운 상태 변수
 
-      // 취소 버튼 클릭
-      document.getElementById('cancelBtn').onclick = closePopup;
-    }
+        function initMap() {
+            // 지도 초기화
+            map = new naver.maps.Map('map', {
+                center: new naver.maps.LatLng(35.119158, 127.003814), // 서석대 중심
+                zoom: 13,
+                zoomControl: true,
+                mapTypeControl: true
+            });
 
-    function closePopup() {
-      const existing = document.getElementById('popup');
-      if (existing) existing.remove();
-    }
+            // 초기 마커 렌더링
+            renderMarkers();
 
-    function addPoint(latlng, iconUrl, risk, description) {
-      const newPoint = {
-        lat: latlng.y,
-        lng: latlng.x,
-        risk,
-        date: new Date().toISOString().slice(0, 10),
-        description,
-        iconUrl
-      };
-      landslideData.push(newPoint);
+            // 지도 클릭 이벤트
+            naver.maps.Event.addListener(map, 'click', function(e) {
+                if (isAddingPoint) {
+                    const newLat = e.coord.y;
+                    const newLng = e.coord.x;
 
-      const marker = new naver.maps.Marker({
-        position: latlng,
-        map,
-        icon: {
-          url: iconUrl,
-          size: new naver.maps.Size(40, 40),
-          origin: new naver.maps.Point(0, 0),
-          anchor: new naver.maps.Point(20, 40)
-        },
-        title: `위험도: ${risk}`
-      });
-      markers.push(marker);
+                    // 새로운 더미 데이터 추가
+                    const newPoint = {
+                        lat: newLat,
+                        lng: newLng,
+                        risk: "보통", // 기본값 설정
+                        date: new Date().toISOString().slice(0, 10),
+                        description: "새롭게 추가된 위험 지역"
+                    };
+                    landslideData.push(newPoint);
 
-      marker.addListener('click', () => {
-        document.getElementById('infoPanel').innerHTML = `
-          <strong>${newPoint.date}</strong><br>
-          위험도: ${risk}<br>
-          좌표: ${newPoint.lat.toFixed(5)}, ${newPoint.lng.toFixed(5)}<br>
-          설명: ${description}
-        `;
-      });
+                    // 마커 다시 렌더링
+                    renderMarkers();
+                    isAddingPoint = false; // 상태 초기화
 
-      // 백엔드 저장 예시 (주석 처리, 필요 시 URL과 API 수정)
-      /*
-      fetch("https://your-backend-api.com/api/landslides", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(newPoint)
-      })
-      .then(res => {
-        if (!res.ok) throw new Error("서버 저장 실패");
-        return res.json();
-      })
-      .then(data => {
-        console.log("백엔드 저장 성공:", data);
-      })
-      .catch(err => {
-        console.error("백엔드 저장 오류:", err);
-      });
-      */
+                    // 버튼 및 패널 텍스트 복구
+                    document.getElementById("addPointBtn").textContent = "지도에서 클릭하여 추가";
+                    document.getElementById("addPointBtn").classList.remove("bg-red-500", "hover:bg-red-600");
+                    document.getElementById("addPointBtn").classList.add("bg-blue-600", "hover:bg-blue-700");
+                    document.getElementById("infoPanel").innerHTML = "새로운 위험 지점이 추가되었습니다. 마커를 클릭하여 상세 정보를 확인하세요.";
+                }
+            });
+        }
 
-      document.getElementById('infoPanel').innerText = '새로운 위험 지점이 추가되었습니다.';
-    }
+        function renderMarkers() {
+            markers.forEach(marker => marker.setMap(null));
+            markers = [];
 
-    window.addEventListener('DOMContentLoaded', initMap);
-  </script>
+            landslideData.forEach(data => {
+                const marker = new naver.maps.Marker({
+                    position: new naver.maps.LatLng(data.lat, data.lng),
+                    map: map,
+                    title: `위험도: ${data.risk}`,
+                    icon: getMarkerIcon(data.risk)
+                });
+
+                // 마커 클릭 시 정보 패널 업데이트
+                naver.maps.Event.addListener(marker, 'click', () => {
+                    const infoPanel = document.getElementById("infoPanel");
+                    infoPanel.innerHTML = `
+                        <h3 class="text-xl font-semibold">${data.date}</h3>
+                        <p class="mt-2 text-base"><strong>위험도:</strong> <span class="font-bold text-${getRiskColor(data.risk)}-600">${data.risk}</span></p>
+                        <p class="mt-1 text-base"><strong>위치:</strong> ${data.lat}, ${data.lng}</p>
+                        <p class="mt-1 text-base"><strong>설명:</strong> ${data.description}</p>
+                    `;
+                });
+                markers.push(marker);
+            });
+        }
+
+        function getMarkerIcon(risk) {
+            let color = "";
+            switch(risk) {
+                case "높음": color = "red"; break;
+                case "보통": color = "orange"; break;
+                case "낮음": color = "yellow"; break;
+                default: color = "grey"; break;
+            }
+            // 위험도에 따라 다른 아이콘 사용 (Naver Maps는 별도의 아이콘 URL 제공)
+            // 여기서는 임시로 기본 아이콘을 사용하고, 위험도를 색상으로만 구분합니다.
+            return {
+                url: `https://naver-maps.github.io/maps.js/docs/img/example/pin_default.png`,
+                size: new naver.maps.Size(32, 50),
+                origin: new naver.maps.Point(0, 0),
+                anchor: new naver.maps.Point(16, 50)
+            };
+        }
+        
+        // Tailwind CSS 클래스를 위한 위험도 색상 매핑
+        function getRiskColor(risk) {
+            switch(risk) {
+                case "높음": return "red";
+                case "보통": return "orange";
+                case "낮음": return "yellow";
+                default: return "gray";
+            }
+        }
+
+        // 이벤트 리스너
+        document.getElementById("addPointBtn").addEventListener("click", () => {
+            isAddingPoint = true;
+            document.getElementById("addPointBtn").textContent = "지도에서 위치를 클릭하세요...";
+            document.getElementById("addPointBtn").classList.remove("bg-blue-600", "hover:bg-blue-700");
+            document.getElementById("addPointBtn").classList.add("bg-red-500", "hover:bg-red-600");
+            document.getElementById("infoPanel").innerHTML = "<strong class='text-red-500'>지도 클릭 모드 활성화됨.</strong><br>지도에서 마커를 추가할 위치를 클릭하세요.";
+        });
+        
+        // 새롭게 추가된 좌표 입력 버튼에 대한 이벤트 리스너
+        document.getElementById("addByCoordBtn").addEventListener("click", () => {
+            const lat = parseFloat(document.getElementById("latInput").value);
+            const lng = parseFloat(document.getElementById("lngInput").value);
+
+            if (isNaN(lat) || isNaN(lng)) {
+                document.getElementById("infoPanel").innerHTML = "<strong class='text-red-500'>오류:</strong> 올바른 위도와 경도 값을 입력하세요.";
+                return;
+            }
+
+            const newPoint = {
+                lat: lat,
+                lng: lng,
+                risk: "보통",
+                date: new Date().toISOString().slice(0, 10),
+                description: "좌표로 추가된 위험 지역"
+            };
+            landslideData.push(newPoint);
+
+            renderMarkers();
+
+            document.getElementById("infoPanel").innerHTML = "새로운 위험 지점이 추가되었습니다. 마커를 클릭하여 상세 정보를 확인하세요.";
+            document.getElementById("latInput").value = "";
+            document.getElementById("lngInput").value = "";
+        });
+
+        document.getElementById("toggleMapTypeBtn").addEventListener("click", () => {
+            isSatellite = !isSatellite;
+            if (isSatellite) {
+                map.setMapTypeId(naver.maps.MapTypeId.SATELLITE);
+            } else {
+                map.setMapTypeId(naver.maps.MapTypeId.NORMAL);
+            }
+        });
+
+        // 페이지 로드 시 지도 초기화
+        window.addEventListener('DOMContentLoaded', initMap);
+    </script>
 </body>
 </html>
