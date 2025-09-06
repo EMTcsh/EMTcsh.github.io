@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>산불 비상대응 상황판</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Roboto', sans-serif;
+      background-color: #f8f9fc;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      color: #333;
+    }
+    h2 {
+      text-align: center;
+      color: #4a90e2;
+      margin-top: 20px;
+    }
+    .container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding: 20px;
+      overflow-y: auto;
+      justify-content: space-between;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+      background-color: #fff;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    th, td {
+      padding: 14px 20px;
+      text-align: center;
+      border-bottom: 1px solid #e0e0e0;
+    }
+    th {
+      background-color: #f4f7fa;
+      font-weight: 500;
+    }
+    td button {
+      background-color: #e74c3c;
+      color: white;
+      border: none;
+      padding: 8px 10px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    td button:hover { background-color: #c0392b; }
+    form {
+      background-color: #ffffff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      margin-top: auto;
+      display: grid;
+      gap: 15px;
+    }
+    .form-row { display: flex; gap: 15px; flex-wrap: wrap; }
+    .form-row input {
+      padding: 12px; font-size: 16px;
+      border: 1px solid #ccc; border-radius: 5px;
+      width: 100%; box-sizing: border-box;
+    }
+    .form-row input:focus { border-color: #4a90e2; }
+    .form-row .half { width: 32%; }
+    form button {
+      background-color: #4a90e2;
+      color: white;
+      border: none;
+      padding: 12px 12px;
+      font-size: 16px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    .button-group { display: flex; gap: 20px; justify-content: space-between; }
+    .button-group button { flex: 1; }
+    @media (max-width: 768px) {
+      .form-row { flex-direction: column; }
+      .button-group { flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <h2>산불 비상대응 상황판</h2>
+
+  <!-- 근무표 테이블 -->
+  <table>
+    <thead>
+      <tr>
+        <th>날짜</th>
+        <th>대응시간</th>
+        <th>대응자</th>
+        <th>대응장소</th>
+        <th>산불위기경보단계</th>
+        <th>산불대응(순찰) 구역</th>
+        <th>개인임무</th>
+        <th>삭제</th>
+      </tr>
+    </thead>
+    <tbody id="workerTable"></tbody>
+  </table>
+  <br>
+
+  <!-- 근무자 추가 폼 -->
+  <form id="workerForm">
+    <div class="form-row">
+      <h2>산불 비상대응 입력</h2>
+      <div class="half">
+        <label for="date">날짜:</label>
+        <input type="date" id="date" required>
+      </div>
+      <div class="half">
+        <label for="startTime">현장대응 시간:</label>
+        <input type="time" id="startTime" required>
+      </div>
+      <div class="half">
+        <label for="endTime">대응종료 시간:</label>
+        <input type="time" id="endTime" required>
+      </div>
+      <div class="half">
+        <label for="name">현장대응(근무)자:</label>
+        <input type="text" id="name" placeholder="이름" required>
+      </div>
+      <div class="half">
+        <label for="remarks">현장대응(근무)장소:</label>
+        <input type="text" id="remarks" placeholder="근무 장소" required>
+      </div>
+      <div class="half">
+        <label for="warningLevel">산불위기경보단계:</label>
+        <input id="warningLevel" placeholder="단계 입력" required>
+      </div>
+      <div class="half">
+        <label for="fireIndex">산불발생생 구역:</label>
+        <input id="fireIndex" placeholder="구역 입력" required>
+      </div>
+      <div class="half">
+        <label for="notice">개인임무:</label>
+        <input id="notice" placeholder="임무 입력" required>
+      </div>
+      <div class="button-group">
+        <button type="button" onclick="addWorker()">추가</button>
+        <button type="button" onclick="shareLink()">공유</button>
+        <button type="button" onclick="saveToExcel()">파일저장</button>
+      </div>
+    </div>
+  </form>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.3/xlsx.full.min.js"></script>
+<script>
+  let db;
+  const dbName = 'workerDB';
+  const dbVersion = 1;
+  let deletedWorkers = [];
+
+  // IndexedDB 연결
+  function openDB() {
+    const request = indexedDB.open(dbName, dbVersion);
+    request.onupgradeneeded = function (event) {
+      db = event.target.result;
+      if (!db.objectStoreNames.contains('workers')) {
+        db.createObjectStore('workers', { keyPath: 'id', autoIncrement: true });
+      }
+    };
+    request.onsuccess = function (event) {
+      db = event.target.result;
+      loadDataFromDB();
+    };
+    request.onerror = function (event) {
+      console.error("DB 연결 실패:", event.target.error);
+    };
+  }
+
+  // DB에서 데이터 불러오기
+  function loadDataFromDB() {
+    const transaction = db.transaction(['workers'], 'readonly');
+    const store = transaction.objectStore('workers');
+    const request = store.getAll();
+    request.onsuccess = function (event) {
+      const workers = event.target.result;
+      workers.forEach(worker => addRowToTable(worker));
+    };
+  }
+
+  // 근무자 추가
+  function addWorker() {
+    const date = document.getElementById("date").value;
+    const startTime = document.getElementById("startTime").value;
+    const endTime = document.getElementById("endTime").value;
+    const name = document.getElementById("name").value;
+    const remarks = document.getElementById("remarks").value;
+    const warningLevel = document.getElementById("warningLevel").value;
+    const fireIndex = document.getElementById("fireIndex").value;
+    const notice = document.getElementById("notice").value;
+
+    if (!date || !startTime || !endTime || !name || !remarks || !warningLevel || !fireIndex || !notice) {
+      alert("모든 필수 정보를 입력해주세요.");
+      return;
+    }
+
+    const workTime = `${startTime} - ${endTime}`;
+    const worker = { date, workTime, name, remarks, warningLevel, fireIndex, notice };
+
+    // ✅ 구글 Apps Script 웹앱 URL (실제 본인 URL로 교체하세요)
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby1goX7uk_nAkKALFHShv4WE-FpqortF_auklXY5lOuh0Fal3US41H2zVrRDDX0B7z1/exec";
+
+    fetch(SCRIPT_URL, {
+      method: "POST",
+      mode: "no-cors",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(worker)
+    })
+    .then(() => console.log("구글시트 저장 요청 완료"))
+    .catch(err => console.error("구글시트 저장 실패:", err));
+
+    saveToDB(worker);
+    addRowToTable(worker);
+    document.getElementById("workerForm").reset();
+  }
+
+  // IndexedDB에 저장
+  function saveToDB(worker) {
+    const transaction = db.transaction(['workers'], 'readwrite');
+    const store = transaction.objectStore('workers');
+    store.add(worker);
+  }
+
+  // 테이블에 추가
+  function addRowToTable(worker) {
+    const tableBody = document.getElementById('workerTable');
+    const row = document.createElement('tr');
+    row.setAttribute('data-id', worker.id);
+
+    row.innerHTML = `
+      <td>${worker.date}</td>
+      <td>${worker.workTime}</td>
+      <td>${worker.name}</td>
+      <td>${worker.remarks}</td>
+      <td>${worker.warningLevel}</td>
+      <td>${worker.fireIndex}</td>
+      <td>${worker.notice}</td>
+      <td><button onclick="deleteWorker(${worker.id})">삭제</button></td>
+    `;
+    tableBody.appendChild(row);
+  }
+
+  // 근무자 삭제
+  function deleteWorker(id) {
+    const transaction = db.transaction(['workers'], 'readwrite');
+    const store = transaction.objectStore('workers');
+    store.delete(id);
+    deletedWorkers.push(id);
+    const row = document.querySelector(`tr[data-id="${id}"]`);
+    row.remove();
+  }
+
+  // 공유 기능
+  function shareLink() {
+    let tableData = "날짜\t현장대응 시간\t현장대응(근무)자\t현장대응(근무)장소\t산불위기경보단계\t산불발생생 구역\t개인임무\n";
+    const rows = document.querySelectorAll("#workerTable tr");
+    rows.forEach(row => {
+      const cols = row.querySelectorAll("td");
+      let rowData = [];
+      cols.forEach(col => rowData.push(col.textContent.trim()));
+      tableData += rowData.join("\t") + "\n";
+    });
+    navigator.clipboard.writeText(tableData)
+      .then(() => alert("근무표 데이터가 복사되었습니다. 붙여넣기 하세요."))
+      .catch(err => alert("클립보드 복사 실패: " + err));
+  }
+
+  // Excel 파일 저장
+  function saveToExcel() {
+    const tableData = [];
+    const headers = ["날짜", "현장대응 시간", "현장대응(근무)자", "현장대응(근무)장소", "산불위기경보단계", "산불발생생 구역", "개인임무"];
+    tableData.push(headers);
+    const rows = document.querySelectorAll("#workerTable tr");
+    rows.forEach(row => {
+      const id = row.getAttribute('data-id');
+      if (deletedWorkers.includes(parseInt(id))) return;
+      const cols = row.querySelectorAll("td");
+      let rowData = [];
+      cols.forEach((col, i) => {
+        if (i !== cols.length - 1) rowData.push(col.textContent.trim());
+      });
+      tableData.push(rowData);
+    });
+    const today = new Date().toISOString().split('T')[0];
+    const ws = XLSX.utils.aoa_to_sheet(tableData);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "근무표");
+    XLSX.writeFile(wb, `산불_근무표_${today}.xlsx`);
+  }
+
+  openDB();
+</script>
+</body>
+</html>
