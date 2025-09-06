@@ -2,29 +2,18 @@
 <html lang="ko" class="h-full">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>무등산 산불관리 시스템</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     html, body {
       height: 100%;
-      margin: 0;
-      padding: 0;
-      display: flex;
-      flex-direction: column;
+      margin: 0; padding: 0;
+      display: flex; flex-direction: column;
       background-color: #f3f4f6;
     }
-    #map {
-      height: 100%;
-      width: 100%;
-      border-radius: 0.5rem;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    }
-    .info-panel {
-      max-height: 100%;
-      overflow-y: auto;
-    }
-    /* 팝업 기본 스타일 */
+    #map { height: 100%; width: 100%; border-radius: 0.5rem; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+    .info-panel { max-height: 100%; overflow-y: auto; }
     #popup {
       position: absolute;
       background: white;
@@ -32,7 +21,8 @@
       padding: 1rem;
       box-shadow: 0 4px 6px rgba(0,0,0,0.2);
       z-index: 1000;
-      width: 240px;
+      width: 260px;
+      font-size: 14px;
     }
   </style>
 </head>
@@ -50,10 +40,10 @@
       <div id="map" class="w-full h-full"></div>
       <div class="absolute top-4 right-4 w-72 bg-white p-6 rounded-xl shadow-lg space-y-4">
         <h3>무등산국립공원 산불관리 현황</h3>
-        <p>- 총 탐방로: 38구간 99.4km<br></p>
-        <p>-개방 탐방로: 35구간 95.5km<br></p>
-        <p>-통제 탐방로: 3구간 3.9km<br></p>
-        <p>-감시초소1개/통제소3개/인화물질보관함8개<br></p>
+        <p>총 탐방로: 38구간 99.4km<br></p>
+        <p>개방 탐방로: 35구간 95.5km<br></p>
+        <p>통제 탐방로: 3구간 3.9km<br></p>
+        <p>감시초소 1개/통제소 3개/ 인화물질보관함 8개<br></p>
       </div>
     </div>
 
@@ -98,16 +88,11 @@
           </div>
         </div>
 
-        <!-- 추가 버튼 -->
-        <button id="addByCoordBtn" class="w-full mt-2 bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-lg">
-          좌표로 위험 지역 표시
-        </button>
+        <button id="addByCoordBtn" class="w-full mt-2 bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-lg">좌표로 위험 지역 표시</button>
 
         <hr class="border-gray-200" />
 
-        <button id="toggleMapTypeBtn" class="w-full bg-gray-500 hover:bg-gray-600 text-white font-semibold py-2 px-4 rounded-lg">
-          지도/위성 전환
-        </button>
+        <button id="toggleMapTypeBtn" class="w-full bg-gray-500 hover:bg-gray-600 text-white font-semibold py-2 px-4 rounded-lg">지도/위성 전환</button>
       </div>
 
       <hr class="border-gray-200" />
@@ -128,12 +113,27 @@
     let isSatellite = false;
     const landslideData = [];
 
+    // 위험도별 아이콘 URL (사람/소방차 각 위험도별로 다르게 표시하기 위해)
+    const icons = {
+      person: {
+        낮음: 'https://cdn-icons-png.flaticon.com/512/847/847969.png',
+        보통: 'https://cdn-icons-png.flaticon.com/512/847/847974.png',
+        높음: 'https://cdn-icons-png.flaticon.com/512/847/847971.png'
+      },
+      firetruck: {
+        낮음: 'https://cdn-icons-png.flaticon.com/512/12349/12349658.png',
+        보통: 'https://cdn-icons-png.flaticon.com/512/12349/12349660.png',
+        높음: 'https://cdn-icons-png.flaticon.com/512/12349/12349661.png'
+      }
+    };
+
     function initMap() {
       map = new naver.maps.Map('map', {
         center: new naver.maps.LatLng(35.119158, 127.003814),
         zoom: 13
       });
 
+      // 지도 클릭하면 팝업으로 위험지역 추가
       naver.maps.Event.addListener(map, 'click', e => {
         showPopup(e.coord);
       });
@@ -144,10 +144,8 @@
 
       const popup = document.createElement('div');
       popup.id = 'popup';
-      popup.className = 'popup';
 
-      // 지도 내 클릭 좌표 기준으로 위치 지정
-      const pos = map.getDiv().getBoundingClientRect();
+      // 지도 좌표 -> 화면 좌표로 변환
       const point = map.latLngToPoint(latlng);
       popup.style.left = point.x + 'px';
       popup.style.top = point.y + 'px';
@@ -155,31 +153,33 @@
       popup.innerHTML = `
         <div class="space-y-3">
           <div><strong>아이콘 선택:</strong><br>
-            <label><input type="radio" name="iconType" value="person" checked> 사람</label>
-            <label class="ml-2"><input type="radio" name="iconType" value="firetruck"> 소방차</label>
+<           <label><input type="radio" name="popupIconType" value="person" checked> 사람</label>
+            <label class="ml-2"><input type="radio" name="popupIconType" value="firetruck"> 소방차</label>
           </div>
           <div><strong>위험도 선택:</strong><br>
-            <label><input type="radio" name="riskLevel" value="낮음"> 낮음</label>
-            <label class="ml-2"><input type="radio" name="riskLevel" value="보통" checked> 보통</label>
-            <label class="ml-2"><input type="radio" name="riskLevel" value="높음"> 높음</label>
+            <label><input type="radio" name="popupRiskLevel" value="낮음"> 낮음</label>
+            <label class="ml-2"><input type="radio" name="popupRiskLevel" value="보통" checked> 보통</label>
+            <label class="ml-2"><input type="radio" name="popupRiskLevel" value="높음"> 높음</label>
           </div>
           <div class="text-right">
             <button id="confirmBtn" class="bg-blue-600 text-white px-3 py-1 rounded">확인</button>
             <button id="cancelBtn" class="bg-gray-400 text-white px-3 py-1 rounded ml-2">취소</button>
           </div>
-        </div>`;
-
+        </div>
+      `;
       document.body.appendChild(popup);
 
+      // 팝업 버튼 이벤트
       document.getElementById('confirmBtn').onclick = () => {
-        const iconType = document.querySelector('input[name="iconType"]:checked').value;
-        const risk = document.querySelector('input[name="riskLevel"]:checked').value;
+        const iconType = document.querySelector('input[name="popupIconType"]:checked').value;
+        const risk = document.querySelector('input[name="popupRiskLevel"]:checked').value;
 
-        const iconUrl = iconType === 'person'
-          ? 'https://cdn-icons-png.flaticon.com/512/847/847969.png'
-          : 'https://cdn-icons-png.flaticon.com/512/2966/2966489.png';
+        // 아이콘 URL 선택
+        const iconUrl = icons[iconType][risk];
 
-        const desc = iconType === 'person' ? '사람 아이콘' : '소방차 아이콘';
+        // 설명 문자열 생성
+        const desc = `${iconType === 'person' ? '사람' : '소방차'} - 위험도: ${risk}`;
+
         addPoint(latlng, iconUrl, risk, desc);
         closePopup();
       };
@@ -197,29 +197,36 @@
         lat: latlng.y,
         lng: latlng.x,
         risk,
-        date: new Date().toISOString().slice(0,10),
+        date: new Date().toISOString().slice(0, 10),
         description,
         iconUrl
       };
       landslideData.push(newPoint);
 
+      // 마커 생성
       const marker = new naver.maps.Marker({
         position: latlng,
         map,
-        icon: { url: iconUrl, size: new naver.maps.Size(40,40), anchor: new naver.maps.Point(20,20) },
+        icon: {
+          url: iconUrl,
+          size: new naver.maps.Size(40, 40),
+          anchor: new naver.maps.Point(20, 20),
+        },
         title: `위험도: ${risk}`
       });
       markers.push(marker);
 
+      // 마커 클릭 시 정보패널에 상세정보 표시
       naver.maps.Event.addListener(marker, 'click', () => {
         document.getElementById('infoPanel').innerHTML = `
           <strong>${newPoint.date}</strong><br>
           위험도: ${risk}<br>
-          좌표: ${newPoint.lat}, ${newPoint.lng}<br>
-          설명: ${description}`;
+          좌표: ${newPoint.lat.toFixed(5)}, ${newPoint.lng.toFixed(5)}<br>
+          설명: ${description}
+        `;
       });
 
-      // ✅ 백엔드 저장
+      // 백엔드 저장 (샘플, 실제 URL 수정 필요)
       fetch("https://your-backend-api.com/api/landslides", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -236,32 +243,33 @@
         console.error("백엔드 저장 오류:", err);
       });
 
+      // 좌표 입력창 초기화 및 안내 문구 변경
       document.getElementById("infoPanel").innerHTML = "새로운 위험 지점이 추가되었습니다.";
       document.getElementById("latInput").value = "";
       document.getElementById("lngInput").value = "";
     }
 
-    // 좌표 입력 후 버튼 클릭 시 마커 추가
+    // 좌표 직접 입력 후 버튼 클릭시 마커 추가
     document.getElementById("addByCoordBtn").addEventListener("click", () => {
-      const latVal = parseFloat(document.getElementById("latInput").value);
-      const lngVal = parseFloat(document.getElementById("lngInput").value);
-      if (isNaN(latVal) || isNaN(lngVal)) {
-        alert("유효한 위도와 경도를 입력해주세요.");
+      const lat = parseFloat(document.getElementById("latInput").value);
+      const lng = parseFloat(document.getElementById("lngInput").value);
+      if (isNaN(lat) || isNaN(lng)) {
+        alert("유효한 위도와 경도를 입력하세요.");
         return;
       }
+
+      // 선택된 아이콘과 위험도 가져오기
       const iconType = document.querySelector('input[name="iconType"]:checked').value;
       const risk = document.querySelector('input[name="riskLevel"]:checked').value;
 
-      const iconUrl = iconType === 'person'
-        ? 'https://cdn-icons-png.flaticon.com/512/847/847969.png'
-        : 'https://cdn-icons-png.flaticon.com/512/2966/2966489.png';
+      const iconUrl = icons[iconType][risk];
+      const latlng = new naver.maps.LatLng(lat, lng);
+      const desc = `${iconType === 'person' ? '사람' : '소방차'} - 위험도: ${risk}`;
 
-      const desc = iconType === 'person' ? '사람 아이콘' : '소방차 아이콘';
-
-      addPoint(new naver.maps.LatLng(latVal, lngVal), iconUrl, risk, desc);
+      addPoint(latlng, iconUrl, risk, desc);
     });
 
-    // 지도/위성 전환
+    // 지도 타입 전환
     document.getElementById("toggleMapTypeBtn").addEventListener("click", () => {
       isSatellite = !isSatellite;
       map.setMapTypeId(isSatellite ? naver.maps.MapTypeId.SATELLITE : naver.maps.MapTypeId.NORMAL);
@@ -271,4 +279,3 @@
   </script>
 </body>
 </html>
-
