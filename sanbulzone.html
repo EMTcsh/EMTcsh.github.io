@@ -81,7 +81,7 @@
             <hr class="border-gray-200">
 
             <div class="space-y-4">
-                <h3 class="text-2xl font-bold text-gray-800">산불 발생지지 정보</h3>
+                <h3 class="text-2xl font-bold text-gray-800">과거 산불발생 정보</h3>
                 <div id="infoPanel" class="info-panel bg-gray-50 p-4 rounded-lg border border-gray-200 text-gray-700">
                     마커를 클릭하여 상세 정보를 확인하세요.
                 </div>
@@ -97,7 +97,7 @@
 
         // 더미 데이터: 실제로는 백엔드나 데이터베이스에서 가져와야 합니다.
         const landslideData = [
-            { lat: 35.1285782, lng: 126.9699028, risk: "보통", date: "2024-9-29", description: "과거 산불발생 지역 증심사 " },
+            { lat: 35.1285782, lng: 126.9699028, risk: "국립공원구역", date: "2024-9-29", description: "과거 산불발생 지역 증심사 " },
 
         ];
 
@@ -139,46 +139,7 @@
                     isAddingPoint = false; // 상태 초기화
 
                     // 버튼 및 패널 텍스트 복구
-                    document.getElementById("addPointBtn").textContent = "지도에서 클릭하여 추가";
-                    document.getElementById("addPointBtn").classList.remove("bg-red-500", "hover:bg-red-600");
-                    document.getElementById("addPointBtn").classList.add("bg-blue-600", "hover:bg-blue-700");
-                    document.getElementById("infoPanel").innerHTML = "새로운 위험 지점이 추가되었습니다. 마커를 클릭하여 상세 정보를 확인하세요.";
-                }
-            });
-        }
-
-        function renderMarkers() {
-            markers.forEach(marker => marker.setMap(null));
-            markers = [];
-
-            landslideData.forEach(data => {
-                const marker = new naver.maps.Marker({
-                    position: new naver.maps.LatLng(data.lat, data.lng),
-                    map: map,
-                    title: `위험도: ${data.risk}`,
-                    icon: getMarkerIcon(data.risk)
-                });
-
-                // 마커 클릭 시 정보 패널 업데이트
-                naver.maps.Event.addListener(marker, 'click', () => {
-                    const infoPanel = document.getElementById("infoPanel");
-                    infoPanel.innerHTML = `
-                        <h3 class="text-xl font-semibold">${data.date}</h3>
-                        <p class="mt-2 text-base"><strong>위험도:</strong> <span class="font-bold text-${getRiskColor(data.risk)}-600">${data.risk}</span></p>
-                        <p class="mt-1 text-base"><strong>위치:</strong> ${data.lat}, ${data.lng}</p>
-                        <p class="mt-1 text-base"><strong>설명:</strong> ${data.description}</p>
-                    `;
-                });
-                markers.push(marker);
-            });
-        }
-
-        function getMarkerIcon(risk) {
-            let color = "";
-            switch(risk) {
-                case "높음": color = "red"; break;
-                case "보통": color = "orange"; break;
-                case "낮음": color = "yellow"; break;
+                    document.getElementById("addPointBtn").textContent = "지도에서 클릭하여립공원밖": color = "yellow"; break;
                 default: color = "grey"; break;
             }
             // 위험도에 따라 다른 아이콘 사용 (Naver Maps는 별도의 아이콘 URL 제공)
@@ -194,9 +155,9 @@
         // Tailwind CSS 클래스를 위한 위험도 색상 매핑
         function getRiskColor(risk) {
             switch(risk) {
-                case "높음": return "red";
-                case "보통": return "orange";
-                case "낮음": return "yellow";
+                case "국립공원구역": return "red";
+                case "국립공원인접": return "orange";
+                case "국립공원밖": return "yellow";
                 default: return "gray";
             }
         }
