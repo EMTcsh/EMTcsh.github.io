@@ -80,149 +80,172 @@
     </div>
   </main>
 
-  <!-- Naver Map API -->
-  <script src="https://oapi.map.naver.com/openapi/v3/maps.js?ncpClientId=g2u4orbiqf"></script>
-  <script>
-    const landslideData = [
-      {
-        lat: 35.1285782,
-        lng: 126.9699028,
-        risk: "국립공원구역",
-        date: "2024-09-29",
-        description: "과거 산불 발생 지역 (증심사 인근)"
-      }
-    ];
+ <!-- Naver Maps API 로드 -->
+    <script src="https://oapi.map.naver.com/openapi/v3/maps.js?ncpClientId=g2u4orbiqf"></script>
+    <script>
+        // 이 부분을 실제 Naver Maps API 클라이언트 ID로 교체하세요.
+        const naverClientId = "g2u4orbiqf";
 
-    let map;
-    let markers = [];
-    let isSatellite = false;
-    let isAddingPoint = false;
+        // 더미 데이터: 실제로는 백엔드나 데이터베이스에서 가져와야 합니다.
+        const landslideData = [
+            { lat: 35.129108, lng: 126.970008, risk: "보통", date: "2014-11-28", description: "동구 운림동 산 143-1 임." },
+            { lat: 35.123325, lng: 126.960225, risk: "보통", date: "2024-07-15", description: "동구 운림동 산 212 임." },
+            { lat: 35.167692, lng: 126.977608, risk: "보통", date: "2024-07-15", description: "북구 금곡동 994 답." },
+            { lat: 35.162464, lng: 126.963142, risk: "보통", date: "2024-07-15", description: "북구 청풍동 179-3 답." },
+            { lat: 35.161394, lng: 126.962547, risk: "보통", date: "2024-07-15", description: "북구 청풍동 200 전." },        
+            { lat: 35.172389, lng: 127.015358, risk: "보통", date: "2024-07-15", description: "북구 충효동 산 24 임." },
+            { lat: 35.158475, lng: 126.962533, risk: "보통", date: "2024-07-15", description: "북구 화암동 397-1." },
+            { lat: 35.155253, lng: 126.956025, risk: "보통", date: "2015-08-18", description: "화암동 산 95 임." },
+            { lat: 35.154136, lng: 126.957417, risk: "보통", date: "2015-08-18", description: "화암동 산 97 임." },
+        ];
 
-    function initMap() {
-      map = new naver.maps.Map("map", {
-        center: new naver.maps.LatLng(35.119158, 127.003814),
-        zoom: 13,
-        zoomControl: true,
-        mapTypeControl: true
-      });
+        let map;
+        let markers = [];
+        let isSatellite = false;
+        let isAddingPoint = false; // 새로운 상태 변수
 
-      renderMarkers();
+        function initMap() {
+            // 지도 초기화
+            map = new naver.maps.Map('map', {
+                center: new naver.maps.LatLng(35.119158, 127.003814), // 서석대 중심
+                zoom: 13,
+                zoomControl: true,
+                mapTypeControl: true
+            });
 
-      naver.maps.Event.addListener(map, "click", function (e) {
-        if (isAddingPoint) {
-          const newLat = e.coord.y;
-          const newLng = e.coord.x;
+            // 초기 마커 렌더링
+            renderMarkers();
 
-          const newPoint = {
-            lat: newLat,
-            lng: newLng,
-            risk: "국립공원구역",
-            date: new Date().toISOString().slice(0, 10),
-            description: "지도 클릭으로 추가된 위험 지역"
-          };
+            // 지도 클릭 이벤트
+            naver.maps.Event.addListener(map, 'click', function(e) {
+                if (isAddingPoint) {
+                    const newLat = e.coord.y;
+                    const newLng = e.coord.x;
 
-          landslideData.push(newPoint);
-          renderMarkers();
+                    // 새로운 더미 데이터 추가
+                    const newPoint = {
+                        lat: newLat,
+                        lng: newLng,
+                        risk: "보통", // 기본값 설정
+                        date: new Date().toISOString().slice(0, 10),
+                        description: "새롭게 추가된 위험 지역"
+                    };
+                    landslideData.push(newPoint);
 
-          isAddingPoint = false;
-          document.getElementById("addPointBtn").textContent = "지도에서 클릭하여 표시";
-          document.getElementById("addPointBtn").classList.remove("bg-red-500", "hover:bg-red-600");
-          document.getElementById("addPointBtn").classList.add("bg-blue-600", "hover:bg-blue-700");
-          document.getElementById("infoPanel").innerHTML = "새로운 위험 지점이 추가되었습니다.";
+                    // 마커 다시 렌더링
+                    renderMarkers();
+                    isAddingPoint = false; // 상태 초기화
+
+                    // 버튼 및 패널 텍스트 복구
+                    document.getElementById("addPointBtn").textContent = "지도에서 클릭하여 추가";
+                    document.getElementById("addPointBtn").classList.remove("bg-red-500", "hover:bg-red-600");
+                    document.getElementById("addPointBtn").classList.add("bg-blue-600", "hover:bg-blue-700");
+                    document.getElementById("infoPanel").innerHTML = "새로운 위험 지점이 추가되었습니다. 마커를 클릭하여 상세 정보를 확인하세요.";
+                }
+            });
         }
-      });
-    }
 
-    function renderMarkers() {
-      markers.forEach(marker => marker.setMap(null));
-      markers = [];
+        function renderMarkers() {
+            markers.forEach(marker => marker.setMap(null));
+            markers = [];
 
-      landslideData.forEach(data => {
-        const marker = new naver.maps.Marker({
-          position: new naver.maps.LatLng(data.lat, data.lng),
-          map: map,
-          title: data.description,
-          icon: getMarkerIcon(data.risk)
+            landslideData.forEach(data => {
+                const marker = new naver.maps.Marker({
+                    position: new naver.maps.LatLng(data.lat, data.lng),
+                    map: map,
+                    title: `위험도: ${data.risk}`,
+                    icon: getMarkerIcon(data.risk)
+                });
+
+                // 마커 클릭 시 정보 패널 업데이트
+                naver.maps.Event.addListener(marker, 'click', () => {
+                    const infoPanel = document.getElementById("infoPanel");
+                    infoPanel.innerHTML = `
+                        <h3 class="text-xl font-semibold">${data.date}</h3>
+                        <p class="mt-2 text-base"><strong>위험도:</strong> <span class="font-bold text-${getRiskColor(data.risk)}-600">${data.risk}</span></p>
+                        <p class="mt-1 text-base"><strong>위치:</strong> ${data.lat}, ${data.lng}</p>
+                        <p class="mt-1 text-base"><strong>설명:</strong> ${data.description}</p>
+                    `;
+                });
+                markers.push(marker);
+            });
+        }
+
+        function getMarkerIcon(risk) {
+            let color = "";
+            switch(risk) {
+                case "높음": color = "red"; break;
+                case "보통": color = "orange"; break;
+                case "낮음": color = "yellow"; break;
+                default: color = "grey"; break;
+            }
+            // 위험도에 따라 다른 아이콘 사용 (Naver Maps는 별도의 아이콘 URL 제공)
+            // 여기서는 임시로 기본 아이콘을 사용하고, 위험도를 색상으로만 구분합니다.
+            return {
+                url: `https://naver-maps.github.io/maps.js/docs/img/example/pin_default.png`,
+                size: new naver.maps.Size(32, 50),
+                origin: new naver.maps.Point(0, 0),
+                anchor: new naver.maps.Point(16, 50)
+            };
+        }
+        
+        // Tailwind CSS 클래스를 위한 위험도 색상 매핑
+        function getRiskColor(risk) {
+            switch(risk) {
+                case "높음": return "red";
+                case "보통": return "orange";
+                case "낮음": return "yellow";
+                default: return "gray";
+            }
+        }
+
+        // 이벤트 리스너
+        document.getElementById("addPointBtn").addEventListener("click", () => {
+            isAddingPoint = true;
+            document.getElementById("addPointBtn").textContent = "지도에서 위치를 클릭하세요...";
+            document.getElementById("addPointBtn").classList.remove("bg-blue-600", "hover:bg-blue-700");
+            document.getElementById("addPointBtn").classList.add("bg-red-500", "hover:bg-red-600");
+            document.getElementById("infoPanel").innerHTML = "<strong class='text-red-500'>지도 클릭 모드 활성화됨.</strong><br>지도에서 마커를 추가할 위치를 클릭하세요.";
+        });
+        
+        // 새롭게 추가된 좌표 입력 버튼에 대한 이벤트 리스너
+        document.getElementById("addByCoordBtn").addEventListener("click", () => {
+            const lat = parseFloat(document.getElementById("latInput").value);
+            const lng = parseFloat(document.getElementById("lngInput").value);
+
+            if (isNaN(lat) || isNaN(lng)) {
+                document.getElementById("infoPanel").innerHTML = "<strong class='text-red-500'>오류:</strong> 올바른 위도와 경도 값을 입력하세요.";
+                return;
+            }
+
+            const newPoint = {
+                lat: lat,
+                lng: lng,
+                risk: "보통",
+                date: new Date().toISOString().slice(0, 10),
+                description: "좌표로 추가된 위험 지역"
+            };
+            landslideData.push(newPoint);
+
+            renderMarkers();
+
+            document.getElementById("infoPanel").innerHTML = "새로운 위험 지점이 추가되었습니다. 마커를 클릭하여 상세 정보를 확인하세요.";
+            document.getElementById("latInput").value = "";
+            document.getElementById("lngInput").value = "";
         });
 
-        naver.maps.Event.addListener(marker, "click", () => {
-          document.getElementById("infoPanel").innerHTML = `
-            <h3 class="text-xl font-semibold">${data.date}</h3>
-            <p class="mt-2"><strong>위험도:</strong> ${data.risk}</p>
-            <p><strong>위치:</strong> ${data.lat.toFixed(6)}, ${data.lng.toFixed(6)}</p>
-            <p><strong>설명:</strong> ${data.description}</p>
-          `;
+        document.getElementById("toggleMapTypeBtn").addEventListener("click", () => {
+            isSatellite = !isSatellite;
+            if (isSatellite) {
+                map.setMapTypeId(naver.maps.MapTypeId.SATELLITE);
+            } else {
+                map.setMapTypeId(naver.maps.MapTypeId.NORMAL);
+            }
         });
 
-        markers.push(marker);
-      });
-    }
-
-    function getMarkerIcon(risk) {
-      let iconUrl = "";
-
-      switch (risk) {
-        case "국립공원구역":
-          iconUrl = "https://cdn-icons-png.flaticon.com/512/483/483947.png"; // 빨간 불꽃
-          break;
-        case "국립공원인접":
-          iconUrl = "https://cdn-icons-png.flaticon.com/512/616/616408.png"; // 주황 불꽃
-          break;
-        case "국립공원밖":
-          iconUrl = "https://cdn-icons-png.flaticon.com/512/616/616554.png"; // 노란 불꽃
-          break;
-        default:
-          iconUrl = "https://cdn-icons-png.flaticon.com/512/149/149059.png"; // 기본 마커
-      }
-
-      return {
-        url: iconUrl,
-        size: new naver.maps.Size(32, 32),
-        origin: new naver.maps.Point(0, 0),
-        anchor: new naver.maps.Point(16, 32)
-      };
-    }
-
-    document.getElementById("addPointBtn").addEventListener("click", () => {
-      isAddingPoint = true;
-      document.getElementById("addPointBtn").textContent = "지도에서 위치를 클릭하세요...";
-      document.getElementById("addPointBtn").classList.remove("bg-blue-600", "hover:bg-blue-700");
-      document.getElementById("addPointBtn").classList.add("bg-red-500", "hover:bg-red-600");
-      document.getElementById("infoPanel").innerHTML = "<strong class='text-red-500'>지도 클릭 모드 활성화됨.</strong>";
-    });
-
-    document.getElementById("addByCoordBtn").addEventListener("click", () => {
-      const lat = parseFloat(document.getElementById("latInput").value);
-      const lng = parseFloat(document.getElementById("lngInput").value);
-
-      if (isNaN(lat) || isNaN(lng)) {
-        document.getElementById("infoPanel").innerHTML = "<strong class='text-red-500'>오류:</strong> 올바른 위도와 경도 값을 입력하세요.";
-        return;
-      }
-
-      const newPoint = {
-        lat: lat,
-        lng: lng,
-        risk: "국립공원구역",
-        date: new Date().toISOString().slice(0, 10),
-        description: "좌표 입력으로 추가된 위험 지역"
-      };
-
-      landslideData.push(newPoint);
-      renderMarkers();
-
-      document.getElementById("infoPanel").innerHTML = "위험 지점이 좌표로 추가되었습니다.";
-      document.getElementById("latInput").value = "";
-      document.getElementById("lngInput").value = "";
-    });
-
-    document.getElementById("toggleMapTypeBtn").addEventListener("click", () => {
-      isSatellite = !isSatellite;
-      map.setMapTypeId(isSatellite ? naver.maps.MapTypeId.SATELLITE : naver.maps.MapTypeId.NORMAL);
-    });
-
-    window.addEventListener("DOMContentLoaded", initMap);
-  </script>
+        // 페이지 로드 시 지도 초기화
+        window.addEventListener('DOMContentLoaded', initMap);
+    </script>
 </body>
 </html>
 
