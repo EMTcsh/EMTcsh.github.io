@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>산불 비상대응 상황판</title>
+  <title>비상대응 상황판</title>
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap" rel="stylesheet">
   <style>
     body {
@@ -91,18 +91,18 @@
 </head>
 <body>
 <div class="container">
-  <h2>산불 비상대응 상황판</h2>
+  <h2>비상대응 상황판</h2>
 
   <!-- 근무표 테이블 -->
   <table>
     <thead>
       <tr>
         <th>날짜</th>
-        <th>산불발생(대응) 시간</th>
-        <th>산불발생 장소</th>
-        <th>산불대응 구역</th>
-        <th>산불대응 인력</th>
-        <th>산불위기경보단계</th>
+        <th>발생(대응) 시간</th>
+        <th>발생 장소</th>
+        <th>대응 구역</th>
+        <th>대응 인력</th>
+        <th>위기경보단계</th>
         <th>개인임무</th>
         <th>삭제</th>
       </tr>
@@ -114,33 +114,33 @@
   <!-- 근무자 추가 폼 -->
   <form id="workerForm">
     <div class="form-row">
-      <h2>산불 비상대응 상황판 내용입력</h2>
+      <h2>비상대응 상황판 내용입력</h2>
       <div class="half">
         <label for="date">날짜:</label>
         <input type="date" id="date" required>
       </div>
       <div class="half">
-        <label for="startTime">산불발생(대응) 시작시간:</label>
+        <label for="startTime">발생(대응) 시작시간:</label>
         <input type="time" id="startTime" required>
       </div>
       <div class="half">
-        <label for="endTime">산불발생(대응) 종료시간:</label>
+        <label for="endTime">발생(대응) 종료시간:</label>
         <input type="time" id="endTime" required>
       </div>
       <div class="half">
-        <label for="name">산불발생 장소:</label>
-        <input type="text" id="name" placeholder="산불발생 장소" required>
+        <label for="name">발생 장소:</label>
+        <input type="text" id="name" placeholder="발생 장소" required>
       </div>
       <div class="half">
-        <label for="name">산불대응 구역:</label>
+        <label for="name">대응 구역:</label>
         <input type="text" id="remarks" placeholder="현장대응 장소" required>
       </div>
       <div class="half">
-        <label for="warningLevel">산불대응 인력:</label>
+        <label for="warningLevel">대응 인력:</label>
         <input id="warningLevel" placeholder="근무자 입력" required>
       </div>
       <div class="half">
-        <label for="fireIndex">산불위기(경보)단계:</label>
+        <label for="fireIndex">위기(경보)단계:</label>
         <input id="fireIndex" placeholder="산불위험도 입력" required>
       </div>
       <div class="half">
@@ -266,7 +266,7 @@
 
   // 공유 기능
   function shareLink() {
-    let tableData = "날짜\t산불발생(대응) 시간\t산불발생 장소\t산불대응 구역\t산불대응 인력\t산불위기경보단계\t개인임무\n";
+    let tableData = "날짜\t발생(대응) 시간\t발생 장소\t대응 구역\t대응 인력\t위기경보단계\t개인임무\n";
     const rows = document.querySelectorAll("#workerTable tr");
     rows.forEach(row => {
       const cols = row.querySelectorAll("td");
@@ -282,7 +282,7 @@
   // Excel 파일 저장
   function saveToExcel() {
     const tableData = [];
-    const headers = ["날짜", "산불현장(대응) 시간", "산불발생 장소", "산불대응 구역", "산불대응 인력", "산불위기경보단계", "개인임무"];
+    const headers = ["날짜", "현장(대응) 시간", "발생 장소", "대응 구역", "대응 인력", "위기경보단계", "개인임무"];
     tableData.push(headers);
     const rows = document.querySelectorAll("#workerTable tr");
     rows.forEach(row => {
@@ -299,7 +299,7 @@
     const ws = XLSX.utils.aoa_to_sheet(tableData);
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "근무표");
-    XLSX.writeFile(wb, `산불_근무표_${today}.xlsx`);
+    XLSX.writeFile(wb, `비상_근무표_${today}.xlsx`);
   }
 
   openDB();
