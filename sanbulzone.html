@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="ko" class="h-full">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>무등산 산불관리 시스템</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -42,18 +42,18 @@
     <!-- 지도 및 제어판 (화면의 남은 공간을 차지하도록 flex-1 적용) -->
     <main class="flex flex-col lg:flex-row p-4 sm:p-8 pt-0 gap-8 overflow-hidden fixed-container">
          <!-- 지도 컨테이너 -->
-         <div id="map-container" class="relative w-full h-screen">
-            <div id="map" class="w-full h-full"></div>
+<div id="map-container" class="relative w-full h-screen">
+    <div id="map" class="w-full h-full"></div>
 
-            <!-- 패널을 지도 위에 띄우기 -->
-            <div class="absolute top-4 right-4 w-72 bg-white p-6 rounded-xl shadow-lg space-y-6">
-                <h3>무등산국립공원 산불관리 현황</h3>
-                <p>총 탐방로: 38구간 99.4km<br></p>
-                <p>개방 탐방로: 35구간 95.5km<br></p>
-                <p>통제 탐방로: 3구간 3.9km<br></p>
-                <p>감시초소 1개/통제소 3개/ 인화물질보관함 8개<br></p>
-            </div>
-         </div>
+    <!-- 패널을 지도 위에 띄우기 -->
+    <div class="absolute top-4 right-4 w-72 bg-white p-6 rounded-xl shadow-lg space-y-6">
+        <h3>무등산국립공원 산불관리 현황</h3>
+        <p>총 탐방로: 38구간 99.4km<br></p>
+        <p>개방 탐방로: 35구간 95.5km<br></p>
+        <p>통제 탐방로: 3구간 3.9km<br></p>
+        <p>감시초소 1개/통제소 3개/ 인화물질보관함 8개<br></p>
+      </div>
+</div>
 
         <!-- 제어판 & 정보 패널 -->
         <div class="w-1/6 bg-white p-6 rounded-xl shadow-lg space-y-6 flex-shrink-0">
@@ -61,14 +61,14 @@
                 <h2 class="text-2xl font-bold text-gray-800">지도 제어</h2>
                 <!-- 좌표 입력 기능 추가 -->
                 <div>
-                    <input type="text" id="latInput" placeholder="위도 (예: 37.5)" class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
-                    <input type="text" id="lngInput" placeholder="경도 (예: 127.0)" class="w-full mt-2 px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-2 focus:ring-blue-500" />
+                    <input type="text" id="latInput" placeholder="위도 (예: 37.5)" class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <input type="text" id="lngInput" placeholder="경도 (예: 127.0)" class="w-full mt-2 px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-2 focus:ring-blue-500">
                     <button id="addByCoordBtn" class="w-full mt-2 bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition-colors duration-200">
                         좌표로 위험 지역 표시
                     </button>
                 </div>
 
-                <hr class="border-gray-200" />
+                <hr class="border-gray-200">
                 
                 <button id="addPointBtn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition-colors duration-200">
                     지도에서 클릭하여 표시
@@ -78,7 +78,7 @@
                 </button>
             </div>
             
-            <hr class="border-gray-200" />
+            <hr class="border-gray-200">
 
             <div class="space-y-4">
                 <h3 class="text-2xl font-bold text-gray-800">산불 발생지지 정보</h3>
@@ -97,7 +97,8 @@
 
         // 더미 데이터: 실제로는 백엔드나 데이터베이스에서 가져와야 합니다.
         const landslideData = [
-            { lat: 35.129108, lng: 126.970008, risk: "보통", date: "2014-11-28", description: "과거 산불발생 지역 증심사 " },
+            { lat: 35.1285782, lng: 126.9699028, risk: "보통", date: "2024-9-29", description: "과거 산불발생 지역 증심사 " },
+
         ];
 
         let map;
@@ -173,12 +174,20 @@
         }
 
         function getMarkerIcon(risk) {
-            // 불꽃 아이콘으로 변경
+            let color = "";
+            switch(risk) {
+                case "높음": color = "red"; break;
+                case "보통": color = "orange"; break;
+                case "낮음": color = "yellow"; break;
+                default: color = "grey"; break;
+            }
+            // 위험도에 따라 다른 아이콘 사용 (Naver Maps는 별도의 아이콘 URL 제공)
+            // 여기서는 임시로 기본 아이콘을 사용하고, 위험도를 색상으로만 구분합니다.
             return {
-                url: "https://cdn-icons-png.flaticon.com/512/483/483947.png", // 불꽃 아이콘 URL
-                size: new naver.maps.Size(32, 32),
+                url: `https://naver-maps.github.io/maps.js/docs/img/example/pin_default.png`,
+                size: new naver.maps.Size(32, 50),
                 origin: new naver.maps.Point(0, 0),
-                anchor: new naver.maps.Point(16, 32)
+                anchor: new naver.maps.Point(16, 50)
             };
         }
         
