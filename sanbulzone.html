@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="ko" class="h-full">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>무등산 산불관리 시스템</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      background-color: #f3f4f6;
+    }
+    #map {
+      height: 100%;
+      width: 100%;
+      border-radius: 0.5rem;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    .info-panel {
+      max-height: 100%;
+      overflow-y: auto;
+    }
+  </style>
+</head>
+<body class="bg-gray-100">
+  <div class="p-4 sm:p-8">
+    <header class="text-center">
+      <h1 class="text-3xl sm:text-4xl font-extrabold text-gray-800 tracking-tight">무등산 산불관리 시스템</h1>
+      <p class="mt-2 text-lg text-gray-600">위성 지도를 통해 산사태 위험 지역을 모니터링하고 관리합니다.</p>
+    </header>
+  </div>
+
+  <main class="flex flex-col lg:flex-row p-4 sm:p-8 pt-0 gap-8 overflow-hidden fixed-container">
+    <!-- 지도 -->
+    <div id="map-container" class="relative w-full h-screen">
+      <div id="map" class="w-full h-full"></div>
+      <div class="absolute top-4 right-4 w-72 bg-white p-6 rounded-xl shadow-lg space-y-4">
+        <h3>[ 무등산국립공원 산불관리 현황 ]</h3>
+        <p>총 탐방로: 38구간 99.4km<br></p>
+        <p>개방 탐방로: 35구간 95.5km<br></p>
+        <p>통제 탐방로: 3구간 3.9km<br></p>
+        <p>감시초소 1개/통제소 3개/ 인화물질보관함 8개<br></p>
+      </div>
+    </div>
+
+    <!-- 제어 패널 -->
+    <div class="w-1/6 bg-white p-6 rounded-xl shadow-lg space-y-6 flex-shrink-0">
+      <div class="space-y-4">
+        <h2 class="text-2xl font-bold text-gray-800">지도 제어</h2>
+        <input type="text" id="latInput" placeholder="위도 (예: 35.15)" class="w-full px-3 py-2 border rounded-md" />
+        <input type="text" id="lngInput" placeholder="경도 (예: 126.95)" class="w-full mt-2 px-3 py-2 border rounded-md" />
+
+        <!-- 아이콘 선택 -->
+        <div class="mt-2">
+          <label class="block font-semibold text-gray-700 mb-1">아이콘 선택:</label>
+          <div class="flex items-center space-x-4">
+            <label class="flex items-center space-x-1">
+              <input type="radio" name="iconType" value="person" checked />
+              <img src="https://cdn-icons-png.flaticon.com/512/847/847969.png" alt="사람" class="w-6 h-6" />
+            </label>
+            <label class="flex items-center space-x-1">
+              <input type="radio" name="iconType" value="firetruck" />
+              <img src="https://cdn-icons-png.flaticon.com/128/12349/12349658.png" alt="소방차" class="w-6 h-6" />
+            </label>
+          </div>
+        </div>
+
+        <!-- 위험도 선택 -->
+        <div class="mt-4">
+          <label class="block font-semibold text-gray-700 mb-1">위험도 선택:</label>
+          <div class="flex items-center space-x-4">
+            <label class="flex items-center space-x-1">
+              <input type="radio" name="riskLevel" value="낮음" />
+              <span class="text-yellow-500 font-bold">낮음</span>
+            </label>
+            <label class="flex items-center space-x-1">
+              <input type="radio" name="riskLevel" value="보통" checked />
+              <span class="text-orange-500 font-bold">보통</span>
+            </label>
+            <label class="flex items-center space-x-1">
+              <input type="radio" name="riskLevel" value="높음" />
+              <span class="text-red-500 font-bold">높음</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- 추가 버튼 -->
+        <button id="addByCoordBtn" class="w-full mt-2 bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-lg">
+          좌표로 위험 지역 표시
+        </button>
+
+        <hr class="border-gray-200" />
+
+        <button id="toggleMapTypeBtn" class="w-full bg-gray-500 hover:bg-gray-600 text-white font-semibold py-2 px-4 rounded-lg">
+          지도/위성 전환
+        </button>
+      </div>
+
+      <hr class="border-gray-200" />
+
+      <div>
+        <h3 class="text-2xl font-bold text-gray-800">과거 산불발생 정보</h3>
+        <div id="infoPanel" class="info-panel bg-gray-50 p-4 rounded-lg border border-gray-200 text-gray-700 mt-2">
+          마커를 클릭하여 상세 정보를 확인하세요.
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Naver Maps API -->
+  <script src="https://oapi.map.naver.com/openapi/v3/maps.js?ncpClientId=YOUR_CLIENT_ID"></script>
+  <script>
+    const landslideData = [];
+    let map;
+    let markers = [];
+    let isSatellite = false;
+
+    function initMap() {
+      map = new naver.maps.Map("map", {
+        center: new naver.maps.LatLng(35.119158, 127.003814),
+        zoom: 13,
+      });
+
+      renderMarkers();
+    }
+
+    function renderMarkers() {
+      markers.forEach(marker => marker.setMap(null));
+      markers = [];
+
+      landslideData.forEach(data => {
+        const marker = new naver.maps.Marker({
+          position: new naver.maps.LatLng(data.lat, data.lng),
+          map: map,
+          title: `위험도: ${data.risk}`,
+          icon: data.iconUrl
+            ? {
+                url: data.iconUrl,
+                size: new naver.maps.Size(40, 40),
+                anchor: new naver.maps.Point(20, 20)
+              }
+            : null
+        });
+
+        naver.maps.Event.addListener(marker, "click", () => {
+          document.getElementById("infoPanel").innerHTML = `
+            <h3 class="text-xl font-semibold">${data.date}</h3>
+            <p class="mt-2 text-base"><strong>위험도:</strong> ${data.risk}</p>
+            <p class="mt-1 text-base"><strong>위치:</strong> ${data.lat}, ${data.lng}</p>
+            <p class="mt-1 text-base"><strong>설명:</strong> ${data.description}</p>
+          `;
+        });
+
+        markers.push(marker);
+      });
+    }
+
+    document.getElementById("addByCoordBtn").addEventListener("click", () => {
+      const lat = parseFloat(document.getElementById("latInput").value);
+      const lng = parseFloat(document.getElementById("lngInput").value);
+
+      if (isNaN(lat) || isNaN(lng)) {
+        document.getElementById("infoPanel").innerHTML = "<strong class='text-red-500'>오류:</strong> 올바른 위도와 경도 값을 입력하세요.";
+        return;
+      }
+
+      const selectedIcon = document.querySelector('input[name="iconType"]:checked').value;
+      const selectedRisk = document.querySelector('input[name="riskLevel"]:checked').value;
+
+      const iconUrl = selectedIcon === "person"
+        ? "https://cdn-icons-png.flaticon.com/512/847/847969.png"
+        : "https://cdn-icons-png.flaticon.com/512/2966/2966489.png"; // 🚒 소방차
+
+      const description = selectedIcon === "person"
+        ? "사람 아이콘으로 표시된 위험 지역"
+        : "소방차 아이콘으로 표시된 위험 지역";
+
+      const newPoint = {
+        lat,
+        lng,
+        risk: selectedRisk,
+        date: new Date().toISOString().slice(0, 10),
+        description,
+        iconUrl
+      };
+
+      landslideData.push(newPoint);
+      renderMarkers();
+
+      // ✅ 백엔드 저장
+      fetch("https://your-backend-api.com/api/landslides", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(newPoint)
+      })
+        .then(res => {
+          if (!res.ok) throw new Error("서버 저장 실패");
+          return res.json();
+        })
+        .then(data => {
+          console.log("백엔드 저장 성공:", data);
+        })
+        .catch(err => {
+          console.error("백엔드 저장 오류:", err);
+        });
+
+      document.getElementById("infoPanel").innerHTML = "새로운 위험 지점이 추가되었습니다.";
+      document.getElementById("latInput").value = "";
+      document.getElementById("lngInput").value = "";
+    });
+
+    document.getElementById("toggleMapTypeBtn").addEventListener("click", () => {
+      isSatellite = !isSatellite;
+      map.setMapTypeId(isSatellite ? naver.maps.MapTypeId.SATELLITE : naver.maps.MapTypeId.NORMAL);
+    });
+
+    window.addEventListener("DOMContentLoaded", initMap);
+  </script>
+</body>
+</html>
