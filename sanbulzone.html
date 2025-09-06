@@ -22,7 +22,6 @@
       max-height: 100%;
       overflow-y: auto;
     }
-    /* 팝업 스타일 */
     #popup {
       position: fixed;
       top: 50%; left: 50%;
@@ -43,10 +42,8 @@
   </div>
 
   <div class="flex">
-    <!-- 지도 -->
     <div id="map" class="flex-grow"></div>
 
-    <!-- 제어 및 정보 패널 -->
     <div class="w-80 bg-white p-6 shadow-lg space-y-6">
       <h2 class="text-2xl font-bold">지도 제어</h2>
 
@@ -90,18 +87,10 @@
     let map, markers = [], isSatellite = false;
     const landslideData = [];
 
-    // 아이콘 이미지 URL (위험도별 다른 색상도 가능)
+    // 아이콘 이미지 URL
     const icons = {
-      person: {
-        낮음: 'https://cdn-icons-png.flaticon.com/512/847/847969.png',
-        보통: 'https://cdn-icons-png.flaticon.com/512/847/847969.png',
-        높음: 'https://cdn-icons-png.flaticon.com/512/847/847969.png',
-      },
-      firetruck: {
-        낮음: 'https://cdn-icons-png.flaticon.com/512/2966/2966489.png',
-        보통: 'https://cdn-icons-png.flaticon.com/512/2966/2966489.png',
-        높음: 'https://cdn-icons-png.flaticon.com/512/2966/2966489.png',
-      }
+      person: 'https://cdn-icons-png.flaticon.com/512/847/847969.png', // 사람 아이콘
+      firetruck: 'https://cdn-icons-png.flaticon.com/512/2966/2966489.png' // 소방차 아이콘
     };
 
     function initMap() {
@@ -110,13 +99,11 @@
         zoom: 13
       });
 
-      // 지도 클릭 시 팝업 호출
-      naver.maps.Event.addListener(map, 'click', e => {
+      map.addListener('click', e => {
         showPopup(e.coord);
       });
     }
 
-    // 팝업 생성
     function showPopup(latlng) {
       closePopup();
 
@@ -141,30 +128,25 @@
           </div>
         </div>
       `;
-
       document.body.appendChild(popup);
 
-      // 확인 버튼 이벤트
       document.getElementById('confirmBtn').onclick = () => {
         const iconType = document.querySelector('input[name="popupIconType"]:checked').value;
         const risk = document.querySelector('input[name="popupRiskLevel"]:checked').value;
-        const iconUrl = icons[iconType][risk];
+        const iconUrl = icons[iconType];
         const description = `${iconType === 'person' ? '사람' : '소방차'} - 위험도: ${risk}`;
         addPoint(latlng, iconUrl, risk, description);
         closePopup();
       };
 
-      // 취소 버튼 이벤트
       document.getElementById('cancelBtn').onclick = closePopup;
     }
 
-    // 팝업 닫기
     function closePopup() {
       const existing = document.getElementById('popup');
       if (existing) existing.remove();
     }
 
-    // 마커 추가 함수
     function addPoint(latlng, iconUrl, risk, description) {
       const newPoint = {
         lat: latlng.y,
@@ -188,8 +170,7 @@
       });
       markers.push(marker);
 
-      // 마커 클릭시 상세정보 표시
-      naver.maps.Event.addListener(marker, 'click', () => {
+      marker.addListener('click', () => {
         document.getElementById('infoPanel').innerHTML = `
           <strong>${newPoint.date}</strong><br>
           위험도: ${risk}<br>
@@ -198,25 +179,12 @@
         `;
       });
 
-      // 백엔드 API 예시 (실제 URL로 변경 필요)
-      /*
-      fetch("https://your-backend-api.com/api/landslides", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(newPoint)
-      })
-      .then(res => res.ok ? res.json() : Promise.reject("서버 저장 실패"))
-      .then(data => console.log("저장 성공:", data))
-      .catch(err => console.error("저장 실패:", err));
-      */
-
-      // 입력 초기화 및 안내문 변경
+      // 입력 초기화 및 안내 문구
       document.getElementById('infoPanel').innerText = '새로운 위험 지점이 추가되었습니다.';
       document.getElementById('latInput').value = '';
       document.getElementById('lngInput').value = '';
     }
 
-    // 좌표 입력 후 추가 버튼 이벤트
     document.getElementById('addByCoordBtn').addEventListener('click', () => {
       const lat = parseFloat(document.getElementById('latInput').value);
       const lng = parseFloat(document.getElementById('lngInput').value);
@@ -226,13 +194,12 @@
       }
       const iconType = document.querySelector('input[name="iconType"]:checked').value;
       const risk = document.querySelector('input[name="riskLevel"]:checked').value;
-      const iconUrl = icons[iconType][risk];
+      const iconUrl = icons[iconType];
       const latlng = new naver.maps.LatLng(lat, lng);
       const description = `${iconType === 'person' ? '사람' : '소방차'} - 위험도: ${risk}`;
       addPoint(latlng, iconUrl, risk, description);
     });
 
-    // 지도 타입 전환 버튼 이벤트
     document.getElementById('toggleMapTypeBtn').addEventListener('click', () => {
       isSatellite = !isSatellite;
       map.setMapTypeId(isSatellite ? naver.maps.MapTypeId.SATELLITE : naver.maps.MapTypeId.NORMAL);
