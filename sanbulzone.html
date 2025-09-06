@@ -24,6 +24,16 @@
       max-height: 100%;
       overflow-y: auto;
     }
+    /* 팝업 기본 스타일 */
+    #popup {
+      position: absolute;
+      background: white;
+      border-radius: 0.5rem;
+      padding: 1rem;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+      z-index: 1000;
+      width: 240px;
+    }
   </style>
 </head>
 <body class="bg-gray-100">
@@ -114,82 +124,100 @@
   <!-- Naver Maps API -->
   <script src="https://oapi.map.naver.com/openapi/v3/maps.js?ncpClientId=g2u4orbiqf"></script>
   <script>
-    const landslideData = [];
-    let map;
-    let markers = [];
+    let map, markers = [];
     let isSatellite = false;
+    const landslideData = [];
 
     function initMap() {
-      map = new naver.maps.Map("map", {
+      map = new naver.maps.Map('map', {
         center: new naver.maps.LatLng(35.119158, 127.003814),
-        zoom: 13,
+        zoom: 13
       });
 
-      renderMarkers();
-    }
-
-    function renderMarkers() {
-      markers.forEach(marker => marker.setMap(null));
-      markers = [];
-
-      landslideData.forEach(data => {
-        const marker = new naver.maps.Marker({
-          position: new naver.maps.LatLng(data.lat, data.lng),
-          map: map,
-          title: `위험도: ${data.risk}`,
-          icon: data.iconUrl
-            ? {
-                url: data.iconUrl,
-                size: new naver.maps.Size(40, 40),
-                anchor: new naver.maps.Point(20, 20)
-              }
-            : null
-        });
-
-        naver.maps.Event.addListener(marker, "click", () => {
-          document.getElementById("infoPanel").innerHTML = `
-            <h3 class="text-xl font-semibold">${data.date}</h3>
-            <p class="mt-2 text-base"><strong>위험도:</strong> ${data.risk}</p>
-            <p class="mt-1 text-base"><strong>위치:</strong> ${data.lat}, ${data.lng}</p>
-            <p class="mt-1 text-base"><strong>설명:</strong> ${data.description}</p>
-          `;
-        });
-
-        markers.push(marker);
+      naver.maps.Event.addListener(map, 'click', e => {
+        showPopup(e.coord);
       });
     }
 
-    document.getElementById("addByCoordBtn").addEventListener("click", () => {
-      const lat = parseFloat(document.getElementById("latInput").value);
-      const lng = parseFloat(document.getElementById("lngInput").value);
+    function showPopup(latlng) {
+      closePopup();
 
-      if (isNaN(lat) || isNaN(lng)) {
-        document.getElementById("infoPanel").innerHTML = "<strong class='text-red-500'>오류:</strong> 올바른 위도와 경도 값을 입력하세요.";
-        return;
-      }
+      const popup = document.createElement('div');
+      popup.id = 'popup';
+      popup.className = 'popup';
 
-      const selectedIcon = document.querySelector('input[name="iconType"]:checked').value;
-      const selectedRisk = document.querySelector('input[name="riskLevel"]:checked').value;
+      // 지도 내 클릭 좌표 기준으로 위치 지정
+      const pos = map.getDiv().getBoundingClientRect();
+      const point = map.latLngToPoint(latlng);
+      popup.style.left = point.x + 'px';
+      popup.style.top = point.y + 'px';
 
-      const iconUrl = selectedIcon === "person"
-        ? "https://cdn-icons-png.flaticon.com/512/847/847969.png"
-        : "https://cdn-icons-png.flaticon.com/512/2966/2966489.png"; // 🚒 소방차
+      popup.innerHTML = `
+        <div class="space-y-3">
+          <div><strong>아이콘 선택:</strong><br>
+            <label><input type="radio" name="iconType" value="person" checked> 사람</label>
+            <label class="ml-2"><input type="radio" name="iconType" value="firetruck"> 소방차</label>
+          </div>
+          <div><strong>위험도 선택:</strong><br>
+            <label><input type="radio" name="riskLevel" value="낮음"> 낮음</label>
+            <label class="ml-2"><input type="radio" name="riskLevel" value="보통" checked> 보통</label>
+            <label class="ml-2"><input type="radio" name="riskLevel" value="높음"> 높음</label>
+          </div>
+          <div class="text-right">
+            <button id="confirmBtn" class="bg-blue-600 text-white px-3 py-1 rounded">확인</button>
+            <button id="cancelBtn" class="bg-gray-400 text-white px-3 py-1 rounded ml-2">취소</button>
+          </div>
+        </div>`;
 
-      const description = selectedIcon === "person"
-        ? "사람 아이콘으로 표시된 위험 지역"
-        : "소방차 아이콘으로 표시된 위험 지역";
+      document.body.appendChild(popup);
 
+      document.getElementById('confirmBtn').onclick = () => {
+        const iconType = document.querySelector('input[name="iconType"]:checked').value;
+        const risk = document.querySelector('input[name="riskLevel"]:checked').value;
+
+        const iconUrl = iconType === 'person'
+          ? 'https://cdn-icons-png.flaticon.com/512/847/847969.png'
+          : 'https://cdn-icons-png.flaticon.com/512/2966/2966489.png';
+
+        const desc = iconType === 'person' ? '사람 아이콘' : '소방차 아이콘';
+        addPoint(latlng, iconUrl, risk, desc);
+        closePopup();
+      };
+
+      document.getElementById('cancelBtn').onclick = closePopup;
+    }
+
+    function closePopup() {
+      const existing = document.getElementById('popup');
+      if (existing) existing.remove();
+    }
+
+    function addPoint(latlng, iconUrl, risk, description) {
       const newPoint = {
-        lat,
-        lng,
-        risk: selectedRisk,
-        date: new Date().toISOString().slice(0, 10),
+        lat: latlng.y,
+        lng: latlng.x,
+        risk,
+        date: new Date().toISOString().slice(0,10),
         description,
         iconUrl
       };
-
       landslideData.push(newPoint);
-      renderMarkers();
+
+      const marker = new naver.maps.Marker({
+        position: latlng,
+        map,
+        icon: { url: iconUrl, size: new naver.maps.Size(40,40), anchor: new naver.maps.Point(20,20) },
+        title: `위험도: ${risk}`
+      });
+      markers.push(marker);
+
+      naver.maps.Event.addListener(marker, 'click', () => {
+        document.getElementById('infoPanel').innerHTML = `
+          <strong>${newPoint.date}</strong><br>
+          위험도: ${risk}<br>
+          좌표: ${newPoint.lat}, ${newPoint.lng}<br>
+          설명: ${description}`;
+      });
 
       // ✅ 백엔드 저장
       fetch("https://your-backend-api.com/api/landslides", {
@@ -197,22 +225,43 @@
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(newPoint)
       })
-        .then(res => {
-          if (!res.ok) throw new Error("서버 저장 실패");
-          return res.json();
-        })
-        .then(data => {
-          console.log("백엔드 저장 성공:", data);
-        })
-        .catch(err => {
-          console.error("백엔드 저장 오류:", err);
-        });
+      .then(res => {
+        if (!res.ok) throw new Error("서버 저장 실패");
+        return res.json();
+      })
+      .then(data => {
+        console.log("백엔드 저장 성공:", data);
+      })
+      .catch(err => {
+        console.error("백엔드 저장 오류:", err);
+      });
 
       document.getElementById("infoPanel").innerHTML = "새로운 위험 지점이 추가되었습니다.";
       document.getElementById("latInput").value = "";
       document.getElementById("lngInput").value = "";
+    }
+
+    // 좌표 입력 후 버튼 클릭 시 마커 추가
+    document.getElementById("addByCoordBtn").addEventListener("click", () => {
+      const latVal = parseFloat(document.getElementById("latInput").value);
+      const lngVal = parseFloat(document.getElementById("lngInput").value);
+      if (isNaN(latVal) || isNaN(lngVal)) {
+        alert("유효한 위도와 경도를 입력해주세요.");
+        return;
+      }
+      const iconType = document.querySelector('input[name="iconType"]:checked').value;
+      const risk = document.querySelector('input[name="riskLevel"]:checked').value;
+
+      const iconUrl = iconType === 'person'
+        ? 'https://cdn-icons-png.flaticon.com/512/847/847969.png'
+        : 'https://cdn-icons-png.flaticon.com/512/2966/2966489.png';
+
+      const desc = iconType === 'person' ? '사람 아이콘' : '소방차 아이콘';
+
+      addPoint(new naver.maps.LatLng(latVal, lngVal), iconUrl, risk, desc);
     });
 
+    // 지도/위성 전환
     document.getElementById("toggleMapTypeBtn").addEventListener("click", () => {
       isSatellite = !isSatellite;
       map.setMapTypeId(isSatellite ? naver.maps.MapTypeId.SATELLITE : naver.maps.MapTypeId.NORMAL);
@@ -222,3 +271,4 @@
   </script>
 </body>
 </html>
+
