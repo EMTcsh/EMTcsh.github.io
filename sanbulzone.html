@@ -48,59 +48,56 @@
       </div>
     </div>
 
-    <div class="w-1/6 bg-white p-6 rounded-xl shadow-lg space-y-6 flex-shrink-0">
-      <div class="space-y-4">
-        <h2 class="text-2xl font-bold text-gray-800">지도 제어</h2>
-        <div>
-          <input type="text" id="latInput" placeholder="위도 (예: 35.1)" class="w-full px-3 py-2 border rounded-md"/>
-          <input type="text" id="lngInput" placeholder="경도 (예: 126.9)" class="w-full mt-2 px-3 py-2 border rounded-md"/>
-          <button id="addByCoordBtn" class="w-full mt-2 bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-lg shadow-md">
-            좌표로 위험 지역 표시
-          </button>
-        </div>
-
-        <hr class="border-gray-200"/>
-
-        <button id="addPointBtn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg shadow-md">
-          지도에서 클릭하여 표시
-        </button>
-        <button id="toggleMapTypeBtn" class="w-full bg-gray-500 hover:bg-gray-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md">
-          지도/위성 전환
-        </button>
-
-        <button onclick="window.open('https://fd.forest.go.kr/ffas/pubConn/movePage/main_simple.do?systemCode=ffasout_c', '_blank', 'noopener')" 
-        class="w-full mt-2 bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 px-4 rounded-lg shadow-md">
-        실시간 산불정보
-        </button>
-
-        <button onclick="window.open('https://sanbul.forest.go.kr/map_zone2/login.aspx', '_blank', 'noopener')" 
-        class="w-full mt-2 bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 px-4 rounded-lg shadow-md">
-        산불상황관제시스템
-        </button>
-
-        <button onclick="window.open('https://emtcsh.github.io/sanbul.html', '_blank', 'noopener')" 
-        class="w-full mt-2 bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 px-4 rounded-lg shadow-md">
-        산불비상대응상황판
-        </button>
-
-        <button onclick="window.open('https://emtcsh.github.io/sanbul_data.html', '_blank', 'noopener')" 
-        class="w-full mt-2 bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 px-4 rounded-lg shadow-md">
-        산불비상대응현황
-        </button>
-        
-      </div>
-
-      <hr class="border-gray-200"/>
-
-      <div class="space-y-4">
-        <h3 class="text-2xl font-bold text-gray-800">산불 발생 정보</h3>
-        <div id="infoPanel" class="info-panel bg-gray-50 p-4 rounded-lg border border-gray-200 text-gray-700">
-          마커를 클릭하여 상세 정보를 확인하세요.
-        </div>
-      </div>
+   <div class="w-1/6 bg-white p-4 rounded-xl shadow-lg space-y-4 flex-shrink-0">
+  <div class="space-y-3">
+    <h2 class="text-xl font-bold text-gray-800">지도 제어</h2>
+    <div>
+      <input type="text" id="latInput" placeholder="위도 (예: 35.1)" class="w-full px-2 py-1 border rounded-md"/>
+      <input type="text" id="lngInput" placeholder="경도 (예: 126.9)" class="w-full mt-1 px-2 py-1 border rounded-md"/>
+      <button id="addByCoordBtn" class="w-full mt-1 bg-green-600 hover:bg-green-700 text-white font-semibold py-1.5 px-3 rounded-lg shadow-md text-sm">
+        좌표로 위험 지역 표시
+      </button>
     </div>
-  </main>
 
+    <hr class="border-gray-200"/>
+
+    <button id="addPointBtn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-1.5 px-3 rounded-lg shadow-md text-sm">
+      지도에서 클릭하여 표시
+    </button>
+    <button id="toggleMapTypeBtn" class="w-full bg-gray-500 hover:bg-gray-600 text-white font-semibold py-1.5 px-3 rounded-lg shadow-md text-sm">
+      지도/위성 전환
+    </button>
+
+    <button onclick="window.open('https://fd.forest.go.kr/ffas/pubConn/movePage/main_simple.do?systemCode=ffasout_c', '_blank', 'noopener')" 
+      class="w-full mt-1 bg-purple-600 hover:bg-purple-700 text-white font-semibold py-1.5 px-3 rounded-lg shadow-md text-sm">
+      실시간 산불정보
+    </button>
+
+    <button onclick="window.open('https://sanbul.forest.go.kr/map_zone2/login.aspx', '_blank', 'noopener')" 
+      class="w-full mt-1 bg-purple-600 hover:bg-purple-700 text-white font-semibold py-1.5 px-3 rounded-lg shadow-md text-sm">
+      산불상황관제시스템
+    </button>
+
+    <button onclick="window.open('https://emtcsh.github.io/sanbul.html', '_blank', 'noopener')" 
+      class="w-full mt-1 bg-purple-600 hover:bg-purple-700 text-white font-semibold py-1.5 px-3 rounded-lg shadow-md text-sm">
+      산불비상대응상황판
+    </button>
+
+    <button onclick="window.open('https://emtcsh.github.io/sanbul_data.html', '_blank', 'noopener')" 
+      class="w-full mt-1 bg-purple-600 hover:bg-purple-700 text-white font-semibold py-1.5 px-3 rounded-lg shadow-md text-sm">
+      산불비상대응현황
+    </button>
+  </div>
+
+  <hr class="border-gray-200"/>
+
+  <div class="space-y-2">
+    <h3 class="text-xl font-bold text-gray-800">산불 발생 정보</h3>
+    <div id="infoPanel" class="info-panel bg-gray-50 p-3 rounded-lg border border-gray-200 text-gray-700 text-sm">
+      마커를 클릭하여 상세 정보를 확인하세요.
+    </div>
+  </div>
+</div>
  <!-- Naver Maps API 로드 -->
     <script src="https://oapi.map.naver.com/openapi/v3/maps.js?ncpClientId=g2u4orbiqf"></script>
     <script>
