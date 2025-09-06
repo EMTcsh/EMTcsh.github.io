@@ -128,7 +128,7 @@
                     const newPoint = {
                         lat: newLat,
                         lng: newLng,
-                        risk: "보통", // 기본값 설정
+                        risk: "국립공원구역", // 기본값 설정
                         date: new Date().toISOString().slice(0, 10),
                         description: "새롭게 추가된 위험 지역"
                     };
@@ -139,7 +139,7 @@
                     isAddingPoint = false; // 상태 초기화
 
                     // 버튼 및 패널 텍스트 복구
-                    document.getElementById("addPointBtn").textContent = "지도에서 클릭하여립공원밖": color = "yellow"; break;
+                    document.getElementById("addPointBtn").textContent = "지도에서 클릭하여 국립공원구역": color = "red"; break;
                 default: color = "grey"; break;
             }
             // 위험도에 따라 다른 아이콘 사용 (Naver Maps는 별도의 아이콘 URL 제공)
@@ -184,7 +184,7 @@
             const newPoint = {
                 lat: lat,
                 lng: lng,
-                risk: "보통",
+                risk: "국립공원구역",
                 date: new Date().toISOString().slice(0, 10),
                 description: "좌표로 추가된 위험 지역"
             };
