@@ -99,10 +99,10 @@
       <tr>
         <th>날짜</th>
         <th>산불발생(대응) 시간</th>
-        <th>산불발생(대응) 장소</th>
-        <th>산불발생(대응) 인력</th>
+        <th>산불발생 장소</th>
+        <th>산불대응 구역</th>
+        <th>산불대응 인력</th>
         <th>산불위기경보단계</th>
-        <th>산불대응(순찰) 구역</th>
         <th>개인임무</th>
         <th>삭제</th>
       </tr>
@@ -120,27 +120,27 @@
         <input type="date" id="date" required>
       </div>
       <div class="half">
-        <label for="startTime">산불대응 시작시간:</label>
+        <label for="startTime">산불발생(대응) 시작시간:</label>
         <input type="time" id="startTime" required>
       </div>
       <div class="half">
-        <label for="endTime">산불대응 종료시간:</label>
+        <label for="endTime">산불발생(대응) 종료시간:</label>
         <input type="time" id="endTime" required>
       </div>
       <div class="half">
-        <label for="name">산불현장 대응(근무)자:</label>
+        <label for="name">산불발생 장소:</label>
         <input type="text" id="name" placeholder="이름" required>
       </div>
       <div class="half">
-        <label for="remarks">산불현장 대응(근무)장소:</label>
+        <lab역</label>
         <input type="text" id="remarks" placeholder="근무 장소" required>
       </div>
       <div class="half">
-        <label for="warningLevel">산불위기경보단계:</label>
+        <label for="warningLevel">산불대응 구역:</label>
         <input id="warningLevel" placeholder="단계 입력" required>
       </div>
       <div class="half">
-        <label for="fireIndex">산불발생(대응) 구역:</label>
+        <label for="fireIndex">산불위기경보단계:</label>
         <input id="fireIndex" placeholder="구역 입력" required>
       </div>
       <div class="half">
@@ -266,7 +266,7 @@
 
   // 공유 기능
   function shareLink() {
-    let tableData = "날짜\t산불발생(대응) 시간\t산불현장 대응(근무)장소\t산불현장 대응(근무)자\t산불위기경보단계\t산불발생(대응) 구역\t개인임무\n";
+    let tableData = "날짜\t산불발생(대응) 시간\t산불발생 장소\t산불대응 구역\t산불대응 인력\t산불위기경보단계\t개인임무\n";
     const rows = document.querySelectorAll("#workerTable tr");
     rows.forEach(row => {
       const cols = row.querySelectorAll("td");
@@ -282,7 +282,7 @@
   // Excel 파일 저장
   function saveToExcel() {
     const tableData = [];
-    const headers = ["날짜", "산불현장대응 시간", "산불현장 대응(근무)장소", "산불현장 대응(근무)자", "산불위기경보단계", "산불발생(대응) 구역", "개인임무"];
+    const headers = ["날짜", "산불현장(대응) 시간", "산불발생 장소", "산불대응 구역", "산불대응 인력", "산불위기경보단계", "개인임무"];
     tableData.push(headers);
     const rows = document.querySelectorAll("#workerTable tr");
     rows.forEach(row => {
