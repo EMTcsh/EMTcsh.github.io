@@ -325,9 +325,25 @@
                 name: "증심상가",
                 lat: 35.133409,
                 lng: 126.955495,
-                status: "개방",
-                reason: "정상 운영",
-                path: null
+                status: "통제",
+                reason: "시설물 정비중",
+                path: [
+                    new naver.maps.LatLng(35.133409, 126.955495),
+                    new naver.maps.LatLng(35.119675, 126.972906) // 새인봉 삼거리 입구로 연결하는 경로
+                ],
+                connectedTo: "새인봉 삼거리 입구"
+            },
+            {
+                name: "새인봉 삼거리",
+                lat: 35.119675,
+                lng: 126.972906,
+                status: "통제",
+                reason: "시설물 정비중",
+                path: [
+                    new naver.maps.LatLng(35.119675, 126.972906),
+                    new naver.maps.LatLng(35.133409, 126.955495) // 증심상가 연결하는 경로
+                ],
+                connectedTo: "증심상가 입구"
             },
              {
                 name: "너와나목장",
