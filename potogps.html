@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>사진에서 좌표 추출 & 지도 표시</title>
   <!-- Leaflet CSS -->
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-sA+e2GkQbYJg7wQ3wKkG0c5wq1kQk9Y+vM6b0b1o0+8=" crossorigin=""/>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
   <style>
     body{font-family:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial; margin:12px}
     .container{max-width:980px;margin:0 auto}
@@ -24,14 +24,10 @@
 <body>
   <div class="container">
     <h1>사진에서 좌표 추출 & 지도 표시</h1>
-    <p>사진을 업로드하면 EXIF GPS 정보를 우선으로 읽고, 없으면 이미지 내 텍스트(OCR)에서 좌표 형태를 찾아 표시합니다.</p><div class="row">
+    <p>사진을 업로드하면 EXIF GPS 정보를 읽어 지도에 자동 표시합니다. (OCR 제외)</p><div class="row">
   <div class="card">
     <label for="fileInput">사진 선택</label>
     <input id="fileInput" type="file" accept="image/*" />
-    <div style="margin-top:10px">
-      <button id="analyzeBtn">좌표 분석 시작</button>
-      <button id="placeMarkerBtn" style="margin-left:8px">지도에 표시</button>
-    </div>
 
     <hr />
     <label>사진 미리보기</label>
@@ -40,33 +36,22 @@
     <hr />
     <label>추출된 좌표</label>
     <div id="coordsArea"><em>아직 분석되지 않음</em></div>
-    <small>EXIF가 우선입니다. EXIF가 없으면 OCR로 텍스트에서 좌표 포맷(예: 37.12345, 127.54321 또는 N 37° 7' 24" E 127° 32' 35")을 찾습니다.</small>
-
   </div>
 
   <div class="card">
     <label>로그 / 디버그</label>
     <pre id="log">대기 중...</pre>
-    <hr />
-    <label>설정</label>
-    <div>
-      <input type="checkbox" id="useOCR" checked /> <label for="useOCR" style="display:inline;font-weight:normal">OCR(이미지 텍스트 인식) 사용</label>
-    </div>
-    <div style="margin-top:8px"><small>참고: OCR은 클라이언트에서 실행되며 느릴 수 있습니다. 네트워크에 연결되어야 합니다.</small></div>
   </div>
 </div>
 
 <div id="map"></div>
 
-  </div>  <!-- 필요한 라이브러리: EXIF.js, Tesseract.js (OCR), Leaflet -->  <script src="https://cdnjs.cloudflare.com/ajax/libs/exif-js/2.3.0/exif.min.js"></script>  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-QV1X7hybF8c+g9mG0Q2n0G3kzQ9ocb8n8+7mT+gDk6A=" crossorigin=""></script>  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@2.1.5/dist/tesseract.min.js"></script>  <script>
-    // 유틸리티: EXIF GPS -> 소수점 변환
+  </div>  <!-- 필요한 라이브러리: EXIF.js, Leaflet -->  <script src="https://cdnjs.cloudflare.com/ajax/libs/exif-js/2.3.0/exif.min.js"></script>  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>  <script>
     function gpsToDecimal(gpsData, ref) {
       if (!gpsData) return null;
-      // gpsData 예: [deg, min, sec]에서 각각은 {numerator,denominator} 또는 숫자
       const toNumber = (v) => {
         if (typeof v === 'number') return v;
         if (v.numerator !== undefined) return v.numerator / v.denominator;
-        // 혹은 배열형태
         if (Array.isArray(v)) return v[0] / v[1];
         return Number(v);
       }
@@ -78,65 +63,34 @@
       return dec;
     }
 
-    // OCR로 텍스트에서 좌표 패턴 찾기 (여러 패턴 지원)
-    function findCoordsInText(text) {
-      if (!text) return null;
-      // 소수점 위도,경도 패턴: 37.12345, 127.54321
-      const decPair = /([+-]?\d{1,3}\.\d{3,})\s*[,\s]\s*([+-]?\d{1,3}\.\d{3,})/g;
-      let m = decPair.exec(text);
-      if (m) return {lat: parseFloat(m[1]), lng: parseFloat(m[2]), source: 'text-decimal'};
-
-      // N 37° 7' 24" E 127° 32' 35" 같은 패턴
-      const dms = /([NS])\s*(\d{1,3})[^\d\n]*(\d{1,2})[^\d\n]*(\d{1,2}(?:\.\d+)?)\D+([EW])\s*(\d{1,3})[^\d\n]*(\d{1,2})[^\d\n]*(\d{1,2}(?:\.\d+)?)/i;
-      m = dms.exec(text);
-      if (m) {
-        const latSign = m[1].toUpperCase() === 'S' ? -1 : 1;
-        const lat = latSign * (Number(m[2]) + Number(m[3])/60 + Number(m[4])/3600);
-        const lngSign = m[5].toUpperCase() === 'W' ? -1 : 1;
-        const lng = lngSign * (Number(m[6]) + Number(m[7])/60 + Number(m[8])/3600);
-        return {lat, lng, source: 'text-dms'};
-      }
-
-      // 간단한 괄호안 또는 '위도:' '경도:' 같은 표현
-      const kv = /(?:위도|lat)[:\s]*([+-]?\d{1,3}\.\d+)[,;\s]+(?:경도|lon|lng)[:\s]*([+-]?\d{1,3}\.\d+)/i;
-      m = kv.exec(text);
-      if (m) return {lat: parseFloat(m[1]), lng: parseFloat(m[2]), source: 'text-kv'};
-
-      return null;
-    }
-
-    // DOM 요소
     const fileInput = document.getElementById('fileInput');
     const preview = document.getElementById('preview');
-    const analyzeBtn = document.getElementById('analyzeBtn');
     const coordsArea = document.getElementById('coordsArea');
     const log = document.getElementById('log');
-    const useOCR = document.getElementById('useOCR');
-    const placeMarkerBtn = document.getElementById('placeMarkerBtn');
 
     let lastCoords = null;
-    let lastImageBlob = null;
+    let marker = null;
 
-    function appendLog(s){ log.textContent = new Date().toLocaleTimeString() + ' - ' + s + '\n' + log.textContent; }
+    function appendLog(s){ log.textContent = new Date().toLocaleTimeString() + ' - ' + s + "\n" + log.textContent; }
+
+    // 지도 초기화
+    const map = L.map('map').setView([37.5665, 126.9780], 13);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19,
+      attribution: '© OpenStreetMap'
+    }).addTo(map);
 
     fileInput.addEventListener('change', (e) => {
       const f = e.target.files && e.target.files[0];
       if (!f) return;
-      lastImageBlob = f;
       const url = URL.createObjectURL(f);
       preview.src = url;
-      coordsArea.innerHTML = '<em>아직 분석되지 않음</em>';
-      appendLog('이미지 선택됨: ' + f.name);
-    });
-
-    analyzeBtn.addEventListener('click', async () => {
-      if (!lastImageBlob) { alert('먼저 이미지를 선택하세요.'); return; }
       coordsArea.innerHTML = '<em>분석 중...</em>';
-      appendLog('EXIF 정보 읽기 시도...');
+      appendLog('이미지 선택됨: ' + f.name);
 
       // EXIF 읽기
       try {
-        EXIF.getData(lastImageBlob, async function() {
+        EXIF.getData(f, function() {
           const gpsLat = EXIF.getTag(this, 'GPSLatitude');
           const gpsLatRef = EXIF.getTag(this, 'GPSLatitudeRef');
           const gpsLng = EXIF.getTag(this, 'GPSLongitude');
@@ -145,30 +99,17 @@
             const lat = gpsToDecimal(gpsLat, gpsLatRef);
             const lng = gpsToDecimal(gpsLng, gpsLngRef);
             lastCoords = {lat, lng, source: 'exif'};
-            coordsArea.innerHTML = `<strong>EXIF GPS:</strong> ${lat.toFixed(6)}, ${lng.toFixed(6)} <br/><small>출처: EXIF</small>`;
+            coordsArea.innerHTML = `<strong>EXIF GPS:</strong> ${lat.toFixed(6)}, ${lng.toFixed(6)}`;
             appendLog('EXIF 좌표 발견: ' + lat + ', ' + lng);
-            return;
+
+            // 지도에 자동 표시
+            if (marker) map.removeLayer(marker);
+            marker = L.marker([lat, lng]).addTo(map).bindPopup(`추출 좌표<br>${lat.toFixed(6)}, ${lng.toFixed(6)}<br><small>출처: EXIF</small>`).openPopup();
+            map.setView([lat, lng], 16);
+            appendLog('마커 자동 추가 완료.');
           } else {
+            coordsArea.innerHTML = '<em>EXIF GPS 정보 없음</em>';
             appendLog('EXIF에 GPS 정보 없음.');
-            // OCR 시도
-            if (useOCR.checked) {
-              appendLog('OCR 시도... (Tesseract.js)');
-              coordsArea.innerHTML = '<em>EXIF 없음 — OCR로 텍스트 검색 중...</em>';
-              const result = await runOCR(lastImageBlob);
-              const found = findCoordsInText(result);
-              if (found) {
-                lastCoords = {lat: found.lat, lng: found.lng, source: found.source};
-                coordsArea.innerHTML = `<strong>OCR로 추출:</strong> ${found.lat.toFixed(6)}, ${found.lng.toFixed(6)} <br/><small>출처: OCR (${found.source})</small>`;
-                appendLog('OCR에서 좌표 발견: ' + found.lat + ', ' + found.lng);
-                return;
-              } else {
-                coordsArea.innerHTML = '<em>좌표를 찾을 수 없음</em>';
-                appendLog('OCR 결과에서 좌표 패턴을 찾지 못함.');
-              }
-            } else {
-              coordsArea.innerHTML = '<em>EXIF에 GPS 없음. OCR 비활성화 상태.</em>';
-              appendLog('OCR 비활성화 됨. 분석 종료.');
-            }
           }
         });
       } catch (err) {
@@ -177,55 +118,6 @@
       }
     });
 
-    // Tesseract OCR 실행
-    async function runOCR(fileBlob) {
-      try {
-        // Tesseract는 blob을 직접 지원하지 않을 수 있으므로 image로 변환
-        const img = await createImageBitmap(fileBlob);
-        // 캔버스에 그려서 데이터 URL 얻기
-        const canvas = document.createElement('canvas');
-        canvas.width = img.width; canvas.height = img.height;
-        const ctx = canvas.getContext('2d');
-        ctx.drawImage(img,0,0);
-        const dataUrl = canvas.toDataURL('image/jpeg');
-
-        appendLog('OCR: 이미지 준비완료, Tesseract 시작');
-        const worker = Tesseract.createWorker({logger: m => appendLog('Tesseract: ' + (m.status || '') + ' ' + (m.progress? (m.progress*100).toFixed(0)+ '%' : ''))});
-        await worker.load();
-        await worker.loadLanguage('eng+kor');
-        await worker.initialize('eng+kor');
-        const { data: { text } } = await worker.recognize(dataUrl);
-        await worker.terminate();
-        appendLog('OCR 완료. 텍스트 길이: ' + (text||'').length);
-        return text;
-      } catch (e) {
-        appendLog('OCR 오류: ' + e);
-        return '';
-      }
-    }
-
-    // 지도 초기화 (Leaflet)
-    const map = L.map('map').setView([37.5665, 126.9780], 13); // 기본 서울 중심
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      maxZoom: 19,
-      attribution: '© OpenStreetMap'
-    }).addTo(map);
-
-    let marker = null;
-    placeMarkerBtn.addEventListener('click', () => {
-      if (!lastCoords) { alert('먼저 분석으로 좌표를 얻으세요.'); return; }
-      if (marker) map.removeLayer(marker);
-      marker = L.marker([lastCoords.lat, lastCoords.lng]).addTo(map).bindPopup(`추출 좌표<br>${lastCoords.lat.toFixed(6)}, ${lastCoords.lng.toFixed(6)}<br><small>출처: ${lastCoords.source}</small>`).openPopup();
-      map.setView([lastCoords.lat, lastCoords.lng], 16);
-      appendLog('마커 추가: ' + lastCoords.lat + ', ' + lastCoords.lng);
-    });
-
-    // 이미지 위에 마우스로 좌표 찍기 (추가 기능)
-    preview.addEventListener('click', (e) => {
-      // 향후 이미지에 GPS 태그로 위치 찍어보는 기능 확장 가능
-      appendLog('미리보기 클릭');
-    });
-
-    appendLog('준비 완료 — 이미지를 선택하고 "좌표 분석 시작"을 눌러보세요.');
+    appendLog('준비 완료 — 이미지를 선택하면 자동으로 좌표를 분석하고 지도에 표시합니다.');
   </script></body>
-</html> 
+</html>
