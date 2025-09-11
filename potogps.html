@@ -2,8 +2,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>사진에서 좌표 추출 및 지도 표시</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/exif-js/2.3.0/exif.min.js"></script>
+  <title>사진에서 좌표 추출 (piexif.js 버전)</title>
+  <script src="https://cdn.jsdelivr.net/npm/piexifjs"></script>
   <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
   <style>
@@ -13,8 +13,8 @@
   </style>
 </head>
 <body>
-  <h2>📷 사진에서 좌표 추출 (강제 EXIF 분석)</h2>
-  <input type="file" id="imageInput" accept="image/*" />
+  <h2>📷 사진에서 좌표 추출 (piexif.js 강제 분석)</h2>
+  <input type="file" id="imageInput" accept="image/jpeg" />
   <div id="log" class="log"></div>
   <div id="map"></div>  <script>
     const logEl = document.getElementById('log');
@@ -28,12 +28,10 @@
       logEl.textContent += msg + "\n";
     }
 
-    function toDecimal(gpsData, ref) {
-      if (!gpsData) return null;
-      const d = gpsData[0].numerator / gpsData[0].denominator;
-      const m = gpsData[1].numerator / gpsData[1].denominator;
-      const s = gpsData[2].numerator / gpsData[2].denominator;
-      let dec = d + m / 60 + s / 3600;
+    function dmsToDecimal(dms, ref) {
+      if (!dms) return null;
+      const [d, m, s] = dms;
+      let dec = d[0]/d[1] + m[0]/m[1]/60 + s[0]/s[1]/3600;
       if (ref === 'S' || ref === 'W') dec = -dec;
       return dec;
     }
@@ -47,27 +45,30 @@
 
       const reader = new FileReader();
       reader.onload = function(e) {
-        const arrayBuffer = e.target.result;
         try {
-          const tags = EXIF.readFromBinaryFile(arrayBuffer);
-          log('전체 EXIF 태그:\n' + JSON.stringify(tags, null, 2));
+          const dataUrl = e.target.result;
+          const exifObj = piexif.load(dataUrl);
+          log('전체 EXIF 태그:\n' + JSON.stringify(exifObj, null, 2));
 
-          const lat = toDecimal(tags.GPSLatitude, tags.GPSLatitudeRef);
-          const lng = toDecimal(tags.GPSLongitude, tags.GPSLongitudeRef);
+          const gps = exifObj['GPS'];
+          if (gps && gps[piexif.GPSIFD.GPSLatitude] && gps[piexif.GPSIFD.GPSLongitude]) {
+            const lat = dmsToDecimal(gps[piexif.GPSIFD.GPSLatitude], gps[piexif.GPSIFD.GPSLatitudeRef]);
+            const lng = dmsToDecimal(gps[piexif.GPSIFD.GPSLongitude], gps[piexif.GPSIFD.GPSLongitudeRef]);
 
-          if (lat && lng) {
-            log(`좌표 추출 성공: ${lat}, ${lng}`);
-            if (marker) map.removeLayer(marker);
-            marker = L.marker([lat, lng]).addTo(map);
-            map.setView([lat, lng], 15);
-          } else {
-            log('❌ GPS 정보 없음');
+            if (lat && lng) {
+              log(`좌표 추출 성공: ${lat}, ${lng}`);
+              if (marker) map.removeLayer(marker);
+              marker = L.marker([lat, lng]).addTo(map);
+              map.setView([lat, lng], 15);
+              return;
+            }
           }
+          log('❌ GPS 정보 없음');
         } catch (err) {
           log('EXIF 분석 오류: ' + err);
         }
       };
-      reader.readAsArrayBuffer(file);
+      reader.readAsDataURL(file);
     });
   </script></body>
 </html>
