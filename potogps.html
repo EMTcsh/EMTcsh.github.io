@@ -1,74 +1,120 @@
-<!DOCTYPE html><html lang="ko">
+<!doctype html>
+
+<html lang="ko">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>사진에서 좌표 추출 (piexif.js 버전)</title>
-  <script src="https://cdn.jsdelivr.net/npm/piexifjs"></script>
-  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
-  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>사진에서 좌표 추출 & 지도 표시</title>
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
   <style>
-    body { font-family: sans-serif; margin: 20px; }
-    #map { height: 400px; margin-top: 20px; }
-    .log { white-space: pre-wrap; background: #f5f5f5; padding: 10px; border-radius: 6px; max-height: 200px; overflow: auto; }
+    body{font-family:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial; margin:12px}
+    .container{max-width:980px;margin:0 auto}
+    #preview{max-width:100%;height:auto;border:1px solid #ddd;padding:6px;background:#fafafa}
+    #map{height:420px;margin-top:12px;border-radius:8px;overflow:hidden}
+    .row{display:flex;gap:12px;flex-wrap:wrap}
+    .card{flex:1 1 320px;padding:12px;border-radius:8px;border:1px solid #eee;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,0.04)}
+    label{display:block;margin-bottom:6px;font-weight:600}
+    input[type=file]{display:block}
+    pre{background:#111;color:#fff;padding:10px;border-radius:6px;overflow:auto;max-height:300px}
+    small{color:#666}
   </style>
 </head>
 <body>
-  <h2>📷 사진에서 좌표 추출 (piexif.js 강제 분석)</h2>
-  <input type="file" id="imageInput" accept="image/jpeg" />
-  <div id="log" class="log"></div>
-  <div id="map"></div>  <script>
-    const logEl = document.getElementById('log');
-    const map = L.map('map').setView([37.5665, 126.9780], 13);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '&copy; OpenStreetMap contributors'
-    }).addTo(map);
-    let marker;
+  <div class="container">
+    <h1>사진에서 좌표 추출 & 지도 표시</h1>
+    <p>사진을 업로드하면 EXIF GPS 정보를 읽어 지도에 자동 표시합니다. (OCR 제외)</p><div class="row">
+  <div class="card">
+    <label for="fileInput">사진 선택</label>
+    <input id="fileInput" type="file" accept="image/*" />
 
-    function log(msg) {
-      logEl.textContent += msg + "\n";
-    }
+    <hr />
+    <label>사진 미리보기</label>
+    <img id="preview" alt="preview" />
 
-    function dmsToDecimal(dms, ref) {
-      if (!dms) return null;
-      const [d, m, s] = dms;
-      let dec = d[0]/d[1] + m[0]/m[1]/60 + s[0]/s[1]/3600;
+    <hr />
+    <label>추출된 좌표</label>
+    <div id="coordsArea"><em>아직 분석되지 않음</em></div>
+  </div>
+
+  <div class="card">
+    <label>로그 / 디버그</label>
+    <pre id="log">대기 중...</pre>
+  </div>
+</div>
+
+<div id="map"></div>
+
+  </div>  <!-- 필요한 라이브러리: EXIF.js, Leaflet -->  <script src="https://cdnjs.cloudflare.com/ajax/libs/exif-js/2.3.0/exif.min.js"></script>  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>  <script>
+    function gpsToDecimal(gpsData, ref) {
+      if (!gpsData) return null;
+      const toNumber = (v) => {
+        if (typeof v === 'number') return v;
+        if (v.numerator !== undefined) return v.numerator / v.denominator;
+        if (Array.isArray(v)) return v[0] / v[1];
+        return Number(v);
+      }
+      const d = toNumber(gpsData[0]);
+      const m = toNumber(gpsData[1]);
+      const s = toNumber(gpsData[2]);
+      let dec = d + m/60 + s/3600;
       if (ref === 'S' || ref === 'W') dec = -dec;
       return dec;
     }
 
-    document.getElementById('imageInput').addEventListener('change', function(evt) {
-      const file = evt.target.files[0];
-      if (!file) return;
+    const fileInput = document.getElementById('fileInput');
+    const preview = document.getElementById('preview');
+    const coordsArea = document.getElementById('coordsArea');
+    const log = document.getElementById('log');
 
-      logEl.textContent = '';
-      log('파일 읽는 중: ' + file.name);
+    let marker = null;
 
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        try {
-          const dataUrl = e.target.result;
-          const exifObj = piexif.load(dataUrl);
-          log('전체 EXIF 태그:\n' + JSON.stringify(exifObj, null, 2));
+    function appendLog(s){ log.textContent = new Date().toLocaleTimeString() + ' - ' + s + "\n" + log.textContent; }
 
-          const gps = exifObj['GPS'];
-          if (gps && gps[piexif.GPSIFD.GPSLatitude] && gps[piexif.GPSIFD.GPSLongitude]) {
-            const lat = dmsToDecimal(gps[piexif.GPSIFD.GPSLatitude], gps[piexif.GPSIFD.GPSLatitudeRef]);
-            const lng = dmsToDecimal(gps[piexif.GPSIFD.GPSLongitude], gps[piexif.GPSIFD.GPSLongitudeRef]);
+    // 지도 초기화
+    const map = L.map('map').setView([37.5665, 126.9780], 13);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19,
+      attribution: '© OpenStreetMap'
+    }).addTo(map);
 
-            if (lat && lng) {
-              log(`좌표 추출 성공: ${lat}, ${lng}`);
-              if (marker) map.removeLayer(marker);
-              marker = L.marker([lat, lng]).addTo(map);
-              map.setView([lat, lng], 15);
-              return;
-            }
+    fileInput.addEventListener('change', (e) => {
+      const f = e.target.files && e.target.files[0];
+      if (!f) return;
+      const url = URL.createObjectURL(f);
+      preview.src = url;
+      coordsArea.innerHTML = '<em>분석 중...</em>';
+      appendLog('이미지 선택됨: ' + f.name);
+
+      // EXIF 읽기
+      try {
+        EXIF.getData(f, function() {
+          const gpsLat = EXIF.getTag(this, 'GPSLatitude');
+          const gpsLatRef = EXIF.getTag(this, 'GPSLatitudeRef');
+          const gpsLng = EXIF.getTag(this, 'GPSLongitude');
+          const gpsLngRef = EXIF.getTag(this, 'GPSLongitudeRef');
+          if (gpsLat && gpsLng) {
+            const lat = gpsToDecimal(gpsLat, gpsLatRef);
+            const lng = gpsToDecimal(gpsLng, gpsLngRef);
+            coordsArea.innerHTML = `<strong>EXIF GPS:</strong> ${lat.toFixed(6)}, ${lng.toFixed(6)}`;
+            appendLog('EXIF 좌표 발견: ' + lat + ', ' + lng);
+
+            // 지도에 자동 표시
+            if (marker) map.removeLayer(marker);
+            marker = L.marker([lat, lng]).addTo(map).bindPopup(`추출 좌표<br>${lat.toFixed(6)}, ${lng.toFixed(6)}<br><small>출처: EXIF</small>`).openPopup();
+            map.setView([lat, lng], 16);
+            appendLog('마커 자동 추가 완료.');
+          } else {
+            coordsArea.innerHTML = '<em>EXIF GPS 정보 없음</em>';
+            appendLog('EXIF에 GPS 정보 없음.');
           }
-          log('❌ GPS 정보 없음');
-        } catch (err) {
-          log('EXIF 분석 오류: ' + err);
-        }
-      };
-      reader.readAsDataURL(file);
+        });
+      } catch (err) {
+        appendLog('EXIF 처리 중 오류: ' + err);
+        coordsArea.innerHTML = '<em>분석 실패: 예외 발생</em>';
+      }
     });
+
+    appendLog('준비 완료 — 이미지를 선택하면 자동으로 좌표를 분석하고 지도에 표시합니다.');
   </script></body>
-</html> 
+</html>
