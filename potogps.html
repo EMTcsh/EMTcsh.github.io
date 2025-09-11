@@ -4,7 +4,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>사진에서 좌표 추출 & 지도 표시</title>
+  <title>사진에서 좌표 추출 & 지도 표시 (디버그 강화)</title>
   <!-- Leaflet CSS -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
   <style>
@@ -16,15 +16,14 @@
     .card{flex:1 1 320px;padding:12px;border-radius:8px;border:1px solid #eee;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,0.04)}
     label{display:block;margin-bottom:6px;font-weight:600}
     input[type=file]{display:block}
-    button{padding:8px 12px;border-radius:6px;border:0;background:#2563eb;color:#fff;cursor:pointer}
-    pre{background:#111;color:#fff;padding:10px;border-radius:6px;overflow:auto}
+    pre{background:#111;color:#fff;padding:10px;border-radius:6px;overflow:auto;max-height:300px}
     small{color:#666}
   </style>
 </head>
 <body>
   <div class="container">
     <h1>사진에서 좌표 추출 & 지도 표시</h1>
-    <p>사진을 업로드하면 EXIF GPS 정보를 읽어 지도에 자동 표시합니다. (OCR 제외)</p><div class="row">
+    <p>사진을 업로드하면 EXIF GPS 정보를 읽어 지도에 자동 표시합니다.<br><small>※ 사진에 GPS가 없는 경우 "GPS 정보 없음"으로 표시됩니다.</small></p><div class="row">
   <div class="card">
     <label for="fileInput">사진 선택</label>
     <input id="fileInput" type="file" accept="image/*" />
@@ -68,7 +67,6 @@
     const coordsArea = document.getElementById('coordsArea');
     const log = document.getElementById('log');
 
-    let lastCoords = null;
     let marker = null;
 
     function appendLog(s){ log.textContent = new Date().toLocaleTimeString() + ' - ' + s + "\n" + log.textContent; }
@@ -86,29 +84,31 @@
       const url = URL.createObjectURL(f);
       preview.src = url;
       coordsArea.innerHTML = '<em>분석 중...</em>';
-      appendLog('이미지 선택됨: ' + f.name);
+      appendLog('이미지 선택됨: ' + f.name + ', 크기: ' + f.size + ' bytes');
 
-      // EXIF 읽기
       try {
+        // 방법1: EXIF.getData 사용
         EXIF.getData(f, function() {
+          const allTags = EXIF.getAllTags(this);
+          appendLog('EXIF 전체 태그: ' + JSON.stringify(allTags, null, 2));
+
           const gpsLat = EXIF.getTag(this, 'GPSLatitude');
           const gpsLatRef = EXIF.getTag(this, 'GPSLatitudeRef');
           const gpsLng = EXIF.getTag(this, 'GPSLongitude');
           const gpsLngRef = EXIF.getTag(this, 'GPSLongitudeRef');
+
           if (gpsLat && gpsLng) {
             const lat = gpsToDecimal(gpsLat, gpsLatRef);
             const lng = gpsToDecimal(gpsLng, gpsLngRef);
-            lastCoords = {lat, lng, source: 'exif'};
             coordsArea.innerHTML = `<strong>EXIF GPS:</strong> ${lat.toFixed(6)}, ${lng.toFixed(6)}`;
             appendLog('EXIF 좌표 발견: ' + lat + ', ' + lng);
 
-            // 지도에 자동 표시
+            // 지도에 표시
             if (marker) map.removeLayer(marker);
             marker = L.marker([lat, lng]).addTo(map).bindPopup(`추출 좌표<br>${lat.toFixed(6)}, ${lng.toFixed(6)}<br><small>출처: EXIF</small>`).openPopup();
             map.setView([lat, lng], 16);
-            appendLog('마커 자동 추가 완료.');
           } else {
-            coordsArea.innerHTML = '<em>EXIF GPS 정보 없음</em>';
+            coordsArea.innerHTML = '<em>GPS 정보 없음 (사진에 좌표 데이터가 없습니다)</em>';
             appendLog('EXIF에 GPS 정보 없음.');
           }
         });
