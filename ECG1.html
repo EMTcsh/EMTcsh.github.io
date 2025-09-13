@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ECG Image Analyzer</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    #canvas { border: 1px solid #ccc; margin-top: 10px; }
+    #results { margin-top: 20px; padding: 10px; border-radius: 8px; }
+    .green { color: green; font-weight: bold; }
+    .orange { color: orange; font-weight: bold; }
+    .red { color: red; font-weight: bold; }
+    .gray { color: gray; font-weight: bold; }
+  </style>
+</head>
+<body>
+  <h1>심전도 파형 분석기</h1>
+  <input type="file" id="upload" accept="image/*"><br>
+  <canvas id="canvas"></canvas>
+  <div id="results">
+    <p id="bpmResult"></p>
+    <p id="rrResult"></p>
+    <p id="rhythmResult"></p>
+  </div>
+
+  <script>
+    const upload = document.getElementById("upload");
+    const canvas = document.getElementById("canvas");
+    const ctx = canvas.getContext("2d");
+
+    upload.addEventListener("change", (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const img = new Image();
+      img.onload = () => {
+        canvas.width = img.width;
+        canvas.height = img.height;
+        ctx.drawImage(img, 0, 0);
+        analyzeECG();
+      };
+      img.src = URL.createObjectURL(file);
+    });
+
+    function analyzeECG() {
+      // 더미 데이터 (실제는 파형 추출 및 R파 검출 필요)
+      const rr = [0.8, 0.82, 0.79, 0.81, 0.8]; // 초 단위 RR 간격
+      const bpm = Math.round(60 / (rr.reduce((a,b)=>a+b,0)/rr.length));
+      const rrCV = std(rr)/mean(rr);
+      const qrsWidth = 100; // ms (가정)
+
+      const result = classifyRhythm(rr, bpm, rrCV, qrsWidth);
+
+      document.getElementById("bpmResult").innerText = `추정 BPM: ${bpm}`;
+      document.getElementById("rrResult").innerText = `RR 간격 평균: ${mean(rr).toFixed(2)}s, 변동계수: ${rrCV.toFixed(2)}`;
+      const rhythmEl = document.getElementById("rhythmResult");
+      rhythmEl.innerText = `추정 리듬: ${result.text}`;
+      rhythmEl.className = result.color;
+    }
+
+    function classifyRhythm(rr, bpm, rrCV, qrsWidth) {
+      if (rr.length < 3) return {text: "분석 불충분", color: "gray"};
+
+      if (bpm < 60) return {text: "동성 서맥(Sinus Bradycardia)", color: "orange"};
+      if (bpm > 100 && rrCV < 0.1) return {text: "동성 빈맥(Sinus Tachycardia)", color: "orange"};
+      if (rrCV > 0.2) return {text: "심방세동(Atrial Fibrillation) 가능성", color: "orange"};
+      if (qrsWidth > 120 && bpm > 100) return {text: "심실빈맥(VT) 가능성", color: "red"};
+      if (qrsWidth > 120 && rrCV < 0.1) return {text: "조기심실수축(PVC) 의심", color: "orange"};
+
+      return {text: "정상 동율동(Normal Sinus Rhythm)", color: "green"};
+    }
+
+    function mean(arr) {
+      return arr.reduce((a,b)=>a+b,0)/arr.length;
+    }
+
+    function std(arr) {
+      const m = mean(arr);
+      return Math.sqrt(arr.reduce((a,b)=>a+(b-m)**2,0)/arr.length);
+    }
+  </script>
+</body>
+</html>
