@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>심전도(ECG) 파형 이미지 분석기</title>
+  <style>
+    body{font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,'Noto Sans KR',sans-serif;margin:18px;background:#f6f8fa;color:#0b1220}
+    h1{font-size:20px;margin-bottom:6px}
+    .card{background:#fff;padding:14px;border-radius:10px;box-shadow:0 6px 18px rgba(11,17,32,0.06);margin-bottom:12px}
+    label{display:block;margin-top:8px;font-size:13px}
+    input,select,button{padding:8px 10px;border-radius:8px;border:1px solid #d6dbe3;font-size:14px}
+    .controls{display:flex;gap:8px;flex-wrap:wrap}
+    canvas{max-width:100%;border:1px solid #e1e6ef;border-radius:8px}
+    .stats{margin-top:10px;font-size:14px}
+    .small{font-size:13px;color:#475569}
+    pre{background:#0b1220;color:#e6eef8;padding:10px;border-radius:8px;overflow:auto}
+    .btn-primary{background:#0f62fe;color:white;border:none}
+    .btn-ghost{background:transparent;border:1px solid #d6dbe3}
+  </style>
+</head>
+<body>
+  <h1>심전도(ECG) 파형 이미지 업로드 및 자동분석</h1>
+  <div class="card">
+    <label>이미지 업로드 (JPG / PNG)</label>
+    <input id="fileInput" type="file" accept="image/*" />
+
+    <div style="margin-top:10px" class="controls">
+      <div>
+        <label>기본 속도</label>
+        <select id="paperSpeed">
+          <option value="25">25 mm/s (일반)</option>
+          <option value="50">50 mm/s</option>
+        </select>
+        <div class="small">종종 ECG 용지 속도는 25 mm/s 입니다.</div>
+      </div>
+
+      <div>
+        <label>화면/이미지의 mm 당 픽셀 수 (mm per pixel)</label>
+        <input id="mmPerPixel" type="number" step="0.0001" value="0.2646" />
+        <div class="small">기본값 0.2646 mm/pixel (96 DPI). 이미지를 스캔하거나 촬영한 해상도에 따라 조정하세요.</div>
+      </div>
+
+      <div>
+        <label>노이즈 제거 윈도우 (픽셀)</label>
+        <input id="smooth" type="number" value="5" min="1" />
+        <div class="small">이 값이 크면 파형이 더 부드러워집니다.</div>
+      </div>
+
+      <div style="align-self:end">
+        <button id="analyzeBtn" class="btn-primary">분석 시작</button>
+        <button id="resetBtn" class="btn-ghost">초기화</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <canvas id="imgCanvas"></canvas>
+    <div class="stats" id="results"></div>
+    <div style="margin-top:8px;display:flex;gap:8px">
+      <button id="togglePeaks" class="btn-ghost">R파 표시 토글</button>
+      <button id="downloadCsv" class="btn-ghost">RR 간격 CSV로 다운로드</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>사용 안내</h3>
+    <ul>
+      <li>선명한 ECG 이미지(흰 배경, 검은 선)가 가장 잘 동작합니다.</li>
+      <li>스마트폰 촬영 시 그림자/기울기 보정이 필요하면 미리 보정하세요.</li>
+      <li>시간 변환 정확도는 <code>mm per pixel</code> 값에 크게 의존합니다. 스캔 DPI나 촬영 해상도 정보를 알고 있다면 정확히 입력하세요.</li>
+    </ul>
+  </div>
+
+  <script>
+    const fileInput = document.getElementById('fileInput');
+    const canvas = document.getElementById('imgCanvas');
+    const ctx = canvas.getContext('2d');
+    const analyzeBtn = document.getElementById('analyzeBtn');
+    const resetBtn = document.getElementById('resetBtn');
+    const resultsDiv = document.getElementById('results');
+    const mmPerPixelInput = document.getElementById('mmPerPixel');
+    const paperSpeedSelect = document.getElementById('paperSpeed');
+    const smoothInput = document.getElementById('smooth');
+    const togglePeaksBtn = document.getElementById('togglePeaks');
+    const downloadCsvBtn = document.getElementById('downloadCsv');
+
+    let originalImage = null;
+    let waveform = null;
+    let peaks = [];
+    let showPeaks = true;
+
+    fileInput.addEventListener('change', e => {
+      const f = e.target.files[0];
+      if(!f) return;
+      const img = new Image();
+      img.onload = () => {
+        // fit canvas to image but limit width for performance
+        const maxW = 1200;
+        const scale = Math.min(1, maxW / img.width);
+        canvas.width = Math.round(img.width * scale);
+        canvas.height = Math.round(img.height * scale);
+        ctx.clearRect(0,0,canvas.width,canvas.height);
+        ctx.drawImage(img,0,0,canvas.width,canvas.height);
+        originalImage = img;
+        waveform = null; peaks = [];
+        resultsDiv.innerHTML = '<div class="small">이미지 로드 완료. "분석 시작"을 눌러주세요.</div>';
+      };
+      img.src = URL.createObjectURL(f);
+    });
+
+    analyzeBtn.addEventListener('click', () => {
+      if(!originalImage && !canvas.width) return alert('먼저 이미지를 업로드하세요.');
+      const mmPerPixel = parseFloat(mmPerPixelInput.value) || 0.2646;
+      const paperSpeed = parseFloat(paperSpeedSelect.value) || 25; // mm/s
+      const smoothN = Math.max(1, parseInt(smoothInput.value)||5);
+
+      // get image data from canvas (current display)
+      const imgData = ctx.getImageData(0,0,canvas.width,canvas.height);
+      const data = imgData.data;
+      const W = canvas.width, H = canvas.height;
+
+      // For each x column, find darkest pixel (min brightness) -> waveform y
+      const columnY = new Float32Array(W);
+      for(let x=0;x<W;x++){
+        let minB = 255;
+        let minY = H/2;
+        for(let y=0;y<H;y+=1){
+          const idx = (y*W + x)*4;
+          const r = data[idx], g = data[idx+1], b = data[idx+2];
+          // brightness
+          const bright = 0.299*r + 0.587*g + 0.114*b;
+          if(bright < minB){ minB = bright; minY = y; }
+        }
+        columnY[x] = minY;
+      }
+
+      // smooth
+      const smooth = (arr, n)=>{
+        const out = new Float32Array(arr.length);
+        const half = Math.floor(n/2);
+        for(let i=0;i<arr.length;i++){
+          let s=0, c=0;
+          for(let j=i-half;j<=i+half;j++){
+            if(j>=0 && j<arr.length){ s+=arr[j]; c++; }
+          }
+          out[i] = s / c;
+        }
+        return out;
+      }
+      let yvals = smooth(columnY, smoothN);
+
+      // normalize: lower y means top of canvas; convert to signal value (inverted so peaks up)
+      const minY = Math.min(...yvals), maxY = Math.max(...yvals);
+      const signal = new Float32Array(W);
+      for(let i=0;i<W;i++) signal[i] = (maxY - yvals[i]);
+
+      // further smooth with small window (3)
+      const signalSm = smooth(signal, 3);
+
+      // detect peaks (R-waves) by prominence and local maxima
+      // compute derivative and find local maxima above threshold
+      const derivative = new Float32Array(W-1);
+      for(let i=0;i<W-1;i++) derivative[i] = signalSm[i+1]-signalSm[i];
+
+      // simple peak detection: local maxima with value > mean + k*std
+      const mean = signalSm.reduce((a,b)=>a+b,0)/W;
+      let variance = 0;
+      for(let i=0;i<W;i++) variance += (signalSm[i]-mean)*(signalSm[i]-mean);
+      const std = Math.sqrt(variance/W);
+      const thresh = mean + Math.max(1.0, 0.8*std);
+
+      const isPeak = new Array(W).fill(false);
+      for(let i=2;i<W-2;i++){
+        if(signalSm[i] > signalSm[i-1] && signalSm[i] > signalSm[i+1] && signalSm[i] > thresh){
+          // ensure it's local maximum across small window
+          let localMax = true;
+          for(let j=i-3;j<=i+3;j++) if(j>=0 && j<W && signalSm[j] > signalSm[i]) localMax=false;
+          if(localMax) isPeak[i]=true;
+        }
+      }
+      peaks = [];
+      for(let i=0;i<W;i++) if(isPeak[i]) peaks.push(i);
+
+      // refine peaks by keeping those separated by minimal distance (to avoid double-detection)
+      const minDistPx = Math.round((0.2 /* sec */) / (mmPerPixel / paperSpeed)); // at least 0.2s between R peaks
+      const filtered = [];
+      let last = -9999;
+      for(const p of peaks){
+        if(p - last >= minDistPx){ filtered.push(p); last = p; }
+      }
+      peaks = filtered;
+
+      // compute RR intervals (s) from pixel differences
+      const timePerPixel = mmPerPixel / paperSpeed; // s / pixel
+      const rr = [];
+      for(let i=1;i<peaks.length;i++) rr.push((peaks[i]-peaks[i-1]) * timePerPixel);
+
+      // compute BPM median
+      const meanRR = rr.length? (rr.reduce((a,b)=>a+b,0)/rr.length) : NaN;
+      const bpm = rr.length? Math.round(60 / meanRR) : NaN;
+
+      waveform = {yvals: yvals, signal: signalSm, peaks: peaks, timePerPixel, W, H};
+
+      // draw overlay
+      redraw();
+
+      // results
+      let html = '';
+      html += `<div><strong>검출된 R파 개수:</strong> ${peaks.length}</div>`;
+      html += `<div><strong>평균 RR 간격:</strong> ${rr.length ? (meanRR.toFixed(3) + ' s') : '검출 불충분'}</div>`;
+      html += `<div><strong>추정 심박수(BPM):</strong> ${!isNaN(bpm) ? bpm + ' bpm' : '검출 불충분'}</div>`;
+      if(rr.length){
+        html += `<div class="small" style="margin-top:6px"><strong>RR 간격 예시 (s):</strong> ${rr.slice(0,10).map(x=>x.toFixed(3)).join(', ')}${rr.length>10?', ...':''}</div>`;
+        // quick irregularity check: sd
+        const meanR = meanRR;
+        let sd=0; for(const v of rr) sd += (v-meanR)*(v-meanR); sd = Math.sqrt(sd/rr.length);
+        html += `<div class="small"><strong>RR 표준편차:</strong> ${sd.toFixed(3)} s (${(sd/meanR*100).toFixed(1)} %)</div>`;
+        if(sd/meanR > 0.1) html += `<div style="color:#b45309;" class="small">주의: RR 간격 변동성(변동계수 &gt;10%) — 부정맥 가능성</div>`;
+      }
+
+      html += `<div style="margin-top:8px" class="small">시간 변환 기준: mm/pixel=${mmPerPixel}, paper speed=${paperSpeed} mm/s -> 1픽셀=${timePerPixel.toFixed(5)} s</div>`;
+      resultsDiv.innerHTML = html;
+    });
+
+    function redraw(){
+      // redraw original image then overlay waveform and peaks
+      // draw image from canvas current pixel buffer
+      // we still have drawn image in canvas
+      // create overlay
+      ctx.save();
+      // draw semi-transparent overlay of detected waveform
+      if(!waveform) return;
+      ctx.lineWidth = 2;
+      ctx.strokeStyle = 'rgba(3,105,161,0.9)';
+      ctx.beginPath();
+      for(let x=0;x<waveform.W;x++){
+        const y = waveform.yvals[x];
+        if(x===0) ctx.moveTo(x,y);
+        else ctx.lineTo(x,y);
+      }
+      ctx.stroke();
+
+      // draw signal (inverted) as thin line
+      ctx.lineWidth = 1.2;
+      ctx.strokeStyle = 'rgba(12,21,34,0.9)';
+      ctx.beginPath();
+      for(let x=0;x<waveform.W;x++){
+        const val = waveform.signal[x];
+        // scale signal around center
+        const scaled = waveform.H*0.5 - (val - Math.min(...waveform.signal))/ (Math.max(...waveform.signal)-Math.min(...waveform.signal)+1e-6) * (waveform.H*0.45);
+        if(x===0) ctx.moveTo(x,scaled);
+        else ctx.lineTo(x,scaled);
+      }
+      ctx.stroke();
+
+      // draw peaks
+      if(showPeaks){
+        ctx.fillStyle = 'rgba(220,38,38,0.9)';
+        for(const p of waveform.peaks){
+          const py = waveform.yvals[p];
+          ctx.beginPath(); ctx.arc(p, py, 4, 0, Math.PI*2); ctx.fill();
+        }
+      }
+      ctx.restore();
+    }
+
+    togglePeaksBtn.addEventListener('click', ()=>{
+      showPeaks = !showPeaks; redraw();
+      togglePeaksBtn.textContent = showPeaks? 'R파 숨기기' : 'R파 표시';
+    });
+
+    resetBtn.addEventListener('click', ()=>{
+      ctx.clearRect(0,0,canvas.width,canvas.height);
+      originalImage = null; waveform=null; peaks=[]; resultsDiv.innerHTML=''; fileInput.value='';
+    });
+
+    downloadCsvBtn.addEventListener('click', ()=>{
+      if(!waveform || !waveform.peaks.length) return alert('분석된 RR 간격이 없습니다.');
+      const timePerPixel = waveform.timePerPixel;
+      const rr = [];
+      for(let i=1;i<waveform.peaks.length;i++) rr.push((waveform.peaks[i]-waveform.peaks[i-1])*timePerPixel);
+      let csv = 'index,rr_seconds\n';
+      rr.forEach((v,i)=> csv += `${i+1},${v.toFixed(6)}\n`);
+      const blob = new Blob([csv], {type:'text/csv'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a'); a.href=url; a.download='rr_intervals.csv'; a.click(); URL.revokeObjectURL(url);
+    });
+
+    // redraw overlay when window resizes (image still in canvas)
+    window.addEventListener('resize', ()=>{ if(waveform) redraw(); });
+  </script>
+</body>
+</html>
