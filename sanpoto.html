@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>산사태 증후 분석기</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 30px;
+      background-color: #f0f0f0;
+    }
+    h1 {
+      color: #2e4a62;
+    }
+    #preview {
+      margin-top: 20px;
+      max-width: 100%;
+      height: auto;
+    }
+    #result {
+      margin-top: 20px;
+      padding: 15px;
+      background-color: #ffffff;
+      border: 1px solid #ccc;
+    }
+  </style>
+</head>
+<body>
+  <h1>📷 사진 기반 산사태 증후 분석</h1>
+
+  <input type="file" id="imageInput" accept="image/*">
+  <div>
+    <img id="preview" src="#" alt="이미지 미리보기" style="display:none;">
+  </div>
+
+  <button onclick="analyzeImage()">분석하기</button>
+
+  <div id="result">
+    분석 결과가 여기에 표시됩니다.
+  </div>
+
+  <script>
+    const imageInput = document.getElementById('imageInput');
+    const preview = document.getElementById('preview');
+    const result = document.getElementById('result');
+
+    imageInput.addEventListener('change', function() {
+      const file = this.files[0];
+      if (file) {
+        const reader = new FileReader();
+
+        reader.onload = function(e) {
+          preview.setAttribute('src', e.target.result);
+          preview.style.display = 'block';
+        }
+
+        reader.readAsDataURL(file);
+      }
+    });
+
+    function analyzeImage() {
+      const file = imageInput.files[0];
+
+      if (!file) {
+        alert("이미지를 먼저 업로드하세요.");
+        return;
+      }
+
+      // ✨ 실제로는 여기서 백엔드에 이미지를 보내 분석하게 해야 함
+      // 지금은 예시로 가짜 결과만 출력
+      result.innerHTML = `
+        <strong>예상 분석 결과:</strong><br>
+        - 지반 균열 발견<br>
+        - 배수 불량 의심<br>
+        - 식생 파괴 감지<br><br>
+        <em>(실제 분석을 위해 AI 모델 또는 전문가 판단이 필요합니다)</em>
+      `;
+    }
+  </script>
+</body>
+</html>
