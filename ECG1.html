@@ -3,16 +3,16 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>심전도(ECG) 파형 분석 — 리듬 자동분류(교육시뮬레이션용)</title>
+<title>심전도(ECG) 파형 분석 — 리듬 자동분류(교육/시뮬레이션용)</title>
 <style>
   :root{--bg:#f6f8fa;--card:#fff;--muted:#6b7280;--ok:#059669;--warn:#d97706;--alert:#dc2626;--info:#0f62fe}
   body{font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,'Noto Sans KR',sans-serif;margin:18px;background:var(--bg);color:#0b1220}
-  h1{font-size:20px;margin-bottom:6px}
-  .card{background:var(--card);padding:14px;border-radius:10px;box-shadow:0 6px 18px rgba(11,17,32,0.06);margin-bottom:12px}
+  h1{font-size:20px;margin-bottom:12px}
+  .card{background:var(--card);padding:16px;border-radius:10px;box-shadow:0 6px 18px rgba(11,17,32,0.06);margin-bottom:12px}
   label{display:block;margin-top:8px;font-size:13px}
   input,select,button{padding:8px 10px;border-radius:8px;border:1px solid #d6dbe3;font-size:14px}
-  .controls{display:flex;gap:8px;flex-wrap:wrap}
-  canvas{max-width:100%;border:1px solid #e1e6ef;border-radius:8px}
+  .controls{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+  canvas{max-width:100%;border:1px solid #e1e6ef;border-radius:8px;margin-top:8px}
   .stats{margin-top:10px;font-size:14px}
   .small{font-size:13px;color:var(--muted)}
   .btn-primary{background:var(--info);color:white;border:none}
@@ -207,29 +207,34 @@ function redraw(){
   ctx.clearRect(0,0,canvas.width,canvas.height);
   ctx.drawImage(originalImage,0,0,canvas.width,canvas.height);
   ctx.save();
-  ctx.lineWidth=2; ctx.strokeStyle='rgba(3,105,161,0.9)';
+
+  // 분석 파형
+  ctx.globalAlpha = 0.85;
+  ctx.lineWidth = 2;
+  ctx.strokeStyle = 'rgba(3,105,161,1)';
   ctx.beginPath();
   for(let x=0;x<waveform.W;x++){
-    const y=waveform.yvals[x];
+    const y = waveform.yvals[x];
     if(x===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
   }
   ctx.stroke();
 
-  ctx.lineWidth=1.2; ctx.strokeStyle='rgba(12,21,34,0.9)';
+  ctx.lineWidth = 1.5;
+  ctx.strokeStyle = 'rgba(12,21,34,0.95)';
   ctx.beginPath();
   for(let x=0;x<waveform.W;x++){
-    const val=waveform.signal[x];
-    const scaled=waveform.H*0.5-(val-Math.min(...waveform.signal))/(Math.max(...waveform.signal)-Math.min(...waveform.signal)+1e-6)*(waveform.H*0.45);
+    const val = waveform.signal[x];
+    const scaled = waveform.H*0.5-(val-Math.min(...waveform.signal))/(Math.max(...waveform.signal)-Math.min(...waveform.signal)+1e-6)*(waveform.H*0.7);
     if(x===0) ctx.moveTo(x,scaled); else ctx.lineTo(x,scaled);
   }
   ctx.stroke();
 
-  if(showPeaks){
-    ctx.fillStyle='rgba(220,38,38,0.9)';
-    for(const p of waveform.peaks){
-      const py=waveform.yvals[p];
-      ctx.beginPath(); ctx.arc(p,py,4,0,Math.PI*2); ctx.fill();
-    }
+  // R파
+  ctx.globalAlpha = 1;
+  ctx.fillStyle = 'rgba(220,38,38,1)';
+  for(const p of waveform.peaks){
+    const py = waveform.yvals[p];
+    ctx.beginPath(); ctx.arc(p,py,6,0,Math.PI*2); ctx.fill();
   }
   ctx.restore();
 }
