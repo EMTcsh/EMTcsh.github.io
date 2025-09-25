@@ -267,6 +267,8 @@ function setFormData(data){
 }
 
 // --- Google Sheet 전송 ---
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyqXUOA74lkADlE4QcMM18asKRQQCCigsQ5Y49cwwqyQLPONv5LPfDyp0XNnX4ywlC9/exec'; // 반드시 교체
+
 function sendToGoogleSheet(data){
   fetch(SCRIPT_URL + '?data=' + encodeURIComponent(JSON.stringify(data)))
     .then(res=>res.text())
