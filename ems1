@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>응급구조사 구급활동일지</title>
+  <style>
+    .sheet-container {
+      width: 100%;
+      overflow-x: auto;  /* 가로 스크롤 허용 */
+    }
+    .sheet-container iframe {
+      width: 100%;
+      min-width: 600px;  /* 너무 작아지지 않게 최소 폭 지정 */
+      height: 80vh;      /* 화면 높이에 맞춤 */
+      border: none;
+    }
+  </style>
+</head>
+<body>
+  <h2>응급구조사 의료지도 저장기록</h2>
+  <div class="sheet-container">
+    <iframe 
+      src="https://docs.google.com/spreadsheets/d/e/2PACX-1vReH2eK19MgQce_v8BA-4fzGx1-Z2afDLxei_SUENRZZsLTevb7kiMIp6sLPrUihZ3KYK4pv4RSHG5Q/pubhtml?gid=0&single=true">
+    </iframe>
+  </div>
+</body>
+</html>
