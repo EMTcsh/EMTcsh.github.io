@@ -1,155 +1,187 @@
 <!doctype html>
 <html lang="ko">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>응급구조사 구급활동일지</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <style>
-    @media print {
-      .no-print { display: none !important; }
-      body { background: white; }
-    }
-    .field-label { min-width: 100px; }
-    /* 모바일 최적화: 버튼 full width */
-    .btn { width: 100%; text-align: center; }
-  </style>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>응급구조사 구급활동일지</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  @media print { .no-print { display:none!important; } body{background:white;} }
+  .field-label{min-width:100px;}
+  .btn{width:100%; text-align:center;}
+</style>
 </head>
 <body class="bg-gray-100 p-4 font-sans text-gray-800">
-  <div class="max-w-4xl mx-auto bg-white rounded-xl shadow-md p-4">
-    <header class="flex flex-col md:flex-row items-start md:items-center justify-between mb-4">
-      <div>
-        <h1 class="text-xl md:text-2xl font-bold">응급구조사 구급활동일지</h1>
-        <p class="text-sm text-gray-500">현장·이송·처치 내용을 기록합니다.</p>
+<div class="max-w-4xl mx-auto bg-white rounded-xl shadow-md p-4">
+  <header class="flex flex-col md:flex-row items-start md:items-center justify-between mb-4">
+    <div>
+      <h1 class="text-xl md:text-2xl font-bold">응급구조사 구급활동일지</h1>
+      <p class="text-sm text-gray-500">현장·이송·처치 내용을 기록합니다.</p>
+    </div>
+    <div class="grid grid-cols-2 md:grid-cols-5 gap-2 mt-2 md:mt-0 no-print">
+      <button id="saveBtn" class="px-2 py-1 rounded bg-blue-600 text-white btn">저장</button>
+      <button id="loadBtn" class="px-2 py-1 rounded bg-yellow-500 text-white btn">불러오기</button>
+      <button id="exportBtn" class="px-2 py-1 rounded bg-green-600 text-white btn">CSV 내보내기</button>
+      <button id="printBtn" class="px-2 py-1 rounded bg-gray-700 text-white btn">인쇄</button>
+      <button id="clearBtn" class="px-2 py-1 rounded bg-red-500 text-white btn">초기화</button>
+    </div>
+  </header>
+
+  <form id="logForm" class="space-y-4">
+    <!-- 기본 정보 -->
+    <section class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
+      <div class="flex flex-col"><label class="field-label">기록일시</label><input type="datetime-local" id="datetime" class="p-2 border rounded w-full" required /></div>
+      <div class="flex flex-col"><label class="field-label">구급대/차량</label><input type="text" id="unit" class="p-2 border rounded w-full" placeholder="예: 119구급대, 차량번호" /></div>
+      <div class="flex flex-col"><label class="field-label">출동번호</label><input type="text" id="callNo" class="p-2 border rounded w-full" placeholder="출동번호" /></div>
+    </section>
+
+    <!-- 현장 정보 -->
+    <section class="bg-gray-50 p-3 rounded">
+      <h2 class="font-semibold mb-2">현장 정보</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
+        <div class="flex flex-col"><label class="text-sm text-gray-600">현장주소 / 장소</label><input type="text" id="location" class="p-2 border rounded w-full" placeholder="예: OO시 OO구 OO동" /></div>
+        <div class="flex flex-col"><label class="text-sm text-gray-600">접수자 / 신고자</label><input type="text" id="reporter" class="p-2 border rounded w-full" /></div>
+        <div class="flex flex-col"><label class="text-sm text-gray-600">응급처치 시작/종료</label><div class="flex gap-2"><input type="time" id="treatStart" class="p-2 border rounded flex-1"/><input type="time" id="treatEnd" class="p-2 border rounded flex-1"/></div></div>
       </div>
-      <div class="grid grid-cols-2 md:grid-cols-5 gap-2 mt-2 md:mt-0 no-print">
-        <button id="saveBtn" class="px-2 py-1 rounded bg-blue-600 text-white btn">저장</button>
-        <button id="loadBtn" class="px-2 py-1 rounded bg-yellow-500 text-white btn">불러오기</button>
-        <button id="exportBtn" class="px-2 py-1 rounded bg-green-600 text-white btn">CSV 내보내기</button>
-        <button id="printBtn" class="px-2 py-1 rounded bg-gray-700 text-white btn">인쇄</button>
-        <button id="clearBtn" class="px-2 py-1 rounded bg-red-500 text-white btn">초기화</button>
+    </section>
+
+    <!-- 환자 정보 -->
+    <section class="bg-gray-50 p-3 rounded">
+      <h2 class="font-semibold mb-2">환자 정보</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2">
+        <input type="text" id="patientName" class="p-2 border rounded w-full" placeholder="성명" />
+        <input type="number" id="patientAge" class="p-2 border rounded w-full" placeholder="나이" />
+        <select id="patientSex" class="p-2 border rounded w-full"><option value="">성별</option><option value="남">남</option><option value="여">여</option><option value="기타">기타</option></select>
+        <input type="text" id="patientId" class="p-2 border rounded w-full" placeholder="환자 식별 (ID/주민번호 일부)" />
       </div>
-    </header>
+      <div class="mt-2 flex flex-col"><label class="text-sm text-gray-600">주주소견(주호소)</label><textarea id="chiefComplaint" class="p-2 border rounded w-full" rows="2" placeholder="호흡곤란, 통증 등"></textarea></div>
+    </section>
 
-    <form id="logForm" class="space-y-4">
+    <!-- 활력징후 -->
+    <section class="bg-gray-50 p-3 rounded">
+      <h2 class="font-semibold mb-2">활력징후 / 상태</h2>
+      <div id="vitalsArea" class="space-y-2 overflow-x-auto"></div>
+      <div class="mt-2 no-print"><button id="addVitalBtn" type="button" class="px-2 py-1 rounded bg-blue-500 text-white w-full">활력징후 항목 추가</button></div>
+      <div class="mt-2 flex flex-col"><label class="text-sm text-gray-600">의식/호흡/순환 상태 요약</label><textarea id="statusSummary" class="w-full p-2 border rounded" rows="2"></textarea></div>
+    </section>
 
-      <!-- 기본 정보 -->
-      <section class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
-        <div class="flex flex-col">
-          <label class="field-label">기록일시</label>
-          <input type="datetime-local" id="datetime" class="p-2 border rounded w-full" required />
-        </div>
-        <div class="flex flex-col">
-          <label class="field-label">출동대원</label>
-          <input type="text" id="unit" class="p-2 border rounded w-full" placeholder="출동대원" />
-        </div>
-        <div class="flex flex-col">
-          <label class="field-label">출동번호</label>
-          <input type="text" id="callNo" class="p-2 border rounded w-full" placeholder="출동번호" />
-        </div>
-      </section>
+    <!-- 처치/약물/장비 -->
+    <section class="bg-gray-50 p-3 rounded">
+      <h2 class="font-semibold mb-2">처치·약물·장비</h2>
+      <div id="interventionsArea" class="space-y-2 overflow-x-auto"></div>
+      <div class="mt-2 no-print"><button id="addRowBtn" type="button" class="px-2 py-1 rounded bg-blue-500 text-white w-full">항목 추가</button></div>
+    </section>
 
-      <!-- 현장 정보 -->
-      <section class="bg-gray-50 p-3 rounded">
-        <h2 class="font-semibold mb-2">현장 정보</h2>
-        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
-          <div class="flex flex-col">
-            <label class="text-sm text-gray-600">현장주소 / 장소</label>
-            <input type="text" id="location" class="p-2 border rounded w-full" placeholder="예: OO시 OO구 OO동" />
-          </div>
-          <div class="flex flex-col">
-            <label class="text-sm text-gray-600">접수자 / 신고자</label>
-            <input type="text" id="reporter" class="p-2 border rounded w-full" />
-          </div>
-          <div class="flex flex-col">
-            <label class="text-sm text-gray-600">응급처치 시작/종료</label>
-            <div class="flex gap-2">
-              <input type="time" id="treatStart" class="p-2 border rounded flex-1" />
-              <input type="time" id="treatEnd" class="p-2 border rounded flex-1" />
-            </div>
-          </div>
-        </div>
-      </section>
+    <!-- 이송/결과 -->
+    <section class="bg-gray-50 p-3 rounded">
+      <h2 class="font-semibold mb-2">이송/결과</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
+        <select id="destination" class="p-2 border rounded w-full"><option value="">이송병원</option><option>응급의료센터 A</option><option>응급의료센터 B</option><option>지역병원</option></select>
+        <input type="text" id="outcome" class="p-2 border rounded w-full" placeholder="결과" />
+        <input type="text" id="receivingDoc" class="p-2 border rounded w-full" placeholder="접수자/담당자" />
+      </div>
+      <div class="mt-2 flex flex-col"><label class="text-sm text-gray-600">기타 메모</label><textarea id="notes" class="w-full p-2 border rounded" rows="2"></textarea></div>
+    </section>
 
-      <!-- 환자 정보 -->
-      <section class="bg-gray-50 p-3 rounded">
-        <h2 class="font-semibold mb-2">환자 정보</h2>
-        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2">
-          <input type="text" id="patientName" class="p-2 border rounded w-full" placeholder="성명" />
-          <input type="number" id="patientAge" class="p-2 border rounded w-full" placeholder="나이" />
-          <select id="patientSex" class="p-2 border rounded w-full">
-            <option value="">성별</option>
-            <option value="남">남</option>
-            <option value="여">여</option>
-            <option value="기타">기타</option>
-          </select>
-          <input type="text" id="patientId" class="p-2 border rounded w-full" placeholder="환자 식별 (ID/주소 일부)" />
-        </div>
-        <div class="mt-2 flex flex-col">
-          <label class="text-sm text-gray-600">주소견(주호소)</label>
-          <textarea id="chiefComplaint" class="p-2 border rounded w-full" rows="2" placeholder="호흡곤란, 통증 등"></textarea>
-        </div>
-      </section>
+    <!-- 기록자/서명 -->
+    <section class="flex flex-col sm:flex-row gap-2 items-start sm:items-center justify-between">
+      <div class="flex flex-col gap-2 w-full sm:w-auto">
+        <div class="flex flex-col sm:flex-row gap-2 items-start sm:items-center"><label class="field-label">기록자</label><input type="text" id="recorder" class="p-2 border rounded flex-1" placeholder="응급구조사 이름" /></div>
+        <div class="flex flex-col sm:flex-row gap-2 items-start sm:items-center"><label class="field-label">서명</label><input type="text" id="sign" class="p-2 border rounded flex-1" placeholder="(디지털 서명 또는 이름)" /></div>
+      </div>
+      <div class="text-sm text-gray-500 mt-2 sm:mt-0">자동저장: Google 스프레드시트로 연별 저장됩니다.</div>
+    </section>
+  </form>
+</div>
 
-      <!-- 활력징후 -->
-      <section class="bg-gray-50 p-3 rounded">
-        <h2 class="font-semibold mb-2">활력징후 / 상태</h2>
-        <div id="vitalsArea" class="space-y-2 overflow-x-auto"></div>
-        <div class="mt-2 no-print">
-          <button id="addVitalBtn" type="button" class="px-2 py-1 rounded bg-blue-500 text-white w-full">활력징후 항목 추가</button>
-        </div>
-        <div class="mt-2 flex flex-col">
-          <label class="text-sm text-gray-600">의식/호흡/순환 상태 요약</label>
-          <textarea id="statusSummary" class="w-full p-2 border rounded" rows="2"></textarea>
-        </div>
-      </section>
+<script>
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyoA6_s8iGZ9NMCZ07d48UsyiPBsaT1lM4sTi1cl61KBFLpDHwuXbKntdPOBgjovM37Lg/exec';
+const interventionsArea = document.getElementById('interventionsArea');
+const vitalsArea = document.getElementById('vitalsArea');
 
-      <!-- 처치/약물/장비 -->
-      <section class="bg-gray-50 p-3 rounded">
-        <h2 class="font-semibold mb-2">처치·약물·장비</h2>
-        <div id="interventionsArea" class="space-y-2 overflow-x-auto"></div>
-        <div class="mt-2 no-print">
-          <button id="addRowBtn" type="button" class="px-2 py-1 rounded bg-blue-500 text-white w-full">항목 추가</button>
-        </div>
-      </section>
+function escapeHtml(str){return (str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 
-      <!-- 이송/결과 -->
-      <section class="bg-gray-50 p-3 rounded">
-        <h2 class="font-semibold mb-2">이송/결과</h2>
-        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
-          <select id="destination" class="p-2 border rounded w-full">
-            <option value="">이송병원</option>
-            <option>응급의료센터 A</option>
-            <option>응급의료센터 B</option>
-            <option>지역병원</option>
-          </select>
-          <input type="text" id="outcome" class="p-2 border rounded w-full" placeholder="결과" />
-          <input type="text" id="receivingDoc" class="p-2 border rounded w-full" placeholder="접수자/담당자" />
-        </div>
-        <div class="mt-2 flex flex-col">
-          <label class="text-sm text-gray-600">기타 메모</label>
-          <textarea id="notes" class="p-2 border rounded w-full" rows="2"></textarea>
-        </div>
-      </section>
+// 항목 생성
+function createInterventionRow(intervention='', dose='', note=''){
+  const wrapper=document.createElement('div'); wrapper.className='grid grid-cols-1 md:grid-cols-3 gap-2 items-center';
+  wrapper.innerHTML=`<input type="text" class="intervention p-2 border rounded w-full" value="${escapeHtml(intervention)}" placeholder="처치/장비"/>
+<input type="text" class="dose p-2 border rounded w-full" value="${escapeHtml(dose)}" placeholder="투약/용량"/>
+<div class="flex gap-2"><input type="text" class="note p-2 border rounded flex-1" value="${escapeHtml(note)}" placeholder="비고"/>
+<button type="button" class="removeBtn px-2 py-1 rounded bg-red-500 text-white no-print">삭제</button></div>`;
+  interventionsArea.appendChild(wrapper);
+  wrapper.querySelector('.removeBtn').addEventListener('click',()=>wrapper.remove());
+}
+function createVitalRow(label='', value=''){
+  const wrapper=document.createElement('div'); wrapper.className='flex gap-2 flex-wrap';
+  wrapper.innerHTML=`<input type="text" class="vitalLabel p-2 border rounded flex-1" value="${escapeHtml(label)}" placeholder="항목"/>
+<input type="text" class="vitalValue p-2 border rounded flex-1" value="${escapeHtml(value)}" placeholder="값"/>
+<button type="button" class="removeBtn px-2 py-1 rounded bg-red-500 text-white no-print">삭제</button>`;
+  vitalsArea.appendChild(wrapper);
+  wrapper.querySelector('.removeBtn').addEventListener('click',()=>wrapper.remove());
+}
 
-      <!-- 기록자/서명 -->
-      <section class="flex flex-col sm:flex-row gap-2 items-start sm:items-center justify-between">
-        <div class="flex flex-col gap-2 w-full sm:w-auto">
-          <div class="flex flex-col sm:flex-row gap-2 items-start sm:items-center">
-            <label class="field-label">기록자</label>
-            <input type="text" id="recorder" class="p-2 border rounded flex-1" placeholder="응급구조사 이름" />
-          </div>
-          <div class="flex flex-col sm:flex-row gap-2 items-start sm:items-center">
-            <label class="field-label">서명</label>
-            <input type="text" id="sign" class="p-2 border rounded flex-1" placeholder="(디지털 서명 또는 이름)" />
-          </div>
-        </div>
-        <div class="text-sm text-gray-500 mt-2 sm:mt-0">자동저장: 로컬스토리지에 저장됩니다.</div>
-      </section>
-    </form>
-  </div>
+// 버튼 이벤트
+document.getElementById('addRowBtn').addEventListener('click',()=>createInterventionRow());
+document.getElementById('addVitalBtn').addEventListener('click',()=>createVitalRow());
 
-  <!-- JS는 이전 답변의 코드 그대로 사용 (활력징후 추가/삭제, 처치/약물/장비, 연별 저장, Google Sheet 전송) -->
+function getFormData(){
+  const interventions=Array.from(document.querySelectorAll('.intervention')).map(el=>{
+    const parent=el.parentElement;
+    return {intervention:el.value||'', dose:(parent.querySelector('.dose')||{}).value||'', note:(parent.querySelector('.note')||{}).value||''};
+  });
+  const vitals=Array.from(document.querySelectorAll('.vitalLabel')).map(el=>{
+    const parent=el.parentElement;
+    return {label:el.value||'', value:(parent.querySelector('.vitalValue')||{}).value||''};
+  });
+  return {
+    datetime:document.getElementById('datetime').value,
+    unit:document.getElementById('unit').value,
+    callNo:document.getElementById('callNo').value,
+    location:document.getElementById('location').value,
+    reporter:document.getElementById('reporter').value,
+    treatStart:document.getElementById('treatStart').value,
+    treatEnd:document.getElementById('treatEnd').value,
+    patientName:document.getElementById('patientName').value,
+    patientAge:document.getElementById('patientAge').value,
+    patientSex:document.getElementById('patientSex').value,
+    patientId:document.getElementById('patientId').value,
+    chiefComplaint:document.getElementById('chiefComplaint').value,
+    statusSummary:document.getElementById('statusSummary').value,
+    vitals,
+    interventions,
+    destination:document.getElementById('destination').value,
+    outcome:document.getElementById('outcome').value,
+    receivingDoc:document.getElementById('receivingDoc').value,
+    notes:document.getElementById('notes').value,
+    recorder:document.getElementById('recorder').value,
+    sign:document.getElementById('sign').value
+  };
+}
 
+// 저장 -> Google Sheet
+document.getElementById('saveBtn').addEventListener('click',()=>{
+  const data=getFormData();
+  if(!data.datetime){alert('기록일시를 입력하세요'); return;}
+  fetch(SCRIPT_URL,{
+    method:'POST',
+    body:JSON.stringify(data)
+  }).then(res=>res.text()).then(res=>{
+    alert('Google 스프레드시트에 저장되었습니다.');
+  }).catch(err=>{console.error(err); alert('저장 실패');});
+});
+
+// 초기화
+document.getElementById('clearBtn').addEventListener('click',()=>{
+  if(confirm('양식을 초기화하시겠습니까?')){
+    document.getElementById('logForm').reset();
+    vitalsArea.innerHTML=''; interventionsArea.innerHTML='';
+    createInterventionRow(); createVitalRow();
+  }
+});
+
+// 초기 항목
+createInterventionRow();
+createVitalRow();
+</script>
 </body>
 </html>
