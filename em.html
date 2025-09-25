@@ -10,352 +10,146 @@
       .no-print { display: none !important; }
       body { background: white; }
     }
-    .field-label { min-width: 110px; }
+    .field-label { min-width: 100px; }
+    /* 모바일 최적화: 버튼 full width */
+    .btn { width: 100%; text-align: center; }
   </style>
 </head>
-<body class="bg-gray-100 p-6 font-sans text-gray-800">
-  <div class="max-w-5xl mx-auto bg-white rounded-xl shadow-md p-6">
-    <header class="flex items-start justify-between mb-6">
+<body class="bg-gray-100 p-4 font-sans text-gray-800">
+  <div class="max-w-4xl mx-auto bg-white rounded-xl shadow-md p-4">
+    <header class="flex flex-col md:flex-row items-start md:items-center justify-between mb-4">
       <div>
-        <h1 class="text-2xl font-bold">응급구조사 구급활동일지</h1>
+        <h1 class="text-xl md:text-2xl font-bold">응급구조사 구급활동일지</h1>
         <p class="text-sm text-gray-500">현장·이송·처치 내용을 기록합니다.</p>
       </div>
-      <div class="space-x-2 no-print">
-        <button id="saveBtn" class="px-3 py-1 rounded bg-blue-600 text-white">저장</button>
-        <button id="loadBtn" class="px-3 py-1 rounded bg-yellow-500 text-white">불러오기</button>
-        <button id="exportBtn" class="px-3 py-1 rounded bg-green-600 text-white">CSV 내보내기</button>
-        <button id="printBtn" class="px-3 py-1 rounded bg-gray-700 text-white">인쇄</button>
-        <button id="clearBtn" class="px-3 py-1 rounded bg-red-500 text-white">초기화</button>
+      <div class="grid grid-cols-2 md:grid-cols-5 gap-2 mt-2 md:mt-0 no-print">
+        <button id="saveBtn" class="px-2 py-1 rounded bg-blue-600 text-white btn">저장</button>
+        <button id="loadBtn" class="px-2 py-1 rounded bg-yellow-500 text-white btn">불러오기</button>
+        <button id="exportBtn" class="px-2 py-1 rounded bg-green-600 text-white btn">CSV 내보내기</button>
+        <button id="printBtn" class="px-2 py-1 rounded bg-gray-700 text-white btn">인쇄</button>
+        <button id="clearBtn" class="px-2 py-1 rounded bg-red-500 text-white btn">초기화</button>
       </div>
     </header>
 
-    <form id="logForm" class="space-y-6">
+    <form id="logForm" class="space-y-4">
+
       <!-- 기본 정보 -->
-      <section class="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div class="flex items-center gap-3">
+      <section class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
+        <div class="flex flex-col">
           <label class="field-label">기록일시</label>
-          <input type="datetime-local" id="datetime" class="flex-1 p-2 border rounded" required />
+          <input type="datetime-local" id="datetime" class="p-2 border rounded w-full" required />
         </div>
-        <div class="flex items-center gap-3">
-          <label class="field-label">구급대/차량</label>
-          <input type="text" id="unit" class="flex-1 p-2 border rounded" placeholder="예: 119구급대, 차량번호" />
+        <div class="flex flex-col">
+          <label class="field-label">출동대원</label>
+          <input type="text" id="unit" class="p-2 border rounded w-full" placeholder="출동대원" />
         </div>
-        <div class="flex items-center gap-3">
+        <div class="flex flex-col">
           <label class="field-label">출동번호</label>
-          <input type="text" id="callNo" class="flex-1 p-2 border rounded" placeholder="출동번호" />
+          <input type="text" id="callNo" class="p-2 border rounded w-full" placeholder="출동번호" />
         </div>
       </section>
 
       <!-- 현장 정보 -->
-      <section class="bg-gray-50 p-4 rounded">
-        <h2 class="font-semibold mb-3">현장 정보</h2>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div>
-            <label class="block text-sm text-gray-600">현장주소 / 장소</label>
-            <input type="text" id="location" class="w-full p-2 border rounded" placeholder="예: OO시 OO구 OO동" />
+      <section class="bg-gray-50 p-3 rounded">
+        <h2 class="font-semibold mb-2">현장 정보</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
+          <div class="flex flex-col">
+            <label class="text-sm text-gray-600">현장주소 / 장소</label>
+            <input type="text" id="location" class="p-2 border rounded w-full" placeholder="예: OO시 OO구 OO동" />
           </div>
-          <div>
-            <label class="block text-sm text-gray-600">접수자 / 신고자</label>
-            <input type="text" id="reporter" class="w-full p-2 border rounded" />
+          <div class="flex flex-col">
+            <label class="text-sm text-gray-600">접수자 / 신고자</label>
+            <input type="text" id="reporter" class="p-2 border rounded w-full" />
           </div>
-          <div>
-            <label class="block text-sm text-gray-600">응급처치 시작/종료</label>
+          <div class="flex flex-col">
+            <label class="text-sm text-gray-600">응급처치 시작/종료</label>
             <div class="flex gap-2">
-              <input type="time" id="treatStart" class="p-2 border rounded" />
-              <input type="time" id="treatEnd" class="p-2 border rounded" />
+              <input type="time" id="treatStart" class="p-2 border rounded flex-1" />
+              <input type="time" id="treatEnd" class="p-2 border rounded flex-1" />
             </div>
           </div>
         </div>
       </section>
 
       <!-- 환자 정보 -->
-      <section class="bg-gray-50 p-4 rounded">
-        <h2 class="font-semibold mb-3">환자 정보</h2>
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <input type="text" id="patientName" class="p-2 border rounded" placeholder="성명" />
-          <input type="number" id="patientAge" class="p-2 border rounded" placeholder="나이" />
-          <select id="patientSex" class="p-2 border rounded">
+      <section class="bg-gray-50 p-3 rounded">
+        <h2 class="font-semibold mb-2">환자 정보</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2">
+          <input type="text" id="patientName" class="p-2 border rounded w-full" placeholder="성명" />
+          <input type="number" id="patientAge" class="p-2 border rounded w-full" placeholder="나이" />
+          <select id="patientSex" class="p-2 border rounded w-full">
             <option value="">성별</option>
             <option value="남">남</option>
             <option value="여">여</option>
             <option value="기타">기타</option>
           </select>
-          <input type="text" id="patientId" class="p-2 border rounded" placeholder="환자 식별 (ID/주민번호 일부)" />
+          <input type="text" id="patientId" class="p-2 border rounded w-full" placeholder="환자 식별 (ID/주소 일부)" />
         </div>
-        <div class="mt-4">
-          <label class="block text-sm text-gray-600">주소견(주호소)</label>
-          <textarea id="chiefComplaint" class="w-full p-2 border rounded" rows="2" placeholder="호흡곤란, 통증 등"></textarea>
+        <div class="mt-2 flex flex-col">
+          <label class="text-sm text-gray-600">주소견(주호소)</label>
+          <textarea id="chiefComplaint" class="p-2 border rounded w-full" rows="2" placeholder="호흡곤란, 통증 등"></textarea>
         </div>
       </section>
 
       <!-- 활력징후 -->
-      <section class="bg-gray-50 p-4 rounded">
-        <h2 class="font-semibold mb-3">활력징후 / 상태</h2>
-        <div id="vitalsArea" class="space-y-2"></div>
+      <section class="bg-gray-50 p-3 rounded">
+        <h2 class="font-semibold mb-2">활력징후 / 상태</h2>
+        <div id="vitalsArea" class="space-y-2 overflow-x-auto"></div>
         <div class="mt-2 no-print">
-          <button id="addVitalBtn" type="button" class="px-3 py-1 rounded bg-blue-500 text-white">활력징후 항목 추가</button>
+          <button id="addVitalBtn" type="button" class="px-2 py-1 rounded bg-blue-500 text-white w-full">활력징후 항목 추가</button>
         </div>
-        <div class="mt-3">
-          <label class="block text-sm text-gray-600">의식/호흡/순환 상태 요약</label>
+        <div class="mt-2 flex flex-col">
+          <label class="text-sm text-gray-600">의식/호흡/순환 상태 요약</label>
           <textarea id="statusSummary" class="w-full p-2 border rounded" rows="2"></textarea>
         </div>
       </section>
 
       <!-- 처치/약물/장비 -->
-      <section class="bg-gray-50 p-4 rounded">
-        <h2 class="font-semibold mb-3">처치·약물·장비</h2>
-        <div id="interventionsArea" class="space-y-3"></div>
+      <section class="bg-gray-50 p-3 rounded">
+        <h2 class="font-semibold mb-2">처치·약물·장비</h2>
+        <div id="interventionsArea" class="space-y-2 overflow-x-auto"></div>
         <div class="mt-2 no-print">
-          <button id="addRowBtn" type="button" class="px-3 py-1 rounded bg-blue-500 text-white">처치·장비 항목 추가</button>
+          <button id="addRowBtn" type="button" class="px-2 py-1 rounded bg-blue-500 text-white w-full">항목 추가</button>
         </div>
       </section>
 
       <!-- 이송/결과 -->
-      <section class="bg-gray-50 p-4 rounded">
-        <h2 class="font-semibold mb-3">이송/결과</h2>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-          <select id="destination" class="p-2 border rounded">
+      <section class="bg-gray-50 p-3 rounded">
+        <h2 class="font-semibold mb-2">이송/결과</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
+          <select id="destination" class="p-2 border rounded w-full">
             <option value="">이송병원</option>
             <option>응급의료센터 A</option>
             <option>응급의료센터 B</option>
             <option>지역병원</option>
           </select>
-          <input type="text" id="outcome" class="p-2 border rounded" placeholder="결과(예: 이송/현장치료완료/사망)" />
-          <input type="text" id="receivingDoc" class="p-2 border rounded" placeholder="접수의/담당자" />
+          <input type="text" id="outcome" class="p-2 border rounded w-full" placeholder="결과" />
+          <input type="text" id="receivingDoc" class="p-2 border rounded w-full" placeholder="접수자/담당자" />
         </div>
-        <div class="mt-3">
-          <label class="block text-sm text-gray-600">기타 메모</label>
-          <textarea id="notes" class="w-full p-2 border rounded" rows="3"></textarea>
+        <div class="mt-2 flex flex-col">
+          <label class="text-sm text-gray-600">기타 메모</label>
+          <textarea id="notes" class="p-2 border rounded w-full" rows="2"></textarea>
         </div>
       </section>
 
       <!-- 기록자/서명 -->
-      <section class="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between">
-        <div class="flex flex-col gap-2">
-          <div class="flex gap-3 items-center">
+      <section class="flex flex-col sm:flex-row gap-2 items-start sm:items-center justify-between">
+        <div class="flex flex-col gap-2 w-full sm:w-auto">
+          <div class="flex flex-col sm:flex-row gap-2 items-start sm:items-center">
             <label class="field-label">기록자</label>
-            <input type="text" id="recorder" class="p-2 border rounded" placeholder="응급구조사 이름" />
+            <input type="text" id="recorder" class="p-2 border rounded flex-1" placeholder="응급구조사 이름" />
           </div>
-          <div class="flex gap-3 items-center">
+          <div class="flex flex-col sm:flex-row gap-2 items-start sm:items-center">
             <label class="field-label">서명</label>
-            <input type="text" id="sign" class="p-2 border rounded" placeholder="(디지털 서명 또는 이름)" />
+            <input type="text" id="sign" class="p-2 border rounded flex-1" placeholder="(디지털 서명 또는 이름)" />
           </div>
         </div>
-        <div class="text-sm text-gray-500">자동저장: 로컬스토리지에 저장됩니다. CSV로 내보낸 후 기관 시스템에 업로드하세요.</div>
+        <div class="text-sm text-gray-500 mt-2 sm:mt-0">자동저장: 로컬스토리지에 저장됩니다.</div>
       </section>
     </form>
   </div>
 
-<script>
-const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyoA6_s8iGZ9NMCZ07d48UsyiPBsaT1lM4sTi1cl61KBFLpDHwuXbKntdPOBgjovM37Lg/exec';
+  <!-- JS는 이전 답변의 코드 그대로 사용 (활력징후 추가/삭제, 처치/약물/장비, 연별 저장, Google Sheet 전송) -->
 
-// --- 활력징후 동적 추가 ---
-const vitalsArea = document.getElementById('vitalsArea');
-const addVitalBtn = document.getElementById('addVitalBtn');
-function createVitalRow(bp='', hr='', rr='', spO2='', gcs='', bloodSugar=''){
-  const wrapper = document.createElement('div');
-  wrapper.className = 'grid grid-cols-2 md:grid-cols-6 gap-2 items-center';
-  wrapper.innerHTML = `
-    <input type="text" class="v_bp p-2 border rounded" value="${bp}" placeholder="혈압">
-    <input type="number" class="v_hr p-2 border rounded" value="${hr}" placeholder="맥박">
-    <input type="number" class="v_rr p-2 border rounded" value="${rr}" placeholder="호흡">
-    <input type="number" class="v_spO2 p-2 border rounded" value="${spO2}" placeholder="SpO2">
-    <input type="text" class="v_gcs p-2 border rounded" value="${gcs}" placeholder="GCS">
-    <input type="text" class="v_bloodSugar p-2 border rounded" value="${bloodSugar}" placeholder="혈당">
-    <button type="button" class="removeBtn px-2 py-1 rounded bg-red-500 text-white no-print">삭제</button>
-  `;
-  vitalsArea.appendChild(wrapper);
-  wrapper.querySelector('.removeBtn').addEventListener('click', ()=> wrapper.remove());
-}
-addVitalBtn.addEventListener('click', ()=> createVitalRow());
-vitalsArea.innerHTML = '';
-createVitalRow();
-
-// --- 처치/약물/장비 동적 추가 ---
-const interventionsArea = document.getElementById('interventionsArea');
-const addRowBtn = document.getElementById('addRowBtn');
-function createInterventionRow(intervention='', dose='', note=''){
-  const wrapper = document.createElement('div');
-  wrapper.className = 'grid grid-cols-1 md:grid-cols-3 gap-3 items-center';
-  wrapper.innerHTML = `
-    <input type="text" class="intervention p-2 border rounded" value="${intervention}" placeholder="처치/장비">
-    <input type="text" class="dose p-2 border rounded" value="${dose}" placeholder="투약/용량">
-    <div class="flex gap-2">
-      <input type="text" class="note p-2 border rounded flex-1" value="${note}" placeholder="비고">
-      <button type="button" class="removeBtn px-2 py-1 rounded bg-red-500 text-white no-print">삭제</button>
-    </div>
-  `;
-  interventionsArea.appendChild(wrapper);
-  wrapper.querySelector('.removeBtn').addEventListener('click', ()=> wrapper.remove());
-}
-addRowBtn.addEventListener('click', ()=> createInterventionRow());
-interventionsArea.innerHTML = '';
-createInterventionRow();
-
-// --- Form 데이터 수집 ---
-function getFormData(){
-  const vitals = Array.from(vitalsArea.children).map(row=>({
-    bp: row.querySelector('.v_bp').value,
-    hr: row.querySelector('.v_hr').value,
-    rr: row.querySelector('.v_rr').value,
-    spO2: row.querySelector('.v_spO2').value,
-    gcs: row.querySelector('.v_gcs').value,
-    bloodSugar: row.querySelector('.v_bloodSugar').value
-  }));
-  const interventions = Array.from(interventionsArea.children).map(row=>({
-    intervention: row.querySelector('.intervention').value,
-    dose: row.querySelector('.dose').value,
-    note: row.querySelector('.note').value
-  }));
-  return {
-    datetime: document.getElementById('datetime').value,
-    unit: document.getElementById('unit').value,
-    callNo: document.getElementById('callNo').value,
-    location: document.getElementById('location').value,
-    reporter: document.getElementById('reporter').value,
-    treatStart: document.getElementById('treatStart').value,
-    treatEnd: document.getElementById('treatEnd').value,
-    patientName: document.getElementById('patientName').value,
-    patientAge: document.getElementById('patientAge').value,
-    patientSex: document.getElementById('patientSex').value,
-    patientId: document.getElementById('patientId').value,
-    chiefComplaint: document.getElementById('chiefComplaint').value,
-    vitals,
-    statusSummary: document.getElementById('statusSummary').value,
-    interventions,
-    destination: document.getElementById('destination').value,
-    outcome: document.getElementById('outcome').value,
-    receivingDoc: document.getElementById('receivingDoc').value,
-    notes: document.getElementById('notes').value,
-    recorder: document.getElementById('recorder').value,
-    sign: document.getElementById('sign').value
-  };
-}
-
-// --- Form 데이터 세팅 ---
-function setFormData(data){
-  if(!data) return;
-  document.getElementById('datetime').value = data.datetime || '';
-  document.getElementById('unit').value = data.unit || '';
-  document.getElementById('callNo').value = data.callNo || '';
-  document.getElementById('location').value = data.location || '';
-  document.getElementById('reporter').value = data.reporter || '';
-  document.getElementById('treatStart').value = data.treatStart || '';
-  document.getElementById('treatEnd').value = data.treatEnd || '';
-  document.getElementById('patientName').value = data.patientName || '';
-  document.getElementById('patientAge').value = data.patientAge || '';
-  document.getElementById('patientSex').value = data.patientSex || '';
-  document.getElementById('patientId').value = data.patientId || '';
-  document.getElementById('chiefComplaint').value = data.chiefComplaint || '';
-
-  // 활력징후
-  vitalsArea.innerHTML = '';
-  (data.vitals||[]).forEach(v=>createVitalRow(v.bp,v.hr,v.rr,v.spO2,v.gcs,v.bloodSugar));
-  if(!(data.vitals||[]).length) createVitalRow();
-
-  document.getElementById('statusSummary').value = data.statusSummary || '';
-
-  // interventions
-  interventionsArea.innerHTML = '';
-  (data.interventions||[]).forEach(it=>createInterventionRow(it.intervention,it.dose,it.note));
-  if(!(data.interventions||[]).length) createInterventionRow();
-
-  document.getElementById('destination').value = data.destination || '';
-  document.getElementById('outcome').value = data.outcome || '';
-  document.getElementById('receivingDoc').value = data.receivingDoc || '';
-  document.getElementById('notes').value = data.notes || '';
-  document.getElementById('recorder').value = data.recorder || '';
-  document.getElementById('sign').value = data.sign || '';
-}
-
-// --- Google Sheet 전송 ---
-function sendToGoogleSheet(data){
-  fetch(SCRIPT_URL + '?data=' + encodeURIComponent(JSON.stringify(data)))
-    .then(res=>res.text())
-    .then(txt=>console.log('GoogleSheet 전송:', txt))
-    .catch(err=>console.error(err));
-}
-
-// --- 저장 버튼 ---
-const saveBtn = document.getElementById('saveBtn');
-saveBtn.addEventListener('click', ()=>{
-  const data = getFormData();
-  const year = new Date(data.datetime||new Date()).getFullYear();
-  const key = `emergency_log_${year}_` + new Date().toISOString();
-  localStorage.setItem(key, JSON.stringify(data));
-
-  const index = JSON.parse(localStorage.getItem('emergency_log_index')||'[]');
-  index.push({key, datetime: data.datetime||new Date().toISOString(), patient: data.patientName||''});
-  localStorage.setItem('emergency_log_index', JSON.stringify(index));
-
-  sendToGoogleSheet(data);
-  alert('저장되었습니다. (연도별 저장 + Google Sheet 전송)');
-});
-
-// --- 불러오기 ---
-document.getElementById('loadBtn').addEventListener('click', ()=>{
-  const index = JSON.parse(localStorage.getItem('emergency_log_index')||'[]');
-  if(!index.length){ alert('저장된 기록이 없습니다.'); return; }
-  const last = index[index.length-1];
-  const data = JSON.parse(localStorage.getItem(last.key));
-  setFormData(data);
-  alert('마지막 저장 항목을 불러왔습니다.');
-});
-
-// --- 초기화 ---
-document.getElementById('clearBtn').addEventListener('click', ()=>{
-  if(confirm('양식을 초기화하시겠습니까?')){
-    document.getElementById('logForm').reset();
-    vitalsArea.innerHTML = ''; createVitalRow();
-    interventionsArea.innerHTML = ''; createInterventionRow();
-  }
-});
-
-// --- CSV 내보내기 ---
-document.getElementById('exportBtn').addEventListener('click', ()=>{
-  const data = getFormData();
-  const rows = [];
-  rows.push(['기록일시', data.datetime]);
-  rows.push(['구급대/차량', data.unit]);
-  rows.push(['출동번호', data.callNo]);
-  rows.push(['현장주소', data.location]);
-  rows.push(['신고자', data.reporter]);
-  rows.push(['처치시작', data.treatStart]);
-  rows.push(['처치종료', data.treatEnd]);
-  rows.push([]);
-  rows.push(['환자성명', data.patientName, '나이', data.patientAge, '성별', data.patientSex]);
-  rows.push(['주호소', data.chiefComplaint]);
-  rows.push([]);
-  data.vitals.forEach((v,i)=>rows.push([`활력징후${i+1}`, v.bp,v.hr,v.rr,v.spO2,v.gcs,v.bloodSugar]));
-  rows.push(['상태요약', data.statusSummary]);
-  rows.push([]);
-  rows.push(['처치/투약/비고']);
-  data.interventions.forEach(it=>rows.push([it.intervention,it.dose,it.note]));
-  rows.push([]);
-  rows.push(['이송병원', data.destination, '결과', data.outcome, '접수자', data.receivingDoc]);
-  rows.push(['기록자', data.recorder, '서명', data.sign]);
-  rows.push(['기타메모', data.notes]);
-
-  const csv = rows.map(r=> r.map(c=>'"'+String(c||'').replace(/"/g,'""')+'"').join(',')).join('\n');
-  const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = '구급활동일지_'+(data.datetime?data.datetime.replace(/[:T]/g,'_'):new Date().toISOString())+'.csv';
-  document.body.appendChild(a); a.click(); a.remove();
-});
-
-// --- 인쇄 ---
-document.getElementById('printBtn').addEventListener('click', ()=> window.print());
-
-// --- 자동저장 ---
-window.addEventListener('beforeunload', ()=>{
-  const temp = getFormData();
-  localStorage.setItem('emergency_log_autosave', JSON.stringify(temp));
-});
-window.addEventListener('DOMContentLoaded', ()=>{
-  const tmp = localStorage.getItem('emergency_log_autosave');
-  if(tmp){ if(confirm('이전 입력 내용이 있습니다. 복원하시겠습니까?')) setFormData(JSON.parse(tmp)); }
-});
-</script>
 </body>
 </html>
