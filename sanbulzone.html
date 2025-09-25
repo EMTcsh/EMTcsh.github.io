@@ -111,9 +111,10 @@
 
         // 더미 데이터: 실제로는 백엔드나 데이터베이스에서 가져와야 합니다.
        const landslideData = [
-    { lat: 35.1286067, lng: 126.9699645, risk: "높음", date: "2024-09-29", description: "동구 운림동 산143-1 용접불길" },
-    { lat: 35.178827, lng: 126.999265, risk: "높음", date: "2025-03-22", description: "북구 금곡동 산166-2 담배불씨" },
-    { lat: 35.152931, lng: 126.964767, risk: "높음", date: "2024-09-29", description: "북구 화암동 335-4 쓰레기" }
+    { lat: 35.1286067, lng: 126.9699645, risk: "공원구역", date: "2024-09-29", description: "동구 운림동 산143-1 용접불씨" },
+    { lat: 35.178827, lng: 126.999265, risk: "공원구역", date: "2025-03-22", description: "북구 금곡동 산166-2 차량 담배불씨" },
+    { lat: 35.152931, lng: 126.964767, risk: "공원구역", date: "2025-03-22", description: "북구 화암동 335-4 쓰레기 소각" }
+    { lat: 35.117806, lng: 126.944922, risk: "공원구역 인근", date: "2025-02-21", description: "동구 소태동 산184 쓰레기 소각" }     
 ];
       
         let map;
@@ -179,7 +180,7 @@
                     const infoPanel = document.getElementById("infoPanel");
                     infoPanel.innerHTML = `
                         <h3 class="text-xl font-semibold">${data.date}</h3>
-                        <p class="mt-2 text-base"><strong>위험도:</strong> <span class="font-bold text-${getRiskColor(data.risk)}-600">${data.risk}</span></p>
+                        <p class="mt-2 text-base"><strong>공원구역:</strong> <span class="font-bold text-${getRiskColor(data.risk)}-600">${data.risk}</span></p>
                         <p class="mt-1 text-base"><strong>위치:</strong> ${data.lat}, ${data.lng}</p>
                         <p class="mt-1 text-base"><strong>설명:</strong> ${data.description}</p>
                     `;
@@ -191,9 +192,9 @@
         function getMarkerIcon(risk) {
             let color = "";
             switch(risk) {
-                case "높음": color = "red"; break;
-                case "보통": color = "orange"; break;
-                case "낮음": color = "yellow"; break;
+                case "공원구역": color = "red"; break;
+                case "공원구역 근접": color = "orange"; break;
+                case "공원구역 인근": color = "yellow"; break;
                 default: color = "grey"; break;
             }
             // 위험도에 따라 다른 아이콘 사용 (Naver Maps는 별도의 아이콘 URL 제공)
@@ -209,9 +210,9 @@
         // Tailwind CSS 클래스를 위한 위험도 색상 매핑
         function getRiskColor(risk) {
             switch(risk) {
-                case "높음": return "red";
-                case "보통": return "orange";
-                case "낮음": return "yellow";
+                case "공원구역": return "red";
+                case "공원구역 근접": return "orange";
+                case "공원구역 인근": return "yellow";
                 default: return "gray";
             }
         }
@@ -238,7 +239,7 @@
             const newPoint = {
                 lat: lat,
                 lng: lng,
-                risk: "보통",
+                risk: "공원구역",
                 date: new Date().toISOString().slice(0, 10),
                 description: "좌표로 추가된 위험 지역"
             };
