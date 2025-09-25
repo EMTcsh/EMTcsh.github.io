@@ -14,7 +14,6 @@
 </style>
 </head>
 <body class="bg-gray-100 p-4 font-sans text-gray-800">
-
 <div class="max-w-5xl mx-auto bg-white rounded-xl shadow-md p-4 md:p-6">
 
 <header class="flex flex-col md:flex-row items-start md:items-center justify-between mb-4 md:mb-6 gap-3 md:gap-0">
@@ -33,7 +32,6 @@
 
 <form id="logForm" class="space-y-4">
 
-  <!-- 기본 정보 -->
   <section class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
     <div class="flex flex-col sm:flex-row sm:items-center gap-2">
       <label class="field-label w-full sm:w-auto">기록일시</label>
@@ -49,7 +47,6 @@
     </div>
   </section>
 
-  <!-- 현장 정보 -->
   <section class="bg-gray-50 p-3 md:p-4 rounded">
     <h2 class="font-semibold mb-2">현장 정보</h2>
     <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
@@ -71,7 +68,6 @@
     </div>
   </section>
 
-  <!-- 환자 정보 -->
   <section class="bg-gray-50 p-3 md:p-4 rounded">
     <h2 class="font-semibold mb-2">환자 정보</h2>
     <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
@@ -91,7 +87,6 @@
     </div>
   </section>
 
-  <!-- 활력징후 / 상태 -->
   <section class="bg-gray-50 p-3 md:p-4 rounded">
     <h2 class="font-semibold mb-2">활력징후 / 상태</h2>
     <div id="vitalsArea" class="space-y-2"></div>
@@ -104,7 +99,6 @@
     </div>
   </section>
 
-  <!-- 처치/약물/장비 -->
   <section class="bg-gray-50 p-3 md:p-4 rounded">
     <h2 class="font-semibold mb-2">처치·약물·장비</h2>
     <div id="interventionsArea" class="space-y-2"></div>
@@ -113,7 +107,6 @@
     </div>
   </section>
 
-  <!-- 이송/결과 -->
   <section class="bg-gray-50 p-3 md:p-4 rounded">
     <h2 class="font-semibold mb-2">이송/결과</h2>
     <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
@@ -132,7 +125,6 @@
     </div>
   </section>
 
-  <!-- 기록자/서명 -->
   <section class="flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
     <div class="flex flex-col gap-2 w-full sm:w-auto">
       <div class="flex flex-col sm:flex-row sm:items-center gap-2">
@@ -153,13 +145,14 @@
 </div>
 
 <script>
-// Apps Script 웹앱 URL
+// IMPORTANT: Replace this with your Google Apps Script Web App URL
 const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzaYMJXukY4pHDCDbBxnfbopU-iH68qC1eW2vyAX-mF221uaC-wzLwV8qijMGYo1X-qJw/exec';
 
-// --- 활력징후 추가 ---
+// --- 활력징후 관련 함수 ---
 const vitalsArea = document.getElementById('vitalsArea');
 const addVitalBtn = document.getElementById('addVitalBtn');
-function createVitalRow(bp='', hr='', rr='', spO2='', gcs='', bloodSugar='') {
+
+function createVitalRow(bp = '', hr = '', rr = '', spO2 = '', gcs = '', bloodSugar = '') {
   const wrapper = document.createElement('div');
   wrapper.className = 'grid grid-cols-1 sm:grid-cols-2 md:grid-cols-6 gap-2 items-center';
   wrapper.innerHTML = `
@@ -172,15 +165,18 @@ function createVitalRow(bp='', hr='', rr='', spO2='', gcs='', bloodSugar='') {
     <button type="button" class="removeBtn px-2 py-1 rounded bg-red-500 text-white no-print">삭제</button>
   `;
   vitalsArea.appendChild(wrapper);
-  wrapper.querySelector('.removeBtn').addEventListener('click', ()=>wrapper.remove());
+  wrapper.querySelector('.removeBtn').addEventListener('click', () => wrapper.remove());
 }
-addVitalBtn.addEventListener('click', ()=>createVitalRow());
-vitalsArea.innerHTML=''; createVitalRow();
+addVitalBtn.addEventListener('click', () => createVitalRow());
+// 초기 로드 시 최소 1개 항목 생성
+vitalsArea.innerHTML = '';
+createVitalRow();
 
-// --- 처치/약물/장비 추가 ---
+// --- 처치/약물/장비 관련 함수 ---
 const interventionsArea = document.getElementById('interventionsArea');
 const addRowBtn = document.getElementById('addRowBtn');
-function createInterventionRow(intervention='', dose='', note='') {
+
+function createInterventionRow(intervention = '', dose = '', note = '') {
   const wrapper = document.createElement('div');
   wrapper.className = 'grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2 items-center';
   wrapper.innerHTML = `
@@ -192,153 +188,197 @@ function createInterventionRow(intervention='', dose='', note='') {
     </div>
   `;
   interventionsArea.appendChild(wrapper);
-  wrapper.querySelector('.removeBtn').addEventListener('click', ()=>wrapper.remove());
+  wrapper.querySelector('.removeBtn').addEventListener('click', () => wrapper.remove());
 }
-addRowBtn.addEventListener('click', ()=>createInterventionRow());
-interventionsArea.innerHTML=''; createInterventionRow();
+addRowBtn.addEventListener('click', () => createInterventionRow());
+// 초기 로드 시 최소 1개 항목 생성
+interventionsArea.innerHTML = '';
+createInterventionRow();
 
 // --- Form 데이터 가져오기 ---
 function getFormData() {
-  const vitals = Array.from(vitalsArea.children).map(row=>({
-    bp: row.querySelector('.v_bp')?.value||'',
-    hr: row.querySelector('.v_hr')?.value||'',
-    rr: row.querySelector('.v_rr')?.value||'',
-    spO2: row.querySelector('.v_spO2')?.value||'',
-    gcs: row.querySelector('.v_gcs')?.value||'',
-    bloodSugar: row.querySelector('.v_bloodSugar')?.value||''
+  const vitals = Array.from(vitalsArea.children).map(row => ({
+    bp: row.querySelector('.v_bp')?.value || '',
+    hr: row.querySelector('.v_hr')?.value || '',
+    rr: row.querySelector('.v_rr')?.value || '',
+    spO2: row.querySelector('.v_spO2')?.value || '',
+    gcs: row.querySelector('.v_gcs')?.value || '',
+    bloodSugar: row.querySelector('.v_bloodSugar')?.value || ''
   }));
-  const interventions = Array.from(interventionsArea.children).map(row=>({
-    intervention: row.querySelector('.intervention')?.value||'',
-    dose: row.querySelector('.dose')?.value||'',
-    note: row.querySelector('.note')?.value||''
+  const interventions = Array.from(interventionsArea.children).map(row => ({
+    intervention: row.querySelector('.intervention')?.value || '',
+    dose: row.querySelector('.dose')?.value || '',
+    note: row.querySelector('.note')?.value || ''
   }));
   return {
-    datetime: document.getElementById('datetime')?.value||'',
-    unit: document.getElementById('unit')?.value||'',
-    callNo: document.getElementById('callNo')?.value||'',
-    location: document.getElementById('location')?.value||'',
-    reporter: document.getElementById('reporter')?.value||'',
-    treatStart: document.getElementById('treatStart')?.value||'',
-    treatEnd: document.getElementById('treatEnd')?.value||'',
-    patientName: document.getElementById('patientName')?.value||'',
-    patientAge: document.getElementById('patientAge')?.value||'',
-    patientSex: document.getElementById('patientSex')?.value||'',
-    patientId: document.getElementById('patientId')?.value||'',
-    chiefComplaint: document.getElementById('chiefComplaint')?.value||'',
+    datetime: document.getElementById('datetime')?.value || '',
+    unit: document.getElementById('unit')?.value || '',
+    callNo: document.getElementById('callNo')?.value || '',
+    location: document.getElementById('location')?.value || '',
+    reporter: document.getElementById('reporter')?.value || '',
+    treatStart: document.getElementById('treatStart')?.value || '',
+    treatEnd: document.getElementById('treatEnd')?.value || '',
+    patientName: document.getElementById('patientName')?.value || '',
+    patientAge: document.getElementById('patientAge')?.value || '',
+    patientSex: document.getElementById('patientSex')?.value || '',
+    patientId: document.getElementById('patientId')?.value || '',
+    chiefComplaint: document.getElementById('chiefComplaint')?.value || '',
     vitals,
-    statusSummary: document.getElementById('statusSummary')?.value||'',
+    statusSummary: document.getElementById('statusSummary')?.value || '',
     interventions,
-    destination: document.getElementById('destination')?.value||'',
-    outcome: document.getElementById('outcome')?.value||'',
-    receivingDoc: document.getElementById('receivingDoc')?.value||'',
-    notes: document.getElementById('notes')?.value||'',
-    recorder: document.getElementById('recorder')?.value||'',
-    sign: document.getElementById('sign')?.value||''
+    destination: document.getElementById('destination')?.value || '',
+    outcome: document.getElementById('outcome')?.value || '',
+    receivingDoc: document.getElementById('receivingDoc')?.value || '',
+    notes: document.getElementById('notes')?.value || '',
+    recorder: document.getElementById('recorder')?.value || '',
+    sign: document.getElementById('sign')?.value || ''
   };
 }
 
+// --- Form 데이터로 UI 업데이트 ---
+function setFormData(data) {
+  if (!data) return;
+  document.getElementById('datetime').value = data.datetime || '';
+  document.getElementById('unit').value = data.unit || '';
+  document.getElementById('callNo').value = data.callNo || '';
+  document.getElementById('location').value = data.location || '';
+  document.getElementById('reporter').value = data.reporter || '';
+  document.getElementById('treatStart').value = data.treatStart || '';
+  document.getElementById('treatEnd').value = data.treatEnd || '';
+  document.getElementById('patientName').value = data.patientName || '';
+  document.getElementById('patientAge').value = data.patientAge || '';
+  document.getElementById('patientSex').value = data.patientSex || '';
+  document.getElementById('patientId').value = data.patientId || '';
+  document.getElementById('chiefComplaint').value = data.chiefComplaint || '';
+
+  vitalsArea.innerHTML = '';
+  (data.vitals || []).forEach(v => createVitalRow(v.bp, v.hr, v.rr, v.spO2, v.gcs, v.bloodSugar));
+  if (!(data.vitals || []).length) createVitalRow();
+
+  document.getElementById('statusSummary').value = data.statusSummary || '';
+
+  interventionsArea.innerHTML = '';
+  (data.interventions || []).forEach(it => createInterventionRow(it.intervention, it.dose, it.note));
+  if (!(data.interventions || []).length) createInterventionRow();
+
+  document.getElementById('destination').value = data.destination || '';
+  document.getElementById('outcome').value = data.outcome || '';
+  document.getElementById('receivingDoc').value = data.receivingDoc || '';
+  document.getElementById('notes').value = data.notes || '';
+  document.getElementById('recorder').value = data.recorder || '';
+  document.getElementById('sign').value = data.sign || '';
+}
+
 // --- Google Sheet 전송 ---
-async function sendToGoogleSheet(data){
-  try{
-    const res = await fetch(SCRIPT_URL,{
-      method:'POST',
+async function sendToGoogleSheet(data) {
+  try {
+    const response = await fetch(SCRIPT_URL, {
+      method: 'POST',
       body: JSON.stringify(data),
-      headers:{'Content-Type':'application/json'}
+      headers: { 'Content-Type': 'application/json' }
     });
-    const resData = await res.json();
-    if(resData.status!=='success') throw new Error(resData.message||'알 수 없는 오류');
-    alert('✅ 구글 시트 전송 성공');
-  }catch(err){
-    alert('⚠️ 구글 시트 전송 실패: '+err.message);
+
+    const resData = await response.json();
+
+    if (resData.status === 'success') {
+      console.log('GoogleSheet 전송 성공');
+      return { status: 'success' };
+    } else {
+      console.error('전송 오류', resData);
+      throw new Error(resData.message || '알 수 없는 전송 오류');
+    }
+  } catch (err) {
+    console.error('전송 실패', err);
+    throw new Error('Google Sheet 전송 실패: ' + err.message);
   }
 }
 
 // --- 버튼 기능 ---
-document.getElementById('saveBtn').addEventListener('click',()=>{
+document.getElementById('saveBtn').addEventListener('click', async () => {
   const data = getFormData();
-  const key = 'emergency_log_'+new Date().toISOString();
-  localStorage.setItem(key,JSON.stringify(data));
-  const index = JSON.parse(localStorage.getItem('emergency_log_index')||'[]');
-  index.push({key, datetime: data.datetime, patient: data.patientName});
-  localStorage.setItem('emergency_log_index',JSON.stringify(index));
-  alert('✅ 로컬 저장 완료. 구글 시트 전송 시도...');
-  sendToGoogleSheet(data);
-});
+  const key = 'emergency_log_' + new Date().toISOString();
+  
+  // 로컬 스토리지에 저장
+  localStorage.setItem(key, JSON.stringify(data));
+  const index = JSON.parse(localStorage.getItem('emergency_log_index') || '[]');
+  index.push({ key, datetime: data.datetime || '', patient: data.patientName || '' });
+  localStorage.setItem('emergency_log_index', JSON.stringify(index));
+  alert('로컬에 저장되었습니다. 구글 시트로 전송을 시도합니다.');
 
-document.getElementById('loadBtn').addEventListener('click',()=>{
-  const index = JSON.parse(localStorage.getItem('emergency_log_index')||'[]');
-  if(!index.length){ alert('저장된 기록이 없습니다.'); return; }
-  const last = index[index.length-1];
-  const data = JSON.parse(localStorage.getItem(last.key));
-  setFormData(data);
-  alert('✅ 마지막 기록 불러오기 완료');
-});
-
-document.getElementById('clearBtn').addEventListener('click',()=>{
-  if(confirm('양식을 초기화하시겠습니까?')){
-    document.getElementById('logForm').reset();
-    vitalsArea.innerHTML=''; createVitalRow();
-    interventionsArea.innerHTML=''; createInterventionRow();
+  // 구글 시트로 전송
+  try {
+    await sendToGoogleSheet(data);
+    alert('✅ 구글 시트 전송에 성공했습니다!');
+  } catch (error) {
+    alert('⚠️ 구글 시트 전송에 실패했습니다: ' + error.message);
   }
 });
 
-document.getElementById('exportBtn').addEventListener('click',()=>{
-  const data = getFormData();
-  function rowToCSV(arr){ return arr.map(v=>`"${(v||'').toString().replace(/"/g,'""')}"`).join(',')+'\n'; }
-  let csv = '';
-  csv += rowToCSV(['기록일시', data.datetime]);
-  csv += rowToCSV(['구급대/차량', data.unit]);
-  csv += rowToCSV(['출동번호', data.callNo]);
-  csv += rowToCSV(['현장주소', data.location]);
-  csv += rowToCSV(['신고자', data.reporter]);
-  csv += rowToCSV(['처치시작', data.treatStart, '처치종료', data.treatEnd]);
-  csv += rowToCSV(['환자성명', data.patientName, '나이', data.patientAge, '성별', data.patientSex]);
-  csv += rowToCSV(['주호소', data.chiefComplaint]);
-  csv += rowToCSV(['활력징후','혈압','맥박','호흡','SpO2','GCS','혈당']);
-  (data.vitals||[]).forEach(v=>csv+=rowToCSV(['',v.bp,v.hr,v.rr,v.spO2,v.gcs,v.bloodSugar]));
-  csv += rowToCSV(['처치/약물/장비','처치','용량','비고']);
-  (data.interventions||[]).forEach(it=>csv+=rowToCSV(['',it.intervention,it.dose,it.note]));
-  csv += rowToCSV(['상태요약', data.statusSummary]);
-  csv += rowToCSV(['이송병원', data.destination, '결과', data.outcome, '접수의', data.receivingDoc]);
-  csv += rowToCSV(['기타메모', data.notes]);
-  csv += rowToCSV(['기록자', data.recorder, '서명', data.sign]);
-  const blob = new Blob(['\ufeff', csv],{type:'text/csv;charset=utf-8;'});
-  const a = document.createElement('a'); a.href=URL.createObjectURL(blob);
-  a.download='응급구조사_구급활동일지.csv'; a.click();
-  URL.revokeObjectURL(a.href);
+document.getElementById('loadBtn').addEventListener('click', () => {
+  const index = JSON.parse(localStorage.getItem('emergency_log_index') || '[]');
+  if (!index.length) {
+    alert('저장된 기록이 없습니다.');
+    return;
+  }
+  const last = index[index.length - 1];
+  const data = JSON.parse(localStorage.getItem(last.key));
+  setFormData(data);
+  alert('마지막 기록을 불러왔습니다.');
 });
 
-document.getElementById('printBtn').addEventListener('click',()=>window.print());
+document.getElementById('clearBtn').addEventListener('click', () => {
+  if (confirm('양식을 초기화하시겠습니까?')) {
+    document.getElementById('logForm').reset();
+    vitalsArea.innerHTML = '';
+    createVitalRow();
+    interventionsArea.innerHTML = '';
+    createInterventionRow();
+  }
+});
 
-// --- Form UI 세팅 함수 ---
-function setFormData(data){
-  if(!data) return;
-  document.getElementById('datetime').value=data.datetime||'';
-  document.getElementById('unit').value=data.unit||'';
-  document.getElementById('callNo').value=data.callNo||'';
-  document.getElementById('location').value=data.location||'';
-  document.getElementById('reporter').value=data.reporter||'';
-  document.getElementById('treatStart').value=data.treatStart||'';
-  document.getElementById('treatEnd').value=data.treatEnd||'';
-  document.getElementById('patientName').value=data.patientName||'';
-  document.getElementById('patientAge').value=data.patientAge||'';
-  document.getElementById('patientSex').value=data.patientSex||'';
-  document.getElementById('patientId').value=data.patientId||'';
-  document.getElementById('chiefComplaint').value=data.chiefComplaint||'';
-  vitalsArea.innerHTML=''; (data.vitals||[]).forEach(v=>createVitalRow(v.bp,v.hr,v.rr,v.spO2,v.gcs,v.bloodSugar));
-  if(!(data.vitals||[]).length) createVitalRow();
-  document.getElementById('statusSummary').value=data.statusSummary||'';
-  interventionsArea.innerHTML=''; (data.interventions||[]).forEach(it=>createInterventionRow(it.intervention,it.dose,it.note));
-  if(!(data.interventions||[]).length) createInterventionRow();
-  document.getElementById('destination').value=data.destination||'';
-  document.getElementById('outcome').value=data.outcome||'';
-  document.getElementById('receivingDoc').value=data.receivingDoc||'';
-  document.getElementById('notes').value=data.notes||'';
-  document.getElementById('recorder').value=data.recorder||'';
-  document.getElementById('sign').value=data.sign||'';
-}
+document.getElementById('exportBtn').addEventListener('click', () => {
+  const data = getFormData();
+  let csvContent = '';
+  function rowToCSV(arr) {
+    return arr.map(v => `"${(v || '').toString().replace(/"/g, '""')}"`).join(',') + '\n';
+  }
+
+  csvContent += rowToCSV(['기록일시', data.datetime]);
+  csvContent += rowToCSV(['구급대/차량', data.unit]);
+  csvContent += rowToCSV(['출동번호', data.callNo]);
+  csvContent += rowToCSV(['현장주소', data.location]);
+  csvContent += rowToCSV(['신고자', data.reporter]);
+  csvContent += rowToCSV(['처치시작', data.treatStart, '처치종료', data.treatEnd]);
+  csvContent += '\n';
+  csvContent += rowToCSV(['환자성명', data.patientName, '나이', data.patientAge, '성별', data.patientSex]);
+  csvContent += rowToCSV(['주호소', data.chiefComplaint]);
+  csvContent += '\n';
+  csvContent += rowToCSV(['활력징후', '혈압', '맥박', '호흡', 'SpO2', 'GCS', '혈당']);
+  (data.vitals || []).forEach(v => {
+    csvContent += rowToCSV(['', v.bp, v.hr, v.rr, v.spO2, v.gcs, v.bloodSugar]);
+  });
+  csvContent += '\n';
+  csvContent += rowToCSV(['처치/약물/장비', '처치', '용량', '비고']);
+  (data.interventions || []).forEach(it => {
+    csvContent += rowToCSV(['', it.intervention, it.dose, it.note]);
+  });
+  csvContent += '\n';
+  csvContent += rowToCSV(['상태요약', data.statusSummary]);
+  csvContent += rowToCSV(['이송병원', data.destination, '결과', data.outcome, '접수의', data.receivingDoc]);
+  csvContent += rowToCSV(['기타메모', data.notes]);
+  csvContent += rowToCSV(['기록자', data.recorder, '서명', data.sign]);
+
+  const blob = new Blob(['\ufeff', csvContent], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = '응급구조사_구급활동일지.csv';
+  a.click();
+  URL.revokeObjectURL(url);
+});
+
+document.getElementById('printBtn').addEventListener('click', () => window.print());
 </script>
-
 </body>
 </html>
 
