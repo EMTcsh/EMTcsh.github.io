@@ -1,155 +1,158 @@
 <!doctype html>
 <html lang="ko">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>응급구조사 구급활동일지</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <style>
-    @media print {
-      .no-print { display: none !important; }
-      body { background: white; }
-    }
-    .field-label { min-width: 110px; }
-  </style>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>응급구조사 구급활동일지</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  @media print {
+    .no-print { display: none !important; }
+    body { background: white; }
+  }
+  .field-label { min-width: 110px; }
+</style>
 </head>
 <body class="bg-gray-100 p-4 font-sans text-gray-800">
-  <div class="max-w-5xl mx-auto bg-white rounded-xl shadow-md p-4 md:p-6">
-    <header class="flex flex-col md:flex-row items-start md:items-center justify-between mb-4 md:mb-6 gap-3 md:gap-0">
-      <div>
-        <h1 class="text-2xl font-bold">응급구조사 구급활동일지</h1>
-        <p class="text-sm text-gray-500">현장·이송·처치 내용을 기록합니다.</p>
-      </div>
-      <div class="flex flex-wrap gap-2 no-print mt-2 md:mt-0">
-        <button id="saveBtn" class="px-3 py-1 rounded bg-blue-600 text-white">저장</button>
-        <button id="loadBtn" class="px-3 py-1 rounded bg-yellow-500 text-white">불러오기</button>
-        <button id="exportBtn" class="px-3 py-1 rounded bg-green-600 text-white">CSV 내보내기</button>
-        <button id="printBtn" class="px-3 py-1 rounded bg-gray-700 text-white">인쇄</button>
-        <button id="clearBtn" class="px-3 py-1 rounded bg-red-500 text-white">초기화</button>
-      </div>
-    </header>
+<div class="max-w-5xl mx-auto bg-white rounded-xl shadow-md p-4 md:p-6">
 
-    <form id="logForm" class="space-y-4">
-      <!-- 기본 정보 -->
-      <section class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
-        <div class="flex flex-col sm:flex-row sm:items-center gap-2">
-          <label class="field-label w-full sm:w-auto">기록일시</label>
-          <input type="datetime-local" id="datetime" class="flex-1 p-2 border rounded" required />
-        </div>
-        <div class="flex flex-col sm:flex-row sm:items-center gap-2">
-          <label class="field-label w-full sm:w-auto">구급대/차량</label>
-          <input type="text" id="unit" class="flex-1 p-2 border rounded" placeholder="예: 119구급대, 차량번호" />
-        </div>
-        <div class="flex flex-col sm:flex-row sm:items-center gap-2">
-          <label class="field-label w-full sm:w-auto">출동번호</label>
-          <input type="text" id="callNo" class="flex-1 p-2 border rounded" placeholder="출동번호" />
-        </div>
-      </section>
-
-      <!-- 현장 정보 -->
-      <section class="bg-gray-50 p-3 md:p-4 rounded">
-        <h2 class="font-semibold mb-2">현장 정보</h2>
-        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
-          <div class="flex flex-col">
-            <label class="text-sm text-gray-600">현장주소 / 장소</label>
-            <input type="text" id="location" class="w-full p-2 border rounded" placeholder="예: OO시 OO구 OO동" />
-          </div>
-          <div class="flex flex-col">
-            <label class="text-sm text-gray-600">접수자 / 신고자</label>
-            <input type="text" id="reporter" class="w-full p-2 border rounded" />
-          </div>
-          <div class="flex flex-col">
-            <label class="text-sm text-gray-600">응급처치 시작/종료</label>
-            <div class="flex gap-2">
-              <input type="time" id="treatStart" class="p-2 border rounded flex-1" />
-              <input type="time" id="treatEnd" class="p-2 border rounded flex-1" />
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- 환자 정보 -->
-      <section class="bg-gray-50 p-3 md:p-4 rounded">
-        <h2 class="font-semibold mb-2">환자 정보</h2>
-        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
-          <input type="text" id="patientName" class="p-2 border rounded w-full" placeholder="성명" />
-          <input type="number" id="patientAge" class="p-2 border rounded w-full" placeholder="나이" />
-          <select id="patientSex" class="p-2 border rounded w-full">
-            <option value="">성별</option>
-            <option value="남">남</option>
-            <option value="여">여</option>
-            <option value="기타">기타</option>
-          </select>
-          <input type="text" id="patientId" class="p-2 border rounded w-full" placeholder="환자 식별 (ID/주민번호 일부)" />
-        </div>
-        <div class="mt-2">
-          <label class="text-sm text-gray-600">주소견(주호소)</label>
-          <textarea id="chiefComplaint" class="w-full p-2 border rounded" rows="2" placeholder="호흡곤란, 통증 등"></textarea>
-        </div>
-      </section>
-
-      <!-- 활력징후 -->
-      <section class="bg-gray-50 p-3 md:p-4 rounded">
-        <h2 class="font-semibold mb-2">활력징후 / 상태</h2>
-        <div id="vitalsArea" class="space-y-2"></div>
-        <div class="mt-2 no-print">
-          <button id="addVitalBtn" type="button" class="px-3 py-1 rounded bg-blue-500 text-white">활력징후 항목 추가</button>
-        </div>
-        <div class="mt-2">
-          <label class="text-sm text-gray-600">의식/호흡/순환 상태 요약</label>
-          <textarea id="statusSummary" class="w-full p-2 border rounded" rows="2"></textarea>
-        </div>
-      </section>
-
-      <!-- 처치/약물/장비 -->
-      <section class="bg-gray-50 p-3 md:p-4 rounded">
-        <h2 class="font-semibold mb-2">처치·약물·장비</h2>
-        <div id="interventionsArea" class="space-y-2"></div>
-        <div class="mt-2 no-print">
-          <button id="addRowBtn" type="button" class="px-3 py-1 rounded bg-blue-500 text-white">처치·장비 항목 추가</button>
-        </div>
-      </section>
-
-      <!-- 이송/결과 -->
-      <section class="bg-gray-50 p-3 md:p-4 rounded">
-        <h2 class="font-semibold mb-2">이송/결과</h2>
-        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
-          <select id="destination" class="p-2 border rounded w-full">
-            <option value="">이송병원</option>
-            <option>응급의료센터 A</option>
-            <option>응급의료센터 B</option>
-            <option>지역병원</option>
-          </select>
-          <input type="text" id="outcome" class="p-2 border rounded w-full" placeholder="결과(예: 이송/현장치료완료/사망)" />
-          <input type="text" id="receivingDoc" class="p-2 border rounded w-full" placeholder="접수의/담당자" />
-        </div>
-        <div class="mt-2">
-          <label class="text-sm text-gray-600">기타 메모</label>
-          <textarea id="notes" class="w-full p-2 border rounded" rows="2"></textarea>
-        </div>
-      </section>
-
-      <!-- 기록자/서명 -->
-      <section class="flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
-        <div class="flex flex-col gap-2 w-full sm:w-auto">
-          <div class="flex flex-col sm:flex-row sm:items-center gap-2">
-            <label class="field-label w-full sm:w-auto">기록자</label>
-            <input type="text" id="recorder" class="p-2 border rounded flex-1" placeholder="응급구조사 이름" />
-          </div>
-          <div class="flex flex-col sm:flex-row sm:items-center gap-2">
-            <label class="field-label w-full sm:w-auto">서명</label>
-            <input type="text" id="sign" class="p-2 border rounded flex-1" placeholder="(디지털 서명 또는 이름)" />
-          </div>
-        </div>
-        <div class="text-sm text-gray-500 mt-2 sm:mt-0 w-full sm:w-auto">
-          자동저장: 로컬스토리지에 저장됩니다. CSV로 내보낸 후 기관 시스템에 업로드하세요.
-        </div>
-      </section>
-    </form>
+<header class="flex flex-col md:flex-row items-start md:items-center justify-between mb-4 md:mb-6 gap-3 md:gap-0">
+  <div>
+    <h1 class="text-2xl font-bold">응급구조사 구급활동일지</h1>
+    <p class="text-sm text-gray-500">현장·이송·처치 내용을 기록합니다.</p>
   </div>
+  <div class="flex flex-wrap gap-2 no-print mt-2 md:mt-0">
+    <button id="saveBtn" class="px-3 py-1 rounded bg-blue-600 text-white">저장</button>
+    <button id="loadBtn" class="px-3 py-1 rounded bg-yellow-500 text-white">불러오기</button>
+    <button id="exportBtn" class="px-3 py-1 rounded bg-green-600 text-white">CSV 내보내기</button>
+    <button id="printBtn" class="px-3 py-1 rounded bg-gray-700 text-white">인쇄</button>
+    <button id="clearBtn" class="px-3 py-1 rounded bg-red-500 text-white">초기화</button>
+  </div>
+</header>
+
+<form id="logForm" class="space-y-4">
+
+  <!-- 기본 정보 -->
+  <section class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+    <div class="flex flex-col sm:flex-row sm:items-center gap-2">
+      <label class="field-label w-full sm:w-auto">기록일시</label>
+      <input type="datetime-local" id="datetime" class="flex-1 p-2 border rounded" required />
+    </div>
+    <div class="flex flex-col sm:flex-row sm:items-center gap-2">
+      <label class="field-label w-full sm:w-auto">구급대/차량</label>
+      <input type="text" id="unit" class="flex-1 p-2 border rounded" placeholder="예: 119구급대, 차량번호" />
+    </div>
+    <div class="flex flex-col sm:flex-row sm:items-center gap-2">
+      <label class="field-label w-full sm:w-auto">출동번호</label>
+      <input type="text" id="callNo" class="flex-1 p-2 border rounded" placeholder="출동번호" />
+    </div>
+  </section>
+
+  <!-- 현장 정보 -->
+  <section class="bg-gray-50 p-3 md:p-4 rounded">
+    <h2 class="font-semibold mb-2">현장 정보</h2>
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+      <div class="flex flex-col">
+        <label class="text-sm text-gray-600">현장주소 / 장소</label>
+        <input type="text" id="location" class="w-full p-2 border rounded" placeholder="예: OO시 OO구 OO동" />
+      </div>
+      <div class="flex flex-col">
+        <label class="text-sm text-gray-600">접수자 / 신고자</label>
+        <input type="text" id="reporter" class="w-full p-2 border rounded" />
+      </div>
+      <div class="flex flex-col">
+        <label class="text-sm text-gray-600">응급처치 시작/종료</label>
+        <div class="flex gap-2">
+          <input type="time" id="treatStart" class="p-2 border rounded flex-1" />
+          <input type="time" id="treatEnd" class="p-2 border rounded flex-1" />
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 환자 정보 -->
+  <section class="bg-gray-50 p-3 md:p-4 rounded">
+    <h2 class="font-semibold mb-2">환자 정보</h2>
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
+      <input type="text" id="patientName" class="p-2 border rounded w-full" placeholder="성명" />
+      <input type="number" id="patientAge" class="p-2 border rounded w-full" placeholder="나이" />
+      <select id="patientSex" class="p-2 border rounded w-full">
+        <option value="">성별</option>
+        <option value="남">남</option>
+        <option value="여">여</option>
+        <option value="기타">기타</option>
+      </select>
+      <input type="text" id="patientId" class="p-2 border rounded w-full" placeholder="환자 식별 (ID/주민번호 일부)" />
+    </div>
+    <div class="mt-2">
+      <label class="text-sm text-gray-600">주소견(주호소)</label>
+      <textarea id="chiefComplaint" class="w-full p-2 border rounded" rows="2" placeholder="호흡곤란, 통증 등"></textarea>
+    </div>
+  </section>
+
+  <!-- 활력징후 -->
+  <section class="bg-gray-50 p-3 md:p-4 rounded">
+    <h2 class="font-semibold mb-2">활력징후 / 상태</h2>
+    <div id="vitalsArea" class="space-y-2"></div>
+    <div class="mt-2 no-print">
+      <button id="addVitalBtn" type="button" class="px-3 py-1 rounded bg-blue-500 text-white">활력징후 항목 추가</button>
+    </div>
+    <div class="mt-2">
+      <label class="text-sm text-gray-600">의식/호흡/순환 상태 요약</label>
+      <textarea id="statusSummary" class="w-full p-2 border rounded" rows="2"></textarea>
+    </div>
+  </section>
+
+  <!-- 처치/약물/장비 -->
+  <section class="bg-gray-50 p-3 md:p-4 rounded">
+    <h2 class="font-semibold mb-2">처치·약물·장비</h2>
+    <div id="interventionsArea" class="space-y-2"></div>
+    <div class="mt-2 no-print">
+      <button id="addRowBtn" type="button" class="px-3 py-1 rounded bg-blue-500 text-white">처치·장비 항목 추가</button>
+    </div>
+  </section>
+
+  <!-- 이송/결과 -->
+  <section class="bg-gray-50 p-3 md:p-4 rounded">
+    <h2 class="font-semibold mb-2">이송/결과</h2>
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+      <select id="destination" class="p-2 border rounded w-full">
+        <option value="">이송병원</option>
+        <option>응급의료센터 A</option>
+        <option>응급의료센터 B</option>
+        <option>지역병원</option>
+      </select>
+      <input type="text" id="outcome" class="p-2 border rounded w-full" placeholder="결과(예: 이송/현장치료완료/사망)" />
+      <input type="text" id="receivingDoc" class="p-2 border rounded w-full" placeholder="접수의/담당자" />
+    </div>
+    <div class="mt-2">
+      <label class="text-sm text-gray-600">기타 메모</label>
+      <textarea id="notes" class="w-full p-2 border rounded" rows="2"></textarea>
+    </div>
+  </section>
+
+  <!-- 기록자/서명 -->
+  <section class="flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
+    <div class="flex flex-col gap-2 w-full sm:w-auto">
+      <div class="flex flex-col sm:flex-row sm:items-center gap-2">
+        <label class="field-label w-full sm:w-auto">기록자</label>
+        <input type="text" id="recorder" class="p-2 border rounded flex-1" placeholder="응급구조사 이름" />
+      </div>
+      <div class="flex flex-col sm:flex-row sm:items-center gap-2">
+        <label class="field-label w-full sm:w-auto">서명</label>
+        <input type="text" id="sign" class="p-2 border rounded flex-1" placeholder="(디지털 서명 또는 이름)" />
+      </div>
+    </div>
+    <div class="text-sm text-gray-500 mt-2 sm:mt-0 w-full sm:w-auto">
+      자동저장: 로컬스토리지에 저장됩니다. CSV로 내보낸 후 기관 시스템에 업로드하세요.
+    </div>
+  </section>
+
+</form>
+</div>
 
 <script>
-const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyqXUOA74lkADlE4QcMM18asKRQQCCigsQ5Y49cwwqyQLPONv5LPfDyp0XNnX4ywlC9/exec'; // Google Apps Script 웹앱 URL
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyqXUOA74lkADlE4QcMM18asKRQQCCigsQ5Y49cwwqyQLPONv5LPfDyp0XNnX4ywlC9/exec'; // 배포 URL 교체
 
 // --- 활력징후 ---
 const vitalsArea = document.getElementById('vitalsArea');
@@ -159,7 +162,173 @@ function createVitalRow(bp='', hr='', rr='', spO2='', gcs='', bloodSugar=''){
   wrapper.className = 'grid grid-cols-1 sm:grid-cols-2 md:grid-cols-6 gap-2 items-center';
   wrapper.innerHTML = `
     <input type="text" class="v_bp p-2 border rounded" value="${bp}" placeholder="혈압">
-    <input type="number" class="v_hr p-2 border rounded" value="${hr}" placeholder="맥박">
+    <input type="number" class="v_hr p-2 border rounded"
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>응급구조사 구급활동일지</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  @media print {
+    .no-print { display: none !important; }
+    body { background: white; }
+  }
+  .field-label { min-width: 110px; }
+</style>
+</head>
+<body class="bg-gray-100 p-4 font-sans text-gray-800">
+<div class="max-w-5xl mx-auto bg-white rounded-xl shadow-md p-4 md:p-6">
+
+<header class="flex flex-col md:flex-row items-start md:items-center justify-between mb-4 md:mb-6 gap-3 md:gap-0">
+  <div>
+    <h1 class="text-2xl font-bold">응급구조사 구급활동일지</h1>
+    <p class="text-sm text-gray-500">현장·이송·처치 내용을 기록합니다.</p>
+  </div>
+  <div class="flex flex-wrap gap-2 no-print mt-2 md:mt-0">
+    <button id="saveBtn" class="px-3 py-1 rounded bg-blue-600 text-white">저장</button>
+    <button id="loadBtn" class="px-3 py-1 rounded bg-yellow-500 text-white">불러오기</button>
+    <button id="exportBtn" class="px-3 py-1 rounded bg-green-600 text-white">CSV 내보내기</button>
+    <button id="printBtn" class="px-3 py-1 rounded bg-gray-700 text-white">인쇄</button>
+    <button id="clearBtn" class="px-3 py-1 rounded bg-red-500 text-white">초기화</button>
+  </div>
+</header>
+
+<form id="logForm" class="space-y-4">
+
+  <!-- 기본 정보 -->
+  <section class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+    <div class="flex flex-col sm:flex-row sm:items-center gap-2">
+      <label class="field-label w-full sm:w-auto">기록일시</label>
+      <input type="datetime-local" id="datetime" class="flex-1 p-2 border rounded" required />
+    </div>
+    <div class="flex flex-col sm:flex-row sm:items-center gap-2">
+      <label class="field-label w-full sm:w-auto">구급대/차량</label>
+      <input type="text" id="unit" class="flex-1 p-2 border rounded" placeholder="예: 119구급대, 차량번호" />
+    </div>
+    <div class="flex flex-col sm:flex-row sm:items-center gap-2">
+      <label class="field-label w-full sm:w-auto">출동번호</label>
+      <input type="text" id="callNo" class="flex-1 p-2 border rounded" placeholder="출동번호" />
+    </div>
+  </section>
+
+  <!-- 현장 정보 -->
+  <section class="bg-gray-50 p-3 md:p-4 rounded">
+    <h2 class="font-semibold mb-2">현장 정보</h2>
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+      <div class="flex flex-col">
+        <label class="text-sm text-gray-600">현장주소 / 장소</label>
+        <input type="text" id="location" class="w-full p-2 border rounded" placeholder="예: OO시 OO구 OO동" />
+      </div>
+      <div class="flex flex-col">
+        <label class="text-sm text-gray-600">접수자 / 신고자</label>
+        <input type="text" id="reporter" class="w-full p-2 border rounded" />
+      </div>
+      <div class="flex flex-col">
+        <label class="text-sm text-gray-600">응급처치 시작/종료</label>
+        <div class="flex gap-2">
+          <input type="time" id="treatStart" class="p-2 border rounded flex-1" />
+          <input type="time" id="treatEnd" class="p-2 border rounded flex-1" />
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 환자 정보 -->
+  <section class="bg-gray-50 p-3 md:p-4 rounded">
+    <h2 class="font-semibold mb-2">환자 정보</h2>
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
+      <input type="text" id="patientName" class="p-2 border rounded w-full" placeholder="성명" />
+      <input type="number" id="patientAge" class="p-2 border rounded w-full" placeholder="나이" />
+      <select id="patientSex" class="p-2 border rounded w-full">
+        <option value="">성별</option>
+        <option value="남">남</option>
+        <option value="여">여</option>
+        <option value="기타">기타</option>
+      </select>
+      <input type="text" id="patientId" class="p-2 border rounded w-full" placeholder="환자 식별 (ID/주민번호 일부)" />
+    </div>
+    <div class="mt-2">
+      <label class="text-sm text-gray-600">주소견(주호소)</label>
+      <textarea id="chiefComplaint" class="w-full p-2 border rounded" rows="2" placeholder="호흡곤란, 통증 등"></textarea>
+    </div>
+  </section>
+
+  <!-- 활력징후 -->
+  <section class="bg-gray-50 p-3 md:p-4 rounded">
+    <h2 class="font-semibold mb-2">활력징후 / 상태</h2>
+    <div id="vitalsArea" class="space-y-2"></div>
+    <div class="mt-2 no-print">
+      <button id="addVitalBtn" type="button" class="px-3 py-1 rounded bg-blue-500 text-white">활력징후 항목 추가</button>
+    </div>
+    <div class="mt-2">
+      <label class="text-sm text-gray-600">의식/호흡/순환 상태 요약</label>
+      <textarea id="statusSummary" class="w-full p-2 border rounded" rows="2"></textarea>
+    </div>
+  </section>
+
+  <!-- 처치/약물/장비 -->
+  <section class="bg-gray-50 p-3 md:p-4 rounded">
+    <h2 class="font-semibold mb-2">처치·약물·장비</h2>
+    <div id="interventionsArea" class="space-y-2"></div>
+    <div class="mt-2 no-print">
+      <button id="addRowBtn" type="button" class="px-3 py-1 rounded bg-blue-500 text-white">처치·장비 항목 추가</button>
+    </div>
+  </section>
+
+  <!-- 이송/결과 -->
+  <section class="bg-gray-50 p-3 md:p-4 rounded">
+    <h2 class="font-semibold mb-2">이송/결과</h2>
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+      <select id="destination" class="p-2 border rounded w-full">
+        <option value="">이송병원</option>
+        <option>응급의료센터 A</option>
+        <option>응급의료센터 B</option>
+        <option>지역병원</option>
+      </select>
+      <input type="text" id="outcome" class="p-2 border rounded w-full" placeholder="결과(예: 이송/현장치료완료/사망)" />
+      <input type="text" id="receivingDoc" class="p-2 border rounded w-full" placeholder="접수의/담당자" />
+    </div>
+    <div class="mt-2">
+      <label class="text-sm text-gray-600">기타 메모</label>
+      <textarea id="notes" class="w-full p-2 border rounded" rows="2"></textarea>
+    </div>
+  </section>
+
+  <!-- 기록자/서명 -->
+  <section class="flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
+    <div class="flex flex-col gap-2 w-full sm:w-auto">
+      <div class="flex flex-col sm:flex-row sm:items-center gap-2">
+        <label class="field-label w-full sm:w-auto">기록자</label>
+        <input type="text" id="recorder" class="p-2 border rounded flex-1" placeholder="응급구조사 이름" />
+      </div>
+      <div class="flex flex-col sm:flex-row sm:items-center gap-2">
+        <label class="field-label w-full sm:w-auto">서명</label>
+        <input type="text" id="sign" class="p-2 border rounded flex-1" placeholder="(디지털 서명 또는 이름)" />
+      </div>
+    </div>
+    <div class="text-sm text-gray-500 mt-2 sm:mt-0 w-full sm:w-auto">
+      자동저장: 로컬스토리지에 저장됩니다. CSV로 내보낸 후 기관 시스템에 업로드하세요.
+    </div>
+  </section>
+
+</form>
+</div>
+
+<script>
+const SCRIPT_URL = 'YOUR_GOOGLE_SCRIPT_WEBAPP_URL'; // 배포 URL 교체
+
+// --- 활력징후 ---
+const vitalsArea = document.getElementById('vitalsArea');
+const addVitalBtn = document.getElementById('addVitalBtn');
+function createVitalRow(bp='', hr='', rr='', spO2='', gcs='', bloodSugar=''){
+  const wrapper = document.createElement('div');
+  wrapper.className = 'grid grid-cols-1 sm:grid-cols-2 md:grid-cols-6 gap-2 items-center';
+  wrapper.innerHTML = `
+    <input type="text" class="v_bp p-2 border rounded" value="${bp}" placeholder="혈압">
+    <input type="number" class="v_hr p-2 border rounded"
+.value="${hr}" placeholder="맥박">
     <input type="number" class="v_rr p-2 border rounded" value="${rr}" placeholder="호흡">
     <input type="number" class="v_spO2 p-2 border rounded" value="${spO2}" placeholder="SpO2">
     <input type="text" class="v_gcs p-2 border rounded" value="${gcs}" placeholder="GCS">
@@ -192,7 +361,7 @@ function createInterventionRow(intervention='', dose='', note=''){
 addRowBtn.addEventListener('click', ()=> createInterventionRow());
 interventionsArea.innerHTML=''; createInterventionRow();
 
-// --- Form 데이터 ---
+// --- Form 데이터 가져오기 ---
 function getFormData(){
   const vitals = Array.from(vitalsArea.children).map(row=>({
     bp: row.querySelector('.v_bp')?.value||'',
@@ -320,49 +489,42 @@ document.getElementById('clearBtn').addEventListener('click', ()=>{
 
 document.getElementById('exportBtn').addEventListener('click', ()=>{
   const data = getFormData();
-  const rows = [];
-  rows.push(['기록일시', data.datetime]);
-  rows.push(['구급대/차량', data.unit]);
-  rows.push(['출동번호', data.callNo]);
-  rows.push(['현장주소', data.location]);
-  rows.push(['신고자', data.reporter]);
-  rows.push(['처치시작', data.treatStart]);
-  rows.push(['처치종료', data.treatEnd]);
-  rows.push([]);
-  rows.push(['환자성명', data.patientName, '나이', data.patientAge, '성별', data.patientSex]);
-  rows.push(['주호소', data.chiefComplaint]);
-  rows.push([]);
-  (data.vitals||[]).forEach((v,i)=>rows.push([`활력징후${i+1}`, v.bp,v.hr,v.rr,v.spO2,v.gcs,v.bloodSugar]));
-  rows.push(['상태요약', data.statusSummary]);
-  rows.push([]);
-  rows.push(['처치/투약/비고']);
-  (data.interventions||[]).forEach(it=>rows.push([it.intervention,it.dose,it.note]));
-  rows.push([]);
-  rows.push(['이송병원', data.destination, '결과', data.outcome, '접수자', data.receivingDoc]);
-  rows.push(['기록자', data.recorder, '서명', data.sign]);
-  rows.push(['기타메모', data.notes]);
+  let csvContent = '';
+  function rowToCSV(arr){ return arr.map(v=>`"${v||''}"`).join(',')+'\n'; }
 
-  const csv = rows.map(r=> r.map(c=>'"'+String(c||'').replace(/"/g,'""')+'"').join(',')).join('\n');
-  const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+  csvContent += rowToCSV(['기록일시', data.datetime]);
+  csvContent += rowToCSV(['구급대/차량', data.unit]);
+  csvContent += rowToCSV(['출동번호', data.callNo]);
+  csvContent += rowToCSV(['현장주소', data.location]);
+  csvContent += rowToCSV(['신고자', data.reporter]);
+  csvContent += rowToCSV(['처치시작', data.treatStart, '처치종료', data.treatEnd]);
+  csvContent += '\n';
+  csvContent += rowToCSV(['환자성명', data.patientName, '나이', data.patientAge, '성별', data.patientSex]);
+  csvContent += rowToCSV(['주호소', data.chiefComplaint]);
+  csvContent += '\n';
+  (data.vitals||[]).forEach((v,i)=>{
+    csvContent += rowToCSV([`활력징후${i+1}`, v.bp,v.hr,v.rr,v.spO2,v.gcs,v.bloodSugar]);
+  });
+  csvContent += '\n';
+  (data.interventions||[]).forEach((it,i)=>{
+    csvContent += rowToCSV([`처치${i+1}`, it.intervention, it.dose, it.note]);
+  });
+  csvContent += '\n';
+  csvContent += rowToCSV(['상태요약', data.statusSummary]);
+  csvContent += rowToCSV(['이송병원', data.destination, '결과', data.outcome, '접수의', data.receivingDoc]);
+  csvContent += rowToCSV(['기타메모', data.notes]);
+  csvContent += rowToCSV(['기록자', data.recorder, '서명', data.sign]);
+
+  const blob = new Blob([csvContent], {type:'text/csv'});
+  const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = '구급활동일지_'+(data.datetime?data.datetime.replace(/[:T]/g,'_'):new Date().toISOString())+'.csv';
-  document.body.appendChild(a); a.click(); a.remove();
+  a.href = url;
+  a.download = '응급구조사_구급활동일지.csv';
+  a.click();
+  URL.revokeObjectURL(url);
 });
 
 document.getElementById('printBtn').addEventListener('click', ()=> window.print());
-
-// --- 자동저장 ---
-window.addEventListener('beforeunload', ()=> {
-  localStorage.setItem('emergency_log_autosave', JSON.stringify(getFormData()));
-});
-window.addEventListener('DOMContentLoaded', ()=>{
-  const tmp = localStorage.getItem('emergency_log_autosave');
-  if(tmp && confirm('이전 입력 내용이 있습니다. 복원하시겠습니까?')){
-    setFormData(JSON.parse(tmp));
-  }
-});
 </script>
 </body>
 </html>
-
