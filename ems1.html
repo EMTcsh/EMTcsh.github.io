@@ -149,7 +149,7 @@
   </div>
 
 <script>
-const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyqXUOA74lkADlE4QcMM18asKRQQCCigsQ5Y49cwwqyQLPONv5LPfDyp0XNnX4ywlC9/exec'; // 반드시 교체
+const SCRIPT_URL = 'https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec'; // 반드시 교체
 
 // --- 활력징후 추가 ---
 const vitalsArea = document.getElementById('vitalsArea');
@@ -266,17 +266,19 @@ function setFormData(data){
   document.getElementById('sign').value = data.sign||'';
 }
 
-// --- Google Sheet 전송 ---
-const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyqXUOA74lkADlE4QcMM18asKRQQCCigsQ5Y49cwwqyQLPONv5LPfDyp0XNnX4ywlC9/exec'; // 반드시 교체
-
+// --- Google Sheet 전송 (POST 방식) ---
 function sendToGoogleSheet(data){
-  fetch(SCRIPT_URL + '?data=' + encodeURIComponent(JSON.stringify(data)))
-    .then(res=>res.text())
-    .then(txt=>console.log('GoogleSheet 전송:', txt))
-    .catch(err=>{
-      console.error('GoogleSheet 전송 오류:', err);
-      alert('Google Sheet 전송 중 오류가 발생했습니다.');
-    });
+  fetch(SCRIPT_URL, {
+    method: 'POST',
+    body: JSON.stringify(data),
+    headers: { 'Content-Type': 'application/json' }
+  })
+  .then(res => res.text())
+  .then(txt => console.log('GoogleSheet 전송:', txt))
+  .catch(err => {
+    console.error('GoogleSheet 전송 오류:', err);
+    alert('Google Sheet 전송 중 오류가 발생했습니다.');
+  });
 }
 
 // --- 저장 버튼 ---
@@ -286,7 +288,6 @@ document.getElementById('saveBtn').addEventListener('click', ()=>{
   const key = `emergency_log_${year}_` + new Date().toISOString();
   localStorage.setItem(key, JSON.stringify(data));
 
-  // index 관리
   const index = JSON.parse(localStorage.getItem('emergency_log_index')||'[]');
   index.push({key, datetime: data.datetime||new Date().toISOString(), patient: data.patientName||''});
   localStorage.setItem('emergency_log_index', JSON.stringify(index));
@@ -295,7 +296,7 @@ document.getElementById('saveBtn').addEventListener('click', ()=>{
   alert('저장되었습니다. (연도별 저장 + Google Sheet 전송)');
 });
 
-// --- 불러오기 (마지막 저장 항목) ---
+// --- 불러오기 ---
 document.getElementById('loadBtn').addEventListener('click', ()=>{
   const index = JSON.parse(localStorage.getItem('emergency_log_index')||'[]');
   if(!index.length){ alert('저장된 기록이 없습니다.'); return; }
@@ -362,3 +363,4 @@ window.addEventListener('DOMContentLoaded', ()=>{
 </script>
 </body>
 </html>
+
