@@ -149,9 +149,9 @@
   </div>
 
 <script>
-const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyqXUOA74lkADlE4QcMM18asKRQQCCigsQ5Y49cwwqyQLPONv5LPfDyp0XNnX4ywlC9/exec'; // 교체 필요
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyqXUOA74lkADlE4QcMM18asKRQQCCigsQ5Y49cwwqyQLPONv5LPfDyp0XNnX4ywlC9/exec'; // Google Apps Script 웹앱 URL
 
-// --- 활력징후 추가 ---
+// --- 활력징후 ---
 const vitalsArea = document.getElementById('vitalsArea');
 const addVitalBtn = document.getElementById('addVitalBtn');
 function createVitalRow(bp='', hr='', rr='', spO2='', gcs='', bloodSugar=''){
@@ -170,8 +170,9 @@ function createVitalRow(bp='', hr='', rr='', spO2='', gcs='', bloodSugar=''){
   wrapper.querySelector('.removeBtn').addEventListener('click', ()=> wrapper.remove());
 }
 addVitalBtn.addEventListener('click', ()=> createVitalRow());
+vitalsArea.innerHTML=''; createVitalRow();
 
-// --- 처치/약물/장비 추가 ---
+// --- 처치/약물/장비 ---
 const interventionsArea = document.getElementById('interventionsArea');
 const addRowBtn = document.getElementById('addRowBtn');
 function createInterventionRow(intervention='', dose='', note=''){
@@ -189,8 +190,9 @@ function createInterventionRow(intervention='', dose='', note=''){
   wrapper.querySelector('.removeBtn').addEventListener('click', ()=> wrapper.remove());
 }
 addRowBtn.addEventListener('click', ()=> createInterventionRow());
+interventionsArea.innerHTML=''; createInterventionRow();
 
-// --- Form 데이터 가져오기 ---
+// --- Form 데이터 ---
 function getFormData(){
   const vitals = Array.from(vitalsArea.children).map(row=>({
     bp: row.querySelector('.v_bp')?.value||'',
@@ -230,7 +232,51 @@ function getFormData(){
   };
 }
 
-// --- Form 데이터 설정 ---
+// --- Google Sheet 전송 ---
+function sendToGoogleSheet(data){
+  fetch(SCRIPT_URL, {
+    method: 'POST',
+    body: JSON.stringify(data),
+    headers: { 'Content-Type': 'application/json' }
+  })
+  .then(res => res.json())
+  .then(resData => {
+    if(resData.status==='success'){
+      console.log('GoogleSheet 전송 성공');
+    } else {
+      console.error('전송 오류', resData);
+      alert('Google Sheet 전송 오류: '+(resData.message||''));
+    }
+  })
+  .catch(err => {
+    console.error('전송 실패', err);
+    alert('Google Sheet 전송 실패: '+err.message);
+  });
+}
+
+// --- 버튼 기능 ---
+document.getElementById('saveBtn').addEventListener('click', ()=>{
+  const data = getFormData();
+  const key = 'emergency_log_'+ new Date().toISOString();
+  localStorage.setItem(key, JSON.stringify(data));
+
+  const index = JSON.parse(localStorage.getItem('emergency_log_index')||'[]');
+  index.push({key, datetime: data.datetime||'', patient: data.patientName||''});
+  localStorage.setItem('emergency_log_index', JSON.stringify(index));
+
+  sendToGoogleSheet(data);
+  alert('저장되었습니다.');
+});
+
+document.getElementById('loadBtn').addEventListener('click', ()=>{
+  const index = JSON.parse(localStorage.getItem('emergency_log_index')||'[]');
+  if(!index.length){ alert('저장된 기록이 없습니다.'); return; }
+  const last = index[index.length-1];
+  const data = JSON.parse(localStorage.getItem(last.key));
+  setFormData(data);
+  alert('마지막 기록을 불러왔습니다.');
+});
+
 function setFormData(data){
   if(!data) return;
   document.getElementById('datetime').value = data.datetime||'';
@@ -263,43 +309,6 @@ function setFormData(data){
   document.getElementById('recorder').value = data.recorder||'';
   document.getElementById('sign').value = data.sign||'';
 }
-
-// --- Google Sheet 전송 ---
-function sendToGoogleSheet(data){
-  if(!SCRIPT_URL){ console.warn('Google Script URL이 설정되지 않았습니다.'); return; }
-  fetch(SCRIPT_URL, {
-    method:'POST',
-    body: JSON.stringify(data),
-    headers:{'Content-Type':'application/json'}
-  })
-  .then(res=>res.text())
-  .then(txt=>console.log('GoogleSheet 전송:',txt))
-  .catch(err=>{console.error('GoogleSheet 전송 오류:',err); alert('Google Sheet 전송 중 오류 발생'); });
-}
-
-// --- 이벤트 연결 ---
-document.getElementById('saveBtn').addEventListener('click', ()=>{
-  const data = getFormData();
-  const year = new Date(data.datetime||new Date()).getFullYear();
-  const key = `emergency_log_${year}_${new Date().toISOString()}`;
-  localStorage.setItem(key, JSON.stringify(data));
-
-  const index = JSON.parse(localStorage.getItem('emergency_log_index')||'[]');
-  index.push({key, datetime: data.datetime||new Date().toISOString(), patient: data.patientName||''});
-  localStorage.setItem('emergency_log_index', JSON.stringify(index));
-
-  sendToGoogleSheet(data);
-  alert('저장되었습니다.');
-});
-
-document.getElementById('loadBtn').addEventListener('click', ()=>{
-  const index = JSON.parse(localStorage.getItem('emergency_log_index')||'[]');
-  if(!index.length){ alert('저장된 기록이 없습니다.'); return; }
-  const last = index[index.length-1];
-  const data = JSON.parse(localStorage.getItem(last.key));
-  setFormData(data);
-  alert('마지막 저장 항목을 불러왔습니다.');
-});
 
 document.getElementById('clearBtn').addEventListener('click', ()=>{
   if(confirm('양식을 초기화하시겠습니까?')){
@@ -347,16 +356,13 @@ document.getElementById('printBtn').addEventListener('click', ()=> window.print(
 window.addEventListener('beforeunload', ()=> {
   localStorage.setItem('emergency_log_autosave', JSON.stringify(getFormData()));
 });
-
 window.addEventListener('DOMContentLoaded', ()=>{
   const tmp = localStorage.getItem('emergency_log_autosave');
   if(tmp && confirm('이전 입력 내용이 있습니다. 복원하시겠습니까?')){
     setFormData(JSON.parse(tmp));
-  } else {
-    vitalsArea.innerHTML=''; createVitalRow();
-    interventionsArea.innerHTML=''; createInterventionRow();
   }
 });
 </script>
 </body>
 </html>
+
