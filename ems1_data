@@ -18,10 +18,11 @@
   </style>
 </head>
 <body>
-  <h2>응급구조사 의료지도 저장기록</h2>
+  <h2>응급구조사 구급활동일지</h2>
   <div class="sheet-container">
     <iframe 
-      src="https://docs.google.com/spreadsheets/d/e/2PACX-1vReH2eK19MgQce_v8BA-4fzGx1-Z2afDLxei_SUENRZZsLTevb7kiMIp6sLPrUihZ3KYK4pv4RSHG5Q/pubhtml?gid=0&single=true">
+      src="https://docs.google.com/spreadsheets/d/1eZ8hMjfNPPUypIP6zxLlo9LVwM8vjRwW0qRrK3v5hzI/edit?usp=sharinge">
+           
     </iframe>
   </div>
 </body>
