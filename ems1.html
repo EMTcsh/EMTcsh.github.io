@@ -42,7 +42,9 @@
           <input type="text" placeholder="혈당" class="border p-2 rounded v_bloodSugar">
         </div>
       </div>
-      <button onclick="addVital()" class="mt-2 bg-blue-500 text-white px-3 py-1 rounded">+ 추가</button>
+      <div class="flex justify-center mt-2 no-print">
+        <button onclick="addVital()" class="bg-green-500 text-white px-3 py-1 rounded">+ 활력징후 추가</button>
+      </div>
     </section>
 
     <!-- 처치·장비 -->
@@ -55,7 +57,9 @@
           <input type="text" placeholder="비고" class="border p-2 rounded note">
         </div>
       </div>
-      <button onclick="addTreatment()" class="mt-2 bg-green-500 text-white px-3 py-1 rounded">+ 추가</button>
+      <div class="flex justify-center mt-2 no-print">
+        <button onclick="addTreatment()" class="bg-green-500 text-white px-3 py-1 rounded">+ 처치·장비 추가</button>
+      </div>
     </section>
 
     <!-- 버튼 -->
@@ -106,6 +110,7 @@
         treatments: []
       };
 
+      // 활력징후
       document.querySelectorAll("#vitalContainer > div").forEach(row => {
         data.vitals.push({
           bp: row.querySelector(".v_bp").value,
@@ -117,6 +122,7 @@
         });
       });
 
+      // 처치/장비
       document.querySelectorAll("#treatmentContainer > div").forEach(row => {
         data.treatments.push({
           treatment: row.querySelector(".treatment").value,
@@ -125,16 +131,16 @@
         });
       });
 
-      const url = "https://script.google.com/macros/s/AKfycbwoukv-YGDe0zapkyipf9oSObecU8bJr4JAyHregzOyWb-mp9rQTioTbtCpTmY4MhyYZQ/exec"; // 🔹 Apps Script 배포 URL 넣기
+      const SCRIPT_URL = "YOUR_SCRIPT_URL_HERE"; // 🔹 Apps Script 배포 URL
 
-      fetch(url, {
+      fetch(SCRIPT_URL, {
         method: "POST",
-        mode: "no-cors",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data)
       })
-      .then(() => alert("전송 완료!"))
-      .catch(err => alert("전송 실패: " + err));
+      .then(res => res.text())
+      .then(() => alert("✅ 전송 완료!"))
+      .catch(err => alert("⚠️ 전송 실패: " + err));
     }
   </script>
 </body>
