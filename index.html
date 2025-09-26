@@ -166,8 +166,8 @@ document.getElementById("recordForm").addEventListener("submit", function(e){
     const formData = new FormData(form);
     const data = {};
     for(const [key,value] of formData.entries()){
-        if(key.endsWith("[]")){
-            const baseKey = key.replace("[]","");
+        if(key.endsWith("")){
+            const baseKey = key.replace("","");
             if(!data[baseKey]) data[baseKey]=[];
             data[baseKey].push(value);
         } else {
