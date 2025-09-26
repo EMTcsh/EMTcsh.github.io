@@ -6,12 +6,12 @@
 <title>PARAMEDIC 응급환자 평가도구</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <style>
-body { font-family: Arial, sans-serif; padding: 10px; }
-.section { margin-bottom: 20px; padding: 15px; border: 1px solid #ddd; border-radius: 8px; background: #f9f9f9; }
-.board-item { border-bottom: 1px solid #ddd; padding: 10px 0; white-space: pre-line; }
-.discord-link { border: 1px solid #ddd; border-radius: 5px; padding: 10px; margin: 10px 0; text-align: center; background-color: #f4f4f4; }
-a { text-decoration: none; color: #7289DA; font-weight: bold; }
-.vitalsRow { border: 1px dashed #ccc; padding: 5px; margin-bottom: 10px; border-radius: 5px; background-color: #fff; }
+  body { font-family: Arial, sans-serif; padding: 10px; }
+  .section { margin-bottom: 20px; padding: 15px; border: 1px solid #ddd; border-radius: 8px; background: #f9f9f9; }
+  .board-item { border-bottom: 1px solid #ddd; padding: 10px 0; white-space: pre-line; }
+  .discord-link { border: 1px solid #ddd; border-radius: 5px; padding: 10px; margin: 10px 0; text-align: center; background-color: #f4f4f4; }
+  a { text-decoration: none; color: #7289DA; font-weight: bold; }
+  .vitalsRow { border: 1px dashed #ccc; padding: 5px; margin-bottom: 10px; border-radius: 5px; background-color: #fff; }
 </style>
 </head>
 <body>
@@ -101,6 +101,7 @@ a { text-decoration: none; color: #7289DA; font-weight: bold; }
 </div>
 
 <script>
+// 활력징후 추가
 function addVitalSigns() {
   const container = document.getElementById("vitalSignsContainer");
   const index = container.children.length + 1;
@@ -118,6 +119,7 @@ function addVitalSigns() {
 }
 addVitalSigns();
 
+// GCS 계산
 function calculateGCS() {
   const eye = parseInt(document.getElementById("eye").value);
   const verbal = parseInt(document.getElementById("verbal").value);
@@ -135,47 +137,44 @@ function calculateGCS() {
 ["eye","verbal","motor"].forEach(id=>document.getElementById(id).addEventListener("change",calculateGCS));
 calculateGCS();
 
+// 폼 제출 (Google Sheets 연동 제거)
 document.getElementById("recordForm").addEventListener("submit", function(e){
   e.preventDefault();
-  saveReport();
-});
-
-function saveReport() {
   const form = document.getElementById("recordForm");
   const formData = new FormData(form);
   const data = {};
-  formData.forEach((value,key)=>{
+  for(const [key,value] of formData.entries()){
     if(key.endsWith("[]")){
       const baseKey = key.replace("[]","");
-      if(!data[baseKey]) data[baseKey] = [];
+      if(!data[baseKey]) data[baseKey]=[];
       data[baseKey].push(value);
-    } else data[key] = value;
-  });
+    } else {
+      data[key] = value;
+    }
+  }
   data["GCS"] = document.getElementById("gcsResult").innerText;
 
-  google.script.run.withSuccessHandler(function(res){
-    document.getElementById("resultMessage").innerText = res;
+  // TXT 다운로드
+  let content = "";
+  for(const key in data){
+    if(Array.isArray(data[key])) content+=`${key}: ${data[key].join(", ")}\n`;
+    else content+=`${key}: ${data[key]}\n`;
+  }
+  const today = new Date().toISOString().slice(0,10);
+  const blob = new Blob([content],{type:"text/plain"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href=url;
+  a.download=`환자평가_${today}.txt`;
+  a.click();
+  URL.revokeObjectURL(url);
 
-    // TXT 다운로드
-    let content = "";
-    for(const key in data){
-      if(Array.isArray(data[key])) content+=`${key}: ${data[key].join(", ")}\n`;
-      else content+=`${key}: ${data[key]}\n`;
-    }
-    const today = new Date().toISOString().slice(0,10);
-    const blob = new Blob([content], {type:"text/plain"});
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `환자평가_${today}.txt`;
-    a.click();
-    URL.revokeObjectURL(url);
+  document.getElementById("savedData").innerHTML = `<div class="board-item">${content}</div>`;
+  document.getElementById("resultMessage").innerText = "기록 저장 완료 ✅";
+});
 
-    document.getElementById("savedData").innerHTML = `<div class="board-item">${content}</div>`;
-  }).saveRecord(data);
-}
-
-function shareReport() {
+// 공유 기능
+function shareReport(){
   const form = document.getElementById("recordForm");
   const formData = new FormData(form);
   let text = "";
@@ -186,6 +185,7 @@ function shareReport() {
   } else alert("이 브라우저는 공유 기능을 지원하지 않습니다.");
 }
 </script>
+
 </body>
 </html>
 
