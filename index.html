@@ -3,189 +3,294 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>PARAMEDIC 응급환자 평가도구</title>
+<title>📌 특수구조대 환자평가_특수산악구조대</title>
+
+<!-- Tailwind CSS -->
 <script src="https://cdn.tailwindcss.com"></script>
+<!-- Kakao 지도 API -->
+<script type="text/javascript" src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=ff9e145029506d6e4c72d1f2b01ea424&libraries=services"></script>
+
 <style>
-  body { font-family: Arial, sans-serif; padding: 10px; }
-  .section { margin-bottom: 20px; padding: 15px; border: 1px solid #ddd; border-radius: 8px; background: #f9f9f9; }
-  .board-item { border-bottom: 1px solid #ddd; padding: 10px 0; white-space: pre-line; }
-  .discord-link { border: 1px solid #ddd; border-radius: 5px; padding: 10px; margin: 10px 0; text-align: center; background-color: #f4f4f4; }
-  a { text-decoration: none; color: #7289DA; font-weight: bold; }
-  .vitalsRow { border: 1px dashed #ccc; padding: 5px; margin-bottom: 10px; border-radius: 5px; background-color: #fff; }
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 20px;
+    background-color: #f0f0f0;
+}
+.container {
+    width: 80%;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
+h1, h2 { color: #0056b3; }
+.section { margin-bottom: 30px; padding: 15px; border: 1px solid #ddd; border-radius: 8px; background-color: #fff; }
+.section label { font-weight: bold; display: flex; align-items: center; margin-bottom: 5px; }
+.section input[type="checkbox"] { margin-right: 10px; width: 25px; height: 25px; }
+select, input, textarea { width: calc(100% - 22px); padding: 12px; border: 1px solid #ddd; border-radius: 5px; box-sizing: border-box; font-size: 16px; }
+input, textarea { height: 45px; }
+textarea { resize: vertical; }
+button { width: 100%; padding: 12px; background-color: #007bff; color: #fff; border: none; border-radius: 5px; font-size: 18px; cursor: pointer; margin-top: 10px; }
+button:hover { background-color: #0056b3; }
+.result-container { background-color: #e9ecef; padding: 15px; border-radius: 8px; border: 1px solid #ddd; margin-top: 20px; }
+.board-item { border-bottom: 1px solid #ddd; padding: 10px 0; white-space: pre-line; }
+.vitalsRow { border: 1px dashed #ccc; padding: 5px; margin-bottom: 10px; border-radius: 5px; background-color: #fff; }
+.coordinate-box { border: 1px solid #ccc; padding: 10px; margin-top: 10px; background-color: #f0f0f0; border-radius: 5px; }
+#map { height: 300px; width: 100%; margin-top: 10px; }
+.GPS-link { border: 1px solid #ddd; border-radius: 5px; padding: 10px; margin: 10px 0; text-align: center; background-color: #f4f4f4; }
+a { text-decoration: none; color: #7289DA; font-weight: bold; }
 </style>
 </head>
+
 <body>
+<div class="container">
+<h1>📌 특수산악구조대 환자평가</h1>
 
-<h1 class="text-2xl font-bold mb-4">🚑 PARAMEDIC 응급환자 평가도구</h1>
+<!-- 공지사항 -->
+<div class="section">
+    <h2>알림</h2>
+    <div class="result">
+        <div class="footer">
+            <p>© 2024 Paramedic Web Applications. EMT Ver. 0.9.28. Korea National Park Service Paramedic Lab.</p>
+        </div>
+        <h4>응급환자의 신속한 평가와 기록 및 구조대의 현장 대응력 향상을 위하여 본 페이지를 만들었습니다.</h4>
+    </div>
+</div>
 
+<!-- ================== 응급환자 평가도구 ================== -->
 <form id="recordForm">
-  <!-- 환자 정보 -->
-  <div class="section">
-    <h2 class="text-xl font-semibold mb-2">환자 정보</h2>
-    <label>이름: <input type="text" name="환자이름" required class="rounded-lg"></label><br>
-    <label>생년월일: <input type="date" name="생년월일" required class="rounded-lg"></label>
-  </div>
+<div class="section">
+    <h2>상황 정보</h2>
+    <label>시간: <input type="datetime-local" name="발생시간" required class="rounded-lg"></label>
+    <label>장소: <input type="text" name="장소" placeholder="예: OO동 123-45" required class="rounded-lg"></label>
+    <label>증상: <input type="text" name="주증상" placeholder="예: 호흡곤란, 가슴 통증" required class="rounded-lg"></label>
+</div>
 
-  <!-- 활력징후 -->
-  <div class="section">
-    <h2 class="text-xl font-semibold mb-2">활력징후 (여러 회 측정 가능)</h2>
+<div class="section">
+    <h2>환자 정보</h2>
+    <label>이름: <input type="text" name="환자이름" required class="rounded-lg"></label>
+    <label>나이: <input type="date" name="생년월일" required class="rounded-lg"></label>
+</div>
+
+<div class="section">
+    <h2>Glasgow Coma Scale (GCS)</h2>
+    <label>눈 반응 (E)
+        <select id="eye">
+            <option value="4">자발적으로 열림</option>
+            <option value="3">소리 자극에 열림</option>
+            <option value="2">통증 자극에 열림</option>
+            <option value="1">전혀 열림 안함</option>
+        </select>
+    </label>
+    <label>언어 반응 (V)
+        <select id="verbal">
+            <option value="5">정확한 대답</option>
+            <option value="4">혼잡한 대답</option>
+            <option value="3">혼미한 대답</option>
+            <option value="2">모호한 대답</option>
+            <option value="1">응답 없음</option>
+        </select>
+    </label>
+    <label>운동 반응 (M)
+        <select id="motor">
+            <option value="6">명령 수행</option>
+            <option value="5">통증 자극에 국소화</option>
+            <option value="4">통증 자극에 굴곡</option>
+            <option value="3">통증 자극에 구부리기</option>
+            <option value="2">경련</option>
+            <option value="1">운동 없음</option>
+        </select>
+    </label>
+    <div id="gcsResultContainer" style="margin-top:10px; display:none;">
+        <strong>GCS 결과:</strong> <span id="gcsResult"></span>
+    </div>
+</div>
+
+<div class="section">
+    <h2>활력징후 (여러 회 측정 가능)</h2>
     <div id="vitalSignsContainer"></div>
     <button type="button" onclick="addVitalSigns()" class="bg-green-600 text-white px-3 py-1 rounded">+ 활력징후 추가</button>
-  </div>
+</div>
 
-  <!-- GCS -->
-  <div class="section">
-    <h2 class="text-xl font-semibold">Glasgow Coma Scale (GCS)</h2>
-    <label>눈 반응 (E)</label>
-    <select id="eye">
-      <option value="4">자발적으로 열림</option>
-      <option value="3">소리 자극에 열림</option>
-      <option value="2">통증 자극에 열림</option>
-      <option value="1">전혀 열림 안함</option>
-    </select>
-    <label>언어 반응 (V)</label>
-    <select id="verbal">
-      <option value="5">정확한 대답</option>
-      <option value="4">혼잡한 대답</option>
-      <option value="3">혼미한 대답</option>
-      <option value="2">모호한 대답</option>
-      <option value="1">응답 없음</option>
-    </select>
-    <label>운동 반응 (M)</label>
-    <select id="motor">
-      <option value="6">명령 수행</option>
-      <option value="5">통증 자극에 국소화</option>
-      <option value="4">통증 자극에 굴곡</option>
-      <option value="3">통증 자극에 구부리기</option>
-      <option value="2">경련</option>
-      <option value="1">운동 없음</option>
-    </select>
-    <div id="gcsResultContainer" style="margin-top:10px; display:none;">
-      <strong>GCS 결과:</strong> <span id="gcsResult"></span>
-    </div>
-  </div>
-
-  <!-- 응급처치 -->
-  <div class="section">
-    <h2 class="text-xl font-semibold mb-2">응급처치</h2>
+<div class="section">
+    <h2>응급처치</h2>
     <textarea name="응급처치" rows="4" placeholder="실시한 응급처치 기록" class="w-full rounded-lg"></textarea>
-  </div>
+</div>
 
-  <!-- 상황 정보 -->
-  <div class="section">
-    <h2 class="text-xl font-semibold mb-2">상황 정보</h2>
-    <label>발생 시간: <input type="datetime-local" name="발생시간" required class="rounded-lg"></label><br>
-    <label>장소: <input type="text" name="장소" placeholder="예: OO동 123-45" required class="rounded-lg"></label><br>
-    <label>주 증상: <input type="text" name="주증상" placeholder="예: 호흡곤란, 가슴 통증" required class="rounded-lg"></label>
-  </div>
-
-  <!-- 기록자 -->
-  <div class="section">
-    <h2 class="text-xl font-semibold">기록자</h2>
+<div class="section">
+    <h2>기록자</h2>
     <input type="text" name="기록자" placeholder="응급구조사 성명" required class="rounded-lg">
-  </div>
+</div>
 
-  <button type="submit" class="w-full bg-blue-600 text-white py-3 px-4 rounded-lg">기록 저장하기</button>
-  <button type="button" onclick="shareReport()" class="w-full bg-purple-500 text-white py-3 px-4 rounded-lg mt-2">공유</button>
-  <div id="resultMessage" class="mt-4 text-center"></div>
+<button type="submit" class="w-full bg-blue-600 text-white py-3 px-4 rounded-lg">기록 저장하기</button>
+<button type="button" onclick="shareReport()" class="w-full bg-purple-500 text-white py-3 px-4 rounded-lg mt-2">공유</button>
+<div id="resultMessage" class="mt-4 text-center"></div>
 </form>
 
 <div class="section">
-  <h2 class="text-xl font-semibold">저장된 기록</h2>
-  <div id="savedData" class="board"></div>
+    <h2>작성기록</h2>
+    <div id="savedData" class="board"></div>
 </div>
 
-<div class="discord-link">
-  <p>Ver.0.9.26. E-mail: paramedic@knps.or.kr</p>
-  <a href="https://discord.gg/ryaMRTAhwP" target="_blank">문의: 🐸 국립공원 응급처치 연구회</a>
+<!-- ================== GPS 좌표 ================== -->
+<div class="section">
+    <h2>GPS 좌표</h2>
+    <button id="getLocation" class="bg-green-600 text-white px-3 py-1 rounded">🌐 내 위치 확인</button>
+    <button id="shareLocation" class="bg-blue-500 text-white px-3 py-1 rounded">📲 위치 공유</button>
+
+    <div class="coordinate-box" id="locationDisplay">위도: , 경도: </div>
+    <div class="coordinate-box" id="dmsCoordinates">도분초: </div>
+    <div id="map"></div>
+</div>
+
+<div class="GPS-link">
+    <a href="https://www.whereurl.com/" target="_blank">조난자 위치공유 whereUrl</a>
+</div>
+<div class="GPS-link">
+    <a href="https://discord.gg/ryaMRTAhwP" target="_blank">문의: 🐸 국립공원 안전사고 연구회</a>
 </div>
 
 <script>
-// 활력징후 추가
-function addVitalSigns() {
-  const container = document.getElementById("vitalSignsContainer");
-  const index = container.children.length + 1;
-  const div = document.createElement("div");
-  div.className = "vitalsRow";
-  div.innerHTML = `
-    <strong>${index}회차 측정</strong><br>
-    혈압: <input type="text" name="혈압[]" placeholder="120/80"><br>
-    맥박: <input type="number" name="맥박[]" placeholder="회/분"><br>
-    호흡수: <input type="number" name="호흡수[]" placeholder="회/분"><br>
-    체온: <input type="number" step="0.1" name="체온[]" placeholder="℃"><br>
-    SpO₂: <input type="number" name="산소포화도[]" placeholder="%"><br>
-  `;
-  container.appendChild(div);
-}
-addVitalSigns();
+document.addEventListener("DOMContentLoaded", function(){
 
-// GCS 계산
-function calculateGCS() {
-  const eye = parseInt(document.getElementById("eye").value);
-  const verbal = parseInt(document.getElementById("verbal").value);
-  const motor = parseInt(document.getElementById("motor").value);
-  const total = eye + verbal + motor;
-  let state = '';
-  if(total === 15) state='정상';
-  else if(total >=13) state='졸림';
-  else if(total >=9) state='혼미';
-  else if(total >=4) state='반혼수';
-  else state='혼수';
-  document.getElementById("gcsResult").innerText = `${total}점 (${state})`;
-  document.getElementById("gcsResultContainer").style.display="block";
-}
-["eye","verbal","motor"].forEach(id=>document.getElementById(id).addEventListener("change",calculateGCS));
-calculateGCS();
-
-// 폼 제출 (Google Sheets 연동 제거)
-document.getElementById("recordForm").addEventListener("submit", function(e){
-  e.preventDefault();
-  const form = document.getElementById("recordForm");
-  const formData = new FormData(form);
-  const data = {};
-  for(const [key,value] of formData.entries()){
-    if(key.endsWith("[]")){
-      const baseKey = key.replace("[]","");
-      if(!data[baseKey]) data[baseKey]=[];
-      data[baseKey].push(value);
-    } else {
-      data[key] = value;
+    /* ====== 활력징후 추가 ====== */
+    function addVitalSigns() {
+        const container = document.getElementById("vitalSignsContainer");
+        const index = container.children.length + 1;
+        const div = document.createElement("div");
+        div.className = "vitalsRow";
+        div.innerHTML = `
+            <strong>${index}회차 측정</strong><br>
+            혈압: <input type="text" name="혈압[]" placeholder="120/80"><br>
+            맥박: <input type="number" name="맥박[]" placeholder="회/분"><br>
+            호흡수: <input type="number" name="호흡수[]" placeholder="회/분"><br>
+            체온: <input type="number" step="0.1" name="체온[]" placeholder="℃"><br>
+            SpO₂: <input type="number" name="산소포화도[]" placeholder="%"><br>
+        `;
+        container.appendChild(div);
     }
-  }
-  data["GCS"] = document.getElementById("gcsResult").innerText;
+    addVitalSigns();
 
-  // TXT 다운로드
-  let content = "";
-  for(const key in data){
-    if(Array.isArray(data[key])) content+=`${key}: ${data[key].join(", ")}\n`;
-    else content+=`${key}: ${data[key]}\n`;
-  }
-  const today = new Date().toISOString().slice(0,10);
-  const blob = new Blob([content],{type:"text/plain"});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href=url;
-  a.download=`환자평가_${today}.txt`;
-  a.click();
-  URL.revokeObjectURL(url);
+    /* ====== GCS 계산 ====== */
+    function calculateGCS() {
+        const eye = parseInt(document.getElementById("eye").value);
+        const verbal = parseInt(document.getElementById("verbal").value);
+        const motor = parseInt(document.getElementById("motor").value);
+        const total = eye + verbal + motor;
+        let state = '';
+        if(total === 15) state='정상';
+        else if(total >=13) state='졸림';
+        else if(total >=9) state='혼미';
+        else if(total >=4) state='반혼수';
+        else state='혼수';
+        document.getElementById("gcsResult").innerText = `${total}점 (${state})`;
+        document.getElementById("gcsResultContainer").style.display="block";
+    }
+    ["eye","verbal","motor"].forEach(id=>document.getElementById(id).addEventListener("change",calculateGCS));
+    calculateGCS();
 
-  document.getElementById("savedData").innerHTML = `<div class="board-item">${content}</div>`;
-  document.getElementById("resultMessage").innerText = "기록 저장 완료 ✅";
+    /* ====== 기록 저장 ====== */
+    document.getElementById("recordForm").addEventListener("submit", function(e){
+        e.preventDefault();
+        const form = document.getElementById("recordForm");
+        const formData = new FormData(form);
+        const data = {};
+        for(const [key,value] of formData.entries()){
+            if(key.endsWith("[]")){
+                const baseKey = key.replace("[]","");
+                if(!data[baseKey]) data[baseKey]=[];
+                data[baseKey].push(value);
+            } else { data[key] = value; }
+        }
+        data["GCS"] = document.getElementById("gcsResult").innerText;
+
+        let content = "";
+        for(const key in data){
+            if(Array.isArray(data[key])) content+=`${key}: ${data[key].join(", ")}\n`;
+            else content+=`${key}: ${data[key]}\n`;
+        }
+        const today = new Date().toISOString().slice(0,10);
+        const blob = new Blob([content],{type:"text/plain"});
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href=url;
+        a.download=`환자평가_${today}.txt`;
+        a.click();
+        URL.revokeObjectURL(url);
+
+        document.getElementById("savedData").innerHTML = `<div class="board-item">${content}</div>`;
+        document.getElementById("resultMessage").innerText = "기록 저장 완료 ✅";
+    });
+
+    /* ====== 공유 ====== */
+    window.shareReport = function(){
+        const form = document.getElementById("recordForm");
+        const formData = new FormData(form);
+        let text = "";
+        formData.forEach((value,key)=>{ text+=`${key}: ${value}\n`; });
+        text += "GCS: "+document.getElementById("gcsResult").innerText;
+        if(navigator.share){
+            navigator.share({title:"환자 평가 기록", text});
+        } else alert("이 브라우저는 공유 기능을 지원하지 않습니다.");
+    }
+
+    /* ====== GPS 좌표 ====== */
+    let map, marker, currentLat, currentLng;
+    function initMap(lat, lng) {
+        map = new kakao.maps.Map(document.getElementById('map'), {
+            center: new kakao.maps.LatLng(lat, lng),
+            level: 3
+        });
+        marker = new kakao.maps.Marker({
+            position: new kakao.maps.LatLng(lat, lng),
+            map: map
+        });
+    }
+
+    document.getElementById('getLocation').addEventListener('click', function() {
+        if (navigator.geolocation) navigator.geolocation.getCurrentPosition(showPosition, showError);
+        else alert("이 브라우저는 위치 정보를 지원하지 않습니다.");
+    });
+
+    function showPosition(position) {
+        currentLat = position.coords.latitude;
+        currentLng = position.coords.longitude;
+        document.getElementById('locationDisplay').textContent = `위도: ${currentLat}, 경도: ${currentLng}`;
+        document.getElementById('dmsCoordinates').textContent = `도분초: ${convertToDMS(currentLat,'lat')}, ${convertToDMS(currentLng,'lng')}`;
+        initMap(currentLat, currentLng);
+    }
+
+    function showError(error) {
+        switch(error.code){
+            case error.PERMISSION_DENIED: alert("사용자가 위치 정보를 요청하지 않았습니다."); break;
+            case error.POSITION_UNAVAILABLE: alert("위치 정보를 사용할 수 없습니다."); break;
+            case error.TIMEOUT: alert("위치 정보 요청이 시간초과되었습니다."); break;
+            default: alert("알 수 없는 오류가 발생했습니다."); break;
+        }
+    }
+
+    function convertToDMS(degree, type){
+        let d = Math.floor(degree);
+        let m = Math.floor((degree - d) * 60);
+        let s = ((degree - d - m/60) * 3600).toFixed(2);
+        return `${d}° ${m}' ${s}" ${type==='lat'? (degree>0?'N':'S'):(degree>0?'E':'W')}`;
+    }
+
+    document.getElementById("shareLocation").addEventListener("click", function(){
+        if(currentLat && currentLng){
+            const googleMapLink = `https://www.google.com/maps?q=${currentLat},${currentLng}`;
+            const kakaoMapLink = `https://map.kakao.com/link/map/Location,${currentLat},${currentLng}`;
+            const shareMessage = `🚨 요구조자 현위치 좌표:\n위도: ${currentLat}\n경도: ${currentLng}\nGoogle Map: ${googleMapLink}\nKakao Map: ${kakaoMapLink}`;
+            if(navigator.share) navigator.share({title:"[구조요청] GPS좌표 공유", text: shareMessage, url:kakaoMapLink});
+            else alert('이 브라우저는 위치 공유를 지원하지 않습니다.\n' + shareMessage);
+        } else alert('위치를 먼저 확인한 후 공유하세요.');
+    });
+
 });
-
-// 공유 기능
-function shareReport(){
-  const form = document.getElementById("recordForm");
-  const formData = new FormData(form);
-  let text = "";
-  formData.forEach((value,key)=>{ text+=`${key}: ${value}\n`; });
-  text += "GCS: "+document.getElementById("gcsResult").innerText;
-  if(navigator.share){
-    navigator.share({title:"환자 평가 기록", text});
-  } else alert("이 브라우저는 공유 기능을 지원하지 않습니다.");
-}
 </script>
 
+</div>
 </body>
 </html>
-
