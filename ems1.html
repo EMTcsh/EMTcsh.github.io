@@ -1,142 +1,212 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>응급구조사 구급활동일지</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <style>
-    @media print {
-      .no-print { display: none !important; }
-      body { background: white; }
-    }
-    .field-label { min-width: 5rem; font-weight: bold; }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PARAMEDIC 응급환자 평가도구</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  body { font-family: Arial, sans-serif; padding: 10px; }
+  .section { margin-bottom: 20px; padding: 15px; border: 1px solid #ddd; border-radius: 8px; background: #f9f9f9; }
+  .board-item { border-bottom: 1px solid #ddd; padding: 10px 0; white-space: pre-line; }
+  .discord-link { border: 1px solid #ddd; border-radius: 5px; padding: 10px; margin: 10px 0; text-align: center; background-color: #f4f4f4; }
+  a { text-decoration: none; color: #7289DA; font-weight: bold; }
+  .vitalsRow { border: 1px dashed #ccc; padding: 5px; margin-bottom: 10px; border-radius: 5px; background-color: #fff; }
+</style>
 </head>
-<body class="bg-gray-100 p-4">
-  <div class="max-w-4xl mx-auto bg-white shadow-lg rounded-xl p-6 space-y-6">
+<body>
 
-    <h1 class="text-2xl font-bold text-center mb-4">🚑 구급활동일지</h1>
+<h1 class="text-2xl font-bold mb-4">🚑 PARAMEDIC 응급환자 평가도구</h1>
 
-    <!-- 환자정보 -->
-    <section>
-      <h2 class="text-xl font-semibold mb-2">환자 정보</h2>
-      <div class="grid grid-cols-2 gap-4">
-        <input type="text" placeholder="성명" class="border p-2 rounded w-full" id="p_name">
-        <input type="text" placeholder="성별" class="border p-2 rounded w-full" id="p_gender">
-        <input type="text" placeholder="연령" class="border p-2 rounded w-full" id="p_age">
-        <input type="text" placeholder="연락처" class="border p-2 rounded w-full" id="p_phone">
-      </div>
-    </section>
+<form id="recordForm">
+  <!-- 환자 정보 -->
+  <div class="section">
+    <h2 class="text-xl font-semibold mb-2">환자 정보</h2>
+    <label>이름: <input type="text" name="환자이름" required class="rounded-lg"></label><br>
+    <label>생년월일: <input type="date" name="생년월일" required class="rounded-lg"></label>
+  </div>
 
-    <!-- 활력징후 -->
-    <section>
-      <h2 class="text-xl font-semibold mb-2">활력징후</h2>
-      <div id="vitalContainer" class="space-y-2">
-        <div class="grid grid-cols-6 gap-2">
-          <input type="text" placeholder="혈압" class="border p-2 rounded v_bp">
-          <input type="text" placeholder="맥박" class="border p-2 rounded v_hr">
-          <input type="text" placeholder="호흡수" class="border p-2 rounded v_rr">
-          <input type="text" placeholder="SpO₂" class="border p-2 rounded v_spO2">
-          <input type="text" placeholder="GCS" class="border p-2 rounded v_gcs">
-          <input type="text" placeholder="혈당" class="border p-2 rounded v_bloodSugar">
-        </div>
-      </div>
-     
-    </section>
+  <!-- 활력징후 -->
+  <div class="section">
+    <h2 class="text-xl font-semibold mb-2">활력징후 (여러 회 측정 가능)</h2>
+    <div id="vitalSignsContainer"></div>
+    <button type="button" onclick="addVitalSigns()" class="bg-green-600 text-white px-3 py-1 rounded">+ 활력징후 추가</button>
+  </div>
 
-    <!-- 처치·장비 -->
-    <section>
-      <h2 class="text-xl font-semibold mb-2">처치·장비</h2>
-      <div id="treatmentContainer" class="space-y-2">
-        <div class="grid grid-cols-3 gap-2">
-          <input type="text" placeholder="처치내용" class="border p-2 rounded treatment">
-          <input type="text" placeholder="사용장비" class="border p-2 rounded equipment">
-          <input type="text" placeholder="비고" class="border p-2 rounded note">
-        </div>
-      </div>
-      <button onclick="addTreatment()" class="mt-2 bg-green-500 text-white px-3 py-1 rounded">+ 추가</button>
-    </section>
-
-    <!-- 버튼 -->
-    <div class="flex justify-center space-x-4 no-print">
-      <button onclick="saveData()" class="bg-indigo-600 text-white px-4 py-2 rounded-lg shadow">저장/전송</button>
-      <button onclick="window.print()" class="bg-gray-500 text-white px-4 py-2 rounded-lg shadow">출력</button>
+  <!-- GCS -->
+  <div class="section">
+    <h2 class="text-xl font-semibold">Glasgow Coma Scale (GCS)</h2>
+    <label>눈 반응 (E)</label>
+    <select id="eye">
+      <option value="4">자발적으로 열림</option>
+      <option value="3">소리 자극에 열림</option>
+      <option value="2">통증 자극에 열림</option>
+      <option value="1">전혀 열림 안함</option>
+    </select>
+    <label>언어 반응 (V)</label>
+    <select id="verbal">
+      <option value="5">정확한 대답</option>
+      <option value="4">혼잡한 대답</option>
+      <option value="3">혼미한 대답</option>
+      <option value="2">모호한 대답</option>
+      <option value="1">응답 없음</option>
+    </select>
+    <label>운동 반응 (M)</label>
+    <select id="motor">
+      <option value="6">명령 수행</option>
+      <option value="5">통증 자극에 국소화</option>
+      <option value="4">통증 자극에 굴곡</option>
+      <option value="3">통증 자극에 구부리기</option>
+      <option value="2">경련</option>
+      <option value="1">운동 없음</option>
+    </select>
+    <div id="gcsResultContainer" style="margin-top:10px; display:none;">
+      <strong>GCS 결과:</strong> <span id="gcsResult"></span>
     </div>
   </div>
 
-  <script>
-    // 활력징후 추가
-    function addVital() {
-      const div = document.createElement("div");
-      div.className = "grid grid-cols-6 gap-2";
-      div.innerHTML = `
-        <input type="text" placeholder="혈압" class="border p-2 rounded v_bp">
-        <input type="text" placeholder="맥박" class="border p-2 rounded v_hr">
-        <input type="text" placeholder="호흡수" class="border p-2 rounded v_rr">
-        <input type="text" placeholder="SpO₂" class="border p-2 rounded v_spO2">
-        <input type="text" placeholder="GCS" class="border p-2 rounded v_gcs">
-        <input type="text" placeholder="혈당" class="border p-2 rounded v_bloodSugar">
-      `;
-      document.getElementById("vitalContainer").appendChild(div);
+  <!-- 응급처치 -->
+  <div class="section">
+    <h2 class="text-xl font-semibold mb-2">응급처치</h2>
+    <textarea name="응급처치" rows="4" placeholder="실시한 응급처치 기록" class="w-full rounded-lg"></textarea>
+  </div>
+
+  <!-- 상황 정보 -->
+  <div class="section">
+    <h2 class="text-xl font-semibold mb-2">상황 정보</h2>
+    <label>발생 시간: <input type="datetime-local" name="발생시간" required class="rounded-lg"></label><br>
+    <label>장소: <input type="text" name="장소" placeholder="예: OO동 123-45" required class="rounded-lg"></label><br>
+    <label>주 증상: <input type="text" name="주증상" placeholder="예: 호흡곤란, 가슴 통증" required class="rounded-lg"></label>
+  </div>
+
+  <!-- 기록자 -->
+  <div class="section">
+    <h2 class="text-xl font-semibold">기록자</h2>
+    <input type="text" name="기록자" placeholder="응급구조사 성명" required class="rounded-lg">
+  </div>
+
+  <button type="submit" class="w-full bg-blue-600 text-white py-3 px-4 rounded-lg">기록 저장하기</button>
+  <button type="button" onclick="shareReport()" class="w-full bg-purple-500 text-white py-3 px-4 rounded-lg mt-2">공유</button>
+  <div id="resultMessage" class="mt-4 text-center"></div>
+</form>
+
+<!-- 저장된 데이터 -->
+<div class="section">
+  <h2 class="text-xl font-semibold">저장된 기록</h2>
+  <div id="savedData" class="board"></div>
+</div>
+
+<!-- 공지 -->
+<div class="discord-link">
+  <p>Ver.0.9.26. E-mail: paramedic@knps.or.kr</p>
+  <a href="https://discord.gg/ryaMRTAhwP" target="_blank">문의: 🐸 국립공원 응급처치 연구회</a>
+</div>
+
+<script>
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwoukv-YGDe0zapkyipf9oSObecU8bJr4JAyHregzOyWb-mp9rQTioTbtCpTmY4MhyYZQ/exec";
+
+// 초기 활력징후 추가
+function addVitalSigns() {
+  const container = document.getElementById("vitalSignsContainer");
+  const index = container.children.length + 1;
+  const div = document.createElement("div");
+  div.className = "vitalsRow";
+  div.innerHTML = `
+    <strong>${index}회차 측정</strong><br>
+    혈압: <input type="text" name="혈압[]" placeholder="120/80"><br>
+    맥박: <input type="number" name="맥박[]" placeholder="회/분"><br>
+    호흡수: <input type="number" name="호흡수[]" placeholder="회/분"><br>
+    체온: <input type="number" step="0.1" name="체온[]" placeholder="℃"><br>
+    SpO₂: <input type="number" name="산소포화도[]" placeholder="%"><br>
+  `;
+  container.appendChild(div);
+}
+addVitalSigns(); // 첫 번째 자동 생성
+
+// GCS 계산
+function calculateGCS() {
+  const eye = parseInt(document.getElementById("eye").value);
+  const verbal = parseInt(document.getElementById("verbal").value);
+  const motor = parseInt(document.getElementById("motor").value);
+  const total = eye + verbal + motor;
+  let state = '';
+  if(total === 15) state='정상';
+  else if(total >=13) state='졸림';
+  else if(total >=9) state='혼미';
+  else if(total >=4) state='반혼수';
+  else state='혼수';
+  document.getElementById("gcsResult").innerText = `${total}점 (${state})`;
+  document.getElementById("gcsResultContainer").style.display="block";
+}
+["eye","verbal","motor"].forEach(id=>document.getElementById(id).addEventListener("change",calculateGCS));
+calculateGCS();
+
+// 폼 제출
+document.getElementById("recordForm").addEventListener("submit", function(e){
+  e.preventDefault();
+  saveReport();
+});
+
+function saveReport(){
+  const form = document.getElementById("recordForm");
+  const formData = new FormData(form);
+  const data = {};
+  for(const [key,value] of formData.entries()){
+    if(key.endsWith("[]")){
+      const baseKey = key.replace("[]","");
+      if(!data[baseKey]) data[baseKey]=[];
+      data[baseKey].push(value);
+    } else {
+      data[key] = value;
     }
+  }
+  data["GCS"] = document.getElementById("gcsResult").innerText;
 
-    // 처치/장비 추가
-    function addTreatment() {
-      const div = document.createElement("div");
-      div.className = "grid grid-cols-3 gap-2";
-      div.innerHTML = `
-        <input type="text" placeholder="처치내용" class="border p-2 rounded treatment">
-        <input type="text" placeholder="사용장비" class="border p-2 rounded equipment">
-        <input type="text" placeholder="비고" class="border p-2 rounded note">
-      `;
-      document.getElementById("treatmentContainer").appendChild(div);
+  // Google Sheets 전송
+  fetch(SCRIPT_URL,{
+    method:"POST",
+    body: JSON.stringify(data),
+    headers: {"Content-Type":"application/json"}
+  }).then(res=>res.text())
+    .then(res=> document.getElementById("resultMessage").innerText="시트 저장 완료 ✅");
+
+  // TXT 다운로드
+  let content = "";
+  for(const key in data){
+    if(Array.isArray(data[key])){
+      content+=`${key}: ${data[key].join(", ")}\n`;
+    } else {
+      content+=`${key}: ${data[key]}\n`;
     }
+  }
+  const today = new Date().toISOString().slice(0,10);
+  const blob = new Blob([content],{type:"text/plain"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href=url;
+  a.download=`환자평가_${today}.txt`;
+  a.click();
+  URL.revokeObjectURL(url);
 
-    // 데이터 저장 (Google Sheets로 전송)
-    function saveData() {
-      const data = {
-        patient: {
-          name: document.getElementById("p_name").value,
-          gender: document.getElementById("p_gender").value,
-          age: document.getElementById("p_age").value,
-          phone: document.getElementById("p_phone").value,
-        },
-        vitals: [],
-        treatments: []
-      };
+  document.getElementById("savedData").innerHTML = `<div class="board-item">${content}</div>`;
+}
 
-      document.querySelectorAll("#vitalContainer > div").forEach(row => {
-        data.vitals.push({
-          bp: row.querySelector(".v_bp").value,
-          hr: row.querySelector(".v_hr").value,
-          rr: row.querySelector(".v_rr").value,
-          spO2: row.querySelector(".v_spO2").value,
-          gcs: row.querySelector(".v_gcs").value,
-          bloodSugar: row.querySelector(".v_bloodSugar").value,
-        });
-      });
+// 공유 기능
+function shareReport(){
+  const form = document.getElementById("recordForm");
+  const formData = new FormData(form);
+  let text = "";
+  formData.forEach((value,key)=>{ text+=`${key}: ${value}\n`; });
+  text += "GCS: "+document.getElementById("gcsResult").innerText;
+  if(navigator.share){
+    navigator.share({title:"환자 평가 기록", text});
+  } else {
+    alert("이 브라우저는 공유 기능을 지원하지 않습니다.");
+  }
+}
+</script>
 
-      document.querySelectorAll("#treatmentContainer > div").forEach(row => {
-        data.treatments.push({
-          treatment: row.querySelector(".treatment").value,
-          equipment: row.querySelector(".equipment").value,
-          note: row.querySelector(".note").value,
-        });
-      });
-
-      const url = "https://script.google.com/macros/s/AKfycbwoukv-YGDe0zapkyipf9oSObecU8bJr4JAyHregzOyWb-mp9rQTioTbtCpTmY4MhyYZQ/exec"; // 🔹 Apps Script 배포 URL 넣기
-
-      fetch(url, {
-        method: "POST",
-        mode: "no-cors",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data)
-      })
-      .then(() => alert("전송 완료!"))
-      .catch(err => alert("전송 실패: " + err));
-    }
-  </script>
 </body>
 </html>
+
 
