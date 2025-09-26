@@ -133,11 +133,11 @@ function addVitalSigns() {
     div.className = "vitalsRow";
     div.innerHTML = `
         <strong>${index}회차 측정</strong><br>
-        혈압: <input type="text" name="혈압[]" placeholder="120/80"><br>
-        맥박: <input type="number" name="맥박[]" placeholder="회/분"><br>
-        호흡수: <input type="number" name="호흡수[]" placeholder="회/분"><br>
-        체온: <input type="number" step="0.1" name="체온[]" placeholder="℃"><br>
-        SpO₂: <input type="number" name="산소포화도[]" placeholder="%"><br>
+        혈압: <input type="text" name="혈압[BP]" placeholder="120/80"><br>
+        맥박: <input type="number" name="맥박[Puls]" placeholder="회/분"><br>
+        호흡수: <input type="number" name="호흡수[RR]" placeholder="회/분"><br>
+        체온: <input type="number" step="0.1" name="체온[T]" placeholder="℃"><br>
+        SpO₂: <input type="number" name="산소포화도[Spo2]" placeholder="%"><br>
     `;
     container.appendChild(div);
 }
@@ -166,8 +166,8 @@ document.getElementById("recordForm").addEventListener("submit", function(e){
     const formData = new FormData(form);
     const data = {};
     for(const [key,value] of formData.entries()){
-        if(key.endsWith("")){
-            const baseKey = key.replace("","");
+        if(key.endsWith("[]")){
+            const baseKey = key.replace("[]","");
             if(!data[baseKey]) data[baseKey]=[];
             data[baseKey].push(value);
         } else {
