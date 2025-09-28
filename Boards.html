@@ -5,9 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>🚨 비상대응 상황판</title>
 <script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
 <style>
   .table th, .table td { padding: 0.5rem; text-align: center; border: 1px solid #ddd; }
-  .table { border-collapse: collapse; width: 100%; margin-top: 1rem; }
+  .table { border-collapse: collapse; width: 100%; margin-top: 1rem; background: white; }
   .delete-btn { color: red; cursor: pointer; }
 </style>
 </head>
@@ -33,7 +34,7 @@
   <button type="submit" class="mt-4 px-4 py-2 bg-blue-600 text-white rounded">추가</button>
 </form>
 
-<table class="table bg-white shadow rounded" id="incidentTable">
+<table class="table shadow rounded" id="incidentTable">
   <thead class="bg-gray-200">
     <tr>
       <th>날짜</th>
@@ -57,6 +58,29 @@ const tableBody = document.getElementById('incidentTable').querySelector('tbody'
 // 구글 앱스스크립트 웹앱 URL
 const SHEET_URL = "https://script.google.com/macros/s/AKfycby-2144RWCM2Ss8h6Wu5R-DPjVQOglqV7Ol3gt0rtuFLMBuOqsvXI7Dc6MuHQiJkUrFpw/exec";
 
+// Excel 자동 저장 함수
+function exportToExcel() {
+  const table = document.getElementById('incidentTable');
+  const wb = XLSX.utils.book_new();
+  const ws_data = [];
+  
+  // 헤더
+  const headers = Array.from(table.querySelectorAll('thead th')).map(th => th.innerText);
+  ws_data.push(headers.slice(0, -1)); // 삭제 컬럼 제외
+
+  // 데이터
+  table.querySelectorAll('tbody tr').forEach(row => {
+    const rowData = Array.from(row.querySelectorAll('td')).slice(0, -1).map(td => td.innerText);
+    ws_data.push(rowData);
+  });
+
+  const ws = XLSX.utils.aoa_to_sheet(ws_data);
+  XLSX.utils.book_append_sheet(wb, ws, "상황판");
+
+  XLSX.writeFile(wb, "비상대응_상황판.xlsx");
+}
+
+// 추가 이벤트
 form.addEventListener('submit', async (e) => {
   e.preventDefault();
   
@@ -101,6 +125,9 @@ form.addEventListener('submit', async (e) => {
   } catch (err) {
     console.error("구글 시트 전송 실패", err);
   }
+
+  // Excel 자동 저장
+  exportToExcel();
 
   form.reset();
 });
