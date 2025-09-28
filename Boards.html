@@ -1,99 +1,109 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>공유 게시판</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-            padding: 0;
-        }
-        .container {
-            max-width: 600px;
-            margin: auto;
-        }
-        h1 {
-            text-align: center;
-        }
-        .board {
-            border-collapse: collapse;
-            width: 100%;
-            margin-bottom: 20px;
-        }
-        .board th, .board td {
-            border: 1px solid #ddd;
-            padding: 8px;
-        }
-        .board th {
-            background-color: #f2f2f2;
-            text-align: center;
-        }
-        .post-form {
-            margin-bottom: 20px;
-        }
-        .post-form input[type="text"] {
-            width: calc(100% - 110px);
-            padding: 10px;
-            margin-right: 10px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-        }
-        .post-form button {
-            padding: 10px 20px;
-            border: none;
-            background-color: #28a745;
-            color: white;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-        .post-form button:hover {
-            background-color: #218838;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🚨 비상대응 상황판</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  .table th, .table td { padding: 0.5rem; text-align: center; border: 1px solid #ddd; }
+  .table { border-collapse: collapse; width: 100%; margin-top: 1rem; }
+  .delete-btn { color: red; cursor: pointer; }
+</style>
 </head>
-<body>
-    <div class="container">
-        <h1>공유 게시판</h1>
+<body class="p-4 bg-gray-100">
+<h1 class="text-2xl font-bold mb-4">비상대응 상황판</h1>
 
-        <form class="post-form" id="postForm">
-            <input type="text" id="postContent" placeholder="게시글을 입력하세요" required>
-            <button type="submit">게시</button>
-        </form>
+<form id="incidentForm" class="bg-white p-4 rounded shadow mb-4">
+  <div class="grid grid-cols-4 gap-4">
+    <input type="date" id="date" class="border p-2 rounded" required>
+    <input type="time" id="startTime" class="border p-2 rounded" required>
+    <input type="time" id="endTime" class="border p-2 rounded" required>
+    <input type="text" id="location" placeholder="발생장소" class="border p-2 rounded" required>
+    <input type="text" id="area" placeholder="대응구역" class="border p-2 rounded">
+    <input type="text" id="personnel" placeholder="대응인력" class="border p-2 rounded">
+    <select id="alertLevel" class="border p-2 rounded">
+      <option value="1">1단계</option>
+      <option value="2">2단계</option>
+      <option value="3">3단계</option>
+      <option value="4">4단계</option>
+    </select>
+    <input type="text" id="task" placeholder="개인임무" class="border p-2 rounded">
+  </div>
+  <button type="submit" class="mt-4 px-4 py-2 bg-blue-600 text-white rounded">추가</button>
+</form>
 
-        <table class="board" id="board">
-            <thead>
-                <tr>
-                    <th>번호</th>
-                    <th>내용</th>
-                </tr>
-            </thead>
-            <tbody id="postList">
-                <!-- 게시글 리스트가 여기에 표시됩니다 -->
-            </tbody>
-        </table>
-    </div>
+<table class="table bg-white shadow rounded" id="incidentTable">
+  <thead class="bg-gray-200">
+    <tr>
+      <th>날짜</th>
+      <th>시작시간</th>
+      <th>종료시간</th>
+      <th>발생장소</th>
+      <th>대응구역</th>
+      <th>대응인력</th>
+      <th>위기경보단계</th>
+      <th>개인임무</th>
+      <th>삭제</th>
+    </tr>
+  </thead>
+  <tbody></tbody>
+</table>
 
-    <script>
-        const postForm = document.getElementById('postForm');
-        const postList = document.getElementById('postList');
-        let postCount = 0;
+<script>
+const form = document.getElementById('incidentForm');
+const tableBody = document.getElementById('incidentTable').querySelector('tbody');
 
-        postForm.addEventListener('submit', function(event) {
-            event.preventDefault();
-            const postContent = document.getElementById('postContent').value;
-            if (postContent.trim() === '') return;
+// 구글 앱스스크립트 웹앱 URL
+const SHEET_URL = "https://script.google.com/macros/s/AKfycbzfrGRfZi6z3a3auwT9hw64Umaiuj7lhnblj1V5gWfyoexez_Dc4Am7fPeN-5ArBxhKlA/exec";
 
-            postCount++;
-            const newRow = document.createElement('tr');
-            newRow.innerHTML = `
-                <td>${postCount}</td>
-                <td>${postContent}</td>
-            `;
-            postList.appendChild(newRow);
-            document.getElementById('postContent').value = '';
-        });
-    </script>
+form.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  
+  const rowData = {
+    date: document.getElementById('date').value,
+    startTime: document.getElementById('startTime').value,
+    endTime: document.getElementById('endTime').value,
+    location: document.getElementById('location').value,
+    area: document.getElementById('area').value,
+    personnel: document.getElementById('personnel').value,
+    alertLevel: document.getElementById('alertLevel').value,
+    task: document.getElementById('task').value
+  };
+
+  // 테이블에 추가
+  const row = document.createElement('tr');
+  row.innerHTML = `
+    <td>${rowData.date}</td>
+    <td>${rowData.startTime}</td>
+    <td>${rowData.endTime}</td>
+    <td>${rowData.location}</td>
+    <td>${rowData.area}</td>
+    <td>${rowData.personnel}</td>
+    <td>${rowData.alertLevel}</td>
+    <td>${rowData.task}</td>
+    <td class="delete-btn">❌</td>
+  `;
+  tableBody.appendChild(row);
+
+  // 삭제 기능
+  row.querySelector('.delete-btn').addEventListener('click', () => {
+    tableBody.removeChild(row);
+  });
+
+  // 구글 시트 전송
+  try {
+    await fetch(SHEET_URL, {
+      method: 'POST',
+      body: JSON.stringify(rowData),
+      headers: { 'Content-Type': 'application/json' }
+    });
+  } catch (err) {
+    console.error("구글 시트 전송 실패", err);
+  }
+
+  form.reset();
+});
+</script>
 </body>
 </html>
