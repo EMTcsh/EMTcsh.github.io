@@ -18,18 +18,18 @@
 <form id="incidentForm" class="bg-white p-4 rounded shadow mb-4">
   <div class="grid grid-cols-4 gap-4">
     <input type="date" id="date" class="border p-2 rounded" required>
-    <input type="time" id="startTime" class="border p-2 rounded" required>
-    <input type="time" id="endTime" class="border p-2 rounded" required>
+    <input type="time" id="startTime" class="border p-2 rounded">    
     <input type="text" id="location" placeholder="발생장소" class="border p-2 rounded" required>
+    <select id="alertLevel" class="border p-2 rounded">
+      <option value="1">구조</option>
+      <option value="2">조난</option>
+      <option value="3">산불</option>
+      <option value="4">대응</option>
+    </select>
     <input type="text" id="area" placeholder="대응구역" class="border p-2 rounded">
     <input type="text" id="personnel" placeholder="대응인력" class="border p-2 rounded">
-    <select id="alertLevel" class="border p-2 rounded">
-      <option value="1">1단계</option>
-      <option value="2">2단계</option>
-      <option value="3">3단계</option>
-      <option value="4">4단계</option>
-    </select>
-    <input type="text" id="task" placeholder="개인임무" class="border p-2 rounded">
+    <input type="text" id="task" placeholder="대응임무" class="border p-2 rounded">
+    <input type="time" id="endTime" class="border p-2 rounded">
   </div>
   <button type="submit" class="mt-4 px-4 py-2 bg-blue-600 text-white rounded">추가</button>
 </form>
@@ -38,13 +38,14 @@
   <thead class="bg-gray-200">
     <tr>
       <th>날짜</th>
-      <th>시작시간</th>
-      <th>종료시간</th>
-      <th>발생장소</th>
+      <th>발생시간</th>
+      <th>발생장소</th>            
+      <th>대응종류</th>
       <th>대응구역</th>
-      <th>대응인력</th>
-      <th>위기경보단계</th>
-      <th>개인임무</th>
+      <th>대응인력</th>      
+      <th>대응임무</th>
+      <th>종료시간</th>
+      <th>기록시간</th>
       <th>삭제</th>
     </tr>
   </thead>
@@ -54,16 +55,28 @@
 <script>
 const form = document.getElementById('incidentForm');
 const tableBody = document.getElementById('incidentTable').querySelector('tbody');
-
-// 구글 앱스스크립트 웹앱 URL
 const SHEET_URL = "https://script.google.com/macros/s/AKfycby-2144RWCM2Ss8h6Wu5R-DPjVQOglqV7Ol3gt0rtuFLMBuOqsvXI7Dc6MuHQiJkUrFpw/exec";
+
+// 현재 날짜시간 포맷 함수
+function getDateTimeString() {
+  const now = new Date();
+  const pad = (n) => String(n).padStart(2, '0');
+  return (
+    now.getFullYear() + "-" +
+    pad(now.getMonth() + 1) + "-" +
+    pad(now.getDate()) + " " +
+    pad(now.getHours()) + ":" +
+    pad(now.getMinutes()) + ":" +
+    pad(now.getSeconds())
+  );
+}
 
 // Excel 자동 저장 함수
 function exportToExcel() {
   const table = document.getElementById('incidentTable');
   const wb = XLSX.utils.book_new();
   const ws_data = [];
-  
+
   // 헤더
   const headers = Array.from(table.querySelectorAll('thead th')).map(th => th.innerText);
   ws_data.push(headers.slice(0, -1)); // 삭제 컬럼 제외
@@ -77,35 +90,42 @@ function exportToExcel() {
   const ws = XLSX.utils.aoa_to_sheet(ws_data);
   XLSX.utils.book_append_sheet(wb, ws, "상황판");
 
-  XLSX.writeFile(wb, "비상대응_상황판.xlsx");
+  const filename = "비상대응_상황판_" + getDateTimeString().replace(/[: ]/g,"_") + ".xlsx";
+  XLSX.writeFile(wb, filename);
 }
 
 // 추가 이벤트
 form.addEventListener('submit', async (e) => {
   e.preventDefault();
-  
+
+  const nowStr = getDateTimeString();
+
+  const alertLevelSelect = document.getElementById('alertLevel');
+
   const rowData = {
     date: document.getElementById('date').value,
-    startTime: document.getElementById('startTime').value,
-    endTime: document.getElementById('endTime').value,
+    startTime: document.getElementById('startTime').value || "",
     location: document.getElementById('location').value,
+    alertLevel: alertLevelSelect.options[alertLevelSelect.selectedIndex].text, // ✅ 텍스트 저장
     area: document.getElementById('area').value,
     personnel: document.getElementById('personnel').value,
-    alertLevel: document.getElementById('alertLevel').value,
-    task: document.getElementById('task').value
+    task: document.getElementById('task').value,
+    endTime: document.getElementById('endTime').value || "",
+    recordTime: nowStr
   };
 
-  // 테이블에 추가
+  // 테이블에 추가 (thead 순서와 동일하게)
   const row = document.createElement('tr');
   row.innerHTML = `
     <td>${rowData.date}</td>
     <td>${rowData.startTime}</td>
-    <td>${rowData.endTime}</td>
     <td>${rowData.location}</td>
+    <td>${rowData.alertLevel}</td>
     <td>${rowData.area}</td>
     <td>${rowData.personnel}</td>
-    <td>${rowData.alertLevel}</td>
     <td>${rowData.task}</td>
+    <td>${rowData.endTime}</td>
+    <td>${rowData.recordTime}</td>
     <td class="delete-btn">❌</td>
   `;
   tableBody.appendChild(row);
