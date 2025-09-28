@@ -18,17 +18,21 @@
 <form id="incidentForm" class="bg-white p-4 rounded shadow mb-4">
   <div class="grid grid-cols-4 gap-4">
     <input type="date" id="date" class="border p-2 rounded" required>
-    <input type="time" id="startTime" class="border p-2 rounded">    
-    <input type="text" id="location" placeholder="발생장소" class="border p-2 rounded" required>
+    <input type="time" id="startTime" class="border p-2 rounded">
+    
+    <!-- 대응종류 (select box) -->
     <select id="alertLevel" class="border p-2 rounded">
-      <option value="1">조사</option>
-      <option value="2">구조</option>
-      <option value="3">조난</option>
-      <option value="4">산불</option>
+      <option value="0"></option>
+      <option value="1">구조</option>
+      <option value="2">조난</option>
+      <option value="3">산불</option>
+      <option value="4">산사태</option>
     </select>
-    <input type="text" id="area" placeholder="대응구역" class="border p-2 rounded">
-    <input type="text" id="personnel" placeholder="대응인력" class="border p-2 rounded">
+    
+    <input type="text" id="location" placeholder="발생내용" class="border p-2 rounded" required>
+    <input type="text" id="area" placeholder="발생지역" class="border p-2 rounded">
     <input type="text" id="task" placeholder="대응임무" class="border p-2 rounded">
+    <input type="text" id="personnel" placeholder="대응인력" class="border p-2 rounded">
     <input type="time" id="endTime" class="border p-2 rounded">
   </div>
   <button type="submit" class="mt-4 px-4 py-2 bg-blue-600 text-white rounded">추가</button>
@@ -38,12 +42,12 @@
   <thead class="bg-gray-200">
     <tr>
       <th>날짜</th>
-      <th>발생시간</th>
-      <th>발생장소</th>            
+      <th>시간</th> 
       <th>대응종류</th>
-      <th>대응구역</th>
-      <th>대응인력</th>      
-      <th>대응임무</th>
+      <th>발생내용</th>
+      <th>발생지역</th>
+      <th>대응임무</th>      
+      <th>대응인력</th>
       <th>종료시간</th>
       <th>기록시간</th>
       <th>삭제</th>
@@ -99,31 +103,30 @@ form.addEventListener('submit', async (e) => {
   e.preventDefault();
 
   const nowStr = getDateTimeString();
-
   const alertLevelSelect = document.getElementById('alertLevel');
 
   const rowData = {
     date: document.getElementById('date').value,
     startTime: document.getElementById('startTime').value || "",
+    alertLevel: alertLevelSelect.options[alertLevelSelect.selectedIndex].text,
     location: document.getElementById('location').value,
-    alertLevel: alertLevelSelect.options[alertLevelSelect.selectedIndex].text, // ✅ 텍스트 저장
     area: document.getElementById('area').value,
-    personnel: document.getElementById('personnel').value,
     task: document.getElementById('task').value,
+    personnel: document.getElementById('personnel').value,
     endTime: document.getElementById('endTime').value || "",
     recordTime: nowStr
   };
 
-  // 테이블에 추가 (thead 순서와 동일하게)
+  // 테이블에 추가 (헤더 순서에 맞춤)
   const row = document.createElement('tr');
   row.innerHTML = `
     <td>${rowData.date}</td>
     <td>${rowData.startTime}</td>
-    <td>${rowData.location}</td>
     <td>${rowData.alertLevel}</td>
+    <td>${rowData.location}</td>
     <td>${rowData.area}</td>
-    <td>${rowData.personnel}</td>
     <td>${rowData.task}</td>
+    <td>${rowData.personnel}</td>
     <td>${rowData.endTime}</td>
     <td>${rowData.recordTime}</td>
     <td class="delete-btn">❌</td>
@@ -154,3 +157,4 @@ form.addEventListener('submit', async (e) => {
 </script>
 </body>
 </html>
+
