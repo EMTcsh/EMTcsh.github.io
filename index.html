@@ -26,31 +26,21 @@ button { border-radius: 8px; font-weight: bold; }
 <h1 class="text-2xl font-bold text-center text-blue-700 mb-4">🚑 특수산악구조팀 환자평가 기록</h1>
 
 <div class="section">
-   
     <p>산악구조팀 현장대응력 향상을 위해 제작함.</p>
     <p class="mt-2 text-sm text-gray-500">© 2024 Paramedic Web Applications | EMT Ver.0.9.28 | Korea National Park Service Paramedic Lab</p>
 </div>
 
-<!-- ================== 응급환자 평가도구 ================== -->
+<form id="recordForm">
+
+  <!-- ================== 현장 정보 ================== -->
   <div class="section">
     <h2 class="text-xl font-semibold mb-2">현장 정보</h2>
-    <label>도착시간: <input type="datetime-local" name="발생시간" required class="rounded-lg"></label><br>
-    <label>사고장소: <input type="text" name="장소" placeholder="예: 무등산 OO일원" required class="rounded-lg"></label><br>
-    <label>환자증상: <input type="text" name="주증상" placeholder="예: 호흡곤란, 가슴 통증" required class="rounded-lg"></label>
+    <label>도착시간: <input type="datetime-local" name="발생시간" required></label><br>
+    <label>사고장소: <input type="text" name="장소" placeholder="예: 무등산 OO일원" required></label><br>
+    <label>환자증상: <input type="text" name="주증상" placeholder="예: 호흡곤란, 가슴 통증" required></label>
   </div>
-  
-  <form id="recordForm">
-  <div class="section">
-    <h2 class="text-xl font-semibold mb-2">환자 정보</h2>
-    <label>이름: <input type="text" name="환자이름" required class="rounded-lg"></label><br>
-    <label>나이: <input type="date" name="생년월일" required class="rounded-lg"></label>
-  </div>
-  
-<div class="section">
-    <h2 class="text-xl font-semibold mb-2">응급처치</h2>
-    <textarea name="응급처치" rows="4" placeholder="SAMPLE, 실시한 응급처치 기록" class="w-full rounded-lg"></textarea>
-  </div>
-     
+
+  <!-- ================== GCS ================== -->
   <div class="section">
     <h2 class="text-xl font-semibold">Glasgow Coma Scale (GCS)</h2>
     <label>눈 반응 (E)</label>
@@ -81,16 +71,31 @@ button { border-radius: 8px; font-weight: bold; }
       <strong>GCS 결과:</strong> <span id="gcsResult"></span>
     </div>
   </div>
+
+  <!-- ================== 환자 정보 ================== -->
+  <div class="section">
+    <h2 class="text-xl font-semibold mb-2">환자 정보</h2>
+    <label>이름: <input type="text" name="환자이름" required></label><br>
+    <label>생년월일: <input type="date" name="생년월일" required></label>
+  </div>
+  
+  <!-- ================== 응급처치 ================== -->
+  <div class="section">
+    <h2 class="text-xl font-semibold mb-2">응급처치</h2>
+    <textarea name="응급처치" rows="4" placeholder="SAMPLE, 실시한 응급처치 기록"></textarea>
+  </div>
     
-<div class="section">
+  <!-- ================== 활력징후 ================== -->
+  <div class="section">
     <h2 class="text-xl font-semibold mb-2">활력징후 (여러 회 측정 가능)</h2>
     <div id="vitalSignsContainer"></div>
     <button type="button" onclick="addVitalSigns()" class="bg-green-600 text-white px-3 py-1 rounded">+ 활력징후 추가</button>
   </div>
 
+  <!-- ================== 기록자 ================== -->
   <div class="section">
     <h2 class="text-xl font-semibold">기록자</h2>
-    <input type="text" name="기록자" placeholder="구조대원 성명" required class="rounded-lg">
+    <input type="text" name="기록자" placeholder="구조대원 성명" required>
   </div>
 
   <button type="submit" class="w-full bg-blue-600 text-white py-3 px-4 rounded-lg">기록 저장하기</button>
@@ -98,6 +103,7 @@ button { border-radius: 8px; font-weight: bold; }
   <div id="resultMessage" class="mt-4 text-center"></div>
 </form>
 
+<!-- ================== 작성기록 ================== -->
 <div class="section">
   <h2 class="text-xl font-semibold">작성기록</h2>
   <div id="savedData" class="board"></div>
@@ -122,7 +128,7 @@ button { border-radius: 8px; font-weight: bold; }
 </div>
 
 <script>
-/* 활력징후 추가 */
+/* ===== 활력징후 추가 ===== */
 function addVitalSigns() {
     const container = document.getElementById("vitalSignsContainer");
     const index = container.children.length + 1;
@@ -130,16 +136,17 @@ function addVitalSigns() {
     div.className = "vitalsRow";
     div.innerHTML = `
         <strong>${index}회차 측정</strong><br>
-        혈압: <input type="text" name="혈압[BP]" placeholder="120/80"><br>
-        맥박: <input type="number" name="맥박[Puls]" placeholder="회/분"><br>
-        호흡수: <input type="number" name="호흡수[RR]" placeholder="회/분"><br>
-        체온: <input type="number" step="0.1" name="체온[T]" placeholder="℃"><br>
-        SpO₂: <input type="number" name="산소포화도[Spo2]" placeholder="%"><br>
+        혈압: <input type="text" name="혈압[]" placeholder="120/80"><br>
+        맥박: <input type="number" name="맥박[]" placeholder="회/분"><br>
+        호흡수: <input type="number" name="호흡수[]" placeholder="회/분"><br>
+        체온: <input type="number" step="0.1" name="체온[]" placeholder="℃"><br>
+        SpO₂: <input type="number" name="산소포화도[]" placeholder="%"><br>
     `;
     container.appendChild(div);
 }
 addVitalSigns();
 
+/* ===== GCS 계산 ===== */
 function calculateGCS() {
     const eye = parseInt(document.getElementById("eye").value);
     const verbal = parseInt(document.getElementById("verbal").value);
@@ -157,6 +164,7 @@ function calculateGCS() {
 ["eye","verbal","motor"].forEach(id=>document.getElementById(id).addEventListener("change",calculateGCS));
 calculateGCS();
 
+/* ===== 기록 저장 ===== */
 document.getElementById("recordForm").addEventListener("submit", function(e){
     e.preventDefault();
     const form = document.getElementById("recordForm");
@@ -198,6 +206,7 @@ document.getElementById("recordForm").addEventListener("submit", function(e){
     document.getElementById("resultMessage").innerText = "기록 저장 완료 ✅";
 });
 
+/* ===== 공유 ===== */
 function shareReport(){
     const form = document.getElementById("recordForm");
     const formData = new FormData(form);
@@ -212,9 +221,8 @@ function shareReport(){
     }
 }
 
-/* ====== GPS 좌표 JS ====== */
+/* ===== GPS 좌표 ===== */
 let map, marker, currentLat, currentLng;
-
 function initMap(lat, lng) {
     map = new kakao.maps.Map(document.getElementById('map'), {
         center: new kakao.maps.LatLng(lat, lng),
@@ -225,7 +233,6 @@ function initMap(lat, lng) {
         map: map
     });
 }
-
 document.getElementById('getLocation').addEventListener('click', function() {
     if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(showPosition, showError);
@@ -233,19 +240,15 @@ document.getElementById('getLocation').addEventListener('click', function() {
         alert("이 브라우저는 위치 정보를 지원하지 않습니다.");
     }
 });
-
 function showPosition(position) {
     currentLat = position.coords.latitude;
     currentLng = position.coords.longitude;
-
     document.getElementById('locationDisplay').textContent = `위도: ${currentLat}, 경도: ${currentLng}`;
     let dmsLat = convertToDMS(currentLat, 'lat');
     let dmsLng = convertToDMS(currentLng, 'lng');
     document.getElementById('dmsCoordinates').textContent = `도분초: ${dmsLat}, ${dmsLng}`;
-
     initMap(currentLat, currentLng);
 }
-
 function showError(error) {
     switch(error.code) {
         case error.PERMISSION_DENIED: alert("사용자가 위치 정보를 요청하지 않았습니다."); break;
@@ -254,14 +257,12 @@ function showError(error) {
         case error.UNKNOWN_ERROR: alert("알 수 없는 오류가 발생했습니다."); break;
     }
 }
-
 function convertToDMS(degree, type) {
     let d = Math.floor(degree);
     let m = Math.floor((degree - d) * 60);
     let s = ((degree - d - m/60) * 3600).toFixed(2);
     return `${d}° ${m}' ${s}" ${type==='lat'? (degree>0?'N':'S'):(degree>0?'E':'W')}`;
 }
-
 document.getElementById("shareLocation").addEventListener("click", function() {
     if(currentLat && currentLng){
         const googleMapLink = `https://www.google.com/maps?q=${currentLat},${currentLng}`;
@@ -275,6 +276,6 @@ document.getElementById("shareLocation").addEventListener("click", function() {
     } else alert('위치를 먼저 확인한 후 공유하세요.');
 });
 </script>
-
+</div>
 </body>
 </html>
