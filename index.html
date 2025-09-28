@@ -183,7 +183,7 @@ document.getElementById("recordForm").addEventListener("submit", function(e){
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href=url;
-    a.download=`환자평가_${today}.txt`;
+    a.download=`특수산악구조팀 환자평가 기록_${today}.txt`;
     a.click();
     URL.revokeObjectURL(url);
 
@@ -198,7 +198,7 @@ function shareReport(){
     formData.forEach((value,key)=>{ text+=`${key}: ${value}\n`; });
     text += "GCS: "+document.getElementById("gcsResult").innerText;
     if(navigator.share){
-        navigator.share({title:"환자 평가 기록", text});
+        navigator.share({title:"특수산악구조팀 환자평가 기록", text});
     } else alert("이 브라우저는 공유 기능을 지원하지 않습니다.");
 }
 
