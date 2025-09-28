@@ -162,6 +162,11 @@ document.getElementById("recordForm").addEventListener("submit", function(e){
     const form = document.getElementById("recordForm");
     const formData = new FormData(form);
     const data = {};
+
+    // GCS 값 저장
+    data["GCS"] = document.getElementById("gcsResult").innerText;
+
+    // 나머지 폼 데이터 처리
     for(const [key,value] of formData.entries()){
         if(key.endsWith("[]")){
             const baseKey = key.replace("[]","");
@@ -171,20 +176,22 @@ document.getElementById("recordForm").addEventListener("submit", function(e){
             data[key] = value;
         }
     }
-    data["GCS"] = document.getElementById("gcsResult").innerText;
 
+    // 텍스트 변환
     let content = "";
-    for(const key in data){
+    Object.keys(data).forEach(key=>{
         if(Array.isArray(data[key])) content+=`${key}: ${data[key].join(", ")}\n`;
         else content+=`${key}: ${data[key]}\n`;
-    }
+    });
+
     const today = new Date().toISOString().slice(0,10);
     const blob = new Blob([content],{type:"text/plain"});
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href=url;
-    a.download=`특수산악구조팀 환자평가 기록_${today}.txt`;
+    a.download=`특수산악구조팀 환자평가_${today}.txt`;
     a.click();
+    a.remove();
     URL.revokeObjectURL(url);
 
     document.getElementById("savedData").innerHTML = `<div class="board-item">${content}</div>`;
@@ -197,9 +204,12 @@ function shareReport(){
     let text = "";
     formData.forEach((value,key)=>{ text+=`${key}: ${value}\n`; });
     text += "GCS: "+document.getElementById("gcsResult").innerText;
+
     if(navigator.share){
-        navigator.share({title:"특수산악구조팀 환자평가 기록", text});
-    } else alert("이 브라우저는 공유 기능을 지원하지 않습니다.");
+        navigator.share({title:"특수산악구조팀 환자 평가 기록", text});
+    } else {
+        alert("이 브라우저는 공유 기능을 지원하지 않습니다.");
+    }
 }
 
 /* ====== GPS 좌표 JS ====== */
