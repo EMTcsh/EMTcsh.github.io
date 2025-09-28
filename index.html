@@ -37,6 +37,11 @@ button { border-radius: 8px; font-weight: bold; }
     <h2 class="text-xl font-semibold mb-2">현장 정보</h2>
     <label>도착시간: <input type="datetime-local" name="발생시간" required></label><br>
     <label>사고장소: <input type="text" name="장소" placeholder="예: 무등산 OO일원" required></label><br>
+    <label>사고좌표: 
+      <div class="coordinate-box" id="locationDisplay">위도: , 경도: </div>
+      <!-- ✅ hidden input 추가 -->
+      <input type="hidden" name="사고좌표" id="hiddenCoordinate">
+    </label><br>
     <label>환자증상: <input type="text" name="주증상" placeholder="예: 호흡곤란, 가슴 통증" required></label>
   </div>
 
@@ -115,7 +120,7 @@ button { border-radius: 8px; font-weight: bold; }
     <button id="getLocation" class="bg-green-600 text-white px-3 py-1 rounded">🌐 내 위치 확인</button>
     <button id="shareLocation" class="bg-blue-500 text-white px-3 py-1 rounded">📲 위치 공유</button>
 
-    <div class="coordinate-box" id="locationDisplay">위도: , 경도: </div>
+    <div class="coordinate-box" id="locationDisplay2">위도: , 경도: </div>
     <div class="coordinate-box" id="dmsCoordinates">도분초: </div>
     <div id="map"></div>
 </div>
@@ -243,10 +248,18 @@ document.getElementById('getLocation').addEventListener('click', function() {
 function showPosition(position) {
     currentLat = position.coords.latitude;
     currentLng = position.coords.longitude;
-    document.getElementById('locationDisplay').textContent = `위도: ${currentLat}, 경도: ${currentLng}`;
+
+    const coordText = `위도: ${currentLat}, 경도: ${currentLng}`;
+    document.getElementById('locationDisplay').textContent = coordText;
+    document.getElementById('locationDisplay2').textContent = coordText;
+
+    // ✅ hidden input에도 값 넣기
+    document.getElementById('hiddenCoordinate').value = coordText;
+
     let dmsLat = convertToDMS(currentLat, 'lat');
     let dmsLng = convertToDMS(currentLng, 'lng');
     document.getElementById('dmsCoordinates').textContent = `도분초: ${dmsLat}, ${dmsLng}`;
+
     initMap(currentLat, currentLng);
 }
 function showError(error) {
