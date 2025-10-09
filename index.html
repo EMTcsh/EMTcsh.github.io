@@ -39,6 +39,7 @@ button { border-radius: 8px; font-weight: bold; }
     <label>사고장소: <input type="text" name="장소" placeholder="예: 무등산 OO일원" required></label><br>
     <label>사고좌표: 
       <div class="coordinate-box" id="locationDisplay">위도: , 경도: </div>
+      <button id="getLocation" class="bg-green-600 text-white px-3 py-1 rounded">🌐 내 위치 확인</button>
       <!-- ✅ hidden input 추가 -->
       <input type="hidden" name="사고좌표" id="hiddenCoordinate">
     </label><br>
@@ -82,6 +83,7 @@ button { border-radius: 8px; font-weight: bold; }
     <h2 class="text-xl font-semibold mb-2">환자 정보</h2>
     <label>이름: <input type="text" name="환자이름" required></label><br>
     <label>생년월일: <input type="date" name="생년월일" required></label>
+    <label>거주지:<input type="text" name="거주지" required></label>
   </div>
   
   <!-- ================== 응급처치 ================== -->
