@@ -1,169 +1,168 @@
 <!doctype html>
 <html lang="ko">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>응급환자 정보 공유 (산악구조대 / 119 / 병원)</title>
-  <style>
-    :root{font-family:system-ui,-apple-system,'Segoe UI',Roboto,'Noto Sans KR',sans-serif}
-    body{margin:0;padding:18px;background:#f4f7fb;color:#111}
-    .container{max-width:1100px;margin:0 auto}
-    header{display:flex;align-items:center;gap:12px}
-    h1{margin:0;font-size:20px}
-    .card{background:#fff;border-radius:10px;padding:14px;margin-top:12px;box-shadow:0 6px 18px rgba(20,30,60,.06)}
-    label{display:block;font-weight:600;font-size:13px;margin-bottom:6px}
-    input[type=text], input[type=datetime-local], textarea, select{width:100%;padding:8px;border-radius:6px;border:1px solid #d7dfe8}
-    textarea{min-height:80px}
-    .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
-    .grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
-    .row{display:flex;gap:8px}
-    button{background:#0b5cff;color:#fff;border:none;padding:9px 12px;border-radius:8px;cursor:pointer}
-    button.secondary{background:#6c757d}
-    .small{font-size:13px;padding:6px 10px}
-    .muted{color:#666;font-size:13px}
-    .attachments img{max-width:120px;border-radius:6px;margin-right:8px;margin-bottom:8px}
-    footer{margin-top:14px;font-size:13px;color:#666}
-    .pill{display:inline-block;padding:6px 10px;border-radius:999px;background:#eef4ff;color:#0540b6;font-weight:600}
-    .log{max-height:200px;overflow:auto;padding:8px;background:#fcfcff;border-radius:8px;border:1px solid #eef2ff}
-  </style>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>응급환자 정보 공유 (산악구조대 / 119 / 병원)</title>
+<style>
+:root{font-family:system-ui,-apple-system,'Segoe UI',Roboto,'Noto Sans KR',sans-serif}
+body{margin:0;padding:18px;background:#f4f7fb;color:#111}
+.container{max-width:1100px;margin:0 auto}
+header{display:flex;align-items:center;gap:12px}
+h1{margin:0;font-size:20px}
+.card{background:#fff;border-radius:10px;padding:14px;margin-top:12px;box-shadow:0 6px 18px rgba(20,30,60,.06)}
+label{display:block;font-weight:600;font-size:13px;margin-bottom:6px}
+input[type=text], input[type=datetime-local], textarea, select{width:100%;padding:8px;border-radius:6px;border:1px solid #d7dfe8}
+textarea{min-height:80px}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.row{display:flex;gap:8px}
+button{background:#0b5cff;color:#fff;border:none;padding:9px 12px;border-radius:8px;cursor:pointer}
+button.secondary{background:#6c757d}
+button.small{font-size:13px;padding:6px 10px}
+.muted{color:#666;font-size:13px}
+.attachments img{max-width:120px;border-radius:6px;margin-right:8px;margin-bottom:8px}
+footer{margin-top:14px;font-size:13px;color:#666}
+.pill{display:inline-block;padding:6px 10px;border-radius:999px;background:#eef4ff;color:#0540b6;font-weight:600}
+.log{max-height:200px;overflow:auto;padding:8px;background:#fcfcff;border-radius:8px;border:1px solid #eef2ff}
+</style>
 </head>
 <body>
-  <div class="container">
-    <header>
-      <h1>응급환자 정보 공유</h1>
-      <div style="margin-left:auto" class="pill">산악구조대 • 119 • 병원 용</div>
-    </header>
+<div class="container">
+<header>
+  <h1>응급환자 정보 공유</h1>
+  <div style="margin-left:auto" class="pill">산악구조대 • 119 • 병원 용</div>
+</header>
 
-    <section class="card">
-      <div class="grid">
-        <div>
-          <label>보고자 / 기관</label>
-          <input id="sender" type="text" placeholder="예: 산악구조대 A팀 / 119 구급대" />
-        </div>
-        <div>
-          <label>수신대상 (콤마로 구분)</label>
-          <input id="recipients" type="text" placeholder="예: 119병원, 종합병원 응급실" />
-        </div>
-      </div>
-
-      <hr style="margin:12px 0;border:none;border-top:1px solid #eef2ff" />
-
-      <label>환자 기본정보</label>
-      <div class="grid-3">
-        <div><input id="name" type="text" placeholder="이름" /></div>
-        <div><input id="age" type="text" placeholder="나이" /></div>
-        <div>
-          <select id="sex">
-            <option value="">성별</option>
-            <option value="M">남</option>
-            <option value="F">여</option>
-            <option value="U">불명</option>
-          </select>
-        </div>
-      </div>
-
-      <label style="margin-top:8px">상태 요약 (최대 300자)</label>
-      <textarea id="summary" maxlength="300" placeholder="간단한 증상/상태: 의식, 호흡, 출혈 등"></textarea>
-
-      <div class="grid" style="margin-top:10px">
-        <div>
-          <label>의식 상태</label>
-          <select id="gcs">
-            <option value="">선택</option>
-            <option value="alert">정상(의식명료)</option>
-            <option value="verbal">언어반응만</option>
-            <option value="pain">통증반응만</option>
-            <option value="unresponsive">무반응</option>
-          </select>
-        </div>
-        <div>
-          <label>부상/주요 병력</label>
-          <input id="hx" type="text" placeholder="예: 고혈압, 당뇨, 약물복용 등" />
-        </div>
-      </div>
-
-      <div style="margin-top:10px" class="grid-3">
-        <div>
-          <label>호흡(회/분)</label>
-          <input id="rr" type="text" placeholder="RR" />
-        </div>
-        <div>
-          <label>맥박(회/분)</label>
-          <input id="hr" type="text" placeholder="HR" />
-        </div>
-        <div>
-          <label>혈압(mmHg)</label>
-          <input id="bp" type="text" placeholder="예: 120/80" />
-        </div>
-      </div>
-
-      <div style="margin-top:10px" class="grid">
-        <div>
-          <label>체온(°C)</label>
-          <input id="temp" type="text" placeholder="예: 36.7" />
-        </div>
-        <div>
-          <label>산소포화도(SpO₂ %)</label>
-          <input id="spo2" type="text" placeholder="예: 98" />
-        </div>
-      </div>
-
-      <label style="margin-top:10px">처치 및 투약 기록</label>
-      <textarea id="treatment" placeholder="예: 산소투여 10L, 투약: 아스피린 300mg, 지혈: 압박붕대"></textarea>
-
-      <div style="margin-top:10px" class="grid">
-        <div>
-          <label>발생 위치 (GPS 자동/수동)</label>
-          <input id="location" type="text" placeholder="위도,경도 또는 상세 위치" />
-          <div style="margin-top:6px">
-            <button id="getGps" class="small secondary">GPS 가져오기</button>
-            <span id="gpsStatus" class="muted" style="margin-left:8px"></span>
-          </div>
-        </div>
-        <div>
-          <label>발생 시간</label>
-          <input id="time" type="datetime-local" />
-        </div>
-      </div>
-
-      <label style="margin-top:10px">첨부 사진 / 파일 (브라우저 임시 저장)</label>
-      <input id="file" type="file" multiple />
-      <div class="attachments" id="attachments"></div>
-
-      <div style="margin-top:12px;display:flex;gap:8px">
-        <button id="genLink" class="secondary">공유 링크 생성</button>
-        <button id="copyJson" class="secondary">JSON 복사</button>
-        <button id="saveLocal" class="secondary">로컬 저장</button>
-        <button id="printBtn" class="secondary">프린트</button>
-      </div>
-
-    </section>
-
-    <section class="card">
-      <label>수신/연결 설정</label>
-      <div class="grid">
-        <div>
-          <label>구글시트 주소</label>
-          <input id="wsUrl" type="text" placeholder="예: 웹앱 URL 입력" />
-        </div>
-      </div>
-    </section>
-
-    <section class="card">
-      <label>저장된 기록</label>
-      <div id="savedList"></div>
-    </section>
-
-    <footer>
-      이 도구는 현장 간단정보 공유용 템플릿입니다. 실제 환자정보(개인정보)는 보안된 통신/서버와 인증을 통해 교환해야 합니다.
-    </footer>
+<section class="card">
+  <div class="grid">
+    <div>
+      <label>보고자 / 기관</label>
+      <input id="sender" type="text" placeholder="예: 산악구조대 A팀 / 119 구급대" />
+    </div>
+    <div>
+      <label>수신대상 (콤마로 구분)</label>
+      <input id="recipients" type="text" placeholder="예: 119병원, 종합병원 응급실" />
+    </div>
   </div>
 
+  <hr style="margin:12px 0;border:none;border-top:1px solid #eef2ff" />
+
+  <label>환자 기본정보</label>
+  <div class="grid-3">
+    <div><input id="name" type="text" placeholder="이름" /></div>
+    <div><input id="age" type="text" placeholder="나이" /></div>
+    <div>
+      <select id="sex">
+        <option value="">성별</option>
+        <option value="M">남</option>
+        <option value="F">여</option>
+        <option value="U">불명</option>
+      </select>
+    </div>
+  </div>
+
+  <label style="margin-top:8px">상태 요약 (최대 300자)</label>
+  <textarea id="summary" maxlength="300" placeholder="간단한 증상/상태: 의식, 호흡, 출혈 등"></textarea>
+
+  <div class="grid" style="margin-top:10px">
+    <div>
+      <label>의식 상태</label>
+      <select id="gcs">
+        <option value="">선택</option>
+        <option value="alert">정상(의식명료)</option>
+        <option value="verbal">언어반응만</option>
+        <option value="pain">통증반응만</option>
+        <option value="unresponsive">무반응</option>
+      </select>
+    </div>
+    <div>
+      <label>부상/주요 병력</label>
+      <input id="hx" type="text" placeholder="예: 고혈압, 당뇨, 약물복용 등" />
+    </div>
+  </div>
+
+  <div style="margin-top:10px" class="grid-3">
+    <div>
+      <label>호흡(회/분)</label>
+      <input id="rr" type="text" placeholder="RR" />
+    </div>
+    <div>
+      <label>맥박(회/분)</label>
+      <input id="hr" type="text" placeholder="HR" />
+    </div>
+    <div>
+      <label>혈압(mmHg)</label>
+      <input id="bp" type="text" placeholder="예: 120/80" />
+    </div>
+  </div>
+
+  <div style="margin-top:10px" class="grid">
+    <div>
+      <label>체온(°C)</label>
+      <input id="temp" type="text" placeholder="예: 36.7" />
+    </div>
+    <div>
+      <label>산소포화도(SpO₂ %)</label>
+      <input id="spo2" type="text" placeholder="예: 98" />
+    </div>
+  </div>
+
+  <label style="margin-top:10px">처치 및 투약 기록</label>
+  <textarea id="treatment" placeholder="예: 산소투여 10L, 투약: 아스피린 300mg, 지혈: 압박붕대"></textarea>
+
+  <div style="margin-top:10px" class="grid">
+    <div>
+      <label>발생 위치 (GPS 자동/수동)</label>
+      <input id="location" type="text" placeholder="위도,경도 또는 상세 위치" />
+      <div style="margin-top:6px">
+        <button id="getGps" class="small secondary">GPS 가져오기</button>
+        <span id="gpsStatus" class="muted" style="margin-left:8px"></span>
+      </div>
+    </div>
+    <div>
+      <label>발생 시간</label>
+      <input id="time" type="datetime-local" />
+    </div>
+  </div>
+
+  <label style="margin-top:10px">첨부 사진 / 파일 (브라우저 임시 저장)</label>
+  <input id="file" type="file" multiple />
+  <div class="attachments" id="attachments"></div>
+
+  <div style="margin-top:12px;display:flex;gap:8px" id="actionButtons">
+    <button id="genLink" class="secondary">공유 링크 생성</button>
+    <button id="copyJson" class="secondary">JSON 복사</button>
+    <button id="saveLocal" class="secondary">로컬 저장</button>
+    <button id="printBtn" class="secondary">프린트</button>
+    <button id="sendGoogle" style="background:#28a745;color:#fff">구글시트 전송</button>
+  </div>
+</section>
+
+<section class="card">
+  <label>수신/연결 설정</label>
+  <div class="grid">
+    <div>
+      <label>구글시트 주소</label>
+      <input id="wsUrl" type="text" placeholder="예: 웹앱 URL 입력" />
+    </div>
+  </div>
+</section>
+
+<section class="card">
+  <label>저장된 기록</label>
+  <div id="savedList"></div>
+</section>
+
+<footer>
+이 도구는 현장 간단정보 공유용 템플릿입니다. 실제 환자정보(개인정보)는 보안된 통신/서버와 인증을 통해 교환해야 합니다.
+</footer>
+</div>
+
 <script>
-/* ------------------ 설정 ------------------ */
 const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwF9TUst9ku_u66zaoiGxil6qIUQkaLaJYPymr2m7ziy7AQyOggq4u0D8xCLok_NvQrMQ/exec";
 
-/* ------------------ DOM 요소 ------------------ */
+/* DOM */
 const sender = document.getElementById('sender');
 const recipients = document.getElementById('recipients');
 const nameEl = document.getElementById('name');
@@ -191,11 +190,16 @@ let attachments = [];
 fileEl.addEventListener('change', async(e)=>{
   const files = Array.from(e.target.files);
   for(const f of files){
+    if(f.size > 5*1024*1024){
+      alert(`${f.name} 파일이 너무 큽니다 (5MB 이하만 가능)`);
+      continue;
+    }
     const dataUrl = await readFileAsDataURL(f);
     attachments.push({name:f.name,dataUrl});
     renderAttachments();
   }
 });
+
 function readFileAsDataURL(file){
   return new Promise((resolve,reject)=>{
     const r = new FileReader();
@@ -204,6 +208,7 @@ function readFileAsDataURL(file){
     r.readAsDataURL(file);
   });
 }
+
 function renderAttachments(){
   attachmentsDiv.innerHTML = '';
   attachments.forEach((a,idx)=>{
@@ -216,7 +221,7 @@ function renderAttachments(){
       const img = document.createElement('img');
       img.src = a.dataUrl;
       wrap.appendChild(img);
-    }else{
+    } else {
       const box = document.createElement('div');
       box.textContent = a.name;
       box.className='muted';
@@ -260,38 +265,31 @@ function sendToGoogle(){
     alert("구글 시트 전송 완료");
   })
   .catch(e=>{
-    alert("전송 오류 발생 (CORS 또는 권한 확인 필요)");
+    alert("전송 오류 발생 (CORS/권한 확인 필요)");
   });
 }
 
-/* ------------------ 버튼 생성 ------------------ */
-const googleBtn = document.createElement("button");
-googleBtn.textContent="구글시트 전송";
-googleBtn.style.background="#28a745";
-googleBtn.style.color="#fff";
-googleBtn.onclick = sendToGoogle;
-document.querySelector(".card div[style*='display:flex']").appendChild(googleBtn);
-
+/* ------------------ 버튼 이벤트 ------------------ */
+document.getElementById('sendGoogle').onclick = sendToGoogle;
 document.getElementById('copyJson').onclick = ()=>{
-  const payload = buildPayload();
-  navigator.clipboard.writeText(JSON.stringify(payload,null,2));
+  navigator.clipboard.writeText(JSON.stringify(buildPayload(),null,2));
   alert("JSON 복사됨");
 };
-
 document.getElementById('saveLocal').onclick = ()=>{
-  const payload = buildPayload();
   const arr = JSON.parse(localStorage.getItem('records')||'[]');
-  arr.unshift(payload);
+  arr.unshift(buildPayload());
   localStorage.setItem('records',JSON.stringify(arr));
   renderSaved();
   alert("로컬 저장 완료");
 };
-
 document.getElementById('printBtn').onclick = ()=>window.print();
 
 /* ------------------ GPS ------------------ */
 document.getElementById('getGps').onclick = ()=>{
-  if(!navigator.geolocation){gpsStatus.textContent="GPS 지원 안됨";return;}
+  if(!navigator.geolocation){
+    gpsStatus.textContent="GPS 지원 안됨";
+    return;
+  }
   gpsStatus.textContent="가져오는 중...";
   navigator.geolocation.getCurrentPosition(
     pos=>{
@@ -299,16 +297,21 @@ document.getElementById('getGps').onclick = ()=>{
       gpsStatus.textContent="GPS 수신 성공";
     },
     err=>{
-      gpsStatus.textContent="GPS 실패";
-    }
+      switch(err.code){
+        case 1: gpsStatus.textContent="GPS 권한 거부됨"; break;
+        case 2: gpsStatus.textContent="위치 정보를 가져올 수 없음"; break;
+        case 3: gpsStatus.textContent="GPS 요청 시간 초과"; break;
+        default: gpsStatus.textContent="알 수 없는 GPS 오류"; break;
+      }
+    },
+    {timeout:10000}
   );
 };
 
-/* ------------------ 로컬 저장/불러오기 ------------------ */
+/* ------------------ 로컬 기록 ------------------ */
 function renderSaved(){
   const arr = JSON.parse(localStorage.getItem('records')||'[]');
   savedList.innerHTML = "";
-  
   arr.slice(0,20).forEach((r,i)=>{
     const d = document.createElement('div');
     d.style.padding = "8px";
@@ -319,25 +322,19 @@ function renderSaved(){
         <span style="color:#666;font-weight:400"> ${new Date(r.meta?.createdAt).toLocaleString()}</span>
       </div>
       <div class="muted">${r.patient?.summary || ''}</div>
-      <button class="small" onclick="viewRecord(${i})">열기</button>
-      <button class="small secondary" onclick="deleteRecord(${i})">삭제</button>
+      <button class="small" data-index="${i}" data-action="view">열기</button>
+      <button class="small secondary" data-index="${i}" data-action="delete">삭제</button>
     `;
     savedList.appendChild(d);
   });
+  savedList.querySelectorAll('button').forEach(btn=>{
+    btn.onclick = ()=> {
+      const idx = btn.dataset.index;
+      if(btn.dataset.action==='view') viewRecord(idx);
+      if(btn.dataset.action==='delete') deleteRecord(idx);
+    };
+  });
 }
-
-window.viewRecord = function(i){
-  const arr = JSON.parse(localStorage.getItem('records')||'[]');
-  const record = arr[i];
-  if(record) populateForm(record);
-};
-
-window.deleteRecord = function(i){
-  const arr = JSON.parse(localStorage.getItem('records')||'[]');
-  arr.splice(i,1);
-  localStorage.setItem('records',JSON.stringify(arr));
-  renderSaved();
-};
 
 function populateForm(obj){
   if(obj.meta){sender.value=obj.meta.from||""; recipients.value=obj.meta.to||""; timeEl.value=obj.location?.time || obj.meta.createdAt || "";}
@@ -360,6 +357,18 @@ function populateForm(obj){
   locationEl.value = obj.location?.text||"";
   attachments = obj.attachments||[];
   renderAttachments();
+}
+
+window.viewRecord = function(i){
+  const arr = JSON.parse(localStorage.getItem('records')||'[]');
+  populateForm(arr[i]);
+};
+
+window.deleteRecord = function(i){
+  const arr = JSON.parse(localStorage.getItem('records')||'[]');
+  arr.splice(i,1);
+  localStorage.setItem('records',JSON.stringify(arr));
+  renderSaved();
 }
 
 /* ------------------ 초기화 ------------------ */
