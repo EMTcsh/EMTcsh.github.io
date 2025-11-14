@@ -27,10 +27,8 @@
     .log{max-height:200px;overflow:auto;padding:8px;background:#fcfcff;border-radius:8px;border:1px solid #eef2ff}
   </style>
 </head>
-
 <body>
   <div class="container">
-
     <header>
       <h1>응급환자 정보 공유</h1>
       <div style="margin-left:auto" class="pill">산악구조대 • 119 • 병원 용</div>
@@ -64,44 +62,59 @@
         </div>
       </div>
 
-      <label style="margin-top:8px">상태 요약</label>
-      <textarea id="summary" maxlength="300" placeholder="간단한 증상/상태"></textarea>
+      <label style="margin-top:8px">상태 요약 (최대 300자)</label>
+      <textarea id="summary" maxlength="300" placeholder="간단한 증상/상태: 의식, 호흡, 출혈 등"></textarea>
 
       <div class="grid" style="margin-top:10px">
         <div>
           <label>의식 상태</label>
           <select id="gcs">
             <option value="">선택</option>
-            <option value="alert">정상</option>
-            <option value="verbal">언어반응</option>
-            <option value="pain">통증반응</option>
+            <option value="alert">정상(의식명료)</option>
+            <option value="verbal">언어반응만</option>
+            <option value="pain">통증반응만</option>
             <option value="unresponsive">무반응</option>
           </select>
         </div>
         <div>
           <label>부상/주요 병력</label>
-          <input id="hx" type="text" />
+          <input id="hx" type="text" placeholder="예: 고혈압, 당뇨, 약물복용 등" />
         </div>
       </div>
 
-      <div class="grid-3" style="margin-top:10px">
-        <div><label>호흡</label><input id="rr" type="text" /></div>
-        <div><label>맥박</label><input id="hr" type="text" /></div>
-        <div><label>혈압</label><input id="bp" type="text" /></div>
-      </div>
-
-      <div class="grid" style="margin-top:10px">
-        <div><label>체온</label><input id="temp" type="text" /></div>
-        <div><label>산소포화도</label><input id="spo2" type="text" /></div>
-      </div>
-
-      <label style="margin-top:10px">처치 내용</label>
-      <textarea id="treatment"></textarea>
-
-      <div class="grid" style="margin-top:10px">
+      <div style="margin-top:10px" class="grid-3">
         <div>
-          <label>발생 위치</label>
-          <input id="location" type="text" />
+          <label>호흡(회/분)</label>
+          <input id="rr" type="text" placeholder="RR" />
+        </div>
+        <div>
+          <label>맥박(회/분)</label>
+          <input id="hr" type="text" placeholder="HR" />
+        </div>
+        <div>
+          <label>혈압(mmHg)</label>
+          <input id="bp" type="text" placeholder="예: 120/80" />
+        </div>
+      </div>
+
+      <div style="margin-top:10px" class="grid">
+        <div>
+          <label>체온(°C)</label>
+          <input id="temp" type="text" placeholder="예: 36.7" />
+        </div>
+        <div>
+          <label>산소포화도(SpO₂ %)</label>
+          <input id="spo2" type="text" placeholder="예: 98" />
+        </div>
+      </div>
+
+      <label style="margin-top:10px">처치 및 투약 기록</label>
+      <textarea id="treatment" placeholder="예: 산소투여 10L, 투약: 아스피린 300mg, 지혈: 압박붕대"></textarea>
+
+      <div style="margin-top:10px" class="grid">
+        <div>
+          <label>발생 위치 (GPS 자동/수동)</label>
+          <input id="location" type="text" placeholder="위도,경도 또는 상세 위치" />
           <div style="margin-top:6px">
             <button id="getGps" class="small secondary">GPS 가져오기</button>
             <span id="gpsStatus" class="muted" style="margin-left:8px"></span>
@@ -113,23 +126,27 @@
         </div>
       </div>
 
-      <label style="margin-top:10px">첨부 파일</label>
+      <label style="margin-top:10px">첨부 사진 / 파일 (브라우저 임시 저장)</label>
       <input id="file" type="file" multiple />
       <div class="attachments" id="attachments"></div>
 
-      <div style="margin-top:12px;display:flex;gap:8px" id="btnArea">
+      <div style="margin-top:12px;display:flex;gap:8px">
         <button id="genLink" class="secondary">공유 링크 생성</button>
         <button id="copyJson" class="secondary">JSON 복사</button>
         <button id="saveLocal" class="secondary">로컬 저장</button>
         <button id="printBtn" class="secondary">프린트</button>
       </div>
 
-      <!-- ⭐ 로그 영역 추가 (오류 해결됨) -->
-      <div style="margin-top:12px">
-        <label>로그</label>
-        <div class="log" id="log"></div>
-      </div>
+    </section>
 
+    <section class="card">
+      <label>수신/연결 설정</label>
+      <div class="grid">
+        <div>
+          <label>구글시트 주소</label>
+          <input id="wsUrl" type="text" placeholder="예: 웹앱 URL 입력" />
+        </div>
+      </div>
     </section>
 
     <section class="card">
@@ -138,17 +155,15 @@
     </section>
 
     <footer>
-      이 도구는 현장 간단정보 공유용 템플릿입니다.
+      이 도구는 현장 간단정보 공유용 템플릿입니다. 실제 환자정보(개인정보)는 보안된 통신/서버와 인증을 통해 교환해야 합니다.
     </footer>
-
   </div>
 
-<!-- ====================== JS ======================= -->
 <script>
-/* Google Apps Script 웹 앱 URL */
-const GOOGLE_SCRIPT_URL =
-"https://script.google.com/macros/s/AKfycbxfBOXu_5-AbX_siQvwnxCNxe3i1qdjZjtKkKe0sY513BkvKRH9zeKsnlZRBfWyzQ7x/exec";
+/* ------------------ 설정 ------------------ */
+const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzw35oBL6NtDKQyHg6QdNA6DY86zaj8NGU-4VkHacJ03ivR4dEybMqKwfNwu_Q6mfX0/exec";
 
+/* ------------------ DOM 요소 ------------------ */
 const sender = document.getElementById('sender');
 const recipients = document.getElementById('recipients');
 const nameEl = document.getElementById('name');
@@ -167,67 +182,61 @@ const locationEl = document.getElementById('location');
 const timeEl = document.getElementById('time');
 const fileEl = document.getElementById('file');
 const attachmentsDiv = document.getElementById('attachments');
-const logEl = document.getElementById('log');
 const savedList = document.getElementById('savedList');
+const gpsStatus = document.getElementById('gpsStatus');
 
 let attachments = [];
 
-/* -------- LOG -------- */
-function log(msg){
-  if(!logEl) return;
-  const time = new Date().toLocaleString();
-  logEl.innerHTML = `<div>[${time}] ${msg}</div>` + logEl.innerHTML;
-}
-
-/* ---------------- 파일 첨부 ---------------- */
+/* ------------------ 파일 업로드 ------------------ */
 fileEl.addEventListener('change', async(e)=>{
   const files = Array.from(e.target.files);
   for(const f of files){
-    const dataUrl = await new Promise((res,rej)=>{
-      const r=new FileReader();
-      r.onload=()=>res(r.result);
-      r.onerror=rej;
-      r.readAsDataURL(f);
-    });
-
-    attachments.push({name:f.name, dataUrl});
+    const dataUrl = await readFileAsDataURL(f);
+    attachments.push({name:f.name,dataUrl});
+    renderAttachments();
   }
-  renderAttachments();
 });
-
+function readFileAsDataURL(file){
+  return new Promise((resolve,reject)=>{
+    const r = new FileReader();
+    r.onload = ()=>resolve(r.result);
+    r.onerror = reject;
+    r.readAsDataURL(file);
+  });
+}
 function renderAttachments(){
-  attachmentsDiv.innerHTML = "";
-  attachments.forEach((a,i)=>{
-    const box=document.createElement("div");
-    box.style.display="inline-block";
-    box.style.position="relative";
-    box.style.marginRight="8px";
+  attachmentsDiv.innerHTML = '';
+  attachments.forEach((a,idx)=>{
+    const wrap = document.createElement('div');
+    wrap.style.display = 'inline-block';
+    wrap.style.position = 'relative';
+    wrap.style.marginRight = '8px';
 
     if(a.dataUrl.startsWith("data:image")){
-      const img=document.createElement("img");
-      img.src=a.dataUrl;
-      box.appendChild(img);
+      const img = document.createElement('img');
+      img.src = a.dataUrl;
+      wrap.appendChild(img);
     }else{
-      const txt=document.createElement("div");
-      txt.textContent=a.name;
-      txt.className="muted";
-      box.appendChild(txt);
+      const box = document.createElement('div');
+      box.textContent = a.name;
+      box.className='muted';
+      wrap.appendChild(box);
     }
 
-    const del=document.createElement("button");
+    const del = document.createElement('button');
     del.textContent="삭제";
     del.className="small secondary";
     del.style.position="absolute";
-    del.style.bottom="0";
     del.style.right="0";
-    del.onclick=()=>{ attachments.splice(i,1); renderAttachments(); };
+    del.style.bottom="0";
+    del.onclick = ()=>{ attachments.splice(idx,1); renderAttachments(); };
+    wrap.appendChild(del);
 
-    box.appendChild(del);
-    attachmentsDiv.appendChild(box);
+    attachmentsDiv.appendChild(wrap);
   });
 }
 
-/* ---------------- Payload ---------------- */
+/* ------------------ JSON 생성 ------------------ */
 function buildPayload(){
   return {
     meta:{from:sender.value,to:recipients.value,createdAt:new Date().toISOString()},
@@ -239,7 +248,7 @@ function buildPayload(){
   };
 }
 
-/* ---------------- Google Sheets 전송 ---------------- */
+/* ------------------ Google Sheets 전송 ------------------ */
 function sendToGoogle(){
   const payload = buildPayload();
   fetch(GOOGLE_SCRIPT_URL,{
@@ -248,101 +257,45 @@ function sendToGoogle(){
   })
   .then(r=>r.text())
   .then(t=>{
-    log("구글시트 전송 완료");
     alert("구글 시트 전송 완료");
   })
   .catch(e=>{
-    log("구글 시트 전송 오류");
-    alert("전송 오류 발생");
+    alert("전송 오류 발생 (CORS 또는 권한 확인 필요)");
   });
 }
 
-/* 구글시트 버튼 UI에 추가 */
-const btnArea = document.getElementById("btnArea");
+/* ------------------ 버튼 생성 ------------------ */
 const googleBtn = document.createElement("button");
 googleBtn.textContent="구글시트 전송";
 googleBtn.style.background="#28a745";
 googleBtn.style.color="#fff";
-googleBtn.onclick=sendToGoogle;
-btnArea.appendChild(googleBtn);
+googleBtn.onclick = sendToGoogle;
+document.querySelector(".card div[style*='display:flex']").appendChild(googleBtn);
 
-/* ---------------- JSON 복사 ---------------- */
-document.getElementById('copyJson').onclick=()=>{
-  navigator.clipboard.writeText(JSON.stringify(buildPayload(),null,2));
-  log("JSON 복사됨");
+document.getElementById('copyJson').onclick = ()=>{
+  const payload = buildPayload();
+  navigator.clipboard.writeText(JSON.stringify(payload,null,2));
+  alert("JSON 복사됨");
 };
 
-/* ---------------- 로컬 저장 ---------------- */
-document.getElementById('saveLocal').onclick=()=>{
-  const arr = JSON.parse(localStorage.getItem("records") || "[]");
-  arr.unshift(buildPayload());
-  localStorage.setItem("records", JSON.stringify(arr));
+document.getElementById('saveLocal').onclick = ()=>{
+  const payload = buildPayload();
+  const arr = JSON.parse(localStorage.getItem('records')||'[]');
+  arr.unshift(payload);
+  localStorage.setItem('records',JSON.stringify(arr));
   renderSaved();
-  log("로컬 저장됨");
+  alert("로컬 저장 완료");
 };
 
-/* ---------------- 저장된 기록 ---------------- */
-function renderSaved(){
-  const arr=JSON.parse(localStorage.getItem('records')||'[]');
-  savedList.innerHTML="";
-  arr.forEach((r,i)=>{
-    const div=document.createElement("div");
-    div.style.padding="8px";
-    div.style.borderBottom="1px solid #eee";
-    div.innerHTML=`
-      <div style="font-weight:600">${r.patient?.name||'무명'} 
-        <span style="color:#666;font-weight:400">${new Date(r.meta?.createdAt).toLocaleString()}</span>
-      </div>
-      <div class="muted">${r.patient?.summary||''}</div>
-      <button class="small" onclick="viewRecord(${i})">열기</button>
-      <button class="small secondary" onclick="deleteRecord(${i})">삭제</button>
-    `;
-    savedList.appendChild(div);
-  });
-}
+document.getElementById('printBtn').onclick = ()=>window.print();
 
-window.viewRecord=function(i){
-  const data=JSON.parse(localStorage.getItem('records')||'[]')[i];
-  if(!data) return;
-  populateForm(data);
-};
-
-window.deleteRecord=function(i){
-  const arr=JSON.parse(localStorage.getItem('records')||'[]');
-  arr.splice(i,1);
-  localStorage.setItem("records",JSON.stringify(arr));
-  renderSaved();
-};
-
-function populateForm(obj){
-  sender.value=obj.meta?.from||"";
-  recipients.value=obj.meta?.to||"";
-  nameEl.value=obj.patient?.name||"";
-  ageEl.value=obj.patient?.age||"";
-  sexEl.value=obj.patient?.sex||"";
-  summary.value=obj.patient?.summary||"";
-  gcs.value=obj.patient?.gcs||"";
-  hx.value=obj.patient?.history||"";
-  rr.value=obj.vitals?.rr||"";
-  hr.value=obj.vitals?.hr||"";
-  bp.value=obj.vitals?.bp||"";
-  temp.value=obj.vitals?.temp||"";
-  spo2.value=obj.vitals?.spo2||"";
-  treatment.value=obj.treatment||"";
-  locationEl.value=obj.location?.text||"";
-  attachments=obj.attachments||[];
-  renderAttachments();
-}
-
-/* ---------------- 프린트 ---------------- */
-document.getElementById('printBtn').onclick=()=>window.print();
-
-/* ---------------- GPS ---------------- */
-document.getElementById('getGps').onclick=()=>{
-  gpsStatus.textContent="가져오는 중…";
+/* ------------------ GPS ------------------ */
+document.getElementById('getGps').onclick = ()=>{
+  if(!navigator.geolocation){gpsStatus.textContent="GPS 지원 안됨";return;}
+  gpsStatus.textContent="가져오는 중...";
   navigator.geolocation.getCurrentPosition(
     pos=>{
-      locationEl.value=`${pos.coords.latitude.toFixed(6)}, ${pos.coords.longitude.toFixed(6)}`;
+      locationEl.value = `${pos.coords.latitude.toFixed(6)}, ${pos.coords.longitude.toFixed(6)}`;
       gpsStatus.textContent="GPS 수신 성공";
     },
     err=>{
@@ -351,7 +304,65 @@ document.getElementById('getGps').onclick=()=>{
   );
 };
 
-/* 초기 렌더 */
+/* ------------------ 로컬 저장/불러오기 ------------------ */
+function renderSaved(){
+  const arr = JSON.parse(localStorage.getItem('records')||'[]');
+  savedList.innerHTML = "";
+  
+  arr.slice(0,20).forEach((r,i)=>{
+    const d = document.createElement('div');
+    d.style.padding = "8px";
+    d.style.borderBottom = "1px solid #f1f5f9";
+    d.innerHTML = `
+      <div style="font-weight:600">
+        ${r.patient?.name || '무명'}
+        <span style="color:#666;font-weight:400"> ${new Date(r.meta?.createdAt).toLocaleString()}</span>
+      </div>
+      <div class="muted">${r.patient?.summary || ''}</div>
+      <button class="small" onclick="viewRecord(${i})">열기</button>
+      <button class="small secondary" onclick="deleteRecord(${i})">삭제</button>
+    `;
+    savedList.appendChild(d);
+  });
+}
+
+window.viewRecord = function(i){
+  const arr = JSON.parse(localStorage.getItem('records')||'[]');
+  const record = arr[i];
+  if(record) populateForm(record);
+};
+
+window.deleteRecord = function(i){
+  const arr = JSON.parse(localStorage.getItem('records')||'[]');
+  arr.splice(i,1);
+  localStorage.setItem('records',JSON.stringify(arr));
+  renderSaved();
+};
+
+function populateForm(obj){
+  if(obj.meta){sender.value=obj.meta.from||""; recipients.value=obj.meta.to||""; timeEl.value=obj.location?.time || obj.meta.createdAt || "";}
+  if(obj.patient){
+    nameEl.value=obj.patient.name||"";
+    ageEl.value=obj.patient.age||"";
+    sexEl.value=obj.patient.sex||"";
+    summary.value=obj.patient.summary||"";
+    gcs.value=obj.patient.gcs||"";
+    hx.value=obj.patient.history||"";
+  }
+  if(obj.vitals){
+    rr.value=obj.vitals.rr||"";
+    hr.value=obj.vitals.hr||"";
+    bp.value=obj.vitals.bp||"";
+    temp.value=obj.vitals.temp||"";
+    spo2.value=obj.vitals.spo2||"";
+  }
+  treatment.value = obj.treatment||"";
+  locationEl.value = obj.location?.text||"";
+  attachments = obj.attachments||[];
+  renderAttachments();
+}
+
+/* ------------------ 초기화 ------------------ */
 renderSaved();
 </script>
 
