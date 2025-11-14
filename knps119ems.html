@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>응급환자 정보공유 (산악구조대 / 119 / 병원)</title>
+<title>응급환자 정보 공유 (산악구조대 / 119 / 병원)</title>
 <style>
 :root{font-family:system-ui,-apple-system,'Segoe UI',Roboto,'Noto Sans KR',sans-serif}
 body{margin:0;padding:18px;background:#f4f7fb;color:#111}
@@ -30,15 +30,15 @@ footer{margin-top:14px;font-size:13px;color:#666}
 <body>
 <div class="container">
 <header>
-  <h1>응급환자 정보공유</h1>
-  <div style="margin-left:auto" class="pill">무등산산악구조대 • 119 • 병원</div>
+  <h1>응급환자 정보 공유</h1>
+  <div style="margin-left:auto" class="pill">산악구조대 • 119 • 병원 용</div>
 </header>
 
 <section class="card">
   <div class="grid">
     <div>
       <label>보고자 / 기관</label>
-      <input id="sender" type="text" placeholder="예: 무등산특수산악구조팀 / 119 구급대" />
+      <input id="sender" type="text" placeholder="예: 산악구조대 A팀 / 119 구급대" />
     </div>
     <div>
       <label>수신대상 (콤마로 구분)</label>
@@ -131,9 +131,25 @@ footer{margin-top:14px;font-size:13px;color:#666}
   <div class="attachments" id="attachments"></div>
 
   <div style="margin-top:12px;display:flex;gap:8px" id="actionButtons">
+    <button id="genLink" class="secondary">공유 링크 생성</button>
+    <button id="copyJson" class="secondary">JSON 복사</button>
     <button id="saveLocal" class="secondary">로컬 저장</button>
     <button id="printBtn" class="secondary">프린트</button>
     <button id="sendGoogle" style="background:#28a745;color:#fff">구글시트 전송</button>
+  </div>
+</section>
+
+<section class="card">
+ <label>구글시트 주소</label>
+<a
+  class="sheet-link"
+  href="https://docs.google.com/spreadsheets/d/1UJUUoZaZaowDAMQSD0jsp6AZ_e0ct0Rn0A9u5iwHMrU/edit?usp=sharing"
+  target="_blank"
+  rel="noopener noreferrer"
+>
+  https://docs.google.com/spreadsheets/d/1UJUUoZaZaowDAMQSD0jsp6AZ_e0ct0Rn0A9u5iwHMrU/edit?usp=sharing
+</a>
+    </div>
   </div>
 </section>
 
