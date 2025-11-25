@@ -228,6 +228,33 @@ function shareReport(){
     }
 }
 
+/* ===== 구글시트 저장 기능 추가된 기록 저장 코드 ===== */
+document.getElementById("recordForm").addEventListener("submit", async function(e) {
+    e.preventDefault();
+
+    const formData = new FormData(document.getElementById("recordForm"));
+    const data = {};
+
+    data["GCS"] = document.getElementById("gcsResult").innerText;
+
+    formData.forEach((value, key) => {
+        data[key] = value;
+    });
+
+    const webAppUrl = "https://script.google.com/macros/s/AKfycbzGMSeQBJT7FrosgucNtmi6EsbqlB8qPtDiDjaieaj8D_bMH-B2Mf0g4i4khS-z7cMM/exec";  // ★★★ 이 부분을 실제 웹앱 URL로 변경 ★★★
+
+    try {
+        await fetch(webAppUrl, {
+            method: "POST",
+            body: JSON.stringify(data)
+        });
+
+        document.getElementById("resultMessage").innerText = "구글 시트에 기록 저장 완료 ✅";
+    } catch (error) {
+        document.getElementById("resultMessage").innerText = "❌ 전송 실패: " + error;
+    }
+});    
+    
 /* ===== GPS 좌표 ===== */
 let map, marker, currentLat, currentLng;
 function initMap(lat, lng) {
