@@ -213,11 +213,11 @@ function calculateGCS() {
     const total = e + v + m;
 
     let state = '';
-    if (total === 15) state = '정상(alert)';
-    else if (total >= 13) state = '졸림(drowsy)';
-    else if (total >= 9) state = '혼미(stupor)';
-    else if (total >= 4) state = '반혼수(semicoma)';
-    else state = '혼수(coma)';
+    if (total === 15) state = '정상-alert';
+    else if (total >= 13) state = '졸림-drowsy';
+    else if (total >= 9) state = '혼미-stupor';
+    else if (total >= 4) state = '반혼수-semicoma';
+    else state = '혼수-coma';
 
     document.getElementById("gcsResult").innerText = `${total}점 (${state})`;
     document.getElementById("gcsResultContainer").style.display = "block";
