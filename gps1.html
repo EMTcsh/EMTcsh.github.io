@@ -96,7 +96,6 @@ function saveToSheet() {
         body: JSON.stringify({
             lat: currentLat,
             lng: currentLng,
-            naver: `https://map.naver.com/v5/search/${currentLat},${currentLng}`,
             kakao: `https://map.kakao.com/link/map/${currentLat},${currentLng}`
         })
     });
