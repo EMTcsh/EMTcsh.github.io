@@ -5,14 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>🆘 구조요청 GPS</title>
 
-<!-- 카카오 지도 API -->
-<script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=ff9e145029506d6e4c72d1f2b01ea424&libraries=services"></script>
-
 <style>
 body {
     font-family: Arial, sans-serif;
     padding: 20px;
-    padding-bottom: 140px;
+    padding-bottom: 120px;
 }
 h1, h2, h4, h5 { text-align: center; }
 
@@ -39,36 +36,6 @@ button {
     border-radius: 6px;
     font-size: 14px;
 }
-
-.map {
-    width: 100%;
-    height: 350px;
-    margin-top: 10px;
-    border: 1px solid #ccc;
-}
-
-/* 하단 고정 */
-.bottom-fixed {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    background: #2DB400;
-    padding: 12px;
-    text-align: center;
-    z-index: 1000;
-}
-.bottom-fixed button {
-    background: white;
-    color: #2DB400;
-    border: none;
-    border-radius: 6px;
-    font-size: 17px;
-    font-weight: bold;
-    width: 90%;
-    max-width: 420px;
-}
-
 </style>
 </head>
 
@@ -80,7 +47,7 @@ button {
 <h5>
 1. 내 위치 확인<br>
 2. 내 위치 공유<br>
-3. 구조대에게 좌표 말하기!
+3. 구조대에게 좌표 전달
 </h5>
 
 <hr>
@@ -94,38 +61,69 @@ button {
 
 <div class="guide">
 🟢 전화 통화 시 위도·경도를 그대로 읽어주세요.<br>
-🟢 공유 → 메시지 / 카카오톡으로 전송
+🟢 공유 버튼 → 카카오톡 / 문자 / 메신저 전송
 </div>
 
 <script>
 let currentLat, currentLng;
-let targetLat, targetLng;
 
-/* 내 위치 */
+/* 📍 내 위치 확인 */
 document.getElementById('getLocation').onclick = () => {
-    navigator.geolocation.getCurrentPosition(pos => {
-        currentLat = pos.coords.latitude;
-        currentLng = pos.coords.longitude;
-        document.getElementById('coord').textContent =
-            `위도: ${currentLat}, 경도: ${currentLng}`;
-    }, () => alert("위치 정보를 불러올 수 없습니다."));
+    navigator.geolocation.getCurrentPosition(
+        pos => {
+            currentLat = pos.coords.latitude;
+            currentLng = pos.coords.longitude;
+
+            document.getElementById('coord').textContent =
+                `위도: ${currentLat}, 경도: ${currentLng}`;
+        },
+        () => alert("위치 정보를 불러올 수 없습니다.")
+    );
 };
 
-/* 좌표 공유 */
+/* 📤 내 위치 공유 (구글·카카오·네이버 지도 링크 포함) */
 document.getElementById('shareCoords').onclick = () => {
-    if (!currentLat || !currentLng) return alert("위치 확인 필요");
+    if (!currentLat || !currentLng) {
+        alert("위치를 먼저 확인하세요.");
+        return;
+    }
 
-    const msg =
-`🚨 구조요청 GPS 좌표
-위도: ${currentLat}
-경도: ${currentLng}`;
+    const googleMapLink =
+        `https://www.google.com/maps?q=${currentLat},${currentLng}`;
 
-    navigator.share
-        ? navigator.share({ title: "[구조요청]", text: msg })
-        : alert(msg);
+    const kakaoMapLink =
+        `https://map.kakao.com/link/map/${currentLat},${currentLng}`;
+
+    // ⚠️ 네이버 지도는 (경도, 위도) 순서
+    const naverMapLink =
+        `https://map.naver.com/v5/?c=${currentLng},${currentLat},15,0,0,0,dh`;
+
+    const shareMessage =
+`🚨 [구조요청] 요구조자 현위치
+
+📍 위도: ${currentLat}
+📍 경도: ${currentLng}
+
+🗺 구글지도
+${googleMapLink}
+
+🗺 카카오맵
+${kakaoMapLink}
+
+🗺 네이버지도
+${naverMapLink}
+
+☎️ 전화 통화 시 위도·경도를 그대로 읽어주세요.`;
+
+    if (navigator.share) {
+        navigator.share({
+            title: "[구조요청] GPS 좌표 공유",
+            text: shareMessage
+        });
+    } else {
+        alert("공유 기능이 지원되지 않습니다.\n\n" + shareMessage);
+    }
 };
-
-
 </script>
 
 </body>
