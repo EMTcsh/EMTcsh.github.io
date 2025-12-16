@@ -94,11 +94,6 @@ document.getElementById('shareCoords').onclick = () => {
     const kakaoMapLink =
         `https://map.kakao.com/link/map/${currentLat},${currentLng}`;
 
-    // ⚠️ 네이버 지도는 (경도, 위도) 순서
-    const naverMapLink =
-        `https://map.naver.com/v5/?c=${currentLng},${currentLat},15,0,0,0,dh`;
-
-    const shareMessage =
 `🚨 [구조요청] 요구조자 현위치
 
 📍 위도: ${currentLat}
@@ -109,9 +104,6 @@ ${googleMapLink}
 
 🗺 카카오맵
 ${kakaoMapLink}
-
-🗺 네이버지도
-${naverMapLink}
 
 ☎️ 전화 통화 시 위도·경도를 그대로 읽어주세요.`;
 
