@@ -5,13 +5,16 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>🆘 구조요청 GPS</title>
 
+<!-- 카카오 지도 API -->
+<script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=ff9e145029506d6e4c72d1f2b01ea424&libraries=services"></script>
+
 <style>
 body {
     font-family: Arial, sans-serif;
     padding: 20px;
-    padding-bottom: 120px; /* 하단 버튼 공간 */
+    padding-bottom: 140px;
 }
-h1, h4, h5 { text-align: center; }
+h1, h2, h4, h5 { text-align: center; }
 
 button {
     padding: 12px 18px;
@@ -37,7 +40,14 @@ button {
     font-size: 14px;
 }
 
-/* 하단 고정 네이버 버튼 */
+.map {
+    width: 100%;
+    height: 350px;
+    margin-top: 10px;
+    border: 1px solid #ccc;
+}
+
+/* 하단 고정 */
 .bottom-fixed {
     position: fixed;
     bottom: 0;
@@ -48,7 +58,6 @@ button {
     text-align: center;
     z-index: 1000;
 }
-
 .bottom-fixed button {
     background: white;
     color: #2DB400;
@@ -57,7 +66,7 @@ button {
     font-size: 17px;
     font-weight: bold;
     width: 90%;
-    max-width: 400px;
+    max-width: 420px;
 }
 </style>
 </head>
@@ -69,88 +78,113 @@ button {
 
 <h5>
 1. 내 위치 확인<br>
-2. 위도·경도 공유<br>
+2. 내 위치 공유<br>
+3. 구조대에게 좌표 전달
 </h5>
 
 <hr>
 
 <div style="text-align:center;">
     <button id="getLocation">📍 내 위치 확인</button>
-    <button id="shareCoords">📤 위도·경도 공유</button>
+    <button id="shareCoords">📤 내 위치 공유</button>
 </div>
 
 <div class="box" id="coord">위도: , 경도: </div>
 
 <div class="guide">
-🟢 <strong>전화통화: 현재 위치 구조대원에게 말해주기</strong><br>
-🟢 <strong>공유방법: 내위치 확인 버튼 클릭 → 위도·경도 공유 클릭 → 더보기 → 메시지, 카카오톡 앱 선택 → 보내기</strong><br>
+🟢 전화 통화 시 위도·경도를 그대로 읽어주세요.<br>
+🟢 공유 → 메시지 / 카카오톡으로 전송
 </div>
 
-<!-- 하단 고정 네이버 지도 버튼 -->
+<!-- 하단 고정 -->
 <div class="bottom-fixed">
-    <button id="naverRoute">🧭 구조대 네이버 지도 도착지 설정</button>
+    <button id="kakaoRoute">🧭 카카오맵 도착지 설정</button>
 </div>
+
+<hr>
+
+<h2>🌐 구조대원용 위치좌표 입력</h2>
+
+<label>대상 위도:</label>
+<input type="text" id="otherLatitude"><br><br>
+
+<label>대상 경도:</label>
+<input type="text" id="otherLongitude"><br><br>
+
+<button onclick="showLocations()">📍 대상 위치 지도 보기</button>
+
+<div id="distanceInfo" class="box"></div>
+<div id="mapComparison" class="map"></div>
 
 <script>
 let currentLat, currentLng;
+let targetLat, targetLng;
 
-/* 위치 확인 */
+/* 내 위치 */
 document.getElementById('getLocation').onclick = () => {
-    if (!navigator.geolocation) {
-        alert("GPS를 지원하지 않는 브라우저입니다.");
-        return;
-    }
-
     navigator.geolocation.getCurrentPosition(pos => {
         currentLat = pos.coords.latitude;
         currentLng = pos.coords.longitude;
-
         document.getElementById('coord').textContent =
             `위도: ${currentLat}, 경도: ${currentLng}`;
-    }, () => {
-        alert("위치 정보를 불러올 수 없습니다.");
-    });
+    }, () => alert("위치 정보를 불러올 수 없습니다."));
 };
 
-/* 위도·경도 공유 */
+/* 좌표 공유 */
 document.getElementById('shareCoords').onclick = () => {
-    if (!currentLat || !currentLng) {
-        alert("먼저 위치를 확인하세요.");
-        return;
-    }
+    if (!currentLat || !currentLng) return alert("위치 확인 필요");
 
     const msg =
-`🚨 구조요청 위치 좌표
-
+`🚨 구조요청 GPS 좌표
 위도: ${currentLat}
 경도: ${currentLng}`;
 
-    if (navigator.share) {
-        navigator.share({
-            title: "[구조요청] GPS 좌표",
-            text: msg
-        });
-    } else {
-        alert(msg);
-    }
+    navigator.share
+        ? navigator.share({ title: "[구조요청]", text: msg })
+        : alert(msg);
 };
 
-/* 네이버 지도 도착지 설정 */
-document.getElementById('naverRoute').onclick = () => {
-    if (!currentLat || !currentLng) {
-        alert("먼저 위치를 확인하세요.");
+/* 카카오맵 도착지 → 대상 위치 */
+document.getElementById('kakaoRoute').onclick = () => {
+    if (!targetLat || !targetLng) {
+        alert("대상 위치를 먼저 지도에 표시하세요.");
         return;
     }
 
-    const naverRoute =
-        `nmap://route/walk?dlat=${currentLat}&dlng=${currentLng}&dname=구조요청지점`;
-
-    location.href = naverRoute;
-
-    setTimeout(() => {
-        window.location.href = "https://map.naver.com/";
-    }, 3000);
+    location.href =
+        `kakaomap://route?ep=${targetLat},${targetLng}&by=FOOT`;
 };
+
+/* 대상 위치 지도 + 거리 */
+function showLocations() {
+    targetLat = parseFloat(document.getElementById('otherLatitude').value);
+    targetLng = parseFloat(document.getElementById('otherLongitude').value);
+
+    if (!currentLat || !currentLng || isNaN(targetLat) || isNaN(targetLng)) {
+        alert("좌표를 모두 정확히 입력하세요.");
+        return;
+    }
+
+    const container = document.getElementById('mapComparison');
+    const map = new kakao.maps.Map(container, {
+        center: new kakao.maps.LatLng(targetLat, targetLng),
+        level: 7
+    });
+
+    const myPos = new kakao.maps.LatLng(currentLat, currentLng);
+    const otherPos = new kakao.maps.LatLng(targetLat, targetLng);
+
+    new kakao.maps.Marker({ position: myPos, map });
+    new kakao.maps.Marker({ position: otherPos, map });
+
+    const polyline = new kakao.maps.Polyline({
+        path: [myPos, otherPos]
+    });
+
+    const distance = polyline.getLength();
+    document.getElementById('distanceInfo').textContent =
+        `두 위치 간 직선거리: ${(distance / 1000).toFixed(2)} km`;
+}
 </script>
 
 </body>
