@@ -5,14 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>🆘 구조요청 GPS</title>
 
-<!-- 카카오 지도 API -->
-<script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=ff9e145029506d6e4c72d1f2b01ea424&libraries=services"></script>
-
 <style>
 body {
     font-family: Arial, sans-serif;
     padding: 20px;
-    padding-bottom: 140px;
+    padding-bottom: 120px;
 }
 h1, h2, h4, h5 { text-align: center; }
 
@@ -24,11 +21,12 @@ button {
 
 .box {
     border: 1px solid #ccc;
-    padding: 10px;
+    padding: 30px;
     margin-top: 10px;
     background: #f0f0f0;
-    border-radius: 5px;
+    border-radius: 15px;
     font-weight: bold;
+    text-align: center;
 }
 
 .guide {
@@ -40,33 +38,12 @@ button {
     font-size: 14px;
 }
 
-.map {
+#map {
     width: 100%;
     height: 350px;
-    margin-top: 10px;
-    border: 1px solid #ccc;
-}
-
-/* 하단 고정 */
-.bottom-fixed {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    background: #2DB400;
-    padding: 12px;
-    text-align: center;
-    z-index: 1000;
-}
-.bottom-fixed button {
-    background: white;
-    color: #2DB400;
-    border: none;
-    border-radius: 6px;
-    font-size: 17px;
-    font-weight: bold;
-    width: 90%;
-    max-width: 420px;
+    margin-top: 12px;
+    border-radius: 12px;
+    overflow: hidden;
 }
 </style>
 </head>
@@ -93,101 +70,80 @@ button {
 
 <div class="guide">
 🟢 전화 통화 시 위도·경도를 그대로 읽어주세요.<br>
-🟢 공유 → 메시지 / 카카오톡으로 전송
+🟢 공유 버튼 → 카카오톡 / 문자 / 메신저 전송
 </div>
 
-<!-- 하단 고정 -->
-<div class="bottom-fixed">
-    <button id="kakaoRoute">🧭 카카오맵 도착지 설정</button>
-</div>
-
-<hr>
-
-<h2>🌐 구조대원용 위치좌표 입력</h2>
-
-<label>대상 위도:</label>
-<input type="text" id="otherLatitude"><br><br>
-
-<label>대상 경도:</label>
-<input type="text" id="otherLongitude"><br><br>
-
-<button onclick="showLocations()">📍 대상 위치 지도 보기</button>
-
-<div id="distanceInfo" class="box"></div>
-<div id="mapComparison" class="map"></div>
+<!-- 📍 지도 표시 영역 -->
+<div id="myLocation" class="guide">📍 Map Location</div>
+<div id="map"></div>
 
 <script>
-let currentLat, currentLng;
-let targetLat, targetLng;
+let currentLat = null;
+let currentLng = null;
 
-/* 내 위치 */
+/* 📍 내 위치 확인 */
 document.getElementById('getLocation').onclick = () => {
-    navigator.geolocation.getCurrentPosition(pos => {
-        currentLat = pos.coords.latitude;
-        currentLng = pos.coords.longitude;
-        document.getElementById('coord').textContent =
-            `위도: ${currentLat}, 경도: ${currentLng}`;
-    }, () => alert("위치 정보를 불러올 수 없습니다."));
+    navigator.geolocation.getCurrentPosition(
+        pos => {
+            currentLat = pos.coords.latitude;
+            currentLng = pos.coords.longitude;
+
+            const coordBox = document.getElementById('coord');
+            coordBox.textContent = `위도: ${currentLat}, 경도: ${currentLng}`;
+            coordBox.style.fontSize = "28px";
+            coordBox.style.fontWeight = "bold";
+
+            // ✅ 지도 표시 (Google Maps Embed)
+            document.getElementById('map').innerHTML = `
+                <iframe
+                    width="100%"
+                    height="350"
+                    style="border:0"
+                    loading="lazy"
+                    allowfullscreen
+                    src="https://www.google.com/maps?q=${currentLat},${currentLng}&z=16&output=embed">
+                </iframe>
+            `;
+        },
+        () => alert("위치 정보를 불러올 수 없습니다.")
+    );
 };
 
-/* 좌표 공유 */
+/* 📤 내 위치 공유 */
 document.getElementById('shareCoords').onclick = () => {
-    if (!currentLat || !currentLng) return alert("위치 확인 필요");
-
-    const msg =
-`🚨 구조요청 GPS 좌표
-위도: ${currentLat}
-경도: ${currentLng}`;
-
-    navigator.share
-        ? navigator.share({ title: "[구조요청]", text: msg })
-        : alert(msg);
-};
-
-/* 카카오맵 도착지 → 대상 위치 */
-document.getElementById('kakaoRoute').onclick = () => {
-    if (!targetLat || !targetLng) {
-        alert("대상 위치를 먼저 지도에 표시하세요.");
+    if (!currentLat || !currentLng) {
+        alert("위치를 먼저 확인하세요.");
         return;
     }
 
-    location.href =
-        `kakaomap://route?ep=${targetLat},${targetLng}&by=FOOT`;
-};
+    const googleMapLink =
+        `https://www.google.com/maps?q=${currentLat},${currentLng}`;
 
-/* 대상 위치 지도 + 거리 */
-function showLocations() {
-    targetLat = parseFloat(document.getElementById('otherLatitude').value);
-    targetLng = parseFloat(document.getElementById('otherLongitude').value);
+    const kakaoMapLink =
+        `https://map.kakao.com/link/map/${currentLat},${currentLng}`;
 
-    if (!currentLat || !currentLng || isNaN(targetLat) || isNaN(targetLng)) {
-        alert("좌표를 모두 정확히 입력하세요.");
-        return;
+    const shareMessage = `🚨 [구조요청] 요구조자 현위치
+
+📍 위도: ${currentLat}
+📍 경도: ${currentLng}
+
+🗺 지도 링크
+구글지도: ${googleMapLink}
+카카오맵: ${kakaoMapLink}
+
+☎️ 전화 통화 시 위도·경도를 그대로 읽어주세요.`;
+
+    if (navigator.share) {
+        navigator.share({
+            title: "[구조요청] GPS 좌표 공유",
+            text: shareMessage
+        }).catch(() => {});
+    } else {
+        navigator.clipboard.writeText(shareMessage);
+        alert("공유 미지원 → 좌표가 클립보드에 복사되었습니다.");
     }
-
-    const container = document.getElementById('mapComparison');
-    const map = new kakao.maps.Map(container, {
-        center: new kakao.maps.LatLng(targetLat, targetLng),
-        level: 7
-    });
-
-    const myPos = new kakao.maps.LatLng(currentLat, currentLng);
-    const otherPos = new kakao.maps.LatLng(targetLat, targetLng);
-
-    new kakao.maps.Marker({ position: myPos, map });
-    new kakao.maps.Marker({ position: otherPos, map });
-
-    const polyline = new kakao.maps.Polyline({
-        path: [myPos, otherPos]
-    });
-
-    const distance = polyline.getLength();
-    document.getElementById('distanceInfo').textContent =
-        `두 위치 간 직선거리: ${(distance / 1000).toFixed(2)} km`;
-}
+};
 </script>
 
 </body>
 </html>
-
-
