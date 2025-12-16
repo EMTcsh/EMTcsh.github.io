@@ -5,15 +5,16 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>🆘 구조요청 GPS</title>
 
-<!-- 카카오오 지도 API -->
-<script type="text/javascript" src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=ff9e145029506d6e4c72d1f2b01ea424&libraries=services"></script> <!-- 카카오 지도 API -->
+<!-- 카카오 지도 API -->
+<script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=ff9e145029506d6e4c72d1f2b01ea424&libraries=services"></script>
+
 <style>
 body {
     font-family: Arial, sans-serif;
     padding: 20px;
     padding-bottom: 140px;
 }
-h1, h3, h4, h5 { text-align: center; }
+h1, h2, h4, h5 { text-align: center; }
 
 button {
     padding: 12px 18px;
@@ -46,7 +47,7 @@ button {
     border: 1px solid #ccc;
 }
 
-/* 하단 고정 버튼 */
+/* 하단 고정 */
 .bottom-fixed {
     position: fixed;
     bottom: 0;
@@ -78,35 +79,37 @@ button {
 <h5>
 1. 내 위치 확인<br>
 2. 내 위치 공유<br>
-3. 구조대에게 좌표 불러주기</h5>
+3. 구조대에게 좌표 전달
+</h5>
 
 <hr>
 
 <div style="text-align:center;">
     <button id="getLocation">📍 내 위치 확인</button>
-    <button id="shareCoords">내 위치 공유</div>
+    <button id="shareCoords">📤 내 위치 공유</button>
+</div>
 
 <div class="box" id="coord">위도: , 경도: </div>
 
 <div class="guide">
-🟢 <strong>전화통화: 현재 위치 구조대원에게 말해주기</strong><br>
-🟢 <strong>공유방법: 내위치 확인 버튼 클릭 → 위도·경도 공유 클릭 → 더보기 → 메시지, 카카오톡 앱 선택 → 보내기</strong><br>
+🟢 전화 통화 시 위도·경도를 그대로 읽어주세요.<br>
+🟢 공유 → 메시지 / 카카오톡으로 전송
 </div>
 
 <!-- 하단 고정 -->
 <div class="bottom-fixed">
-    <button id="naverRoute">🧭 네이버 지도 도착지 설정</button>
+    <button id="kakaoRoute">🧭 카카오맵 도착지 설정</button>
 </div>
 
 <hr>
 
-<h2>🌐 요구조자 위치좌표 입력(구조대원용)</h2>
+<h2>🌐 요구조자 위치좌표 입력 (구조대원용)</h2>
 
 <label>대상 위도:</label>
-<input type="text" id="otherLatitude" placeholder="예: 35.1345"><br><br>
+<input type="text" id="otherLatitude"><br><br>
 
 <label>대상 경도:</label>
-<input type="text" id="otherLongitude" placeholder="예: 126.9881"><br><br>
+<input type="text" id="otherLongitude"><br><br>
 
 <button onclick="showLocations()">📍 대상 위치 지도 보기</button>
 
@@ -135,48 +138,52 @@ document.getElementById('shareCoords').onclick = () => {
 위도: ${currentLat}
 경도: ${currentLng}`;
 
-    navigator.share ? navigator.share({ title:"[구조요청]", text:msg }) : alert(msg);
+    navigator.share
+        ? navigator.share({ title: "[구조요청]", text: msg })
+        : alert(msg);
 };
 
-/* 네이버 지도 도착지 */
-document.getElementById('naverRoute').onclick = () => {
+/* 📍 카카오맵 도착지 설정 */
+document.getElementById('kakaoRoute').onclick = () => {
     if (!currentLat || !currentLng) return alert("위치 확인 필요");
-    location.href = `nmap://route/walk?dlat=${currentLat}&dlng=${currentLng}&dname=구조요청지점`;
+
+    location.href =
+        `kakaomap://route?ep=${currentLat},${currentLng}&by=FOOT`;
 };
 
-/* 상대 위치 비교 */
+/* 대상 위치 지도 + 거리 */
 function showLocations() {
     const oLat = parseFloat(document.getElementById('otherLatitude').value);
     const oLng = parseFloat(document.getElementById('otherLongitude').value);
 
     if (!currentLat || !currentLng || isNaN(oLat) || isNaN(oLng)) {
-        alert("모든 좌표를 정확히 입력하세요.");
+        alert("좌표를 모두 정확히 입력하세요.");
         return;
     }
 
-    const map = new naver.maps.Map('mapComparison', {
-        center: new naver.maps.LatLng(currentLat, currentLng),
-        zoom: 10
+    const container = document.getElementById('mapComparison');
+    const map = new kakao.maps.Map(container, {
+        center: new kakao.maps.LatLng(currentLat, currentLng),
+        level: 7
     });
 
-    const myPos = new naver.maps.LatLng(currentLat, currentLng);
-    const otherPos = new naver.maps.LatLng(oLat, oLng);
+    const myPos = new kakao.maps.LatLng(currentLat, currentLng);
+    const otherPos = new kakao.maps.LatLng(oLat, oLng);
 
-    new naver.maps.Marker({ position: myPos, map, title: "내 위치" });
-    new naver.maps.Marker({ position: otherPos, map, title: "대상 위치" });
+    new kakao.maps.Marker({ position: myPos, map });
+    new kakao.maps.Marker({ position: otherPos, map });
 
-    const distance =
-        naver.maps.geometry.spherical.computeDistanceBetween(myPos, otherPos);
+    const polyline = new kakao.maps.Polyline({
+        path: [myPos, otherPos]
+    });
+
+    const distance = polyline.getLength();
 
     document.getElementById('distanceInfo').textContent =
-        `두 위치 간 거리: ${(distance/1000).toFixed(2)} km`;
-
-    const bounds = new naver.maps.LatLngBounds();
-    bounds.extend(myPos);
-    bounds.extend(otherPos);
-    map.fitBounds(bounds);
+        `두 위치 간 직선거리: ${(distance / 1000).toFixed(2)} km`;
 }
 </script>
 
 </body>
 </html>
+
