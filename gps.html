@@ -88,7 +88,7 @@ document.getElementById('getLocation').onclick = () => {
         currentLng = pos.coords.longitude;
 
         document.getElementById('coord').textContent =
-            `위도: ${currentLat}, 경도: ${currentLng}`;
+            `${currentLat} / ${currentLng}`;
         document.getElementById('coord').style.fontSize = "30px";
 
         showMap();
