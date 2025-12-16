@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>🆘 구조요청 GPS 공유</title>
+<title>🆘 구조요청 GPS 위치공유</title>
 
 <style>
 body {
@@ -11,14 +11,14 @@ body {
     padding: 20px;
     padding-bottom: 120px;
 }
-h1, h4, h5 { text-align: center; }
-
+h1, h4, h5 {
+    text-align: center;
+}
 button {
     padding: 12px 18px;
     font-size: 16px;
     margin: 6px;
 }
-
 .box {
     border: 1px solid #ccc;
     padding: 10px;
@@ -27,7 +27,16 @@ button {
     border-radius: 5px;
     font-weight: bold;
 }
+.guide {
+    margin-top: 15px;
+    padding: 12px;
+    background: #e8f5e9;
+    border: 1px solid #2DB400;
+    border-radius: 6px;
+    font-size: 14px;
+}
 
+/* 하단 고정 버튼 */
 .bottom-fixed {
     position: fixed;
     bottom: 0;
@@ -38,7 +47,6 @@ button {
     text-align: center;
     z-index: 1000;
 }
-
 .bottom-fixed button {
     background: white;
     color: #2DB400;
@@ -55,12 +63,12 @@ button {
 <body>
 
 <h4>[ 국립공원 특수산악구조대 ]</h4>
-<h1>🆘 구조요청 위치 공유</h1>
+<h1>🆘 구조요청 GPS</h1>
 
 <h5>
 1. 내 위치 확인<br>
 2. 위치 공유 전송<br>
-3. 구조대원 → 네이버 지도 도착지 설정
+3. 구조대원 → 네이버 지도 길안내
 </h5>
 
 <hr>
@@ -72,15 +80,23 @@ button {
 
 <div class="box" id="coord">위도: , 경도: </div>
 
-<!-- 하단 고정 버튼 (본인 확인용) -->
+<div class="guide">
+🟢 <strong>구조대원 안내</strong><br>
+공유 메시지 클릭 시<br>
+네이버 지도 앱이 열리며<br>
+<strong>출발지: 구조대원 위치 / 도착지: 요구조자 위치</strong>로<br>
+길안내가 바로 시작됩니다.
+</div>
+
+<!-- 하단 고정 (본인 확인용) -->
 <div class="bottom-fixed">
-    <button id="naverRoute">🧭 네이버 지도 도착지 미리보기</button>
+    <button id="naverRoute">🧭 네이버 지도 도착지 설정</button>
 </div>
 
 <script>
 let currentLat, currentLng;
 
-/* 내 위치 확인 */
+/* 📍 내 위치 확인 */
 document.getElementById('getLocation').onclick = () => {
     if (!navigator.geolocation) {
         alert("GPS를 지원하지 않는 브라우저입니다.");
@@ -98,14 +114,14 @@ document.getElementById('getLocation').onclick = () => {
     });
 };
 
-/* 📤 구조대원에게 위치 공유 */
+/* 📤 위치 공유 (네이버 지도 길안내 정상 동작) */
 document.getElementById('shareLocation').onclick = () => {
     if (!currentLat || !currentLng) {
         alert("먼저 위치를 확인하세요.");
         return;
     }
 
-    // 🔑 구조대원이 누를 링크 (차량 기준)
+    // 🔑 구조대원용 네이버 지도 길안내 딥링크 (차량 기준)
     const naverRouteLink =
         `nmap://route/car?dlat=${currentLat}&dlng=${currentLng}&dname=구조요청지점`;
 
@@ -115,23 +131,26 @@ document.getElementById('shareLocation').onclick = () => {
 위도: ${currentLat}
 경도: ${currentLng}
 
-🧭 네이버 지도 길안내 (구조대용)
-아래 링크 클릭 → 도착지 자동 설정
-${naverRouteLink}`;
+아래 버튼 클릭 시
+네이버 지도 길안내가 바로 시작됩니다.`;
 
     if (navigator.share) {
         navigator.share({
-            title: "[구조요청] 위치 전달",
-            text: message
+            title: "[구조요청] 네이버 지도 길안내",
+            text: message,
+            url: naverRouteLink   // ⭐ 핵심: 반드시 url에 딥링크
         });
     } else {
-        alert(message);
+        alert(message + "\n\n" + naverRouteLink);
     }
 };
 
-/* 하단 버튼 (본인 확인/테스트용) */
+/* 🧭 하단 버튼 (본인 확인/테스트용) */
 document.getElementById('naverRoute').onclick = () => {
-    if (!currentLat || !currentLng) return;
+    if (!currentLat || !currentLng) {
+        alert("먼저 위치를 확인하세요.");
+        return;
+    }
 
     location.href =
         `nmap://route/walk?dlat=${currentLat}&dlng=${currentLng}&dname=내위치`;
