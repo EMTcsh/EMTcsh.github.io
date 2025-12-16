@@ -59,7 +59,7 @@ button { padding: 12px 18px; font-size: 16px; margin: 6px; }
 <div class="guide">
 🟢 전화 통화 시 위도·경도를 그대로 읽어주세요.<br>
 🟢 공유 버튼 → 카카오톡 / 문자 / 메신저 전송
-🟢 화면을 캡처하여 구조대 전화로 사진을 전송(어려우면)
+🟢 화면을 캡처해 구조대에게 전송(어려우면)
 </div>    
 
 <div class="guide">📍 Map Location (Naver)</div>
@@ -108,7 +108,7 @@ function saveToSheet() {
 }
 
 document.getElementById('shareCoords').onclick = () => {
-    const msg = `🚨 구조요청 위치
+    const msg = `🚨 구조요청 GPS 위치
 위도: ${currentLat}
 경도: ${currentLng}`;
     navigator.share({ text: msg });
