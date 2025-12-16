@@ -3,16 +3,22 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>🆘 구조요청 GPS (네이버 지도 도착지)</title>
+<title>🆘 구조요청 GPS</title>
 
 <style>
-body { font-family: Arial, sans-serif; padding: 20px; }
+body {
+    font-family: Arial, sans-serif;
+    padding: 20px;
+    padding-bottom: 120px; /* 하단 버튼 공간 */
+}
 h1, h4, h5 { text-align: center; }
+
 button {
     padding: 12px 18px;
     font-size: 16px;
     margin: 6px;
 }
+
 .box {
     border: 1px solid #ccc;
     padding: 10px;
@@ -21,6 +27,7 @@ button {
     border-radius: 5px;
     font-weight: bold;
 }
+
 .guide {
     margin-top: 15px;
     padding: 12px;
@@ -28,6 +35,29 @@ button {
     border: 1px solid #2DB400;
     border-radius: 6px;
     font-size: 14px;
+}
+
+/* 하단 고정 네이버 버튼 */
+.bottom-fixed {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background: #2DB400;
+    padding: 12px;
+    text-align: center;
+    z-index: 1000;
+}
+
+.bottom-fixed button {
+    background: white;
+    color: #2DB400;
+    border: none;
+    border-radius: 6px;
+    font-size: 17px;
+    font-weight: bold;
+    width: 90%;
+    max-width: 400px;
 }
 </style>
 </head>
@@ -39,30 +69,34 @@ button {
 
 <h5>
 1. 내 위치 확인<br>
-2. 네이버 지도 도착지로 설정<br>
-3. 구조대 길안내 가능
+2. 위도·경도 공유<br>
+3. 네이버 지도 도착지 설정
 </h5>
 
 <hr>
 
 <div style="text-align:center;">
-    <button id="getLocation">📍 내 위치 확인</button><br>
-    <button id="naverRoute">🧭 네이버 지도 도착지 설정</button>
+    <button id="getLocation">📍 내 위치 확인</button>
+    <button id="shareCoords">📤 위도·경도 공유</button>
 </div>
 
 <div class="box" id="coord">위도: , 경도: </div>
 
 <div class="guide">
-🟢 <strong>네이버 지도 안내</strong><br>
-버튼 클릭 시 네이버 지도 앱이 열리며<br>
-<strong>출발지: 현재 위치 / 도착지: 이 위치</strong>로<br>
-길안내가 바로 시작됩니다.
+🟢 <strong>네이버 지도 길안내</strong><br>
+하단 버튼 클릭 → 네이버 지도 앱 실행<br>
+<strong>출발지: 현재 위치 / 도착지: 이 위치</strong>
+</div>
+
+<!-- 하단 고정 네이버 지도 버튼 -->
+<div class="bottom-fixed">
+    <button id="naverRoute">🧭 네이버 지도 도착지 설정</button>
 </div>
 
 <script>
 let currentLat, currentLng;
 
-// 내 위치 확인
+/* 위치 확인 */
 document.getElementById('getLocation').onclick = () => {
     if (!navigator.geolocation) {
         alert("GPS를 지원하지 않는 브라우저입니다.");
@@ -80,21 +114,41 @@ document.getElementById('getLocation').onclick = () => {
     });
 };
 
-// 네이버 지도 도착지 설정
+/* 위도·경도 공유 */
+document.getElementById('shareCoords').onclick = () => {
+    if (!currentLat || !currentLng) {
+        alert("먼저 위치를 확인하세요.");
+        return;
+    }
+
+    const msg =
+`🚨 구조요청 위치 좌표
+
+위도: ${currentLat}
+경도: ${currentLng}`;
+
+    if (navigator.share) {
+        navigator.share({
+            title: "[구조요청] GPS 좌표",
+            text: msg
+        });
+    } else {
+        alert(msg);
+    }
+};
+
+/* 네이버 지도 도착지 설정 */
 document.getElementById('naverRoute').onclick = () => {
     if (!currentLat || !currentLng) {
         alert("먼저 위치를 확인하세요.");
         return;
     }
 
-    // 네이버 지도 앱 딥링크 (도보 기준)
     const naverRoute =
         `nmap://route/walk?dlat=${currentLat}&dlng=${currentLng}&dname=구조요청지점`;
 
-    // 네이버 지도 앱 실행
     location.href = naverRoute;
 
-    // 앱 미설치 대비 (3초 후 웹 지도)
     setTimeout(() => {
         window.location.href = "https://map.naver.com/";
     }, 3000);
@@ -104,6 +158,3 @@ document.getElementById('naverRoute').onclick = () => {
 </body>
 </html>
 
-
-</body>
-</html>
