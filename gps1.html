@@ -1,148 +1,109 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🆘 구조요청 GPS 좌표</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🆘 구조요청 GPS (네이버 지도 도착지)</title>
 
-    <!-- 카카오 지도 API -->
-    <script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=ff9e145029506d6e4c72d1f2b01ea424"></script>
-
-    <style>
-        body { font-family: Arial, sans-serif; padding: 20px; }
-        h1, h4, h5 { text-align: center; }
-        button { font-size: 16px; padding: 10px 15px; margin: 5px; }
-        .box {
-            border: 1px solid #ccc;
-            padding: 10px;
-            margin-top: 10px;
-            background: #f0f0f0;
-            border-radius: 5px;
-            font-weight: bold;
-        }
-        #map { height: 400px; width: 100%; margin-top: 15px; }
-        .naver-guide {
-            margin-top: 15px;
-            padding: 12px;
-            background: #e8f5e9;
-            border: 1px solid #2DB400;
-            border-radius: 6px;
-            font-size: 14px;
-        }
-    </style>
+<style>
+body { font-family: Arial, sans-serif; padding: 20px; }
+h1, h4, h5 { text-align: center; }
+button {
+    padding: 12px 18px;
+    font-size: 16px;
+    margin: 6px;
+}
+.box {
+    border: 1px solid #ccc;
+    padding: 10px;
+    margin-top: 10px;
+    background: #f0f0f0;
+    border-radius: 5px;
+    font-weight: bold;
+}
+.guide {
+    margin-top: 15px;
+    padding: 12px;
+    background: #e8f5e9;
+    border: 1px solid #2DB400;
+    border-radius: 6px;
+    font-size: 14px;
+}
+</style>
 </head>
 
 <body>
 
 <h4>[ 국립공원 특수산악구조대 ]</h4>
-<h1>🆘 구조요청 GPS 좌표</h1>
+<h1>🆘 구조요청 GPS</h1>
 
 <h5>
-1. [내 위치 확인] 클릭<br>
-2. 구조대에 위도·경도 전달<br>
-3. 이동 중에는 네이버 지도 사용
+1. 내 위치 확인<br>
+2. 네이버 지도 도착지로 설정<br>
+3. 구조대 길안내 가능
 </h5>
 
 <hr>
 
 <div style="text-align:center;">
-    <button id="getLocation">🌐 내 위치 확인</button>
-    <button id="shareLocation">📲 구조요청 공유</button>
+    <button id="getLocation">📍 내 위치 확인</button><br>
+    <button id="naverRoute">🧭 네이버 지도 도착지 설정</button>
 </div>
 
-<div class="box" id="locationDisplay">위도: , 경도: </div>
-<div class="box" id="dmsCoordinates">도분초: </div>
+<div class="box" id="coord">위도: , 경도: </div>
 
-<div id="map"></div>
-
-<!-- 네이버 지도 안내 -->
-<div class="naver-guide">
-🟢 <strong>이동 중 위치 확인 (네이버 지도)</strong><br>
-1️⃣ 아래 공유 버튼 클릭 후 네이버 지도 열림<br>
-2️⃣ 지도 오른쪽 하단 <strong>[◎ 내 위치]</strong> 버튼 클릭<br>
-3️⃣ 파란 점이 이동하며 <strong>따라가기 시작</strong>
+<div class="guide">
+🟢 <strong>네이버 지도 안내</strong><br>
+버튼 클릭 시 네이버 지도 앱이 열리며<br>
+<strong>출발지: 현재 위치 / 도착지: 이 위치</strong>로<br>
+길안내가 바로 시작됩니다.
 </div>
 
 <script>
-let map, marker, currentLat, currentLng;
+let currentLat, currentLng;
 
-// 카카오 지도 (정확한 위치 고정)
-function initMap(lat, lng) {
-    const pos = new kakao.maps.LatLng(lat, lng);
-    map = new kakao.maps.Map(document.getElementById('map'), {
-        center: pos,
-        level: 3
-    });
-    marker = new kakao.maps.Marker({
-        position: pos,
-        map: map
-    });
-}
-
-// 위치 확인
+// 내 위치 확인
 document.getElementById('getLocation').onclick = () => {
-    navigator.geolocation.getCurrentPosition(showPosition, () => {
+    if (!navigator.geolocation) {
+        alert("GPS를 지원하지 않는 브라우저입니다.");
+        return;
+    }
+
+    navigator.geolocation.getCurrentPosition(pos => {
+        currentLat = pos.coords.latitude;
+        currentLng = pos.coords.longitude;
+
+        document.getElementById('coord').textContent =
+            `위도: ${currentLat}, 경도: ${currentLng}`;
+    }, () => {
         alert("위치 정보를 불러올 수 없습니다.");
     });
 };
 
-function showPosition(p) {
-    currentLat = p.coords.latitude;
-    currentLng = p.coords.longitude;
-
-    document.getElementById('locationDisplay').textContent =
-        `위도: ${currentLat}, 경도: ${currentLng}`;
-
-    document.getElementById('dmsCoordinates').textContent =
-        `도분초: ${toDMS(currentLat,'lat')} , ${toDMS(currentLng,'lng')}`;
-
-    initMap(currentLat, currentLng);
-}
-
-function toDMS(deg, type) {
-    const d = Math.floor(Math.abs(deg));
-    const m = Math.floor((Math.abs(deg) - d) * 60);
-    const s = ((Math.abs(deg) - d - m/60) * 3600).toFixed(2);
-    const dir = type === 'lat' ? (deg >= 0 ? 'N' : 'S') : (deg >= 0 ? 'E' : 'W');
-    return `${d}° ${m}' ${s}" ${dir}`;
-}
-
-// 📲 구조요청 공유
-document.getElementById('shareLocation').onclick = () => {
+// 네이버 지도 도착지 설정
+document.getElementById('naverRoute').onclick = () => {
     if (!currentLat || !currentLng) {
         alert("먼저 위치를 확인하세요.");
         return;
     }
 
-    const kakaoMap = `https://map.kakao.com/link/map/Location,${currentLat},${currentLng}`;
-    const naverMap = `https://map.naver.com/v5/`; // 🔴 좌표 완전 제거
+    // 네이버 지도 앱 딥링크 (도보 기준)
+    const naverRoute =
+        `nmap://route/walk?dlat=${currentLat}&dlng=${currentLng}&dname=구조요청지점`;
 
-    const msg =
-`🚨 구조요청 위치 정보
+    // 네이버 지도 앱 실행
+    location.href = naverRoute;
 
-위도: ${currentLat}
-경도: ${currentLng}
-
-📍 정확한 위치 (카카오 지도)
-${kakaoMap}
-
-🟢 이동 중 위치 확인 (네이버 지도)
-네이버 지도 열기 → [◎ 내 위치] 버튼 클릭 → 따라가기`;
-
-    if (navigator.share) {
-        navigator.share({
-            title: "[구조요청] 현재 위치",
-            text: msg,
-            url: kakaoMap
-        });
-    } else {
-        alert(msg);
-    }
-
-    // 네이버 지도도 함께 열기 (선택)
-    window.open(naverMap, "_blank");
+    // 앱 미설치 대비 (3초 후 웹 지도)
+    setTimeout(() => {
+        window.location.href = "https://map.naver.com/";
+    }, 3000);
 };
 </script>
+
+</body>
+</html>
+
 
 </body>
 </html>
