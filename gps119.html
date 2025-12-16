@@ -68,6 +68,18 @@ button {
     width: 90%;
     max-width: 420px;
 }
+
+/* 🔴 대상 좌표 입력창 대형화 */
+.coord-input {
+    width: 80%;
+    max-width: 420px;
+    height: 20px;
+    font-size: 15px;
+    padding: 10px 12px;
+    margin: 8px 0 16px 0;
+    border: 3px solid #2DB400;
+    border-radius: 8px;
+}
 </style>
 </head>
 
@@ -105,11 +117,13 @@ button {
 
 <h2>🌐 구조대원용 위치좌표 입력</h2>
 
-<label>대상 위도:</label>
-<input type="text" id="otherLatitude"><br><br>
+<label>대상 위도:</label><br>
+<input type="number" step="any" inputmode="decimal"
+       id="otherLatitude" class="coord-input"><br>
 
-<label>대상 경도:</label>
-<input type="text" id="otherLongitude"><br><br>
+<label>대상 경도:</label><br>
+<input type="number" step="any" inputmode="decimal"
+       id="otherLongitude" class="coord-input"><br>
 
 <button onclick="showLocations()">📍 대상 위치 지도 보기</button>
 
@@ -189,3 +203,4 @@ function showLocations() {
 
 </body>
 </html>
+
