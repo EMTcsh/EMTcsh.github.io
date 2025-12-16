@@ -40,10 +40,10 @@
 <h1>🆘 구조요청 GPS 좌표</h1>
 
 <h5>
-1. [내 위치 확인] 클릭<br>
+1. 내 위치 확인<br>
 2. 지도에 현재 위치 표시<br>
 3. 구조대에 위도 / 경도 전달<br>
-4. 위치 공유로 즉시 전송
+4. 위치 공유 또는 네이버 지도 따라가기
 </h5>
 
 <hr>
@@ -100,7 +100,7 @@ function convertToDMS(deg, type) {
     return `${d}° ${m}' ${s}" ${dir}`;
 }
 
-// 📲 위치 공유 (네이버 지도 = 지도 위치 공유)
+// 📲 위치 공유 + 네이버 지도 따라가기
 document.getElementById("shareLocation").onclick = () => {
     if (!currentLat || !currentLng) {
         alert("먼저 위치를 확인하세요.");
@@ -109,8 +109,8 @@ document.getElementById("shareLocation").onclick = () => {
 
     const googleMap = `https://www.google.com/maps?q=${currentLat},${currentLng}`;
     const kakaoMap  = `https://map.kakao.com/link/map/Location,${currentLat},${currentLng}`;
-    // ✅ 네이버 지도 위치 공유 (지도 화면)
     const naverMap  = `https://map.naver.com/v5/?c=${currentLng},${currentLat},15`;
+    const naverFollow = `https://map.naver.com/v5/?c=${currentLng},${currentLat},15&mode=location`;
 
     const msg =
 `🚨 구조요청 GPS 위치
@@ -120,6 +120,10 @@ document.getElementById("shareLocation").onclick = () => {
 
 📍 지도 위치 공유
 네이버지도: ${naverMap}
+
+🧭 네이버 지도 따라가기
+네이버지도(따라가기): ${naverFollow}
+
 카카오지도: ${kakaoMap}
 구글지도: ${googleMap}`;
 
