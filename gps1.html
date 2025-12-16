@@ -114,12 +114,7 @@ function showPosition(position) {
 }
 
 function showError(error) {
-    const msg = {
-        1: "위치 접근 권한이 거부되었습니다.",
-        2: "위치 정보를 사용할 수 없습니다.",
-        3: "위치 요청 시간이 초과되었습니다."
-    };
-    alert(msg[error.code] || "알 수 없는 오류 발생");
+    alert("위치 정보를 불러올 수 없습니다.");
 }
 
 // 도분초 변환
@@ -133,7 +128,7 @@ function convertToDMS(deg, type) {
     return `${d}° ${m}' ${s}" ${dir}`;
 }
 
-// 📲 위치 공유 (네이버 지도: 좌표 중심 표시)
+// 📲 위치 공유 (네이버 지도 화면 중심 표시)
 document.getElementById("shareLocation").addEventListener("click", function() {
     if (!currentLat || !currentLng) {
         alert("먼저 위치를 확인하세요.");
@@ -142,8 +137,8 @@ document.getElementById("shareLocation").addEventListener("click", function() {
 
     const googleMapLink = `https://www.google.com/maps?q=${currentLat},${currentLng}`;
     const kakaoMapLink  = `https://map.kakao.com/link/map/Location,${currentLat},${currentLng}`;
-    // ⚠️ 네이버 지도는 [경도, 위도] 순서
-    const naverMapLink  = `https://map.naver.com/v5/?c=${currentLng},${currentLat},15,0,0,0,dh`;
+    // 네이버 지도: 좌표 검색 ❌ / 지도 화면 ⭕
+    const naverMapLink  = `https://map.naver.com/v5/?c=${currentLng},${currentLat},15`;
 
     const shareMessage =
 `🚨 구조요청 GPS 좌표
@@ -151,8 +146,8 @@ document.getElementById("shareLocation").addEventListener("click", function() {
 위도: ${currentLat}
 경도: ${currentLng}
 
-📍 지도 바로가기
-네이버지도: ${naverMapLink}
+📍 지도 바로보기
+네이버지도 (지도화면): ${naverMapLink}
 카카오지도: ${kakaoMapLink}
 구글지도: ${googleMapLink}`;
 
@@ -163,7 +158,7 @@ document.getElementById("shareLocation").addEventListener("click", function() {
             url: naverMapLink
         });
     } else {
-        alert("공유 미지원 브라우저입니다.\n\n" + shareMessage);
+        alert(shareMessage);
     }
 });
 </script>
