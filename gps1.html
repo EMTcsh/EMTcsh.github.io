@@ -14,8 +14,13 @@
             font-family: Arial, sans-serif;
             padding: 20px;
         }
-        h2, h3 {
+        h1, h2, h3, h4, h5 {
             text-align: center;
+        }
+        button {
+            font-size: 16px;
+            padding: 10px 15px;
+            margin: 5px;
         }
         .coordinate-box {
             border: 1px solid #ccc;
@@ -23,15 +28,12 @@
             margin-top: 10px;
             background-color: #f0f0f0;
             border-radius: 5px;
+            font-weight: bold;
         }
         #map {
             height: 400px;
             width: 100%;
             margin-top: 20px;
-        }
-        #locationDisplay, #dmsCoordinates, .info {
-            margin-top: 10px;
-            font-weight: bold;
         }
         .GPS-link {
             border: 1px solid #ddd;
@@ -43,7 +45,7 @@
         }
         a {
             text-decoration: none;
-            color: #7289DA;
+            color: #2DB400;
             font-weight: bold;
         }
     </style>
@@ -51,25 +53,26 @@
 
 <body>
 
-<h4><center>[ 국립공원 특수산악구조대 ]</center></h4>
+<h4>[ 국립공원 특수산악구조대 ]</h4>
 <h1>🆘 구조요청 GPS 좌표</h1>
 
 <h5>
-1. 내 위치 확인 누름.<br>
-2. 지도에 내 위치 표시됨.<br>
-3. 구조대에게 [위도] [경도] 불러 주세요!<br>
-4. 화면캡처 & 위치 공유로 구조대 전송 가능!!
+1. [내 위치 확인] 버튼 클릭<br>
+2. 지도에 현재 위치 표시<br>
+3. 구조대에게 위도 / 경도 전달<br>
+4. 위치 공유 버튼으로 즉시 전송
 </h5>
 
-<br>
+<hr>
 
-<button id="getLocation">🌐 내 위치 확인</button>
-<button id="shareLocation">📲 위치 공유</button>
+<div style="text-align:center;">
+    <button id="getLocation">🌐 내 위치 확인</button>
+    <button id="shareLocation">📲 위치 공유</button>
+</div>
 
 <div class="coordinate-box" id="locationDisplay">위도: , 경도: </div>
 <div class="coordinate-box" id="dmsCoordinates">도분초: </div>
 
-<div id="myLocation" class="info">📍 Kakao Map Location</div>
 <div id="map"></div>
 
 <script>
@@ -104,86 +107,75 @@ function showPosition(position) {
     document.getElementById('locationDisplay').textContent =
         `위도: ${currentLat}, 경도: ${currentLng}`;
 
-    const dmsLat = convertToDMS(currentLat, 'lat');
-    const dmsLng = convertToDMS(currentLng, 'lng');
     document.getElementById('dmsCoordinates').textContent =
-        `도분초: ${dmsLat}, ${dmsLng}`;
+        `도분초: ${convertToDMS(currentLat, 'lat')}, ${convertToDMS(currentLng, 'lng')}`;
 
     initMap(currentLat, currentLng);
 }
 
 function showError(error) {
-    switch(error.code) {
-        case error.PERMISSION_DENIED:
-            alert("사용자가 위치 정보를 요청하지 않았습니다.");
-            break;
-        case error.POSITION_UNAVAILABLE:
-            alert("위치 정보를 사용할 수 없습니다.");
-            break;
-        case error.TIMEOUT:
-            alert("위치 정보 요청이 시간초과되었습니다.");
-            break;
-        default:
-            alert("알 수 없는 오류가 발생했습니다.");
-    }
+    const msg = {
+        1: "위치 접근 권한이 거부되었습니다.",
+        2: "위치 정보를 사용할 수 없습니다.",
+        3: "위치 요청 시간이 초과되었습니다."
+    };
+    alert(msg[error.code] || "알 수 없는 오류 발생");
 }
 
 // 도분초 변환
-function convertToDMS(degree, type) {
-    const d = Math.floor(Math.abs(degree));
-    const m = Math.floor((Math.abs(degree) - d) * 60);
-    const s = ((Math.abs(degree) - d - m / 60) * 3600).toFixed(2);
+function convertToDMS(deg, type) {
+    const d = Math.floor(Math.abs(deg));
+    const m = Math.floor((Math.abs(deg) - d) * 60);
+    const s = ((Math.abs(deg) - d - m / 60) * 3600).toFixed(2);
     const dir = type === 'lat'
-        ? (degree >= 0 ? 'N' : 'S')
-        : (degree >= 0 ? 'E' : 'W');
+        ? (deg >= 0 ? 'N' : 'S')
+        : (deg >= 0 ? 'E' : 'W');
     return `${d}° ${m}' ${s}" ${dir}`;
 }
 
-// 📲 위치 공유 (네이버 지도 추가)
+// 📲 위치 공유 (네이버 지도: 좌표 중심 표시)
 document.getElementById("shareLocation").addEventListener("click", function() {
-    if (currentLat && currentLng) {
+    if (!currentLat || !currentLng) {
+        alert("먼저 위치를 확인하세요.");
+        return;
+    }
 
-        const googleMapLink = `https://www.google.com/maps?q=${currentLat},${currentLng}`;
-        const kakaoMapLink  = `https://map.kakao.com/link/map/Location,${currentLat},${currentLng}`;
-        const naverMapLink  = `https://map.naver.com/v5/search/${currentLat},${currentLng}`;
+    const googleMapLink = `https://www.google.com/maps?q=${currentLat},${currentLng}`;
+    const kakaoMapLink  = `https://map.kakao.com/link/map/Location,${currentLat},${currentLng}`;
+    // ⚠️ 네이버 지도는 [경도, 위도] 순서
+    const naverMapLink  = `https://map.naver.com/v5/?c=${currentLng},${currentLat},15,0,0,0,dh`;
 
-        const shareMessage = `
-🚨 요구조자 현위치 좌표
+    const shareMessage =
+`🚨 구조요청 GPS 좌표
 
 위도: ${currentLat}
 경도: ${currentLng}
 
 📍 지도 바로가기
-네이버 지도: ${naverMapLink}
-카카오 지도: ${kakaoMapLink}
-구글 지도: ${googleMapLink}
-`;
+네이버지도: ${naverMapLink}
+카카오지도: ${kakaoMapLink}
+구글지도: ${googleMapLink}`;
 
-        if (navigator.share) {
-            navigator.share({
-                title: "[구조요청] GPS좌표 공유",
-                text: shareMessage,
-                url: naverMapLink
-            });
-        } else {
-            alert('이 브라우저는 위치 공유를 지원하지 않습니다.\n' + shareMessage);
-        }
+    if (navigator.share) {
+        navigator.share({
+            title: "[구조요청] 현재 위치",
+            text: shareMessage,
+            url: naverMapLink
+        });
     } else {
-        alert('위치를 먼저 확인한 후 공유할 수 있습니다.');
+        alert("공유 미지원 브라우저입니다.\n\n" + shareMessage);
     }
 });
 </script>
 
-<br>
+<hr>
 
 <div class="GPS-link">
-    <a href="https://www.whereurl.com/" target="_blank">조난자 위치공유 whereUrl</a>
+    <a href="https://www.whereurl.com/" target="_blank">📡 whereUrl 위치공유</a>
 </div>
 
 <div class="GPS-link">
-    <a href="https://discord.gg/ryaMRTAhwP" target="_blank">
-        문의: 🐸 국립공원 안전사고 연구회
-    </a>
+    <a href="https://discord.gg/ryaMRTAhwP" target="_blank">🐸 국립공원 안전사고 연구회</a>
 </div>
 
 </body>
