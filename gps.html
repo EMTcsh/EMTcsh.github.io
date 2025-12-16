@@ -1,189 +1,133 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>📕 구조요청 GPS 좌표 📌</title>
-    
-    <!-- 카카오 지도 API -->
-    <script type="text/javascript" src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=ff9e145029506d6e4c72d1f2b01ea424&libraries=services"></script> <!-- 카카오 지도 API -->
-    
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            padding: 20px;
-        }
-        h2, h3 {
-            text-align: center;
-        }
-        .coordinate-box {
-            border: 1px solid #ccc;
-            padding: 10px;
-            margin-top: 10px;
-            background-color: #f0f0f0;
-            border-radius: 5px;
-        }
-        #map {
-            height: 400px;
-            width: 100%;
-            margin-top: 20px;
-        }
-        #locationDisplay, #dmsCoordinates, .info {
-            margin-top: 10px;
-            font-weight: bold;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🆘 구조요청 GPS</title>
+
+<!-- 카카오 지도 API -->
+<script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=ff9e145029506d6e4c72d1f2b01ea424&libraries=services"></script>
+
+<style>
+body {
+    font-family: Arial, sans-serif;
+    padding: 20px;
+    padding-bottom: 140px;
+}
+h1, h2, h4, h5 { text-align: center; }
+
+button {
+    padding: 12px 18px;
+    font-size: 16px;
+    margin: 6px;
+}
+
+.box {
+    border: 1px solid #ccc;
+    padding: 10px;
+    margin-top: 10px;
+    background: #f0f0f0;
+    border-radius: 5px;
+    font-weight: bold;
+}
+
+.guide {
+    margin-top: 15px;
+    padding: 12px;
+    background: #e8f5e9;
+    border: 1px solid #2DB400;
+    border-radius: 6px;
+    font-size: 14px;
+}
+
+.map {
+    width: 100%;
+    height: 350px;
+    margin-top: 10px;
+    border: 1px solid #ccc;
+}
+
+/* 하단 고정 */
+.bottom-fixed {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background: #2DB400;
+    padding: 12px;
+    text-align: center;
+    z-index: 1000;
+}
+.bottom-fixed button {
+    background: white;
+    color: #2DB400;
+    border: none;
+    border-radius: 6px;
+    font-size: 17px;
+    font-weight: bold;
+    width: 90%;
+    max-width: 420px;
+}
+
+</style>
 </head>
+
 <body>
-   <h4><center>[ 국립공원 특수산악구조대 ]</center></h4>
-<h1>🆘 구조요청 GPS 좌표</h1>   
-    <h5>1. 내 위치 확인 누름.<br>
-        2. 지도에 내 위치 표시됨.<br>
-        3. 구조대에게 [위도] [경도] 불러 주세요!<br>
-        4. 화면캡처 & 위치 공유로 구조대 전송 가능!!<br>
-     </h5>
-    <br>
-<!-- 내 위치 확인 -->     
-<button id="getLocation">🌐 내 위치 확인</button>
-<button id="shareLocation">📲 위치 공유</button> <!-- 위치 공유 버튼 추가 -->
 
-<div class="coordinate-box" id="locationDisplay">위도: , 경도: </div>
-<div class="coordinate-box" id="dmsCoordinates">도분초: </div>
+<h4>[ 무등산국립공원 산악사고 ]</h4>
+<h1>🆘 구조요청 GPS</h1>
 
-<div id="myLocation" class="info">📍 Kakao Map Location</div>
+<h5>
+1. 내 위치 확인<br>
+2. 내 위치 공유<br>
+3. 구조대에게 좌표 말하기!
+</h5>
 
-<div id="map"></div> <!-- 지도 컨테이너 -->  
+<hr>
+
+<div style="text-align:center;">
+    <button id="getLocation">📍 내 위치 확인</button>
+    <button id="shareCoords">📤 내 위치 공유</button>
+</div>
+
+<div class="box" id="coord">위도: , 경도: </div>
+
+<div class="guide">
+🟢 전화 통화 시 위도·경도를 그대로 읽어주세요.<br>
+🟢 공유 → 메시지 / 카카오톡으로 전송
+</div>
 
 <script>
-    let map, marker, currentLat, currentLng;
+let currentLat, currentLng;
+let targetLat, targetLng;
 
-    // Function to initialize the Kakao map
-    function initMap(lat, lng) {
-        map = new kakao.maps.Map(document.getElementById('map'), {
-            center: new kakao.maps.LatLng(lat, lng), // Center map at the user's location
-            level: 3
-        });
+/* 내 위치 */
+document.getElementById('getLocation').onclick = () => {
+    navigator.geolocation.getCurrentPosition(pos => {
+        currentLat = pos.coords.latitude;
+        currentLng = pos.coords.longitude;
+        document.getElementById('coord').textContent =
+            `위도: ${currentLat}, 경도: ${currentLng}`;
+    }, () => alert("위치 정보를 불러올 수 없습니다."));
+};
 
-        // Add marker at the user's location
-        marker = new kakao.maps.Marker({
-            position: new kakao.maps.LatLng(lat, lng),
-            map: map
-        });
-    }
+/* 좌표 공유 */
+document.getElementById('shareCoords').onclick = () => {
+    if (!currentLat || !currentLng) return alert("위치 확인 필요");
 
-    // Get the user's location
-    document.getElementById('getLocation').addEventListener('click', function() {
-        if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(showPosition, showError);
-        } else {
-            alert("이 브라우저는 위치 정보를 지원하지 않습니다.");
-        }
-    });
+    const msg =
+`🚨 구조요청 GPS 좌표
+위도: ${currentLat}
+경도: ${currentLng}`;
 
-    // Show position on the page
-    function showPosition(position) {
-        currentLat = position.coords.latitude;
-        currentLng = position.coords.longitude;
+    navigator.share
+        ? navigator.share({ title: "[구조요청]", text: msg })
+        : alert(msg);
+};
 
-        // Display the coordinates
-        document.getElementById('locationDisplay').textContent = `위도: ${currentLat}, 경도: ${currentLng}`;
 
-        // Convert coordinates to DMS format
-        let dmsLat = convertToDMS(currentLat, 'lat');
-        let dmsLng = convertToDMS(currentLng, 'lng');
-        document.getElementById('dmsCoordinates').textContent = `도분초: ${dmsLat}, ${dmsLng}`;
-
-        // Initialize the map with the user's position
-        initMap(currentLat, currentLng);
-    }
-
-    // Handle error when geolocation fails
-    function showError(error) {
-        switch(error.code) {
-            case error.PERMISSION_DENIED:
-                alert("사용자가 위치 정보를 요청하지 않았습니다.");
-                break;
-            case error.POSITION_UNAVAILABLE:
-                alert("위치 정보를 사용할 수 없습니다.");
-                break;
-            case error.TIMEOUT:
-                alert("위치 정보 요청이 시간초과되었습니다.");
-                break;
-            case error.UNKNOWN_ERROR:
-                alert("알 수 없는 오류가 발생했습니다.");
-                break;
-        }
-    }
-
-    // Function to convert coordinates to DMS (Degrees, Minutes, Seconds)
-    function convertToDMS(degree, type) {
-        let d = Math.floor(degree);
-        let m = Math.floor((degree - d) * 60);
-        let s = ((degree - d - m / 60) * 3600).toFixed(2);
-        return `${d}° ${m}' ${s}" ${type === 'lat' ? (degree > 0 ? 'N' : 'S') : (degree > 0 ? 'E' : 'W')}`;
-    }
-
-    // Function to share location
-    document.getElementById("shareLocation").addEventListener("click", function() {
-        if (currentLat && currentLng) {
-            
-            const googleMapLink = `https://www.google.com/maps?q=${currentLat},${currentLng}`;        
-            
-            const kakaoMapLink = `https://map.kakao.com/link/map/Location,${currentLat},${currentLng}`;
-
-            const shareMessage = `\n\n🚨 요구조자 현위치 좌표: \n\n위도: ${currentLat} \n\n경도: ${currentLng} \n\nGoogle Map: ${googleMapLink} \nKakao Map: `;
-
-            if (navigator.share) {
-                navigator.share({
-                    title: "[구조요청] GPS좌표 공유",
-                    text: shareMessage,
-                    url: kakaoMapLink
-                }).then(() => {
-                    console.log('위치가 공유되었습니다.');
-                }).catch((error) => {
-                    console.error('위치 공유 오류:', error);
-                });
-            } else {
-                alert('이 브라우저는 위치 공유를 지원하지 않습니다.\n링크를 복사하여 공유하세요:\n' + shareMessage);
-            }
-        } else {
-            alert('위치를 먼저 확인한 후 공유할 수 있습니다.');
-        }
-    });
 </script>
 
-  <title>GPS 링크</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            padding: 10px;
-        }
-        .GPS-link {
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            padding: 10px;
-            margin: 10px 0;
-            text-align: center;
-            background-color: #f4f4f4;
-        }
-        a {
-            text-decoration: none;
-            color: #7289DA; /* Discord 블루 색상 */
-            font-weight: bold;
-        }
-    </style>
-<br>
-
-  <div class="GPS-link">
-  <a href="https://www.whereurl.com/" target="_blank">조난자 위치공유 whereUrl</a>
-         
-</div>
-    
-<div class="GPS-link">
-  <a href="https://discord.gg/ryaMRTAhwP" target="_blank">문의: 🐸 국립공원 안전사고 연구회 </a>
-    
-</div>
-    
 </body>
 </html>
 
