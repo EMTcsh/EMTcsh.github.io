@@ -89,6 +89,7 @@ document.getElementById('getLocation').onclick = () => {
 
         document.getElementById('coord').textContent =
             `위도: ${currentLat}, 경도: ${currentLng}`;
+        document.getElementById('coord').style.fontSize = "28px";
 
         showMap();
         saveToSheet();   // ✅ 자동 저장
