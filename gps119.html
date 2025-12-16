@@ -103,7 +103,7 @@ button {
 
 <hr>
 
-<h2>🌐 구조대원용 위치좌표 입력 </h2>
+<h2>🌐 구조대원용 위치좌표 입력</h2>
 
 <label>대상 위도:</label>
 <input type="text" id="otherLatitude"><br><br>
@@ -118,6 +118,7 @@ button {
 
 <script>
 let currentLat, currentLng;
+let targetLat, targetLng;
 
 /* 내 위치 */
 document.getElementById('getLocation').onclick = () => {
@@ -143,32 +144,35 @@ document.getElementById('shareCoords').onclick = () => {
         : alert(msg);
 };
 
-/* 📍 카카오맵 도착지 설정 */
+/* 카카오맵 도착지 → 대상 위치 */
 document.getElementById('kakaoRoute').onclick = () => {
-    if (!currentLat || !currentLng) return alert("위치 확인 필요");
+    if (!targetLat || !targetLng) {
+        alert("대상 위치를 먼저 지도에 표시하세요.");
+        return;
+    }
 
     location.href =
-        `kakaomap://route?ep=${currentLat},${currentLng}&by=FOOT`;
+        `kakaomap://route?ep=${targetLat},${targetLng}&by=FOOT`;
 };
 
 /* 대상 위치 지도 + 거리 */
 function showLocations() {
-    const oLat = parseFloat(document.getElementById('otherLatitude').value);
-    const oLng = parseFloat(document.getElementById('otherLongitude').value);
+    targetLat = parseFloat(document.getElementById('otherLatitude').value);
+    targetLng = parseFloat(document.getElementById('otherLongitude').value);
 
-    if (!currentLat || !currentLng || isNaN(oLat) || isNaN(oLng)) {
+    if (!currentLat || !currentLng || isNaN(targetLat) || isNaN(targetLng)) {
         alert("좌표를 모두 정확히 입력하세요.");
         return;
     }
 
     const container = document.getElementById('mapComparison');
     const map = new kakao.maps.Map(container, {
-        center: new kakao.maps.LatLng(currentLat, currentLng),
+        center: new kakao.maps.LatLng(targetLat, targetLng),
         level: 7
     });
 
     const myPos = new kakao.maps.LatLng(currentLat, currentLng);
-    const otherPos = new kakao.maps.LatLng(oLat, oLng);
+    const otherPos = new kakao.maps.LatLng(targetLat, targetLng);
 
     new kakao.maps.Marker({ position: myPos, map });
     new kakao.maps.Marker({ position: otherPos, map });
@@ -178,7 +182,6 @@ function showLocations() {
     });
 
     const distance = polyline.getLength();
-
     document.getElementById('distanceInfo').textContent =
         `두 위치 간 직선거리: ${(distance / 1000).toFixed(2)} km`;
 }
@@ -186,4 +189,3 @@ function showLocations() {
 
 </body>
 </html>
-
