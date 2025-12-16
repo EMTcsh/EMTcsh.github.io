@@ -139,8 +139,11 @@ document.getElementById('getLocation').onclick = () => {
     navigator.geolocation.getCurrentPosition(pos => {
         currentLat = pos.coords.latitude;
         currentLng = pos.coords.longitude;
-        document.getElementById('coord').textContent =
-            `위도: ${currentLat}, 경도: ${currentLng}`;
+       
+        const coordBox = document.getElementById('coord');
+        coordBox.textContent = `위도: ${currentLat}, 경도: ${currentLng}`;
+        coordBox.style.fontSize = "28px";   // ← 여기서 변경
+        coordBox.style.fontWeight = "bold";
     }, () => alert("위치 정보를 불러올 수 없습니다."));
 };
 
