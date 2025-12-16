@@ -128,9 +128,6 @@ document.getElementById('shareCoords').onclick = () => {
         return;
     }
 
-    const naverMapLink =
-        `https://map.naver.com/v5/search/${currentLat},${currentLng}`;
-
     const kakaoMapLink =
         `https://map.kakao.com/link/map/${currentLat},${currentLng}`;
 
@@ -140,7 +137,6 @@ document.getElementById('shareCoords').onclick = () => {
 📍 경도: ${currentLng}
 
 🗺 지도 링크
-네이버지도: ${naverMapLink}
 카카오맵: ${kakaoMapLink}
 
 ☎️ 전화 통화 시 위도·경도를 그대로 읽어주세요.`;
