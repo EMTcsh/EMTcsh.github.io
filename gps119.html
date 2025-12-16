@@ -11,14 +11,14 @@ body {
     padding: 20px;
     padding-bottom: 120px;
 }
-h1, h4, h5 {
-    text-align: center;
-}
+h1, h4, h5 { text-align: center; }
+
 button {
     padding: 12px 18px;
     font-size: 16px;
     margin: 6px;
 }
+
 .box {
     border: 1px solid #ccc;
     padding: 10px;
@@ -27,6 +27,7 @@ button {
     border-radius: 5px;
     font-weight: bold;
 }
+
 .guide {
     margin-top: 15px;
     padding: 12px;
@@ -88,7 +89,7 @@ button {
 길안내가 바로 시작됩니다.
 </div>
 
-<!-- 하단 고정 (본인 확인용) -->
+<!-- 하단 고정 (본인 확인/테스트용) -->
 <div class="bottom-fixed">
     <button id="naverRoute">🧭 네이버 지도 도착지 설정</button>
 </div>
@@ -103,47 +104,66 @@ document.getElementById('getLocation').onclick = () => {
         return;
     }
 
-    navigator.geolocation.getCurrentPosition(pos => {
-        currentLat = pos.coords.latitude;
-        currentLng = pos.coords.longitude;
+    navigator.geolocation.getCurrentPosition(
+        pos => {
+            currentLat = pos.coords.latitude;
+            currentLng = pos.coords.longitude;
 
-        document.getElementById('coord').textContent =
-            `위도: ${currentLat}, 경도: ${currentLng}`;
-    }, () => {
-        alert("위치 정보를 불러올 수 없습니다.");
-    });
+            document.getElementById('coord').textContent =
+                `위도: ${currentLat}, 경도: ${currentLng}`;
+        },
+        () => alert("위치 정보를 불러올 수 없습니다.")
+    );
 };
 
-/* 📤 위치 공유 (네이버 지도 길안내 정상 동작) */
+/* 📤 위치 공유 (안정판) */
 document.getElementById('shareLocation').onclick = () => {
     if (!currentLat || !currentLng) {
         alert("먼저 위치를 확인하세요.");
         return;
     }
 
-    // 🔑 구조대원용 네이버 지도 길안내 딥링크 (차량 기준)
     const naverRouteLink =
         `nmap://route/car?dlat=${currentLat}&dlng=${currentLng}&dname=구조요청지점`;
 
-    const message =
+    const shareText =
 `🚨 구조요청 위치 공유
 
 위도: ${currentLat}
 경도: ${currentLng}
 
-아래 버튼 클릭 시
-네이버 지도 길안내가 바로 시작됩니다.`;
+📍 네이버 지도 길안내 (구조대용)
+아래 링크 클릭 → 도착지 자동 설정
+${naverRouteLink}`;
 
     if (navigator.share) {
         navigator.share({
             title: "[구조요청] 네이버 지도 길안내",
-            text: message,
-            url: naverRouteLink   // ⭐ 핵심: 반드시 url에 딥링크
+            text: shareText,
+            url: naverRouteLink
+        }).catch(() => {
+            fallbackShare(shareText);
         });
     } else {
-        alert(message + "\n\n" + naverRouteLink);
+        fallbackShare(shareText);
     }
 };
+
+/* ❗ 공유 실패 대비 */
+function fallbackShare(text) {
+    if (navigator.clipboard) {
+        navigator.clipboard.writeText(text).then(() => {
+            alert(
+`공유가 자동으로 되지 않아
+위치 정보를 복사했습니다.
+
+문자/메신저에 붙여넣어 전송하세요.`
+            );
+        });
+    } else {
+        alert(text);
+    }
+}
 
 /* 🧭 하단 버튼 (본인 확인/테스트용) */
 document.getElementById('naverRoute').onclick = () => {
