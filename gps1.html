@@ -5,6 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>🆘 구조요청 GPS</title>
 
+<!-- ✅ 네이버 지도 API -->
+<script src="https://openapi.map.naver.com/openapi/v3/maps.js?ncpClientId=g2u4orbiqf"></script>
+
 <style>
 body {
     font-family: Arial, sans-serif;
@@ -43,7 +46,6 @@ button {
     height: 350px;
     margin-top: 12px;
     border-radius: 12px;
-    overflow: hidden;
 }
 </style>
 </head>
@@ -73,13 +75,14 @@ button {
 🟢 공유 버튼 → 카카오톡 / 문자 / 메신저 전송
 </div>
 
-<!-- 📍 지도 표시 영역 -->
-<div id="myLocation" class="guide">📍 Map Location</div>
+<div class="guide">📍 Map Location (Naver)</div>
 <div id="map"></div>
 
 <script>
 let currentLat = null;
 let currentLng = null;
+let map = null;
+let marker = null;
 
 /* 📍 내 위치 확인 */
 document.getElementById('getLocation').onclick = () => {
@@ -88,26 +91,35 @@ document.getElementById('getLocation').onclick = () => {
             currentLat = pos.coords.latitude;
             currentLng = pos.coords.longitude;
 
-            const coordBox = document.getElementById('coord');
-            coordBox.textContent = `위도: ${currentLat}, 경도: ${currentLng}`;
-            coordBox.style.fontSize = "28px";
-            coordBox.style.fontWeight = "bold";
+            document.getElementById('coord').textContent =
+                `위도: ${currentLat}, 경도: ${currentLng}`;
+            document.getElementById('coord').style.fontSize = "28px";
 
-            // ✅ 지도 표시 (Google Maps Embed)
-            document.getElementById('map').innerHTML = `
-                <iframe
-                    width="100%"
-                    height="350"
-                    style="border:0"
-                    loading="lazy"
-                    allowfullscreen
-                    src="https://www.google.com/maps?q=${currentLat},${currentLng}&z=16&output=embed">
-                </iframe>
-            `;
+            showNaverMap(currentLat, currentLng);
         },
         () => alert("위치 정보를 불러올 수 없습니다.")
     );
 };
+
+/* 🗺 네이버 지도 표시 */
+function showNaverMap(lat, lng) {
+    const position = new naver.maps.LatLng(lat, lng);
+
+    if (!map) {
+        map = new naver.maps.Map('map', {
+            center: position,
+            zoom: 15
+        });
+
+        marker = new naver.maps.Marker({
+            position: position,
+            map: map
+        });
+    } else {
+        map.setCenter(position);
+        marker.setPosition(position);
+    }
+}
 
 /* 📤 내 위치 공유 */
 document.getElementById('shareCoords').onclick = () => {
@@ -116,8 +128,8 @@ document.getElementById('shareCoords').onclick = () => {
         return;
     }
 
-    const googleMapLink =
-        `https://www.google.com/maps?q=${currentLat},${currentLng}`;
+    const naverMapLink =
+        `https://map.naver.com/v5/search/${currentLat},${currentLng}`;
 
     const kakaoMapLink =
         `https://map.kakao.com/link/map/${currentLat},${currentLng}`;
@@ -128,7 +140,7 @@ document.getElementById('shareCoords').onclick = () => {
 📍 경도: ${currentLng}
 
 🗺 지도 링크
-구글지도: ${googleMapLink}
+네이버지도: ${naverMapLink}
 카카오맵: ${kakaoMapLink}
 
 ☎️ 전화 통화 시 위도·경도를 그대로 읽어주세요.`;
