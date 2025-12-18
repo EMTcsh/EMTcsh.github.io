@@ -46,7 +46,9 @@ button {
 
 <div class="container">
     <h1>🏞️ 국립공원 산행 QR</h1>
-    <p>QR 스캔 시 위치와 시간이 저장됩니다.</p>
+    <p>QR 스캔 시 <b>입장 / 중간 / 퇴장</b>이 분리되어 Google Sheets에 저장됩니다.<br>※ 휴대폰 연락처는 <b>자동 수집이 불가</b>하여 최초 1회 직접 입력합니다.</p>
+
+    <input type="tel" id="phone" placeholder="휴대폰 번호 (최초 1회 입력)" style="width:100%;padding:12px;font-size:15px;margin-bottom:10px;">
 
     <button class="entry" onclick="record('입장')">입구 QR 스캔</button>
     <button class="mid" onclick="record('산행중')">중간 지점 QR 스캔</button>
@@ -57,9 +59,17 @@ button {
 
 <script>
 // 🔴 Google Apps Script 웹앱 URL 입력
-const SHEET_URL = "여기에_웹앱_URL_입력";
+const SHEET_URL = "https://script.google.com/macros/s/AKfycbxjsRH3SCXupSKw9ojGYbjjfTPkww2mIKXngS3HlP_tPf5jaeY5Fvl2T4igh_rtrx7qbw/exec";
 
 function record(type) {
+    const phoneInput = document.getElementById('phone');
+    const phone = phoneInput.value.trim();
+
+    if (!phone) {
+        alert('휴대폰 번호를 입력해주세요.');
+        return;
+    }
+
     if (!navigator.geolocation) {
         alert('위치 정보를 지원하지 않는 기기입니다.');
         return;
@@ -74,6 +84,8 @@ function record(type) {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
+                stage: type,
+                phone: phone,
                 type: type,
                 time: time,
                 latitude: lat,
@@ -91,24 +103,3 @@ function record(type) {
 
 </body>
 </html>
-
-<!-- ================================
-📌 Google Apps Script 코드 (붙여넣기용)
-
-function doPost(e) {
-  const sheet = SpreadsheetApp.openById('스프레드시트ID').getSheetByName('Sheet1');
-  const data = JSON.parse(e.postData.contents);
-
-  sheet.appendRow([
-    new Date(),
-    data.type,
-    data.time,
-    data.latitude,
-    data.longitude
-  ]);
-
-  return ContentService.createTextOutput('OK');
-}
-
-※ 배포: 웹앱 / 접근권한: 누구나
-================================ -->
