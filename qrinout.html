@@ -4,102 +4,45 @@
 <meta charset="UTF-8">
 <title>🏞️ 국립공원 산행 QR 체크</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <style>
-body {
-    font-family: Arial, sans-serif;
-    background: #f4f6f8;
-    margin: 0;
-    padding: 20px;
-}
-.container {
-    max-width: 500px;
-    margin: auto;
-    background: #fff;
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-}
-h1 { text-align: center; }
-button {
-    width: 100%;
-    padding: 15px;
-    font-size: 16px;
-    margin-top: 10px;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-}
-.entry { background: #4caf50; color: #fff; }
-.mid { background: #2196f3; color: #fff; }
-.exit { background: #f44336; color: #fff; }
-.log {
-    margin-top: 20px;
-    font-size: 14px;
-    background: #f9f9f9;
-    padding: 10px;
-    border-radius: 6px;
-}
+body{font-family:Arial;background:#f4f6f8;padding:20px}
+.container{max-width:500px;margin:auto;background:#fff;padding:20px;border-radius:10px}
+button{width:100%;padding:15px;font-size:16px;margin-top:10px;border:none;border-radius:6px;color:#fff}
+.entry{background:#4caf50}
+.mid{background:#2196f3}
+.exit{background:#f44336}
+input{width:100%;padding:12px;font-size:15px;margin-bottom:10px}
 </style>
 </head>
 <body>
-
 <div class="container">
-    <h1>🏞️ 국립공원 산행 QR</h1>
-    <p>QR 스캔 시 <b>입장 / 중간 / 퇴장</b>이 분리되어 Google Sheets에 저장됩니다.<br>※ 휴대폰 연락처는 <b>자동 수집이 불가</b>하여 최초 1회 직접 입력합니다.</p>
-
-    <input type="tel" id="phone" placeholder="휴대폰 번호 (최초 1회 입력)" style="width:100%;padding:12px;font-size:15px;margin-bottom:10px;">
-
-    <button class="entry" onclick="record('입장')">입구 QR 스캔</button>
-    <button class="mid" onclick="record('산행중')">중간 지점 QR 스캔</button>
-    <button class="exit" onclick="record('퇴장')">출구 QR 스캔</button>
-
-    <div class="log" id="log"></div>
+<h2>🏞️ 국립공원 산행 체크</h2>
+<input type="tel" id="phone" placeholder="휴대폰 번호 (최초 1회 입력)">
+<button class="entry" onclick="scan('입장')">입구 스캔</button>
+<button class="mid" onclick="scan('중간')">중간 스캔</button>
+<button class="exit" onclick="scan('퇴장')">출구 스캔</button>
+<p id="status"></p>
 </div>
-
 <script>
-// 🔴 Google Apps Script 웹앱 URL 입력
-const SHEET_URL = "https://script.google.com/macros/s/AKfycbxjsRH3SCXupSKw9ojGYbjjfTPkww2mIKXngS3HlP_tPf5jaeY5Fvl2T4igh_rtrx7qbw/exec";
-
-function record(type) {
-    const phoneInput = document.getElementById('phone');
-    const phone = phoneInput.value.trim();
-
-    if (!phone) {
-        alert('휴대폰 번호를 입력해주세요.');
-        return;
-    }
-
-    if (!navigator.geolocation) {
-        alert('위치 정보를 지원하지 않는 기기입니다.');
-        return;
-    }
-
-    navigator.geolocation.getCurrentPosition(pos => {
-        const time = new Date().toLocaleString();
-        const lat = pos.coords.latitude;
-        const lng = pos.coords.longitude;
-
-        fetch(SHEET_URL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                stage: type,
-                phone: phone,
-                type: type,
-                time: time,
-                latitude: lat,
-                longitude: lng
-            })
-        })
-        .then(() => {
-            document.getElementById('log').innerHTML += `📍 ${type}<br>🕒 ${time}<br>위도:${lat}, 경도:${lng}<hr>`;
-        })
-        .catch(() => alert('저장 실패'));
-
-    }, () => alert('위치 권한이 필요합니다.'));
+const SHEET_URL = "여기에_웹앱_URL_입력";
+if(localStorage.phone){document.getElementById('phone').value=localStorage.phone;}
+function scan(stage){
+const phone=document.getElementById('phone').value.trim();
+if(!phone){alert('휴대폰 번호 입력');return;}
+localStorage.phone=phone;
+if(!navigator.geolocation){alert('GPS 미지원');return;}
+navigator.geolocation.getCurrentPosition(pos=>{
+fetch(SHEET_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
+stage:stage,
+phone:phone,
+lat:pos.coords.latitude,
+lng:pos.coords.longitude,
+time:new Date().toLocaleString()
+})}).then(()=>{
+document.getElementById('status').innerText=stage+' 저장 완료';
+});
+},()=>alert('위치 권한 필요'));
 }
 </script>
-
 </body>
 </html>
