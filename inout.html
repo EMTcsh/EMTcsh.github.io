@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>국립공원 안전산행 체크인/아웃</title>
+<title>국립공원 안전 산행 체크</title>
 <style>
   body { font-family: Arial, sans-serif; padding: 20px; max-width: 480px; margin: auto; }
   input, button { padding: 12px; margin: 5px 0; width: 100%; font-size: 16px; }
@@ -18,7 +18,7 @@
 </head>
 <body>
 
-<h2>국립공원 안전산행 체크인/아웃</h2>
+<h2>국립공원 안전 산행 체크</h2>
 
 <label>전화번호:</label>
 <input type="text" id="phone" placeholder="010-1234-5678" inputmode="tel">
@@ -31,7 +31,7 @@
 <div class="log" id="log"></div>
 
 <script>
-const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwjufnBNZtPhucvyQ4BMImls7fR064bkuGPY5UQjpnPVtNW7Z9GU5BhTBDQnu94QnUo/exec'; // Apps Script URL 입력
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwjufnBNZtPhucvyQ4BMImls7fR064bkuGPY5UQjpnPVtNW7Z9GU5BhTBDQnu94QnUo/exec'; // Web App URL 입력
 
 let startTime, midTime, endTime;
 
@@ -64,10 +64,10 @@ function checkIn(type) {
         if (type === 'mid') midTime = now;
         if (type === 'end') {
             endTime = now;
-            const duration = ((endTime - startTime)/1000/60).toFixed(1);
-            record.duration = duration + "분";
+            record.duration = ((endTime - startTime)/1000/60).toFixed(1) + "분";
         }
 
+        // ✅ 구글시트 자동 기록
         fetch(SCRIPT_URL, {
             method: 'POST',
             mode: 'no-cors',
@@ -78,6 +78,7 @@ function checkIn(type) {
             if (record.duration) logText += `, 총 산행 시간: ${record.duration}`;
             document.getElementById('log').innerHTML += `<p>${logText}</p>`;
 
+            // 버튼별 메시지 색상
             const msgDiv = document.getElementById('message');
             if (type === 'start') msgDiv.style.color = '#007BFF';
             else if (type === 'mid') msgDiv.style.color = '#FFC107';
@@ -93,8 +94,7 @@ function checkIn(type) {
 setInterval(() => {
     if (startTime && !endTime) {
         const now = new Date();
-        const hours = (now - startTime)/1000/60/60;
-        if (hours > 24 && !document.getElementById('alert')) {
+        if ((now - startTime)/1000/60/60 > 24 && !document.getElementById('alert')) {
             const alertDiv = document.createElement('div');
             alertDiv.id = 'alert';
             alertDiv.className = 'alert';
