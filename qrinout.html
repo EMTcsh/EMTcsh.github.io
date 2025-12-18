@@ -26,7 +26,7 @@ input{width:100%;padding:12px;font-size:15px;margin-bottom:10px}
 <div id="result">대기 중...</div>
 </div>
 <script>
-const SHEET_URL = "https://script.google.com/macros/s/AKfycbyu-WKRdnTCWpgTFvzC8-FFD1U93z5PabjyRp4ETXvYpjI1RLb79BPbYNy6fsENKDcn/exec";
+const SHEET_URL = "https://script.google.com/macros/s/AKfycbwwadT2YGMxgPQk34MJFX6PHjIcreBNiJ6_NTeeaqYqHPGoZhTka5j31rRGDdCw8w9J/exec";
 
 if(localStorage.phone){
  document.getElementById('phone').value = localStorage.phone;
@@ -72,42 +72,87 @@ function scan(stage){
 </html>
 
 <!-- ================= GOOGLE APPS SCRIPT =================
+const SPREADSHEET_ID = '1uftb9c8nEyHv6BEdpFcGCbUaOmRTyj0Y9iOQCit95cs';
+
 function doPost(e) {
-  const d = JSON.parse(e.postData.contents);
-  const ss = SpreadsheetApp.openById('스프레드시트ID');
-  const sheet = ss.getSheetByName(d.stage) || ss.insertSheet(d.stage);
-  sheet.appendRow([
-    new Date(),
-    d.stage,
-    d.phone,
-    d.lat,
-    d.lng,
-    d.time
-  ]);
-  updateFinalSheet();
-  return ContentService.createTextOutput('OK');
+  try {
+    const d = JSON.parse(e.postData.contents);
+    const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+
+    // ▶ 단계별 시트 저장
+    const sheet =
+      ss.getSheetByName(d.stage) || ss.insertSheet(d.stage);
+
+    sheet.appendRow([
+      new Date(),
+      d.stage,
+      d.phone,
+      d.lat,
+      d.lng,
+      d.time
+    ]);
+
+    // ▶ 미완료 시트 자동 갱신
+    updateIncompleteSheet(ss);
+
+    return ContentService
+      .createTextOutput(JSON.stringify({ result: 'OK' }))
+      .setMimeType(ContentService.MimeType.JSON);
+
+  } catch (err) {
+    return ContentService
+      .createTextOutput(JSON.stringify({ error: err.toString() }))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
 }
 
-function updateFinalSheet(){
-  const ss=SpreadsheetApp.openById('스프레드시트ID');
-  const entry=getPhones(ss,'입장');
-  const mid=getPhones(ss,'중간');
-  const exit=getPhones(ss,'퇴장');
-  const sheet=ss.getSheetByName('미완료_탐방객')||ss.insertSheet('미완료_탐방객');
+function updateIncompleteSheet(ss) {
+  const entry = getPhones(ss, '입장');
+  const mid   = getPhones(ss, '중간');
+  const exit  = getPhones(ss, '퇴장');
+
+  const sheet =
+    ss.getSheetByName('미완료') || ss.insertSheet('미완료');
+
   sheet.clear();
-  sheet.appendRow(['전화번호','입장','중간','퇴장','상태']);
-  const all=new Set([...entry,...mid,...exit]);
-  all.forEach(p=>{
-    const e=entry.has(p), m=mid.has(p), x=exit.has(p);
-    if(e&&!x){sheet.appendRow([p,e?'O':'X',m?'O':'X',x?'O':'X',m?'퇴장 미확인':'중간·퇴장 미확인']);}
+  sheet.appendRow([
+    '전화번호',
+    '입장',
+    '중간',
+    '퇴장',
+    '상태'
+  ]);
+
+  const all = new Set([...entry, ...mid, ...exit]);
+
+  all.forEach(p => {
+    const e = entry.has(p);
+    const m = mid.has(p);
+    const x = exit.has(p);
+
+    if (e && !x) {
+      sheet.appendRow([
+        p,
+        e ? 'O' : 'X',
+        m ? 'O' : 'X',
+        x ? 'O' : 'X',
+        m ? '퇴장 미확인' : '중간·퇴장 미확인'
+      ]);
+    }
   });
 }
-function getPhones(ss,name){
-  const sh=ss.getSheetByName(name);
-  if(!sh) return new Set();
-  const v=sh.getDataRange().getValues();
-  const s=new Set();
-  for(let i=1;i<v.length;i++){s.add(v[i][2]);}
+
+function getPhones(ss, name) {
+  const sh = ss.getSheetByName(name);
+  if (!sh) return new Set();
+
+  const v = sh.getDataRange().getValues();
+  const s = new Set();
+
+  for (let i = 1; i < v.length; i++) {
+    s.add(v[i][2]); // C열 = 전화번호
+  }
   return s;
 }
+
 ======================================================= -->
