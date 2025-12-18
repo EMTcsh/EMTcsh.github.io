@@ -31,8 +31,9 @@ input{width:100%;padding:12px;font-size:15px;margin-bottom:10px}
 </div>
 
 <script>
-/* ⭐⭐⭐ 반드시 입력 ⭐⭐⭐ */
-const SHEET_URL = "https://script.google.com/macros/s/AKfycbzS7f9kvdKyWM82TG0dL-fmzM1psiprI2JJD1MHEhY7HBgjD0k07Xv9bJZagGBZuR6Q/exec";
+/* ✅ 반드시 실제 웹앱 URL */
+const SHEET_URL =
+  "https://script.google.com/macros/s/실제_배포_URL/exec";
 
 /* 전화번호 기억 */
 if(localStorage.phone){
@@ -70,11 +71,14 @@ function scan(stage){
       headers:{'Content-Type':'application/json'},
       body:JSON.stringify({ stage, phone, lat, lng, time })
     })
-    .then(res => res.json())
-    .then(data => {
+    .then(res => res.text())   <!-- 🔥 핵심 수정 -->
+    .then(text => {
+      console.log('서버응답:', text);
+      const data = JSON.parse(text);
+
       if(data.result === 'OK'){
         document.getElementById('result').innerHTML =
-          `✅ ${stage} 완료<br><b>구글시트로 전송되었습니다</b>`;
+          `✅ ${stage} 완료<br><b>구글시트에 저장되었습니다</b>`;
       } else {
         throw new Error(data.error);
       }
