@@ -12,30 +12,47 @@ button{width:100%;padding:15px;font-size:16px;margin-top:10px;border:none;border
 .entry{background:#4caf50}
 .mid{background:#2196f3}
 .exit{background:#f44336}
-input{width:90%;padding:12px;font-size:15px;margin-bottom:10px}
+input{width:100%;padding:12px;font-size:15px;margin-bottom:10px}
 #result{margin-top:15px;font-size:14px;background:#f1f1f1;padding:10px;border-radius:6px}
 </style>
 </head>
+
 <body>
 <div class="container">
-<h2>국립공원 안전산행 체크</h2>
-<input type="tel" id="phone" placeholder="휴대폰 번호 (최초 1회 입력)">
-<button class="entry" onclick="scan('입장')">입구 스캔</button>
-<button class="mid" onclick="scan('중간')">중간 스캔</button>
-<button class="exit" onclick="scan('퇴장')">출구 스캔</button>
-<div id="result">대기 중...</div>
+  <h2>🏞️ 국립공원 안전산행 체크</h2>
+
+  <input type="tel" id="phone" placeholder="휴대폰 번호 (최초 1회 입력)">
+
+  <button class="entry" onclick="scan('입장')">입구 스캔</button>
+  <button class="mid" onclick="scan('중간')">중간 스캔</button>
+  <button class="exit" onclick="scan('퇴장')">출구 스캔</button>
+
+  <div id="result">대기 중...</div>
 </div>
+
 <script>
+/* ⭐⭐⭐ 반드시 입력 ⭐⭐⭐ */
+const SHEET_URL = "https://script.google.com/macros/s/AKfycbzbcI6n1DtwEFN4HvwdQ7fUJiH_7asagQjT4l5QdrMdUMtGHfspOy0_4JzXfw7oHEH2/exec";
+
+/* 전화번호 기억 */
+if(localStorage.phone){
+  document.getElementById('phone').value = localStorage.phone;
+}
+
 function scan(stage){
   const phone = document.getElementById('phone').value.trim();
-  if(!phone){ alert('휴대폰 번호를 입력해주세요'); return; }
+  if(!phone){
+    alert('휴대폰 번호를 입력해주세요');
+    return;
+  }
+  localStorage.phone = phone;
 
   if(!navigator.geolocation){
     alert('GPS를 지원하지 않는 기기입니다');
     return;
   }
 
-  document.getElementById('result').innerText = '위치 확인 중...';
+  document.getElementById('result').innerText = '📡 위치 확인 중...';
 
   navigator.geolocation.getCurrentPosition(pos=>{
     const lat  = pos.coords.latitude.toFixed(6);
@@ -43,9 +60,11 @@ function scan(stage){
     const time = new Date().toLocaleString();
 
     document.getElementById('result').innerHTML =
-      `📍 ${stage} 좌표 확인<br>위도: ${lat}<br>경도: ${lng}<br>전송 중...`;
+      `📍 ${stage} 좌표 확인<br>
+       위도: ${lat}<br>
+       경도: ${lng}<br>
+       전송 중...`;
 
-    // ⭐⭐⭐ 여기! fetch 작성 위치 ⭐⭐⭐
     fetch(SHEET_URL,{
       method:'POST',
       headers:{'Content-Type':'application/json'},
@@ -55,7 +74,7 @@ function scan(stage){
     .then(data => {
       if(data.result === 'OK'){
         document.getElementById('result').innerHTML =
-          `✅ ${stage} 완료<br>구글시트로 전송되었습니다`;
+          `✅ ${stage} 완료<br><b>구글시트로 전송되었습니다</b>`;
       } else {
         throw new Error(data.error);
       }
@@ -73,41 +92,74 @@ function scan(stage){
 </body>
 </html>
 
-<!-- ================= GOOGLE APPS SCRIPT =================
-const SPREADSHEET_ID = '1uftb9c8nEyHv6BEdpFcGCbUaOmRTyj0Y9iOQCit95cs';
 
+<!-- ================= GOOGLE APPS SCRIPT =================
+
+const SPREADSHEET_ID = '1DMwMD4nrefM2qfP-e7AlirEzBtTFXUuH0twvW2EHUCw';
+
+/**
+ * 웹앱 POST 수신
+ */
 function doPost(e) {
   try {
+    if (!e || !e.postData || !e.postData.contents) {
+      throw new Error('POST 데이터가 없습니다');
+    }
+
     const d = JSON.parse(e.postData.contents);
+
+    if (!d.stage || !d.phone) {
+      throw new Error('필수값(stage, phone) 누락');
+    }
+
     const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
 
-    // ▶ 단계별 시트 저장
+    // 1️⃣ 입장 / 중간 / 퇴장 시트에 원본 저장
     const sheet =
       ss.getSheetByName(d.stage) || ss.insertSheet(d.stage);
+
+    // 헤더 없으면 생성
+    if (sheet.getLastRow() === 0) {
+      sheet.appendRow([
+        '기록시간',
+        '단계',
+        '전화번호',
+        '위도',
+        '경도',
+        '사용자시간'
+      ]);
+    }
 
     sheet.appendRow([
       new Date(),
       d.stage,
       d.phone,
-      d.lat,
-      d.lng,
-      d.time
+      d.lat || '',
+      d.lng || '',
+      d.time || ''
     ]);
 
-    // ▶ 미완료 시트 자동 갱신
+    // 2️⃣ 미완료 시트 자동 갱신
     updateIncompleteSheet(ss);
 
+    // ✅ 반드시 JSON 응답
     return ContentService
       .createTextOutput(JSON.stringify({ result: 'OK' }))
       .setMimeType(ContentService.MimeType.JSON);
 
   } catch (err) {
     return ContentService
-      .createTextOutput(JSON.stringify({ error: err.toString() }))
+      .createTextOutput(JSON.stringify({
+        result: 'ERROR',
+        error: err.toString()
+      }))
       .setMimeType(ContentService.MimeType.JSON);
   }
 }
 
+/**
+ * 미완료 탐방객 시트 생성/갱신
+ */
 function updateIncompleteSheet(ss) {
   const entry = getPhones(ss, '입장');
   const mid   = getPhones(ss, '중간');
@@ -125,36 +177,47 @@ function updateIncompleteSheet(ss) {
     '상태'
   ]);
 
-  const all = new Set([...entry, ...mid, ...exit]);
+  const allPhones = new Set([
+    ...entry,
+    ...mid,
+    ...exit
+  ]);
 
-  all.forEach(p => {
-    const e = entry.has(p);
-    const m = mid.has(p);
-    const x = exit.has(p);
+  allPhones.forEach(phone => {
+    const hasEntry = entry.has(phone);
+    const hasMid   = mid.has(phone);
+    const hasExit  = exit.has(phone);
 
-    if (e && !x) {
+    // 입장은 했는데 퇴장은 안 한 경우만 표시
+    if (hasEntry && !hasExit) {
       sheet.appendRow([
-        p,
-        e ? 'O' : 'X',
-        m ? 'O' : 'X',
-        x ? 'O' : 'X',
-        m ? '퇴장 미확인' : '중간·퇴장 미확인'
+        phone,
+        hasEntry ? 'O' : 'X',
+        hasMid   ? 'O' : 'X',
+        hasExit  ? 'O' : 'X',
+        hasMid ? '퇴장 미확인' : '중간·퇴장 미확인'
       ]);
     }
   });
 }
 
-function getPhones(ss, name) {
-  const sh = ss.getSheetByName(name);
+/**
+ * 특정 시트에서 전화번호 Set 추출
+ */
+function getPhones(ss, sheetName) {
+  const sh = ss.getSheetByName(sheetName);
   if (!sh) return new Set();
 
-  const v = sh.getDataRange().getValues();
-  const s = new Set();
+  const values = sh.getDataRange().getValues();
+  const phones = new Set();
 
-  for (let i = 1; i < v.length; i++) {
-    s.add(v[i][2]); // C열 = 전화번호
+  // 1행은 헤더
+  for (let i = 1; i < values.length; i++) {
+    const phone = values[i][2];
+    if (phone) phones.add(phone);
   }
-  return s;
+  return phones;
 }
+
 
 ======================================================= -->
