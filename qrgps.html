@@ -40,9 +40,7 @@ input, textarea, button {
     margin-top:8px;
     font-size:16px;
 }
-textarea {
-    resize:vertical;
-}
+textarea { resize:vertical; }
 button {
     background:#d32f2f;
     color:white;
@@ -67,19 +65,22 @@ button {
     <div class="info" id="gpsInfo">📍 위치 확인 중...</div>
 
     <div class="info">
-        <b>👤 요구조자 정보</b>
+        <b>👤 환자 정보</b>
         <input id="name" placeholder="이름 (미상 가능)">
-        <input id="age" placeholder="나이 / 성별 / 전화번호">
-        <textarea id="condition" placeholder="증상 및 상황 (예: 골절 거동불가)"></textarea>
+        <input id="age" placeholder="나이 / 성별">
+        <textarea id="condition" placeholder="증상 및 상황 (예: 추락 후 의식저하)"></textarea>
     </div>
 
-    <button onclick="callRescue()">☎️ 구조요청 전화 연결</button>
-    <div class="small">※ 버튼 클릭 시 010-3190-1187로 바로 전화 연결됩니다</div>
+    <button onclick="sendSMSAndCall()">✉️ 문자 전송 후 ☎️ 전화 연결</button>
+    <div class="small">
+        ※ 문자 앱이 열리고 이어서 010-3190-1187로 전화 연결됩니다
+    </div>
 </section>
 
 <script>
 let map, marker;
 let lat = null, lng = null;
+const TARGET_NUMBER = "01031901187";
 
 // 지도 초기화
 function initMap(latInit = 37.5665, lngInit = 126.9780) {
@@ -89,7 +90,6 @@ function initMap(latInit = 37.5665, lngInit = 126.9780) {
     });
     marker = new kakao.maps.Marker({ map: map });
 }
-
 initMap();
 
 // 실시간 위치 갱신
@@ -107,27 +107,41 @@ navigator.geolocation.watchPosition(
             📍 경도: ${lng.toFixed(6)}
         `;
     },
-    () => {
-        alert("위치 권한이 필요합니다.");
-    },
-    {
-        enableHighAccuracy: true,
-        maximumAge: 0,
-        timeout: 5000
-    }
+    () => alert("위치 권한이 필요합니다."),
+    { enableHighAccuracy:true, maximumAge:0, timeout:5000 }
 );
 
-// 전화 연결 전용
-function callRescue() {
+// 문자 + 전화
+function sendSMSAndCall() {
     if (lat === null || lng === null) {
         alert("위치 확인 중입니다. 잠시 후 다시 시도하세요.");
         return;
     }
 
-    // 바로 전화 연결
-    location.href = "tel:01031901187";
+    const name = document.getElementById("name").value || "미상";
+    const age = document.getElementById("age").value || "-";
+    const condition = document.getElementById("condition").value || "-";
+
+    const message =
+`[구조요청]
+위도: ${lat.toFixed(6)}
+경도: ${lng.toFixed(6)}
+
+환자: ${name}
+나이/성별: ${age}
+증상: ${condition}`;
+
+    // 1️⃣ 문자 앱 열기 (내용 자동 입력)
+    location.href =
+        `sms:${TARGET_NUMBER}?body=${encodeURIComponent(message)}`;
+
+    // 2️⃣ 잠시 후 전화 연결
+    setTimeout(() => {
+        location.href = `tel:${TARGET_NUMBER}`;
+    }, 1200);
 }
 </script>
 
 </body>
 </html>
+
