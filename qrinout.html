@@ -6,14 +6,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
 body{font-family:Arial;background:#f4f6f8;padding:20px}
-.container{max-width:500px;margin:auto;background:#fff;padding:20px;border-radius:10px;box-shadow:0 4px 10px rgba(0,0,0,0.1)}
-h2{text-align:center}
+.container{max-width:500px;margin:auto;background:#fff;padding:20px;border-radius:10px}
 button{width:100%;padding:15px;font-size:16px;margin-top:10px;border:none;border-radius:6px;color:#fff}
 .entry{background:#4caf50}
 .mid{background:#2196f3}
 .exit{background:#f44336}
-input{width:90%;padding:12px;font-size:15px;margin-bottom:10px}
-#result{margin-top:15px;font-size:14px;background:#f1f1f1;padding:10px;border-radius:6px}
+input{width:100%;padding:12px;margin-bottom:10px}
+#result{margin-top:15px;background:#f1f1f1;padding:10px;border-radius:6px}
 </style>
 </head>
 
@@ -21,7 +20,7 @@ input{width:90%;padding:12px;font-size:15px;margin-bottom:10px}
 <div class="container">
   <h2>국립공원 안전산행 체크</h2>
 
-  <input type="tel" id="phone" placeholder="휴대폰 번호 (최초 1회 입력)">
+  <input type="tel" id="phone" placeholder="휴대폰 번호">
 
   <button class="entry" onclick="scan('입장')">입구 스캔</button>
   <button class="mid" onclick="scan('중간')">중간 스캔</button>
@@ -31,28 +30,17 @@ input{width:90%;padding:12px;font-size:15px;margin-bottom:10px}
 </div>
 
 <script>
-/* ⭐⭐⭐ 반드시 입력 ⭐⭐⭐ */
-const SHEET_URL = "https://script.google.com/macros/s/AKfycbzbcI6n1DtwEFN4HvwdQ7fUJiH_7asagQjT4l5QdrMdUMtGHfspOy0_4JzXfw7oHEH2/exec";
+const SHEET_URL =
+  "https://script.google.com/macros/s/AKfycbzS7f9kvdKyWM82TG0dL-fmzM1psiprI2JJD1MHEhY7HBgjD0k07Xv9bJZagGBZuR6Q/exec";
 
-/* 전화번호 기억 */
 if(localStorage.phone){
   document.getElementById('phone').value = localStorage.phone;
 }
 
 function scan(stage){
   const phone = document.getElementById('phone').value.trim();
-  if(!phone){
-    alert('휴대폰 번호를 입력해주세요');
-    return;
-  }
+  if(!phone){ alert('휴대폰 번호 입력'); return; }
   localStorage.phone = phone;
-
-  if(!navigator.geolocation){
-    alert('GPS를 지원하지 않는 기기입니다');
-    return;
-  }
-
-  document.getElementById('result').innerText = '📡 위치 확인 중...';
 
   navigator.geolocation.getCurrentPosition(pos=>{
     const lat  = pos.coords.latitude.toFixed(6);
@@ -60,32 +48,28 @@ function scan(stage){
     const time = new Date().toLocaleString();
 
     document.getElementById('result').innerHTML =
-      `📍 ${stage} 좌표 확인<br>
-       위도: ${lat}<br>
-       경도: ${lng}<br>
-       전송 중...`;
+      `📡 위치 확인됨<br>전송 중...`;
 
     fetch(SHEET_URL,{
       method:'POST',
       headers:{'Content-Type':'application/json'},
       body:JSON.stringify({ stage, phone, lat, lng, time })
     })
-    .then(res => res.json())
-    .then(data => {
+    .then(res => res.text())
+    .then(text => {
+      console.log(text);
+      const data = JSON.parse(text);
       if(data.result === 'OK'){
         document.getElementById('result').innerHTML =
-          `✅ ${stage} 완료<br><b>구글시트로 전송되었습니다</b>`;
+          `✅ ${stage} 완료<br>구글시트 저장됨`;
       } else {
         throw new Error(data.error);
       }
     })
-    .catch(err => {
+    .catch(err=>{
       document.getElementById('result').innerText =
         '❌ 전송 실패: ' + err.message;
     });
-
-  }, ()=>{
-    alert('위치 권한이 필요합니다');
   });
 }
 </script>
