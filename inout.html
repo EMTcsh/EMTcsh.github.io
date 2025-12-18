@@ -36,6 +36,12 @@
   .log { margin-top: 20px; font-size: 14px; word-break: break-word; text-align: left; }
   .alert { color: red; font-weight: bold; margin-bottom: 10px; }
   #message { margin-top: 10px; font-weight: bold; font-size: 18px; }
+
+  .guide {
+    text-align: left; /* 왼쪽 정렬 */
+    padding: 10px;    /* 원하면 여백 추가 */
+}
+  
 </style>
 </head>
 <body>
@@ -49,6 +55,15 @@
 <button class="mid" onclick="checkIn('mid')">산행 중 체크</button>
 <button class="end" onclick="checkIn('end')">출구 체크아웃</button>
 
+<br>
+<br>
+  
+<div class="guide">
+🟢 내 전화번호 입력 후 국립공원 입구 클릭<br>
+🟢 일정시간 산행 중 한번더 클릭<br>    
+🟢 하산후 출구에서 클릭<br>
+</div>  
+  
 <div id="message"></div>
 <div class="log" id="log"></div>
 
