@@ -6,7 +6,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <!-- 카카오 지도 API -->
-<script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=ff9e145029506d6e4c72d1f2b01ea424&libraries=services"></script>
+<script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=YOUR_KAKAO_APP_KEY"></script>
 
 <style>
 body { margin:0; font-family: Arial, sans-serif; background:#f5f5f5; }
@@ -39,10 +39,6 @@ button {
     border-radius:6px;
     cursor:pointer;
 }
-.call {
-    background:#2e7d32;
-    margin-top:10px;
-}
 .small {
     font-size:14px;
     color:#555;
@@ -65,7 +61,7 @@ button {
     </div>
 
     <button onclick="sendRescue()">🚨 구조 요청 · 공유 · 전화</button>
-    <div class="small">※ 버튼 클릭 시 119로 전화 연결됩니다</div>
+    <div class="small">※ 버튼 클릭 시 010-3190-1187로 전화 연결됩니다</div>
 </section>
 
 <script>
@@ -76,7 +72,9 @@ let lat = null, lng = null;
 const params = new URLSearchParams(location.search);
 const isRescueView = params.get("mode") === "rescue";
 
+// =====================
 // 지도 초기화
+// =====================
 function initMap(latInit = 37.5665, lngInit = 126.9780) {
     map = new kakao.maps.Map(document.getElementById("map"), {
         center: new kakao.maps.LatLng(latInit, lngInit),
@@ -136,7 +134,8 @@ if (isRescueView) {
     });
 }
 
-// ===========원 전화
+// =====================
+// 구조요청 + 공유 + 전화 연결
 // =====================
 function sendRescue() {
     if (lat === null || lng === null) {
@@ -167,13 +166,13 @@ function sendRescue() {
         navigator.clipboard.writeText(rescueUrl);
     }
 
-    // 2️⃣ 구조 전화 연결
+    // 2️⃣ 지정 휴대폰 번호로 전화 연결
     setTimeout(() => {
-        location.href = "tel:010-3190-1187";
+        location.href = "tel:01031901187";
     }, 800);
 }
 </script>
 
-}, 800);
-}
-</scri
+</body>
+</html>
+
