@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>🏞️ 국립공원 산행 QR 체크</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body {
+    font-family: Arial, sans-serif;
+    background: #f4f6f8;
+    margin: 0;
+    padding: 20px;
+}
+.container {
+    max-width: 500px;
+    margin: auto;
+    background: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+h1 { text-align: center; }
+button {
+    width: 100%;
+    padding: 15px;
+    font-size: 16px;
+    margin-top: 10px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+}
+.entry { background: #4caf50; color: #fff; }
+.mid { background: #2196f3; color: #fff; }
+.exit { background: #f44336; color: #fff; }
+.log {
+    margin-top: 20px;
+    font-size: 14px;
+    background: #f9f9f9;
+    padding: 10px;
+    border-radius: 6px;
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+    <h1>🏞️ 국립공원 산행 QR</h1>
+    <p>QR 스캔 시 위치와 시간이 Google Sheets에 저장됩니다.</p>
+
+    <button class="entry" onclick="record('입장')">입구 QR 스캔</button>
+    <button class="mid" onclick="record('산행중')">중간 지점 QR 스캔</button>
+    <button class="exit" onclick="record('퇴장')">출구 QR 스캔</button>
+
+    <div class="log" id="log"></div>
+</div>
+
+<script>
+// 🔴 Google Apps Script 웹앱 URL 입력
+const SHEET_URL = "여기에_웹앱_URL_입력";
+
+function record(type) {
+    if (!navigator.geolocation) {
+        alert('위치 정보를 지원하지 않는 기기입니다.');
+        return;
+    }
+
+    navigator.geolocation.getCurrentPosition(pos => {
+        const time = new Date().toLocaleString();
+        const lat = pos.coords.latitude;
+        const lng = pos.coords.longitude;
+
+        fetch(SHEET_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                type: type,
+                time: time,
+                latitude: lat,
+                longitude: lng
+            })
+        })
+        .then(() => {
+            document.getElementById('log').innerHTML += `📍 ${type}<br>🕒 ${time}<br>위도:${lat}, 경도:${lng}<hr>`;
+        })
+        .catch(() => alert('저장 실패'));
+
+    }, () => alert('위치 권한이 필요합니다.'));
+}
+</script>
+
+</body>
+</html>
+
+<!-- ================================
+📌 Google Apps Script 코드 (붙여넣기용)
+
+function doPost(e) {
+  const sheet = SpreadsheetApp.openById('스프레드시트ID').getSheetByName('Sheet1');
+  const data = JSON.parse(e.postData.contents);
+
+  sheet.appendRow([
+    new Date(),
+    data.type,
+    data.time,
+    data.latitude,
+    data.longitude
+  ]);
+
+  return ContentService.createTextOutput('OK');
+}
+
+※ 배포: 웹앱 / 접근권한: 누구나
+================================ -->
