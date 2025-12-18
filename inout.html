@@ -31,11 +31,11 @@ input{width:90%;padding:12px;font-size:15px;margin-bottom:10px}
 </div>
 
 <script>
-/* ✅ 반드시 실제 웹앱 URL */
+/* ✅ 배포된 Apps Script 웹앱 URL */
 const SHEET_URL =
-  "https://script.google.com/macros/s/AKfycbxBn7gJSrhJU4CYTQXd1vhh3wKXEtivxTy_7XVxtLsfc-uwe0kPjlh-R3q5_y3wWb6uZg/exec";
+"https://script.google.com/macros/s/AKfycbxBn7gJSrhJU4CYTQXd1vhh3wKXEtivxTy_7XVxtLsfc-uwe0kPjlh-R3q5_y3wWb6uZg/exec";
 
-/* 전화번호 기억 */
+/* 전화번호 로컬 저장 */
 if(localStorage.phone){
   document.getElementById('phone').value = localStorage.phone;
 }
@@ -71,7 +71,7 @@ function scan(stage){
       headers:{'Content-Type':'application/json'},
       body:JSON.stringify({ stage, phone, lat, lng, time })
     })
-    .then(res => res.text())   <!-- 🔥 핵심 수정 -->
+    .then(res => res.text())   // ❗ 반드시 text()
     .then(text => {
       console.log('서버응답:', text);
       const data = JSON.parse(text);
