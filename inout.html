@@ -6,7 +6,7 @@
 <title>국립공원 안전 산행 체크</title>
 <style>
   body { font-family: Arial, sans-serif; padding: 20px; max-width: 480px; margin: auto; }
-  input, button { padding: 12px; margin: 5px 0; width: 90%; font-size: 16px; }
+  input, button { padding: 12px; margin: 5px 0; width: 100%; font-size: 16px; }
   button { border: none; border-radius: 8px; color: white; cursor: pointer; }
   button.start { background-color: #007BFF; }
   button.mid { background-color: #FFC107; color: black; }
@@ -57,7 +57,7 @@ function checkIn(type) {
             lat: coords.lat,
             lng: coords.lng,
             timestamp: now.toISOString(),
-            mapLink: `https://www.google.com/maps?q=${coords.lat},${coords.lng}`
+            mapLink: `https://map.kakao.com/link/map/${coords.lat},${coords.lng}` // 카카오 지도 링크
         };
 
         if (type === 'start') startTime = now;
@@ -67,7 +67,7 @@ function checkIn(type) {
             record.duration = ((endTime - startTime)/1000/60).toFixed(1) + "분";
         }
 
-        // ✅ 구글시트 자동 기록
+        // 구글시트 자동 기록
         fetch(SCRIPT_URL, {
             method: 'POST',
             mode: 'no-cors',
@@ -78,7 +78,6 @@ function checkIn(type) {
             if (record.duration) logText += `, 총 산행 시간: ${record.duration}`;
             document.getElementById('log').innerHTML += `<p>${logText}</p>`;
 
-            // 버튼별 메시지 색상
             const msgDiv = document.getElementById('message');
             if (type === 'start') msgDiv.style.color = '#007BFF';
             else if (type === 'mid') msgDiv.style.color = '#FFC107';
