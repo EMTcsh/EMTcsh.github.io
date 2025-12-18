@@ -6,10 +6,14 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <!-- 카카오 지도 API -->
-<script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=YOUR_KAKAO_APP_KEY"></script>
+<script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=ff9e145029506d6e4c72d1f2b01ea424&libraries=services"></script>
 
 <style>
-body { margin:0; font-family: Arial, sans-serif; background:#f5f5f5; }
+body {
+    margin:0;
+    font-family: Arial, sans-serif;
+    background:#f5f5f5;
+}
 header {
     background:#b71c1c;
     color:white;
@@ -17,8 +21,13 @@ header {
     text-align:center;
     font-size:20px;
 }
-#map { width:100%; height:300px; }
-section { padding:15px; }
+#map {
+    width:100%;
+    height:300px;
+}
+section {
+    padding:15px;
+}
 .info {
     background:white;
     padding:12px;
@@ -31,13 +40,16 @@ input, textarea, button {
     margin-top:8px;
     font-size:16px;
 }
-textarea { resize:vertical; }
+textarea {
+    resize:vertical;
+}
 button {
     background:#d32f2f;
     color:white;
     border:none;
     border-radius:6px;
     cursor:pointer;
+    font-size:18px;
 }
 .small {
     font-size:14px;
@@ -48,9 +60,10 @@ button {
 <body>
 
 <header>🆘 구조요청</header>
+
 <div id="map"></div>
 
-<section id="userScreen">
+<section>
     <div class="info" id="gpsInfo">📍 위치 확인 중...</div>
 
     <div class="info">
@@ -60,21 +73,15 @@ button {
         <textarea id="condition" placeholder="증상 및 상황 (예: 추락 후 의식저하)"></textarea>
     </div>
 
-    <button onclick="sendRescue()">🚨 구조 요청 · 공유 · 전화</button>
-    <div class="small">※ 버튼 클릭 시 010-3190-1187로 전화 연결됩니다</div>
+    <button onclick="callRescue()">☎️ 구조요청 전화 연결</button>
+    <div class="small">※ 버튼 클릭 시 010-3190-1187로 바로 전화 연결됩니다</div>
 </section>
 
 <script>
 let map, marker;
 let lat = null, lng = null;
 
-// URL 파라미터
-const params = new URLSearchParams(location.search);
-const isRescueView = params.get("mode") === "rescue";
-
-// =====================
 // 지도 초기화
-// =====================
 function initMap(latInit = 37.5665, lngInit = 126.9780) {
     map = new kakao.maps.Map(document.getElementById("map"), {
         center: new kakao.maps.LatLng(latInit, lngInit),
@@ -83,37 +90,11 @@ function initMap(latInit = 37.5665, lngInit = 126.9780) {
     marker = new kakao.maps.Marker({ map: map });
 }
 
-// =====================
-// 구조대 전용 화면
-// =====================
-if (isRescueView) {
-    const data = JSON.parse(decodeURIComponent(params.get("data")));
+initMap();
 
-    document.getElementById("userScreen").innerHTML = `
-        <div class="info">
-            <b>🚑 구조대 전용 정보</b><br><br>
-            <b>환자:</b> ${data.name || "미상"}<br>
-            <b>나이/성별:</b> ${data.age || "-"}<br>
-            <b>증상:</b> ${data.condition || "-"}<br>
-            <b>시간:</b> ${data.time}<br>
-            <b>좌표:</b> ${data.lat}, ${data.lng}<br><br>
-            <a href="https://map.kakao.com/link/map/${data.lat},${data.lng}" target="_blank">
-                🗺️ 카카오지도에서 열기
-            </a>
-        </div>
-    `;
-
-    initMap(data.lat, data.lng);
-    marker.setPosition(new kakao.maps.LatLng(data.lat, data.lng));
-
-} else {
-
-    // =====================
-    // 구조 대상자 화면
-    // =====================
-    initMap();
-
-    navigator.geolocation.watchPosition(pos => {
+// 실시간 위치 갱신
+navigator.geolocation.watchPosition(
+    pos => {
         lat = pos.coords.latitude;
         lng = pos.coords.longitude;
 
@@ -125,54 +106,28 @@ if (isRescueView) {
             📍 위도: ${lat.toFixed(6)}<br>
             📍 경도: ${lng.toFixed(6)}
         `;
-    }, () => {
+    },
+    () => {
         alert("위치 권한이 필요합니다.");
-    }, {
+    },
+    {
         enableHighAccuracy: true,
         maximumAge: 0,
         timeout: 5000
-    });
-}
+    }
+);
 
-// =====================
-// 구조요청 + 공유 + 전화 연결
-// =====================
-function sendRescue() {
+// 전화 연결 전용
+function callRescue() {
     if (lat === null || lng === null) {
         alert("위치 확인 중입니다. 잠시 후 다시 시도하세요.");
         return;
     }
 
-    const data = {
-        lat, lng,
-        name: document.getElementById("name").value,
-        age: document.getElementById("age").value,
-        condition: document.getElementById("condition").value,
-        time: new Date().toLocaleString()
-    };
-
-    const rescueUrl =
-        location.origin + location.pathname +
-        `?mode=rescue&data=${encodeURIComponent(JSON.stringify(data))}`;
-
-    // 1️⃣ 구조요청 페이지 공유
-    if (navigator.share) {
-        navigator.share({
-            title: "🆘 구조 요청",
-            text: "현재 위치 및 환자 정보입니다.",
-            url: rescueUrl
-        });
-    } else {
-        navigator.clipboard.writeText(rescueUrl);
-    }
-
-    // 2️⃣ 지정 휴대폰 번호로 전화 연결
-    setTimeout(() => {
-        location.href = "tel:01031901187";
-    }, 800);
+    // 바로 전화 연결
+    location.href = "tel:01031901187";
 }
 </script>
 
 </body>
 </html>
-
