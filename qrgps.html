@@ -2,135 +2,173 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<title>🆘 QR 구조요청 GPS</title>
+<title>🆘 구조요청 위치 공유</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <!-- 카카오 지도 API -->
-<script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=ff9e145029506d6e4c72d1f2b01ea424&libraries=services"></script>
+<script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=YOUR_KAKAO_APP_KEY"></script>
 
 <style>
-body { font-family: Arial, sans-serif; margin:0; padding:0; }
+body { margin:0; font-family: Arial, sans-serif; background:#f5f5f5; }
 header {
-    background:#c62828; color:white;
-    padding:12px; text-align:center;
+    background:#c62828;
+    color:white;
+    padding:14px;
+    text-align:center;
     font-size:20px;
 }
 #map { width:100%; height:300px; }
 section { padding:15px; }
-input, textarea, button {
-    width:100%; padding:10px;
-    margin-top:8px; font-size:16px;
+.info {
+    background:white;
+    padding:12px;
+    border-radius:6px;
+    margin-bottom:10px;
 }
+input, textarea, button {
+    width:100%;
+    padding:10px;
+    margin-top:8px;
+    font-size:16px;
+}
+textarea { resize:vertical; }
 button {
-    background:#d32f2f; color:white;
-    border:none; cursor:pointer;
+    background:#d32f2f;
+    color:white;
+    border:none;
+    border-radius:6px;
+    cursor:pointer;
 }
 button.secondary {
     background:#1976d2;
 }
-.info {
-    background:#f5f5f5;
-    padding:10px; margin-top:10px;
+.small {
+    font-size:14px;
+    color:#555;
 }
 </style>
 </head>
 <body>
 
-<header>🆘 QR 구조요청 위치 공유</header>
-
+<header>🆘 구조요청</header>
 <div id="map"></div>
 
-<section>
-    <div class="info" id="gpsInfo">위치 확인 중...</div>
+<section id="userScreen">
+    <div class="info" id="gpsInfo">📍 위치 확인 중...</div>
 
-    <h3>👤 환자 정보</h3>
-    <input id="name" placeholder="환자 이름">
-    <input id="age" placeholder="나이 / 성별">
-    <textarea id="condition" placeholder="증상 및 상황 (예: 추락 후 의식저하)"></textarea>
+    <div class="info">
+        <b>👤 환자 정보</b>
+        <input id="name" placeholder="이름 (미상 가능)">
+        <input id="age" placeholder="나이 / 성별">
+        <textarea id="condition" placeholder="증상 및 상황 (예: 추락 후 의식저하)"></textarea>
+    </div>
 
-    <button onclick="sendRescue()">🚨 구조 요청</button>
+    <button onclick="sendRescue()">🚨 구조 요청 및 공유</button>
+    <div class="small">※ GPS 권한 허용 필수</div>
 </section>
 
 <script>
 let map, marker;
-let lat = 0, lng = 0;
+let lat = null, lng = null;
 
+// URL 파라미터
+const params = new URLSearchParams(location.search);
+const isRescueView = params.get("mode") === "rescue";
+
+// =====================
 // 지도 초기화
-function initMap() {
-    map = new kakao.maps.Map(document.getElementById('map'), {
-        center: new kakao.maps.LatLng(37.5665, 126.9780),
+// =====================
+function initMap(latInit = 37.5665, lngInit = 126.9780) {
+    map = new kakao.maps.Map(document.getElementById("map"), {
+        center: new kakao.maps.LatLng(latInit, lngInit),
         level: 3
     });
     marker = new kakao.maps.Marker({ map: map });
 }
-initMap();
 
-// 실시간 위치 갱신
-navigator.geolocation.watchPosition(pos => {
-    lat = pos.coords.latitude;
-    lng = pos.coords.longitude;
+// =====================
+// 구조대 전용 화면
+// =====================
+if (isRescueView) {
+    const data = JSON.parse(decodeURIComponent(params.get("data")));
 
-    const loc = new kakao.maps.LatLng(lat, lng);
-    map.setCenter(loc);
-    marker.setPosition(loc);
-
-    document.getElementById("gpsInfo").innerHTML = `
-        📍 위도: ${lat.toFixed(6)}<br>
-        📍 경도: ${lng.toFixed(6)}
+    document.getElementById("userScreen").innerHTML = `
+        <div class="info">
+            <b>🚑 구조대 전용 정보</b><br><br>
+            <b>환자:</b> ${data.name || "미상"}<br>
+            <b>나이/성별:</b> ${data.age || "-"}<br>
+            <b>증상:</b> ${data.condition || "-"}<br>
+            <b>시간:</b> ${data.time}<br>
+            <b>좌표:</b> ${data.lat}, ${data.lng}<br><br>
+            <a href="https://map.kakao.com/link/map/${data.lat},${data.lng}" target="_blank">
+                🗺️ 카카오지도에서 열기
+            </a>
+        </div>
     `;
-}, () => {
-    alert("위치 권한 필요");
-}, {
-    enableHighAccuracy: true,
-    maximumAge: 0,
-    timeout: 5000
-});
 
-// 구조요청
+    initMap(data.lat, data.lng);
+    marker.setPosition(new kakao.maps.LatLng(data.lat, data.lng));
+
+} else {
+
+    // =====================
+    // 구조 대상자 화면
+    // =====================
+    initMap();
+
+    navigator.geolocation.watchPosition(pos => {
+        lat = pos.coords.latitude;
+        lng = pos.coords.longitude;
+
+        const loc = new kakao.maps.LatLng(lat, lng);
+        map.setCenter(loc);
+        marker.setPosition(loc);
+
+        document.getElementById("gpsInfo").innerHTML = `
+            📍 위도: ${lat.toFixed(6)}<br>
+            📍 경도: ${lng.toFixed(6)}
+        `;
+    }, () => {
+        alert("위치 권한이 필요합니다.");
+    }, {
+        enableHighAccuracy: true,
+        maximumAge: 0,
+        timeout: 5000
+    });
+}
+
+// =====================
+// 구조요청 + 공유
+// =====================
 function sendRescue() {
+    if (lat === null || lng === null) {
+        alert("위치 확인 중입니다. 잠시 후 다시 시도하세요.");
+        return;
+    }
+
     const data = {
         lat, lng,
         name: document.getElementById("name").value,
         age: document.getElementById("age").value,
-        condition: document.getElementById("condition").value
+        condition: document.getElementById("condition").value,
+        time: new Date().toLocaleString()
     };
 
-    const url = location.origin + location.pathname +
+    const rescueUrl =
+        location.origin + location.pathname +
         `?mode=rescue&data=${encodeURIComponent(JSON.stringify(data))}`;
 
-    alert("구조 요청 링크가 생성되었습니다.\n구조대에 전달하세요.");
-    window.open(url, "_blank");
-}
-
-// 구조대 전용 화면
-const params = new URLSearchParams(location.search);
-if (params.get("mode") === "rescue") {
-    const data = JSON.parse(decodeURIComponent(params.get("data")));
-
-    document.body.innerHTML = `
-        <header>🚑 구조대 전용 화면</header>
-        <div id="map" style="height:300px"></div>
-        <section class="info">
-            <b>환자:</b> ${data.name}<br>
-            <b>나이/성별:</b> ${data.age}<br>
-            <b>증상:</b> ${data.condition}<br>
-            <b>위치:</b> ${data.lat}, ${data.lng}<br><br>
-            <a href="https://map.kakao.com/link/map/${data.lat},${data.lng}" target="_blank">
-                🗺️ 카카오지도 열기
-            </a>
-        </section>
-    `;
-
-    setTimeout(() => {
-        const map2 = new kakao.maps.Map(document.getElementById('map'), {
-            center: new kakao.maps.LatLng(data.lat, data.lng),
-            level: 3
+    // 모바일 공유 자동 실행
+    if (navigator.share) {
+        navigator.share({
+            title: "🆘 구조 요청",
+            text: "현재 위치 및 환자 정보입니다.",
+            url: rescueUrl
         });
-        new kakao.maps.Marker({
-            position: new kakao.maps.LatLng(data.lat, data.lng),
-            map: map2
-        });
-    }, 300);
+    } else {
+        navigator.clipboard.writeText(rescueUrl);
+        alert("구조요청 링크가 복사되었습니다.\n119 또는 구조대에 전달하세요.");
+    }
 }
 </script>
 
