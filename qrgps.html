@@ -65,20 +65,16 @@ button {
     <div class="info" id="gpsInfo">📍 위치 확인 중...</div>
 
     <div class="info">
-        <b>☎️ 연락 받을 전화번호</b>
-        <input id="phone" value="0622271187" placeholder="전화번호 (숫자만)">
-    </div>
-
-    <div class="info">
         <b>👤 환자 정보</b>
         <input id="name" placeholder="이름 (미상 가능)">
         <input id="age" placeholder="나이 / 성별">
-        <textarea id="condition" placeholder="증상 및 상황 (예: 골절 후 거동불가)"></textarea>
+        <input id="phone" placeholder="연락받을 전화번호 (숫자만)">
+        <textarea id="condition" placeholder="증상 및 상황 (예: 추락 후 의식저하)"></textarea>
     </div>
 
     <button onclick="sendSMSAndCall()">✉️ 문자 전송 후 ☎️ 전화 연결</button>
     <div class="small">
-        ※ 무등산국립공원 특수구조대로 문자 작성 후 전화가 연결됩니다
+        ※ 입력한 전화번호로 문자 작성 후 전화가 연결됩니다
     </div>
 </section>
 
@@ -124,7 +120,7 @@ function sendSMSAndCall() {
 
     const phone = document.getElementById("phone").value.replace(/[^0-9]/g, "");
     if (!phone) {
-        alert("전화번호를 입력하세요.");
+        alert("연락받을 전화번호를 입력하세요.");
         return;
     }
 
@@ -139,6 +135,7 @@ function sendSMSAndCall() {
 
 환자: ${name}
 나이/성별: ${age}
+연락처: ${phone}
 증상: ${condition}`;
 
     // 1️⃣ 문자 앱 열기 (내용 자동 입력)
