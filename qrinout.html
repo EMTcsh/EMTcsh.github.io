@@ -46,3 +46,44 @@ document.getElementById('status').innerText=stage+' 저장 완료';
 </script>
 </body>
 </html>
+<!-- ================= GOOGLE APPS SCRIPT =================
+function doPost(e) {
+const d = JSON.parse(e.postData.contents);
+const ss = SpreadsheetApp.openById('스프레드시트ID');
+const sheet = ss.getSheetByName(d.stage) || ss.insertSheet(d.stage);
+sheet.appendRow([
+new Date(),
+d.stage,
+d.phone,
+d.lat,
+d.lng,
+d.time
+]);
+updateFinalSheet();
+return ContentService.createTextOutput('OK');
+}
+
+
+function updateFinalSheet(){
+const ss=SpreadsheetApp.openById('스프레드시트ID');
+const entry=getPhones(ss,'입장');
+const mid=getPhones(ss,'중간');
+const exit=getPhones(ss,'퇴장');
+const sheet=ss.getSheetByName('미완료_탐방객')||ss.insertSheet('미완료_탐방객');
+sheet.clear();
+sheet.appendRow(['전화번호','입장','중간','퇴장','상태']);
+const all=new Set([...entry,...mid,...exit]);
+all.forEach(p=>{
+const e=entry.has(p), m=mid.has(p), x=exit.has(p);
+if(e&&!x){sheet.appendRow([p,e?'O':'X',m?'O':'X',x?'O':'X',m?'퇴장 미확인':'중간·퇴장 미확인']);}
+});
+}
+function getPhones(ss,name){
+const sh=ss.getSheetByName(name);
+if(!sh) return new Set();
+const v=sh.getDataRange().getValues();
+const s=new Set();
+for(let i=1;i<v.length;i++){s.add(v[i][2]);}
+return s;
+}
+======================================================= -->
