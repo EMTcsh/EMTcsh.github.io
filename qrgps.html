@@ -65,22 +65,26 @@ button {
     <div class="info" id="gpsInfo">📍 위치 확인 중...</div>
 
     <div class="info">
-        <b>👤 구조요청자 정보</b>
+        <b>☎️ 연락 받을 전화번호</b>
+        <input id="phone" value="0622271187" placeholder="전화번호 (숫자만)">
+    </div>
+
+    <div class="info">
+        <b>👤 환자 정보</b>
         <input id="name" placeholder="이름 (미상 가능)">
-        <input id="age" placeholder="나이 / 성별 / 전화번호">
-        <textarea id="condition" placeholder="증상 및 상황 (예: 골절 거동불가)"></textarea>
+        <input id="age" placeholder="나이 / 성별">
+        <textarea id="condition" placeholder="증상 및 상황 (예: 추락 후 의식저하)"></textarea>
     </div>
 
     <button onclick="sendSMSAndCall()">✉️ 문자 전송 후 ☎️ 전화 연결</button>
     <div class="small">
-        ※ 문자 앱이 열리고 이어서 010-3190-1187로 전화 연결됩니다
+        ※ 무등산국립공원 특수구조대로 문자 작성 후 전화가 연결됩니다
     </div>
 </section>
 
 <script>
 let map, marker;
 let lat = null, lng = null;
-const TARGET_NUMBER = "01031901187";
 
 // 지도 초기화
 function initMap(latInit = 37.5665, lngInit = 126.9780) {
@@ -118,6 +122,12 @@ function sendSMSAndCall() {
         return;
     }
 
+    const phone = document.getElementById("phone").value.replace(/[^0-9]/g, "");
+    if (!phone) {
+        alert("전화번호를 입력하세요.");
+        return;
+    }
+
     const name = document.getElementById("name").value || "미상";
     const age = document.getElementById("age").value || "-";
     const condition = document.getElementById("condition").value || "-";
@@ -132,12 +142,11 @@ function sendSMSAndCall() {
 증상: ${condition}`;
 
     // 1️⃣ 문자 앱 열기 (내용 자동 입력)
-    location.href =
-        `sms:${TARGET_NUMBER}?body=${encodeURIComponent(message)}`;
+    location.href = `sms:${phone}?body=${encodeURIComponent(message)}`;
 
     // 2️⃣ 잠시 후 전화 연결
     setTimeout(() => {
-        location.href = `tel:${TARGET_NUMBER}`;
+        location.href = `tel:${phone}`;
     }, 1200);
 }
 </script>
