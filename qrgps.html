@@ -68,13 +68,13 @@ button {
         <b>👤 환자 정보</b>
         <input id="name" placeholder="이름 (미상 가능)">
         <input id="age" placeholder="나이 / 성별">
-        <input id="contact" placeholder="☎ 연락받을 전화번호 (환자/보호자)">
+        <input id="contact" placeholder="☎ 연락받을 전화번호">
         <textarea id="condition" placeholder="증상 및 상황 (예: 골절 후 거동불가)"></textarea>
     </div>
 
     <button onclick="sendSMSAndCall()">✉️ 문자 전송 후 ☎️ 전화 연결</button>
     <div class="small">
-        ※ 문자와 전화는 <b>무등산특수산악구조대</b>로 연결됩니다
+        ※ 문자 및 전화는 <b>무등산특수산악구조대</b>로 연결됩니다
     </div>
 </section>
 
@@ -82,8 +82,12 @@ button {
 let map, marker;
 let lat = null, lng = null;
 
-// 🚑 구조대 고정 연락처
-const RESCUE_NUMBER = "01031901187";
+// 🚑 구조대 고정 번호
+const RESCUE_NUMBER = "01066650113";
+
+// ✅ 구글시트 Apps Script 웹앱 URL (반드시 교체!)
+const GOOGLE_SHEET_API =
+  "https://script.google.com/macros/s/https://script.google.com/macros/s/AKfycbwi9p5S3rOH0aJe9iYG6gfv1GIxUtfQplRS-C45g3QJVCQ5GZzVZVK6UVoIImvl7nSo_g/exec";
 
 // 지도 초기화
 function initMap(latInit = 37.5665, lngInit = 126.9780) {
@@ -95,7 +99,7 @@ function initMap(latInit = 37.5665, lngInit = 126.9780) {
 }
 initMap();
 
-// 실시간 위치 갱신
+// 실시간 GPS
 navigator.geolocation.watchPosition(
     pos => {
         lat = pos.coords.latitude;
@@ -114,7 +118,7 @@ navigator.geolocation.watchPosition(
     { enableHighAccuracy:true, maximumAge:0, timeout:5000 }
 );
 
-// 문자 + 전화 (구조대 번호 고정)
+// 문자 + 구글시트 + 전화
 function sendSMSAndCall() {
     if (lat === null || lng === null) {
         alert("위치 확인 중입니다. 잠시 후 다시 시도하세요.");
@@ -126,21 +130,36 @@ function sendSMSAndCall() {
     const contact = document.getElementById("contact").value || "-";
     const condition = document.getElementById("condition").value || "-";
 
+    const payload = {
+        lat: lat.toFixed(6),
+        lng: lng.toFixed(6),
+        name,
+        age,
+        contact,
+        condition
+    };
+
+    // 1️⃣ 구글시트 자동 저장
+    fetch(GOOGLE_SHEET_API, {
+        method: "POST",
+        body: JSON.stringify(payload)
+    }).catch(err => console.error("시트 저장 실패", err));
+
     const message =
 `[구조요청]
-위도: ${lat.toFixed(6)}
-경도: ${lng.toFixed(6)}
+위도: ${payload.lat}
+경도: ${payload.lng}
 
 환자: ${name}
 나이/성별: ${age}
-환자/보호자 연락처: ${contact}
+연락처: ${contact}
 증상: ${condition}`;
 
-    // 1️⃣ 구조대 번호로 문자 앱 열기
+    // 2️⃣ 문자 전송
     location.href =
         `sms:${RESCUE_NUMBER}?body=${encodeURIComponent(message)}`;
 
-    // 2️⃣ 이어서 구조대 번호로 전화 연결
+    // 3️⃣ 전화 연결
     setTimeout(() => {
         location.href = `tel:${RESCUE_NUMBER}`;
     }, 1200);
