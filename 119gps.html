@@ -4,10 +4,7 @@
 <meta charset="UTF-8">
 <title>🆘 구조 요청</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<!-- 카카오 지도 API -->
 <script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=ff9e145029506d6e4c72d1f2b01ea424&libraries=services"></script>
-
 <style>
 body { margin:0; font-family: Arial, sans-serif; background:#f5f5f5; }
 header { background:#b71c1c; color:white; padding:14px; text-align:center; font-size:20px; }
@@ -63,15 +60,11 @@ if (navigator.geolocation) {
         pos => {
             currentLat = pos.coords.latitude;
             currentLng = pos.coords.longitude;
-
             const loc = new kakao.maps.LatLng(currentLat, currentLng);
             map.setCenter(loc);
             userMarker.setPosition(loc);
-
             document.getElementById("gpsInfo").innerHTML = `
-                📍 현재 위치<br>
-                위도: ${currentLat.toFixed(6)}<br>
-                경도: ${currentLng.toFixed(6)}
+                📍 현재 위치<br>위도: ${currentLat.toFixed(6)}<br>경도: ${currentLng.toFixed(6)}
             `;
         },
         err => {
@@ -90,72 +83,48 @@ function loadAllRequests() {
         .then(res => res.json())
         .then(data => {
             if (!Array.isArray(data)) return;
-
-            // 기존 마커 제거
             markers.forEach(m => m.setMap(null));
             markers = [];
-
             data.forEach(item => {
                 const pos = new kakao.maps.LatLng(item.lat, item.lng);
                 const marker = new kakao.maps.Marker({ map: map, position: pos });
                 markers.push(marker);
-
-                const kakaoRouteURL = `https://map.kakao.com/link/to/목적지/${item.lat},${item.lng}`;
-
+                const kakaoRouteURL = `kakaomap://route?sp=${currentLat},${currentLng}&ep=${item.lat},${item.lng}&by=CAR`;
+                const webFallbackURL = `https://map.kakao.com/?saddr=${currentLat},${currentLng}&daddr=${item.lat},${item.lng}`;
                 const infowindow = new kakao.maps.InfoWindow({
                     content: `<div style="padding:5px; max-width:220px;">
                                 <b>증상:</b> ${item.condition}<br>
                                 <b>위도:</b> ${item.lat}<br>
                                 <b>경도:</b> ${item.lng}<br>
-                                <a href="${kakaoRouteURL}" target="_blank">길 안내 열기</a>
+                                <a href="${kakaoRouteURL}" onclick="setTimeout(()=>{window.location='${webFallbackURL}'},500);return true;">길 안내 열기</a>
                               </div>`
                 });
-
                 kakao.maps.event.addListener(marker, 'click', () => infowindow.open(map, marker));
             });
         })
         .catch(err => console.error("구조 요청 불러오기 실패", err));
 }
-
-// 5초마다 새 요청 자동 업데이트
 setInterval(loadAllRequests, 5000);
 
-// SMS 전송 + 구글 시트 저장 + 지도 마커
+// SMS 전송 + 구글 시트 저장
 function sendSMSAndCall() {
     if (currentLat === null || currentLng === null) {
         alert("현재 위치를 확인할 수 없습니다. 위치 권한을 허용해주세요.");
         return;
     }
-
     const condition = document.getElementById("condition").value || "-";
-
-    // 도착지 = 현재 위치 기반 구조 요청
     const destLat = currentLat.toFixed(6);
     const destLng = currentLng.toFixed(6);
-
     const payload = {
         lat: parseFloat(destLat),
         lng: parseFloat(destLng),
         condition,
-        kakaoMapURL: `https://map.kakao.com/link/to/목적지/${destLat},${destLng}`
+        kakaoMapURL: `kakaomap://route?sp=${currentLat},${currentLng}&ep=${destLat},${destLng}&by=CAR`
     };
-
-    // 구글 시트 저장
-    fetch(GOOGLE_SHEET_API, {
-        method: "POST",
-        body: JSON.stringify(payload)
-    })
-    .then(res => {
-        if(res.ok){
-            alert("구조 요청이 전송되었습니다!");
-            loadAllRequests();
-        }
-    })
-    .catch(err => console.error("시트 저장 실패", err));
-
-    // 모바일에서 SMS 단 한번만 전송
+    fetch(GOOGLE_SHEET_API, { method: "POST", body: JSON.stringify(payload) })
+        .then(res => { if(res.ok){ alert("구조 요청이 전송되었습니다!"); loadAllRequests(); }})
+        .catch(err => console.error("시트 저장 실패", err));
     if (/Mobi|Android/i.test(navigator.userAgent)) {
-        // SMS 전송
         location.href = `sms:${RESCUE_NUMBER}?body=${encodeURIComponent(
             `[구조요청]
 카카오맵 길 안내: ${payload.kakaoMapURL}
@@ -163,8 +132,6 @@ function sendSMSAndCall() {
 경도: ${payload.lng}
 증상: ${condition}`
         )}`;
-        // 전화 연결은 선택 사항, 필요 없으면 제거 가능
-        // setTimeout(() => { location.href = `tel:${RESCUE_NUMBER}`; }, 2000);
     } else {
         alert("모바일에서만 문자 기능이 작동합니다.\n메시지 내용:\n" +
             `[구조요청]\n카카오맵 길 안내: ${payload.kakaoMapURL}\n위도: ${payload.lat}\n경도: ${payload.lng}\n증상: ${condition}`
