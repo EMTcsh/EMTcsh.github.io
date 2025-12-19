@@ -34,7 +34,7 @@ section {
     border-radius:6px;
     margin-bottom:10px;
 }
-input, textarea, button {
+textarea, button {
     width:100%;
     padding:10px;
     margin-top:8px;
@@ -66,11 +66,12 @@ button {
 
     <div class="info">
         <b>👤 구조요청사항</b>
-
         <textarea id="condition" placeholder="증상 및 상황 (예: 내위치 등)"></textarea>
     </div>
 
-    <button onclick="sendSMSAndCall()">✉️ 산악구조대전송 </button>
+    <button onclick="sendSMS()">✉️ 문자 전송</button>
+    <button onclick="callRescue()" style="margin-top:5px;">📞 전화 연결</button>
+
     <div class="small">
         ※ 문자 및 전화는 <b>무등산특수산악구조대</b>로 연결됩니다
     </div>
@@ -80,13 +81,12 @@ button {
 let map, marker;
 let lat = null, lng = null;
 
-// 🚑 구조대 고정 번호
+// 구조대 번호
 const RESCUE_NUMBER = "01066650113";
 
-// ✅ 구글시트 Apps Script 웹앱 URL (반드시 교체!)
-const GOOGLE_SHEET_API =
-  "https://script.google.com/macros/s/AKfycbyTOMmbvCIDZ5VpxWQS5hdjdXdwcvoYsva-Ljtd2Y81lBfuSsPJ-jYhdMPhhxz31jHCaQ/exec";
-   
+// 구글시트 Apps Script 웹앱 URL
+const GOOGLE_SHEET_API = "https://script.google.com/macros/s/AKfycbyTOMmbvCIDZ5VpxWQS5hdjdXdwcvoYsva-Ljtd2Y81lBfuSsPJ-jYhdMPhhxz31jHCaQ/exec";
+
 // 지도 초기화
 function initMap(latInit = 37.5665, lngInit = 126.9780) {
     map = new kakao.maps.Map(document.getElementById("map"), {
@@ -98,65 +98,56 @@ function initMap(latInit = 37.5665, lngInit = 126.9780) {
 initMap();
 
 // 실시간 GPS
-navigator.geolocation.watchPosition(
-    pos => {
-        lat = pos.coords.latitude;
-        lng = pos.coords.longitude;
+if (navigator.geolocation) {
+    navigator.geolocation.watchPosition(
+        pos => {
+            lat = pos.coords.latitude;
+            lng = pos.coords.longitude;
 
-        const loc = new kakao.maps.LatLng(lat, lng);
-        map.setCenter(loc);
-        marker.setPosition(loc);
+            const loc = new kakao.maps.LatLng(lat, lng);
+            map.setCenter(loc);
+            marker.setPosition(loc);
 
-        document.getElementById("gpsInfo").innerHTML = `
-            📍 위도: ${lat.toFixed(6)}<br>
-            📍 경도: ${lng.toFixed(6)}
-        `;
-    },
-    () => alert("위치 권한이 필요합니다."),
-    { enableHighAccuracy:true, maximumAge:0, timeout:5000 }
-);
+            document.getElementById("gpsInfo").innerHTML = `
+                📍 위도: ${lat.toFixed(6)}<br>
+                📍 경도: ${lng.toFixed(6)}
+            `;
+        },
+        err => alert("위치 권한이 필요합니다."),
+        { enableHighAccuracy:true, maximumAge:0, timeout:5000 }
+    );
+} else {
+    alert("이 브라우저는 GPS를 지원하지 않습니다.");
+}
 
-// 문자 + 구글시트 + 전화
-function sendSMSAndCall() {
+// 문자 전송 + 구글시트 저장
+function sendSMS() {
     if (lat === null || lng === null) {
         alert("위치 확인 중입니다. 잠시 후 다시 시도하세요.");
         return;
     }
 
-    const name = document.getElementById("name").value || "미상";
-    const age = document.getElementById("age").value || "-";
-    const contact = document.getElementById("contact").value || "-";
     const condition = document.getElementById("condition").value || "-";
-
     const payload = {
         lat: lat.toFixed(6),
         lng: lng.toFixed(6),
-        name,
-        age,
-        contact,
         condition
     };
 
-    // 1️⃣ 구글시트 자동 저장
+    // 구글시트 저장
     fetch(GOOGLE_SHEET_API, {
         method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload)
     }).catch(err => console.error("시트 저장 실패", err));
 
-    const message =
-`[구조요청]
-위도: ${payload.lat}
-경도: ${payload.lng}
-증상: ${condition}`;
+    const message = `[구조요청]\n위도: ${payload.lat}\n경도: ${payload.lng}\n증상: ${condition}`;
+    location.href = `sms:${RESCUE_NUMBER}?body=${encodeURIComponent(message)}`;
+}
 
-    // 2️⃣ 문자 전송
-    location.href =
-        `sms:${RESCUE_NUMBER}?body=${encodeURIComponent(message)}`;
-
-    // 3️⃣ 전화 연결
-    setTimeout(() => {
-        location.href = `tel:${RESCUE_NUMBER}`;
-    }, 1200);
+// 전화 연결
+function callRescue() {
+    location.href = `tel:${RESCUE_NUMBER}`;
 }
 </script>
 
