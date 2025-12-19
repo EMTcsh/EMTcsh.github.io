@@ -34,7 +34,7 @@ button { background:#d32f2f; color:white; border:none; border-radius:6px; cursor
     <button onclick="sendSMSAndCall()">✉️ 산악구조대 전송</button>
     <button id="shareCoords">📤 내 위치 공유</button>
     <div class="small">
-        ※ 문자 및 전화는 <b>무등산특수산악구조대</b>로 연결됩니다
+        ※ 문자전송은 <b>무등산119특수산악구조대</b>로 연결됩니다
     </div>
 </section>
 
@@ -127,7 +127,7 @@ function sendSMSAndCall() {
         .catch(err => console.error("시트 저장 실패", err));
     if (/Mobi|Android/i.test(navigator.userAgent)) {
         location.href = `sms:${RESCUE_NUMBER}?body=${encodeURIComponent(
-`🚨 [구조요청] 요구조자 현위치
+`🚨 [산악구조요청] 요구조자 현위치
 
 📍 위도: ${payload.lat}
 📍 경도: ${payload.lng}
@@ -140,7 +140,7 @@ function sendSMSAndCall() {
         )}`;
     } else {
         alert("모바일에서만 문자 기능이 작동합니다.\n메시지 내용:\n" +
-`🚨 [구조요청] 요구조자 현위치
+`🚨 [산악구조요청] 요구조자 현위치
 
 📍 위도: ${payload.lat}
 📍 경도: ${payload.lng}
@@ -160,7 +160,7 @@ document.getElementById('shareCoords').onclick = () => {
         return;
     }
     const kakaoMapLink = `http://map.kakao.com/link/map/${currentLat},${currentLng}`;
-    const shareMessage = `🚨 [구조요청] 요구조자 현위치
+    const shareMessage = `🚨 [산악구조요청] 요구조자 현위치
 
 📍 위도: ${currentLat}
 📍 경도: ${currentLng}
@@ -170,7 +170,7 @@ document.getElementById('shareCoords').onclick = () => {
 
 ☎️ 전화 통화 시 위도·경도를 그대로 읽어주세요.`;
     if (navigator.share) {
-        navigator.share({ title: "[구조요청] GPS 좌표 공유", text: shareMessage }).catch(() => {});
+        navigator.share({ title: "[산악구조요청] GPS 좌표 공유", text: shareMessage }).catch(() => {});
     } else {
         navigator.clipboard.writeText(shareMessage);
         alert("공유 미지원 → 좌표가 클립보드에 복사되었습니다.");
