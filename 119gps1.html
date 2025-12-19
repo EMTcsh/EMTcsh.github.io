@@ -24,21 +24,18 @@ button { background:#d32f2f; color:white; border:none; border-radius:6px; cursor
       <section>
     <div class="info" id="gpsInfo">📍 현재 위치 확인 중...</div>
 
-  
+    <button onclick="sendSMSAndCall()">✉️ 산악구조대 전송</button>
+   </section>  
 
         <b>📋 산악구조 요청사항</b>
         <textarea id="condition" placeholder="증상 및 상황 (예: 낙상, 저체온 등)"></textarea>
     </div>
-
-    <button onclick="sendSMSAndCall()">✉️ 산악구조대 전송</button>
-   </section>
   
     <div class="small">
         ※ 문자전송은 <b>무등산119특수산악구조대</b>로 연결됩니다
-    </div> 
-<br>
-    <br>
-    
+    </div>
+  
+  
 <div id="map"></div>
 
 
