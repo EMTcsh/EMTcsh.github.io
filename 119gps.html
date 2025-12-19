@@ -32,6 +32,7 @@ button { background:#d32f2f; color:white; border:none; border-radius:6px; cursor
     </div>
 
     <button onclick="sendSMSAndCall()">✉️ 산악구조대 전송</button>
+    <button id="shareCoords">📤 내 위치 공유</button>
     <div class="small">
         ※ 문자 및 전화는 <b>무등산특수산악구조대</b>로 연결됩니다
     </div>
@@ -89,7 +90,6 @@ function loadAllRequests() {
                 const pos = new kakao.maps.LatLng(item.lat, item.lng);
                 const marker = new kakao.maps.Marker({ map: map, position: pos });
                 markers.push(marker);
-                // 카카오맵 링크 변경
                 const kakaoMapURL = `http://map.kakao.com/link/map/${item.lat},${item.lng}`;
                 const infowindow = new kakao.maps.InfoWindow({
                     content: `<div style="padding:5px; max-width:220px;">
@@ -115,30 +115,67 @@ function sendSMSAndCall() {
     const condition = document.getElementById("condition").value || "-";
     const destLat = currentLat.toFixed(6);
     const destLng = currentLng.toFixed(6);
-    const kakaoMapURL = `http://map.kakao.com/link/map/${destLat},${destLng}`;
+    const kakaoMapLink = `http://map.kakao.com/link/map/${destLat},${destLng}`;
     const payload = {
         lat: parseFloat(destLat),
         lng: parseFloat(destLng),
         condition,
-        kakaoMapURL
+        kakaoMapURL: kakaoMapLink
     };
     fetch(GOOGLE_SHEET_API, { method: "POST", body: JSON.stringify(payload) })
         .then(res => { if(res.ok){ alert("구조 요청이 전송되었습니다!"); loadAllRequests(); }})
         .catch(err => console.error("시트 저장 실패", err));
     if (/Mobi|Android/i.test(navigator.userAgent)) {
         location.href = `sms:${RESCUE_NUMBER}?body=${encodeURIComponent(
-            `[구조요청]
-카카오맵: ${kakaoMapURL}
-위도: ${payload.lat}
-경도: ${payload.lng}
-증상: ${condition}`
+`🚨 [구조요청] 요구조자 현위치
+
+📍 위도: ${payload.lat}
+📍 경도: ${payload.lng}
+
+🗺 지도 링크
+카카오맵: ${kakaoMapLink}
+
+☎️ 전화 통화 시 위도·경도를 그대로 읽어주세요.
+`
         )}`;
     } else {
         alert("모바일에서만 문자 기능이 작동합니다.\n메시지 내용:\n" +
-            `[구조요청]\n카카오맵: ${kakaoMapURL}\n위도: ${payload.lat}\n경도: ${payload.lng}\n증상: ${condition}`
+`🚨 [구조요청] 요구조자 현위치
+
+📍 위도: ${payload.lat}
+📍 경도: ${payload.lng}
+
+🗺 지도 링크
+카카오맵: ${kakaoMapLink}
+
+☎️ 전화 통화 시 위도·경도를 그대로 읽어주세요.`
         );
     }
 }
+
+// 내 위치 공유 버튼
+document.getElementById('shareCoords').onclick = () => {
+    if (!currentLat || !currentLng) {
+        alert("위치를 먼저 확인하세요.");
+        return;
+    }
+    const kakaoMapLink = `http://map.kakao.com/link/map/${currentLat},${currentLng}`;
+    const shareMessage = `🚨 [구조요청] 요구조자 현위치
+
+📍 위도: ${currentLat}
+📍 경도: ${currentLng}
+
+🗺 지도 링크
+카카오맵: ${kakaoMapLink}
+
+☎️ 전화 통화 시 위도·경도를 그대로 읽어주세요.`;
+    if (navigator.share) {
+        navigator.share({ title: "[구조요청] GPS 좌표 공유", text: shareMessage }).catch(() => {});
+    } else {
+        navigator.clipboard.writeText(shareMessage);
+        alert("공유 미지원 → 좌표가 클립보드에 복사되었습니다.");
+    }
+};
 </script>
 
 </body>
