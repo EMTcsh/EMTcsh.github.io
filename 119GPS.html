@@ -106,10 +106,11 @@ function sendSMSAndCall() {
     // SMS 메시지 생성
     const message =
 `[구조요청]
+카카오맵: ${kakaoMapURL}
 위도: ${payload.lat}
 경도: ${payload.lng}
 증상: ${condition}
-카카오맵: ${kakaoMapURL}`;
+`;
 
     // 문자 전송
     location.href = `sms:${RESCUE_NUMBER}?body=${encodeURIComponent(message)}`;
