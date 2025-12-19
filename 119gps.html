@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<title>🆘 실전용 구조 요청</title>
+<title>🆘 구조 요청</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <!-- 카카오 지도 API -->
@@ -48,7 +48,7 @@ const RESCUE_NUMBER = "01066650113";
 const GOOGLE_SHEET_API = "https://script.google.com/macros/s/AKfycbwR_WOHslJnvmdI9K0Vckgr1k6_ZPJVdgF6ynwxVxXJ1qlzHw9nxc3HPVM8mn_qp7k/exec";
 
 // 지도 초기화
-function initMap(latInit = 37.5665, lngInit = 126.9780) {
+function initMap(latInit = 35.162321, lngInit = 126.980342) {
     map = new kakao.maps.Map(document.getElementById("map"), {
         center: new kakao.maps.LatLng(latInit, lngInit),
         level: 3
@@ -100,7 +100,6 @@ function loadAllRequests() {
                 const marker = new kakao.maps.Marker({ map: map, position: pos });
                 markers.push(marker);
 
-                // link/to 방식으로 길 안내
                 const kakaoRouteURL = `https://map.kakao.com/link/to/목적지/${item.lat},${item.lng}`;
 
                 const infowindow = new kakao.maps.InfoWindow({
@@ -130,7 +129,7 @@ function sendSMSAndCall() {
 
     const condition = document.getElementById("condition").value || "-";
 
-    // 도착지 = 구조 요청 위치
+    // 도착지 = 현재 위치 기반 구조 요청
     const destLat = currentLat.toFixed(6);
     const destLng = currentLng.toFixed(6);
 
@@ -154,19 +153,22 @@ function sendSMSAndCall() {
     })
     .catch(err => console.error("시트 저장 실패", err));
 
-    // SMS 메시지 생성
-    const message =
-`[구조요청]
+    // 모바일에서 SMS 단 한번만 전송
+    if (/Mobi|Android/i.test(navigator.userAgent)) {
+        // SMS 전송
+        location.href = `sms:${RESCUE_NUMBER}?body=${encodeURIComponent(
+            `[구조요청]
 카카오맵 길 안내: ${payload.kakaoMapURL}
 위도: ${payload.lat}
 경도: ${payload.lng}
-증상: ${condition}`;
-
-    if (/Mobi|Android/i.test(navigator.userAgent)) {
-        location.href = `sms:${RESCUE_NUMBER}?body=${encodeURIComponent(message)}`;
-        setTimeout(() => { location.href = `tel:${RESCUE_NUMBER}`; }, 2000);
+증상: ${condition}`
+        )}`;
+        // 전화 연결은 선택 사항, 필요 없으면 제거 가능
+        // setTimeout(() => { location.href = `tel:${RESCUE_NUMBER}`; }, 2000);
     } else {
-        alert("모바일에서만 문자 및 전화 기능이 작동합니다.\n메시지 내용:\n" + message);
+        alert("모바일에서만 문자 기능이 작동합니다.\n메시지 내용:\n" +
+            `[구조요청]\n카카오맵 길 안내: ${payload.kakaoMapURL}\n위도: ${payload.lat}\n경도: ${payload.lng}\n증상: ${condition}`
+        );
     }
 }
 </script>
