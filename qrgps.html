@@ -65,14 +65,12 @@ button {
     <div class="info" id="gpsInfo">📍 위치 확인 중...</div>
 
     <div class="info">
-        <b>👤 환자 정보</b>
-        <input id="name" placeholder="이름 (미상 가능)">
-        <input id="age" placeholder="나이 / 성별">
-        <input id="contact" placeholder="☎ 연락받을 전화번호">
-        <textarea id="condition" placeholder="증상 및 상황 (예: 아픈부위 등)"></textarea>
+        <b>👤 구조요청사항</b>
+
+        <textarea id="condition" placeholder="증상 및 상황 (예: 내위치 등)"></textarea>
     </div>
 
-    <button onclick="sendSMSAndCall()">✉️ 문자 전송 후 ☎️ 전화 연결</button>
+    <button onclick="sendSMSAndCall()">✉️ 산악구조대전송 </button>
     <div class="small">
         ※ 문자 및 전화는 <b>무등산특수산악구조대</b>로 연결됩니다
     </div>
@@ -149,10 +147,6 @@ function sendSMSAndCall() {
 `[구조요청]
 위도: ${payload.lat}
 경도: ${payload.lng}
-
-환자: ${name}
-나이/성별: ${age}
-연락처: ${contact}
 증상: ${condition}`;
 
     // 2️⃣ 문자 전송
