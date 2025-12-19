@@ -34,7 +34,7 @@ section {
     border-radius:6px;
     margin-bottom:10px;
 }
-input, textarea, button {
+textarea, button {
     width:100%;
     padding:10px;
     margin-top:8px;
@@ -65,8 +65,7 @@ button {
     <div class="info" id="gpsInfo">📍 위치 확인 중...</div>
 
     <div class="info">
-        <b>👤 구조요청사항</b>
-
+        <b>📋 구조요청사항</b>
         <textarea id="condition" placeholder="증상 및 상황 (예: 내위치 등)"></textarea>
     </div>
 
@@ -81,12 +80,12 @@ let map, marker;
 let lat = null, lng = null;
 
 // 🚑 구조대 고정 번호
-const RESCUE_NUMBER = "01080020860";
+const RESCUE_NUMBER = "01066650113";
 
 // ✅ 구글시트 Apps Script 웹앱 URL (반드시 교체!)
 const GOOGLE_SHEET_API =
   "https://script.google.com/macros/s/AKfycbyTOMmbvCIDZ5VpxWQS5hdjdXdwcvoYsva-Ljtd2Y81lBfuSsPJ-jYhdMPhhxz31jHCaQ/exec";
-   
+
 // 지도 초기화
 function initMap(latInit = 37.5665, lngInit = 126.9780) {
     map = new kakao.maps.Map(document.getElementById("map"), {
@@ -123,37 +122,36 @@ function sendSMSAndCall() {
         return;
     }
 
-    const name = document.getElementById("name").value || "미상";
-    const age = document.getElementById("age").value || "-";
-    const contact = document.getElementById("contact").value || "-";
     const condition = document.getElementById("condition").value || "-";
+
+    // 카카오맵 링크 포함
+    const kakaoMapURL = `https://map.kakao.com/link/map/내위치/${lat.toFixed(6)},${lng.toFixed(6)}`;
 
     const payload = {
         lat: lat.toFixed(6),
         lng: lng.toFixed(6),
-        name,
-        age,
-        contact,
-        condition
+        condition,
+        kakaoMapURL
     };
 
-    // 1️⃣ 구글시트 자동 저장
+    // 구글 시트 저장
     fetch(GOOGLE_SHEET_API, {
         method: "POST",
         body: JSON.stringify(payload)
     }).catch(err => console.error("시트 저장 실패", err));
 
+    // SMS 메시지 생성 (카카오맵 링크 포함)
     const message =
 `[구조요청]
 위도: ${payload.lat}
 경도: ${payload.lng}
-증상: ${condition}`;
+증상: ${condition}
+카카오맵: ${kakaoMapURL}`;
 
-    // 2️⃣ 문자 전송
-    location.href =
-        `sms:${RESCUE_NUMBER}?body=${encodeURIComponent(message)}`;
+    // 문자 전송
+    location.href = `sms:${RESCUE_NUMBER}?body=${encodeURIComponent(message)}`;
 
-    // 3️⃣ 전화 연결
+    // 전화 연결
     setTimeout(() => {
         location.href = `tel:${RESCUE_NUMBER}`;
     }, 1200);
