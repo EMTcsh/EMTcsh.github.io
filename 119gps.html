@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<title>🆘 구조요청</title>
+<title>🆘 실시간 구조 요청</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <!-- 카카오 지도 API -->
@@ -22,19 +22,19 @@ button { background:#d32f2f; color:white; border:none; border-radius:6px; cursor
 </head>
 <body>
 
-<header>🆘 구조요청</header>
+<header>🆘 실시간 구조 요청</header>
 
 <div id="map"></div>
 
 <section>
-    <div class="info" id="gpsInfo">📍 위치 확인 중...</div>
+    <div class="info" id="gpsInfo">📍 현재 위치 확인 중...</div>
 
     <div class="info">
         <b>📋 구조요청사항</b>
-        <textarea id="condition" placeholder="증상 및 상황 (예: 내위치 등)"></textarea>
+        <textarea id="condition" placeholder="증상 및 상황 (예: 낙상, 저체온 등)"></textarea>
     </div>
 
-    <button onclick="sendSMSAndCall()">✉️ 산악구조대전송 </button>
+    <button onclick="sendSMSAndCall()">✉️ 산악구조대 전송</button>
     <div class="small">
         ※ 문자 및 전화는 <b>무등산특수산악구조대</b>로 연결됩니다
     </div>
@@ -42,7 +42,7 @@ button { background:#d32f2f; color:white; border:none; border-radius:6px; cursor
 
 <script>
 let map, marker;
-let lat = null, lng = null;
+let currentLat = null, currentLng = null;
 
 // 구조대 번호
 const RESCUE_NUMBER = "01080020860";
@@ -61,20 +61,21 @@ function initMap(latInit = 37.5665, lngInit = 126.9780) {
 }
 initMap();
 
-// 실시간 GPS
+// 실시간 GPS 추적
 if (navigator.geolocation) {
     navigator.geolocation.watchPosition(
         pos => {
-            lat = pos.coords.latitude;
-            lng = pos.coords.longitude;
+            currentLat = pos.coords.latitude;
+            currentLng = pos.coords.longitude;
 
-            const loc = new kakao.maps.LatLng(lat, lng);
+            const loc = new kakao.maps.LatLng(currentLat, currentLng);
             map.setCenter(loc);
             marker.setPosition(loc);
 
             document.getElementById("gpsInfo").innerHTML = `
-                📍 위도: ${lat.toFixed(6)}<br>
-                📍 경도: ${lng.toFixed(6)}
+                📍 현재 위치<br>
+                위도: ${currentLat.toFixed(6)}<br>
+                경도: ${currentLng.toFixed(6)}
             `;
         },
         err => {
@@ -87,7 +88,7 @@ if (navigator.geolocation) {
     document.getElementById("gpsInfo").innerHTML = "📍 현재 브라우저에서 GPS를 지원하지 않습니다.";
 }
 
-// 구글 시트에서 모든 구조 요청 가져와 지도에 표시
+// 구글 시트에서 모든 구조 요청 불러오기
 function loadAllRequests() {
     fetch(GOOGLE_SHEET_API + "?action=get")
         .then(res => res.json())
@@ -97,12 +98,11 @@ function loadAllRequests() {
                 const pos = new kakao.maps.LatLng(item.lat, item.lng);
                 const m = new kakao.maps.Marker({ map: map, position: pos });
 
-                // 출발지 = 현재 GPS 위치, 목적지 = 구조 요청 위치
-                const saddr = (lat && lng) ? `${lat.toFixed(6)},${lng.toFixed(6)}` : "37.5665,126.9780";
+                const saddr = (currentLat && currentLng) ? `${currentLat.toFixed(6)},${currentLng.toFixed(6)}` : "37.5665,126.9780";
                 const kakaoRouteURL = `https://map.kakao.com/?saddr=${saddr}&daddr=${item.lat},${item.lng}`;
 
                 const infowindow = new kakao.maps.InfoWindow({
-                    content: `<div style="padding:5px; max-width:200px;">
+                    content: `<div style="padding:5px; max-width:220px;">
                                 <b>증상:</b> ${item.condition}<br>
                                 <b>위도:</b> ${item.lat}<br>
                                 <b>경도:</b> ${item.lng}<br>
@@ -117,23 +117,27 @@ function loadAllRequests() {
 }
 loadAllRequests();
 
-// 문자 + 구글시트 + 전화
+// SMS 전송 + 구글 시트 저장 + 지도 마커
 function sendSMSAndCall() {
-    if (lat === null || lng === null) {
-        alert("위치 확인 중입니다. 잠시 후 다시 시도하세요.");
+    if (currentLat === null || currentLng === null) {
+        alert("현재 위치를 확인할 수 없습니다. 위치 권한을 허용해주세요.");
         return;
     }
 
     const condition = document.getElementById("condition").value || "-";
 
-    // 출발지 = 현재 위치, 목적지 = 현재 입력 구조 위치
-    const requestLat = lat.toFixed(6);
-    const requestLng = lng.toFixed(6);
-    const kakaoRouteURL = `https://map.kakao.com/?saddr=${requestLat},${requestLng}&daddr=${requestLat},${requestLng}`;
+    // 출발지 = 현재 GPS, 목적지 = 구조 위치 = 현재 GPS 자동 입력
+    const startLat = currentLat.toFixed(6);
+    const startLng = currentLng.toFixed(6);
+    const destLat = currentLat.toFixed(6);
+    const destLng = currentLng.toFixed(6);
+
+    // 카카오맵 길 안내 링크
+    const kakaoRouteURL = `https://map.kakao.com/?saddr=${startLat},${startLng}&daddr=${destLat},${destLng}`;
 
     const payload = {
-        lat: parseFloat(requestLat),
-        lng: parseFloat(requestLng),
+        lat: parseFloat(destLat),
+        lng: parseFloat(destLng),
         condition,
         kakaoMapURL: kakaoRouteURL
     };
@@ -149,7 +153,7 @@ function sendSMSAndCall() {
             const pos = new kakao.maps.LatLng(payload.lat, payload.lng);
             const m = new kakao.maps.Marker({ map: map, position: pos });
             const infowindow = new kakao.maps.InfoWindow({
-                content: `<div style="padding:5px; max-width:200px;">
+                content: `<div style="padding:5px; max-width:220px;">
                             <b>증상:</b> ${payload.condition}<br>
                             <b>위도:</b> ${payload.lat}<br>
                             <b>경도:</b> ${payload.lng}<br>
@@ -171,7 +175,9 @@ function sendSMSAndCall() {
 `;
 
     if (/Mobi|Android/i.test(navigator.userAgent)) {
+        // SMS 전송
         location.href = `sms:${RESCUE_NUMBER}?body=${encodeURIComponent(message)}`;
+        // 2초 후 전화 연결
         setTimeout(() => {
             location.href = `tel:${RESCUE_NUMBER}`;
         }, 2000);
@@ -183,4 +189,3 @@ function sendSMSAndCall() {
 
 </body>
 </html>
-
