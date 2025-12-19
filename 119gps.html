@@ -45,7 +45,7 @@ let map, marker;
 let lat = null, lng = null;
 
 // 구조대 번호
-const RESCUE_NUMBER = "01066650113";
+const RESCUE_NUMBER = "01080020860";
 
 // 구글 시트 Apps Script URL
 const GOOGLE_SHEET_API =
@@ -97,7 +97,7 @@ function loadAllRequests() {
                 const pos = new kakao.maps.LatLng(item.lat, item.lng);
                 const m = new kakao.maps.Marker({ map: map, position: pos });
 
-                // 현재 위치가 null이면 지도 중심으로 대체
+                // 출발지 = 현재 GPS 위치, 목적지 = 구조 요청 위치
                 const saddr = (lat && lng) ? `${lat.toFixed(6)},${lng.toFixed(6)}` : "37.5665,126.9780";
                 const kakaoRouteURL = `https://map.kakao.com/?saddr=${saddr}&daddr=${item.lat},${item.lng}`;
 
@@ -126,12 +126,14 @@ function sendSMSAndCall() {
 
     const condition = document.getElementById("condition").value || "-";
 
-    // 현재 GPS 위치를 출발지로, 구조 요청 위치를 목적지로
-    const kakaoRouteURL = `https://map.kakao.com/?saddr=${lat.toFixed(6)},${lng.toFixed(6)}&daddr=${lat.toFixed(6)},${lng.toFixed(6)}`;
+    // 출발지 = 현재 위치, 목적지 = 현재 입력 구조 위치
+    const requestLat = lat.toFixed(6);
+    const requestLng = lng.toFixed(6);
+    const kakaoRouteURL = `https://map.kakao.com/?saddr=${requestLat},${requestLng}&daddr=${requestLat},${requestLng}`;
 
     const payload = {
-        lat: parseFloat(lat.toFixed(6)),
-        lng: parseFloat(lng.toFixed(6)),
+        lat: parseFloat(requestLat),
+        lng: parseFloat(requestLng),
         condition,
         kakaoMapURL: kakaoRouteURL
     };
@@ -181,3 +183,4 @@ function sendSMSAndCall() {
 
 </body>
 </html>
+
