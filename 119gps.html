@@ -48,7 +48,7 @@ const RESCUE_NUMBER = "01066650113";
 const GOOGLE_SHEET_API = "https://script.google.com/macros/s/AKfycbwR_WOHslJnvmdI9K0Vckgr1k6_ZPJVdgF6ynwxVxXJ1qlzHw9nxc3HPVM8mn_qp7k/exec";
 
 // 지도 초기화
-function initMap(latInit = 35.162321, lngInit = 126.980342) {
+function initMap(latInit = 37.5665, lngInit = 126.9780) {
     map = new kakao.maps.Map(document.getElementById("map"), {
         center: new kakao.maps.LatLng(latInit, lngInit),
         level: 3
@@ -100,8 +100,8 @@ function loadAllRequests() {
                 const marker = new kakao.maps.Marker({ map: map, position: pos });
                 markers.push(marker);
 
-                const saddr = (currentLat && currentLng) ? `${currentLat.toFixed(6)},${currentLng.toFixed(6)}` : "37.5665,126.9780";
-                const kakaoRouteURL = `https://map.kakao.com/?saddr=${saddr}&daddr=${item.lat},${item.lng}`;
+                // link/to 방식으로 길 안내
+                const kakaoRouteURL = `https://map.kakao.com/link/to/목적지/${item.lat},${item.lng}`;
 
                 const infowindow = new kakao.maps.InfoWindow({
                     content: `<div style="padding:5px; max-width:220px;">
@@ -130,21 +130,15 @@ function sendSMSAndCall() {
 
     const condition = document.getElementById("condition").value || "-";
 
-    // 출발지 = 현재 GPS
-    const startLat = currentLat.toFixed(6);
-    const startLng = currentLng.toFixed(6);
-
-    // 도착지 = 현재 위치 기반 구조 요청 (필요시 다른 좌표로 변경 가능)
+    // 도착지 = 구조 요청 위치
     const destLat = currentLat.toFixed(6);
     const destLng = currentLng.toFixed(6);
-
-    const kakaoRouteURL = `https://map.kakao.com/?saddr=${startLat},${startLng}&daddr=${destLat},${destLng}`;
 
     const payload = {
         lat: parseFloat(destLat),
         lng: parseFloat(destLng),
         condition,
-        kakaoMapURL: kakaoRouteURL
+        kakaoMapURL: `https://map.kakao.com/link/to/목적지/${destLat},${destLng}`
     };
 
     // 구글 시트 저장
