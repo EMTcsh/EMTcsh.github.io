@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>🚑 무등산산악사고 비응급 환자평가 기록</title>
+<title>🚑 무등산산악사고 환자평가 기록</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <script type="text/javascript" src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=ff9e145029506d6e4c72d1f2b01ea424&libraries=services"></script>
 
@@ -26,11 +26,11 @@ button { border-radius: 8px; font-weight: bold; }
 <body>
 <div class="container">
 
-<h1 class="text-2xl font-bold text-center text-blue-700 mb-4">🚑 무등산산악사고 비응급 환자평가 기록</h1>
+<h1 class="text-2xl font-bold text-center text-blue-700 mb-4">🚑 무등산산악사고 환자평가 기록</h1>
 
 <!-- 설명 -->
 <div class="section">
-    <p>산악사고 비응급 환자 단순출동 기록용. 특수산악구조팀-무등산</p>
+    <p>산악사고 환자 출동 기록용. 특수산악구조팀-무등산</p>
     <p class="mt-2 text-sm text-gray-500">© 2024 Web Applications | Korea National Park Service Rescue Paramedic Lab</p>
 </div>
 
@@ -69,6 +69,7 @@ button { border-radius: 8px; font-weight: bold; }
 
     <label>눈 뜨기 반응 (E)</label>
     <select id="eye">
+        <option value=""></option>
         <option value="4">자발적으로 눈을 뜬다</option>
         <option value="3">말로 지시했을때 눈을 뜬다</option>
         <option value="2">통증 자극에 의해 눈을 뜬다</option>
@@ -77,6 +78,7 @@ button { border-radius: 8px; font-weight: bold; }
 
     <label>언어 반응 (V)</label>
     <select id="verbal">
+        <option value=""></option>
         <option value="5">정확한 반응(6하원칙에 지남력 있는 상태)</option>
         <option value="4">대화 혼란(대화가능하나, 계속적 대화 교환 안됨)</option>
         <option value="3">언어혼란(동문서답, 혼란된 말을 함)</option>
@@ -86,6 +88,7 @@ button { border-radius: 8px; font-weight: bold; }
 
     <label>운동 반응 (M)</label>
     <select id="motor">
+        <option value=""></option>
         <option value="6">명령에 따름(간단한 명령에 따라 운동기능 수행)</option>
         <option value="5">통증 자극 국소화 반응(명령은 따지 않지만, 자극을 가하면 피하거나 치우려고 함) </option>
         <option value="4">통증 자극 움츠림(통증 자극을 피하려고 함, 치우려고 하지는 않음)</option>
@@ -160,7 +163,7 @@ button { border-radius: 8px; font-weight: bold; }
   <a href="#" target="_blank">조난자 위치공유 whereUrl</a>
 </div>
 <div class="GPS-link">
-  <a href="https://discord.gg/ryaMRTAhwP" target="_blank">문의: 🐸 국립공원 안전사고 연구회</a>
+  <a href="https://discord.gg/ryaMRTAhwP" target="_blank">🐸 국립공원 안전사고 연구회</a>
 </div>  
 
 </div><!-- container end -->
@@ -215,7 +218,7 @@ document.getElementById("recordForm").addEventListener("submit", async function(
     const a = document.createElement("a");
 
     a.href = url;
-    a.download = `특수산악구조팀_환자평가_${today}.txt`;
+    a.download = `무등산 특수산악구조팀_환자평가_${today}.txt`;
     a.click();
 
     URL.revokeObjectURL(url);
@@ -292,7 +295,7 @@ function shareReport(){
     text += "GCS: " + document.getElementById("gcsResult").innerText;
 
     if (navigator.share){
-        navigator.share({title:"특수산악구조팀 환자평가", text});
+        navigator.share({title:"무등산 특수산악구조팀 환자평가", text});
     } else {
         alert("공유 기능 미지원");
     }
