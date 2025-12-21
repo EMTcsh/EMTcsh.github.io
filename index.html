@@ -4,303 +4,174 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>🚑 무등산산악사고 대응 기록</title>
+
 <script src="https://cdn.tailwindcss.com"></script>
-<script type="text/javascript" src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=ff9e145029506d6e4c72d1f2b01ea424&libraries=services"></script>
+<script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=ff9e145029506d6e4c72d1f2b01ea424&libraries=services"></script>
 
 <style>
-body { background-color: #f0f2f5; font-family: Arial, sans-serif; }
-.container { max-width: 900px; margin: 20px auto; padding: 20px; }
-.section { background-color: #fff; border-radius: 12px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-bottom: 20px; }
-.section h2 { font-size: 1.25rem; color: #1e3a8a; margin-bottom: 10px; }
-input, select, textarea { border: 1px solid #cbd5e1; border-radius: 8px; padding: 10px; width: 100%; margin-bottom: 10px; font-size: 1rem; }
-textarea { resize: vertical; min-height: 80px; }
-button { border-radius: 8px; font-weight: bold; }
-.board-item { white-space: pre-line; background-color: #f8fafc; padding: 12px; border-radius: 8px; margin-bottom: 10px; }
-.vitalsRow { border: 1px dashed #cbd5e1; border-radius: 8px; padding: 10px; margin-bottom: 10px; background-color: #fefefe; }
-.coordinate-box { background-color: #e2e8f0; border-radius: 8px; padding: 10px; margin-bottom: 10px; word-break: break-word; }
-#map { width: 100%; height: 300px; border-radius: 12px; margin-bottom: 10px; }
-.GPS-link a { display: block; text-align: center; padding: 10px; margin: 5px 0; background-color: #e0e7ff; border-radius: 8px; font-weight: bold; color: #1e40af; text-decoration: none; }
+body { background:#f0f2f5; font-family:Arial,sans-serif; }
+.container { max-width:900px; margin:20px auto; padding:20px; }
+.section { background:#fff; border-radius:12px; padding:20px;
+box-shadow:0 2px 8px rgba(0,0,0,0.1); margin-bottom:20px; }
+input,select,textarea { border:1px solid #cbd5e1; border-radius:8px;
+padding:10px; width:100%; margin-bottom:10px; }
+textarea { min-height:80px; resize:vertical; }
+.coordinate-box { background:#e2e8f0; padding:10px; border-radius:8px; }
+.board-item { white-space:pre-line; background:#f8fafc; padding:12px; border-radius:8px; }
+#map { width:100%; height:300px; border-radius:12px; margin-top:10px; }
 </style>
 </head>
 
 <body>
 <div class="container">
 
-<h1 class="text-2xl font-bold text-center text-blue-700 mb-4">🚑 무등산산악사고 대응 기록</h1>
+<h1 class="text-2xl font-bold text-center text-blue-700 mb-4">
+🚑 무등산산악사고 대응 기록
+</h1>
 
-<!-- 설명 -->
-<div class="section">
-    <p>무등산 산악사고 출동 기록용.</p>
-    <p>특수산악구조팀-무등산</p>
-    <p class="mt-2 text-sm text-gray-500">© 2024 Web Applications | Korea National Park Service Rescue Paramedic Lab</p>
-</div>
-
-<!-- 폼 시작 -->
 <form id="recordForm">
 
-<!-- ===== 현장 정보 ===== -->
+<!-- 현장정보 -->
 <div class="section">
-    <h2 class="text-xl font-semibold mb-2">현장정보</h2>
+<h2 class="text-xl font-semibold">현장정보</h2>
 
-    <label>도착시간:
-        <input type="datetime-local" name="발생시간" required>
-    </label>
+<input type="datetime-local" name="도착시간" required>
+<input type="text" name="사고장소" placeholder="사고장소" required>
 
-    <label>사고장소:
-        <input type="text" name="장소" placeholder="예: 무등산 OO일원" required>
-    </label>
-
-    <label>사고좌표:
-        <div class="coordinate-box" id="locationDisplay">위도: , 경도: </div>
-        <button id="getLocation" type="button" class="bg-green-600 text-white px-3 py-1 rounded">
-            🌐 현장도착 좌표
-        </button>
-        <input type="hidden" name="사고좌표" id="hiddenCoordinate">
-    </label>
-<br>
-    <br>
-    <label>환자증상:
-        <input type="text" name="주증상" placeholder="예: 호흡곤란, 가슴 통증" required>
-    </label>
-</div>
-
-<!-- ===== GCS ===== -->
-<div class="section">
-    <h2 class="text-xl font-semibold">의식평가</h2>
-
-    <label>눈 뜨기 반응 (E)</label>
-    <select id="eye">
-        <option value="4">자발적으로 눈을 뜬다</option>
-        <option value="3">말로 지시했을때 눈을 뜬다</option>
-        <option value="2">통증 자극에 의해 눈을 뜬다</option>
-        <option value="1">어떠한 자극에도 눈을 뜨지 못한다</option>
-    </select>
-
-    <label>언어 반응 (V)</label>
-    <select id="verbal">
-        <option value="5">정확한 반응(6하원칙에 지남력 있는 상태)</option>
-        <option value="4">대화 혼란(대화가능하나, 계속적 대화 교환 안됨)</option>
-        <option value="3">언어혼란(동문서답, 혼란된 말을 함)</option>
-        <option value="2">이해 할수 없는 소리(신음소리만)</option>
-        <option value="1">반응이 없음(아무런 소리를 내지 않음)</option>
-    </select>
-
-    <label>운동 반응 (M)</label>
-    <select id="motor">
-        <option value="6">명령에 따름(간단한 명령에 따라 운동기능 수행)</option>
-        <option value="5">통증 자극 국소화 반응(명령은 따지 않지만, 자극을 가하면 피하거나 치우려고 함) </option>
-        <option value="4">통증 자극 움츠림(통증 자극을 피하려고 함, 치우려고 하지는 않음)</option>
-        <option value="3">통증 자극 이상굴곡(통증 자극에 앞으로 구부리거나 몸쪽으로 접음)</option>
-        <option value="2">통증 자극 이상신전(통증 자극에 뒤로 젖히거나 모에서 멀리 뻗음)(</option>
-        <option value="1">전혀 움직이지 않음(무반응, 자가호흡 없음)</option>
-    </select>
-
-    <div id="gcsResultContainer" style="margin-top:10px; display:none;">
-        <strong>의식평가(GCS) 결과:</strong>
-        <span id="gcsResult"></span>
-    </div>
-</div>
-
-<!-- ===== 환자 정보 ===== -->
-<div class="section">
-    <h2 class="text-xl font-semibold mb-2">환자정보</h2>
-
-    <label>이름:
-        <input type="text" name="환자이름" required>
-    </label>
-
-    <label>생년월일:
-        <input type="date" name="생년월일" required>
-    </label>
-
-    <label>거주지:
-        <input type="text" name="거주지" required>
-    </label>
-</div>
-
-<!-- ===== 응급처치 ===== -->
-<div class="section">
-    <h2 class="text-xl font-semibold mb-2">응급처치</h2>
-    <textarea name="응급처치" rows="4" placeholder="SAMPLE, 실시한 응급처치(부목고정, 활력징후, 상처치, 외상환자평가)  / 주소, 좌표 수동입력"></textarea>
-</div>
-
-
-<!-- 제출 버튼들 -->
-<button type="submit" class="w-full bg-blue-600 text-white py-3 px-4 rounded-lg">기록 저장하기</button>
-<button type="button" onclick="sendToGoogleForm()" class="w-full bg-yellow-500 text-white py-3 px-4 rounded-lg mt-2">
-    📤 상황판으로 제출하기
-</button>
-<button type="button" onclick="shareReport()" class="w-full bg-purple-500 text-white py-3 px-4 rounded-lg mt-2">
-    공유
+<div id="locationDisplay" class="coordinate-box">위도: , 경도:</div>
+<button type="button" id="getLocation"
+class="bg-green-600 text-white px-3 py-2 rounded mt-2">
+🌐 현장도착 좌표
 </button>
 
-<div id="resultMessage" class="mt-4 text-center"></div>
+<input type="hidden" name="사고좌표" id="hiddenCoordinate">
+<div id="map"></div>
+
+<input type="text" name="주증상" placeholder="환자 증상" required>
+</div>
+
+<!-- GCS -->
+<div class="section">
+<h2 class="text-xl font-semibold">의식평가(GCS)</h2>
+
+<select id="eye">
+<option value="4">E4 자발: 자발적으로 눈을 뜬다</option>
+<option value="3">E3 음성: 말로 지시했을때 눈을 뜬다</option>
+<option value="2">E2 통증: 통증 자극에 의해 눈을 뜬다</option>
+<option value="1">E1 무반응: 어떠한 자극에도 눈을 뜨지 못한다</option>
+</select>
+
+<select id="verbal">
+<option value="5">V5 지남력: 정확한 반응(6하원칙에 지남력 있는 상태)</option>
+<option value="4">V4 혼란: 대화 혼란(대화가능하나, 계속적 대화 교환 안됨)</option>
+<option value="3">V3 부적절: 언어혼란(동문서답, 혼란된 말을 함)</option>
+<option value="2">V2 신음: 이해 할수 없는 소리(신음소리만)</option>
+<option value="1">V1 무반응: 반응이 없음(아무런 소리를 내지 않음)</option>
+</select>
+
+<select id="motor">
+<option value="6">M6 명령수행: 명령에 따름 간단한 명령에 따라 운동기능 수행</option>
+<option value="5">M5 국소회피: 통증 자극에 명령은 따르지 않지만, 자극을 가하면 피하거나 치우려고 함</option>
+<option value="4">M4 움츠림: 통증 자극을 피하려고 함, 치우려고 하지는 않음</option>
+<option value="3">M3 이상굴곡: 통증 자극에 앞으로 구부리거나 몸쪽으로 접음</option>
+<option value="2">M2 이상신전: 통증 자극에 뒤로 젖히거나 모에서 멀리 뻗음</option>
+<option value="1">M1 무반응: 전혀 움직이지 않음(무반응, 자가호흡 없음)</option>
+</select>
+
+<div class="mt-2">
+<strong>의식평가(GCS) 결과:</strong>
+<span id="gcsResult"></span>
+</div>
+</div>
+
+<!-- 환자정보 -->
+<div class="section">
+<h2 class="text-xl font-semibold">환자정보</h2>
+<input type="text" name="환자이름" placeholder="이름" required>
+<input type="date" name="생년월일" required>
+<input type="text" name="거주지" placeholder="거주지" required>
+</div>
+
+<!-- 응급처치 -->
+<div class="section">
+<h2 class="text-xl font-semibold">응급처치</h2>
+<textarea name="응급처치"></textarea>
+</div>
+
+<button type="submit"
+class="w-full bg-blue-600 text-white py-3 rounded">
+기록 저장 및 공유
+</button>
+
 </form>
 
-<!-- ===== 작성기록 ===== -->
 <div class="section">
-    <h2 class="text-xl font-semibold">작성기록</h2>
-    <div id="savedData" class="board"></div>
+<h2 class="text-xl font-semibold">작성기록</h2>
+<div id="savedData"></div>
 </div>
 
-<!-- ===== GPS 좌표 ===== -->
-<div class="section">
-    <h2 class="text-xl font-semibold">GPS 좌표</h2>
-
-    <button id="getLocation2" class="bg-green-600 text-white px-3 py-1 rounded">🌐 내 위치 확인</button>
-    <button id="shareLocation" class="bg-blue-500 text-white px-3 py-1 rounded">📲 위치 공유</button>
-
-    <div class="coordinate-box" id="locationDisplay2">위도: , 경도: </div>
-    <div class="coordinate-box" id="dmsCoordinates">도분초: </div>
-
-    <div id="map"></div>
 </div>
-
-<!-- 외부 링크 -->
-<div class="GPS-link">
-  <a href="#" target="_blank">조난자 위치공유 whereUrl</a>
-</div>
-<div class="GPS-link">
-  <a href="https://discord.gg/ryaMRTAhwP" target="_blank">🐸 국립공원 안전사고 연구회</a>
-</div>  
-
-</div><!-- container end -->
 
 <script>
+const GOOGLE_SCRIPT_URL =
+"https://script.google.com/macros/s/AKfycbxm_oLeGMIGh5PRokCURztVx6-1Ijug2KtuGbsFH-cZVOKE5LgaKDnLbTgFl2sWWDdkwA/exec";
 
-
-/* ===== GCS 계산 ===== */
-function calculateGCS() {
-    const e = parseInt(document.getElementById("eye").value);
-    const v = parseInt(document.getElementById("verbal").value);
-    const m = parseInt(document.getElementById("motor").value);
-
-    const total = e + v + m;
-
-    let state = '';
-    if (total === 15) state = '정상-alert';
-    else if (total >= 13) state = '졸림-drowsy';
-    else if (total >= 9) state = '혼미-stupor';
-    else if (total >= 4) state = '반혼수-semicoma';
-    else state = '혼수-coma';
-
-    document.getElementById("gcsResult").innerText = `${total}점 (${state})`;
-    document.getElementById("gcsResultContainer").style.display = "block";
+/* GCS 계산 */
+function calcGCS(){
+const t=+eye.value+ +verbal.value+ +motor.value;
+const s=t===15?"정상":t>=13?"졸림":t>=9?"혼미":t>=4?"반혼수":"혼수";
+gcsResult.textContent=`${t}점 (${s})`;
 }
+["eye","verbal","motor"].forEach(id=>document.getElementById(id).onchange=calcGCS);
+calcGCS();
 
-["eye","verbal","motor"].forEach(id => {
-    document.getElementById(id).addEventListener("change", calculateGCS);
+/* GPS */
+getLocation.onclick=()=>{
+navigator.geolocation.getCurrentPosition(p=>{
+const lat=p.coords.latitude, lng=p.coords.longitude;
+const txt=`위도:${lat}, 경도:${lng}`;
+locationDisplay.textContent=txt;
+hiddenCoordinate.value=txt;
+
+const loc=new kakao.maps.LatLng(lat,lng);
+const map=new kakao.maps.Map(document.getElementById("map"),{center:loc,level:3});
+new kakao.maps.Marker({position:loc,map});
 });
-calculateGCS();
+};
 
-/* ===== 기록 저장 + 구글시트 저장 ===== */
-document.getElementById("recordForm").addEventListener("submit", async function(e){
-    e.preventDefault();
+/* 저장 + 전송 + 공유 */
+recordForm.onsubmit=async e=>{
+e.preventDefault();
 
-    const form = new FormData(e.target);
-    const data = {};
+let data={}, text="";
+new FormData(recordForm).forEach((v,k)=>{data[k]=v; text+=`${k}: ${v}\n`;});
+data["GCS"]=gcsResult.textContent;
+text+=`GCS: ${gcsResult.textContent}`;
 
-    data["GCS"] = document.getElementById("gcsResult").innerText;
+savedData.innerHTML=`<div class="board-item">${text}</div>`;
 
-    form.forEach((v,k)=> data[k]=v);
+/* TXT 저장 */
+const blob=new Blob([text],{type:"text/plain"});
+const a=document.createElement("a");
+a.href=URL.createObjectURL(blob);
+a.download="무등산_환자기록.txt";
+a.click();
 
-    /* TXT 파일 저장 */
-    let textContent = "";
-    for (let key in data){
-        textContent += `${key}: ${data[key]}\n`;
-    }
+/* Google 자동 전송 */
+fetch(GOOGLE_SCRIPT_URL,{
+method:"POST",
+body:JSON.stringify(data)
+}).catch(()=>{});
 
-    const today = new Date().toISOString().slice(0,10);
-    const blob = new Blob([textContent],{type:"text/plain"});
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-
-    a.href = url;
-    a.download = `무등산 특수산악구조팀_환자평가_${today}.txt`;
-    a.click();
-
-    URL.revokeObjectURL(url);
-
-    document.getElementById("savedData").innerHTML =
-        `<div class="board-item">${textContent}</div>`;
-    document.getElementById("resultMessage").innerText = "기록 저장 완료 ✅";
-
-    /* 구글시트 저장 */
-    try {
-        const scriptURL = "https://script.google.com/macros/s/AKfycbxm_oLeGMIGh5PRokCURztVx6-1Ijug2KtuGbsFH-cZVOKE5LgaKDnLbTgFl2sWWDdkwA/exec";
-
-        await fetch(scriptURL, {
-            method: "POST",
-            body: JSON.stringify(data)
-        });
-
-    } catch(err){
-        console.log("구글시트 오류:", err);
-    }
+/* 공유 (지원 기기만) */
+if(navigator.share){
+navigator.share({
+title:"무등산 산악사고 기록",
+text:text
 });
-
-/* ===== 구글 폼 제출 ===== */
-function sendToGoogleForm() {
-    alert("구글폼 기능이 연결되었습니다.");
 }
-
-/* ===== GPS 기능 ===== */
-let currentLat, currentLng;
-
-document.getElementById("getLocation").addEventListener("click", function(){
-    navigator.geolocation.getCurrentPosition(showPos, showErr);
-});
-
-document.getElementById("getLocation2").addEventListener("click", function(){
-    navigator.geolocation.getCurrentPosition(showPos, showErr);
-});
-
-function showPos(position){
-    currentLat = position.coords.latitude;
-    currentLng = position.coords.longitude;
-
-    const t = `위도: ${currentLat}, 경도: ${currentLng}`;
-
-    document.getElementById("locationDisplay").textContent = t;
-    document.getElementById("locationDisplay2").textContent = t;
-    document.getElementById("hiddenCoordinate").value = t;
-
-    initMap(currentLat, currentLng);
-}
-
-function showErr(e){
-    alert("GPS 오류 발생");
-}
-
-function initMap(lat, lng){
-    const map = new kakao.maps.Map(document.getElementById("map"), {
-        center: new kakao.maps.LatLng(lat, lng),
-        level: 3
-    });
-
-    new kakao.maps.Marker({
-        position: new kakao.maps.LatLng(lat, lng),
-        map: map
-    });
-}
-
-/* ===== 공유 ===== */
-function shareReport(){
-    const form = new FormData(document.getElementById("recordForm"));
-    let text = "";
-
-    form.forEach((v,k)=> text += `${k}: ${v}\n`);
-    text += "GCS: " + document.getElementById("gcsResult").innerText;
-
-    if (navigator.share){
-        navigator.share({title:"무등산 특수산악구조팀 환자평가", text});
-    } else {
-        alert("공유 기능 미지원");
-    }
-}
-
+};
 </script>
 
 </body>
 </html>
-
