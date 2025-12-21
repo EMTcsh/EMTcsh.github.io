@@ -34,23 +34,24 @@ function load() {
     .then(res => res.json())
     .then(data => {
 
+      console.log("받은 데이터:", data);
+
+      if (!Array.isArray(data)) {
+        console.error("JSON 배열 아님");
+        return;
+      }
+
       markers.forEach(m => m.setMap(null));
       markers = [];
 
-      const bounds = new naver.maps.LatLngBounds();
-      let hasPoint = false;
-
       data.forEach(p => {
-
-        if (!p.lat || !p.lng) return;
-
         const lat = Number(p.lat);
         const lng = Number(p.lng);
-        if (isNaN(lat) || isNaN(lng)) return;
 
-        hasPoint = true;
-        const pos = new naver.maps.LatLng(lat, lng);
-        bounds.extend(pos);
+        if (isNaN(lat) || isNaN(lng)) {
+          console.warn("좌표 오류:", p);
+          return;
+        }
 
         const color =
           p.status === '산행중' ? '#007bff' :
@@ -58,39 +59,32 @@ function load() {
           '#4caf50';
 
         const marker = new naver.maps.Marker({
-          map,
-          position: pos,
+          map: map,
+          position: new naver.maps.LatLng(lat, lng),
           title: p.phone || '',
           icon: {
             content: `
               <div style="
-                width:16px;
-                height:16px;
+                width:18px;
+                height:18px;
                 background:${color};
                 border-radius:50%;
                 border:2px solid white;
-                box-shadow:0 0 4px rgba(0,0,0,0.6);
+                box-shadow:0 0 6px rgba(0,0,0,0.7);
               "></div>
             `,
-            anchor: new naver.maps.Point(8, 8)
+            anchor: new naver.maps.Point(9, 9)
           }
         });
 
         markers.push(marker);
       });
 
-      // ✅ 모든 핀이 지도 우측에 보이도록 범위 조정
-      if (hasPoint) {
-        map.fitBounds(bounds, {
-          top: 50,
-          right: 200,   // 🔥 오른쪽 여백
-          bottom: 50,
-          left: 50
-        });
+      if (markers.length > 0) {
+        map.setCenter(markers[0].getPosition());
       }
-
     })
-    .catch(err => console.error("지도 데이터 오류:", err));
+    .catch(err => console.error("지도 로딩 오류:", err));
 }
 
 load();
@@ -99,3 +93,4 @@ setInterval(load, 60000);
 
 </body>
 </html>
+
