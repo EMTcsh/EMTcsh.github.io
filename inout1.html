@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>무등산 탐방로 통제 및 경로</title>
+    <script src="https://oapi.map.naver.com/openapi/v3/maps.js?ncpClientId=g2u4orbiqf"></script>
+    <style>
+        html, body {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+        #map {
+            width: 100%;
+            height: 100%;
+        }
+        .info-window-content {
+            padding: 10px;
+            font-family: 'Malgun Gothic', '맑은 고딕', sans-serif;
+            font-size: 14px;
+        }
+        .info-window-content h4 {
+            margin: 0 0 5px 0;
+        }
+        .info-status-red { color: #D32F2F; font-weight: bold; }
+        .info-status-orange { color: #FFA000; font-weight: bold; }
+        .info-status-green { color: #2E7D32; font-weight: bold; }
+    </style>
+</head>
+<body>
+<div id="map"></div>
+
+<script>
+    var map = new naver.maps.Map('map', {
+        center: new naver.maps.LatLng(35.1117113, 126.998586),
+        zoom: 14
+    });
+
+    var currentPolyline = null;
+
+    var hikingRoutes = [
+        { name: "제2수원지 입구", lat: 35.099349, lng: 126.964130, status: "개방", reason: "정상 운영", path: null },
+        { name: "제2수원지 시작", lat: 35.101815, lng: 126.964148, status: "개방", reason: "정상 운영", path: null },
+        { name: "용추계곡 입구", lat: 35.114588, lng: 126.987298, status: "개방", reason: "정상 운영", path: null },
+        { name: "서석대", lat: 35.121206, lng: 127.002936, status: "개방", reason: "정상 운영", path: null },
+        {
+            name: "인왕봉",
+            lat: 35.122144,
+            lng: 127.004656,
+            status: "부분 통제",
+            reason: "안전 위험",
+            path: [
+                new naver.maps.LatLng(35.122144, 127.004656),
+                new naver.maps.LatLng(35.123542, 127.006422)
+            ],
+            connectedTo: "서석대"
+        },
+        { name: "장불재", lat: 35.116123, lng: 126.998584, status: "개방", reason: "정상 운영", path: null },
+        { name: "증심상가", lat: 35.13311035, lng: 126.95649829, status: "개방", reason: "정상 운영", path: null },
+        { name: "너와나목장", lat: 35.104153, lng: 126.992062, status: "개방", reason: "정상 운영", path: null },
+        { name: "무등산편백자연휴양림", lat: 35.093293, lng: 127.026211, status: "개방", reason: "정상 운영", path: null },
+        { name: "도원야영장", lat: 35.111098, lng: 127.026909, status: "개방", reason: "정상 운영", path: null },
+        { name: "도원탐방지원센터", lat: 35.114573, lng: 127.029321, status: "개방", reason: "정상 운영", path: null },
+        { name: "영신마을", lat: 35.119626, lng: 127.033517, status: "개방", reason: "정상 운영", path: null },
+        { name: "인계리", lat: 35.124437, lng: 127.033087, status: "개방", reason: "정상 운영", path: null },
+        { name: "무동제", lat: 35.140543, lng: 127.041039, status: "개방", reason: "정상 운영", path: null },
+        { name: "무동리", lat: 35.132993, lng: 127.035878, status: "개방", reason: "정상 운영", path: null },
+        { name: "경상리", lat: 35.152437, lng: 127.041379, status: "개방", reason: "정상 운영", path: null },
+        { name: "가암리", lat: 35.159145, lng: 127.052267, status: "개방", reason: "정상 운영", path: null },
+        { name: "북산", lat: 35.141126, lng: 127.024219, status: "개방", reason: "정상 운영", path: null }
+    ];
+
+    hikingRoutes.forEach(function(item) {
+        var statusClass =
+            item.status === "통제" ? "red" :
+            item.status === "부분 통제" ? "orange" : "green";
+
+        var marker = new naver.maps.Marker({
+            position: new naver.maps.LatLng(item.lat, item.lng),
+            map: map,
+            title: item.name,
+            icon: {
+                content:
+                    '<div style="width:24px;height:24px;border-radius:50%;background:' + statusClass +
+                    ';border:2px solid #fff;text-align:center;line-height:20px;color:#fff;font-weight:bold;">' +
+                    (item.status === "개방" ? "✓" : "!") + '</div>',
+                anchor: new naver.maps.Point(12, 12)
+            }
+        });
+
+        var infoWindow = new naver.maps.InfoWindow({
+            content:
+                '<div class="info-window-content">' +
+                '<h4>' + item.name + '</h4>' +
+                '<p><b>상태:</b> <span class="info-status-' + statusClass + '">' + item.status + '</span></p>' +
+                '<p><b>사유:</b> ' + item.reason + '</p>' +
+                (item.connectedTo ? '<p><b>경로:</b> ' + item.connectedTo + ' 방면</p>' : '') +
+                '</div>'
+        });
+
+        naver.maps.Event.addListener(marker, 'click', function () {
+            if (infoWindow.getMap()) {
+                infoWindow.close();
+            } else {
+                infoWindow.open(map, marker);
+            }
+
+            if (currentPolyline) {
+                currentPolyline.setMap(null);
+                currentPolyline = null;
+            }
+
+            if (item.path) {
+                currentPolyline = new naver.maps.Polyline({
+                    map: map,
+                    path: item.path,
+                    strokeColor: '#007BFF',
+                    strokeOpacity: 0.8,
+                    strokeWeight: 5
+                });
+            }
+        });
+    });
+</script>
+  <script>
+var map = new naver.maps.Map('map', {
+    center: new naver.maps.LatLng(35.1117113, 126.998586),
+    zoom: 14
+});
+
+var markers = [];
+var infoWindows = [];
+
+function loadSheetData() {
+    fetch("🔗여기에_AppsScript_URL")
+        .then(res => res.json())
+        .then(data => {
+            // 기존 마커 제거
+            markers.forEach(m => m.setMap(null));
+            markers = [];
+
+            data.forEach(item => {
+                const statusClass =
+                    item.status === "통제" ? "red" :
+                    item.status === "부분 통제" ? "orange" : "green";
+
+                const marker = new naver.maps.Marker({
+                    map: map,
+                    position: new naver.maps.LatLng(item.lat, item.lng),
+                    title: item.name,
+                    icon: {
+                        content:
+                            `<div style="width:24px;height:24px;border-radius:50%;
+                            background:${statusClass};
+                            border:2px solid #fff;
+                            text-align:center;
+                            line-height:20px;
+                            color:#fff;
+                            font-weight:bold;">
+                            ${item.status === "개방" ? "✓" : "!"}
+                            </div>`,
+                        anchor: new naver.maps.Point(12, 12)
+                    }
+                });
+
+                const infoWindow = new naver.maps.InfoWindow({
+                    content:
+                        `<div class="info-window-content">
+                            <h4>${item.name}</h4>
+                            <p><b>상태:</b> <span class="info-status-${statusClass}">
+                            ${item.status}</span></p>
+                            <p><b>사유:</b> ${item.reason}</p>
+                        </div>`
+                });
+
+                naver.maps.Event.addListener(marker, 'click', () => {
+                    infoWindow.open(map, marker);
+                });
+
+                markers.push(marker);
+            });
+        });
+}
+
+// 최초 로딩
+loadSheetData();
+
+// ⏱️ 1분마다 자동 갱신 (선택)
+setInterval(loadSheetData, 60000);
+</script>
+</body>
+</html>
