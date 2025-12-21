@@ -9,77 +9,95 @@
 <script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=ff9e145029506d6e4c72d1f2b01ea424&libraries=services"></script>
 
 <style>
-/* ===== 기본 UI ===== */
 body {
-  background:#f0f2f5;
-  font-family:Arial,sans-serif;
-  line-height:1.6;
-}
-.container {
-  max-width:900px;
-  margin:24px auto;
-  padding:20px;
-}
-.section {
-  background:#fff;
-  border-radius:14px;
-  padding:24px;
-  box-shadow:0 4px 12px rgba(0,0,0,0.08);
-  margin-bottom:28px;
-}
-.section h2 {
-  margin-bottom:16px;
-  padding-bottom:8px;
-  border-bottom:1px solid #e5e7eb;
-  color:#1e3a8a;
-}
-input,select,textarea {
-  border:1px solid #cbd5e1;
-  border-radius:10px;
-  padding:12px 14px;
-  width:100%;
-  margin-bottom:16px;
-  font-size:1rem;
-}
-textarea {
-  min-height:140px;
-  resize:vertical;
-}
-.coordinate-box {
-  background:#eef2ff;
-  padding:12px 14px;
-  border-radius:10px;
-  margin-bottom:12px;
-  font-weight:500;
-}
-#map {
-  width:100%;
-  height:320px;
-  border-radius:14px;
-  margin-top:12px;
-}
-.board-item {
-  white-space:pre-line;
-  background:#f8fafc;
-  padding:16px;
-  border-radius:12px;
+  background: #f0f2f5;
+  font-family: Arial, sans-serif;
+  line-height: 1.6;
 }
 
-/* ===== 모바일 컴팩트 UI ===== */
-@media (max-width:768px){
-  body { font-size:0.95rem; }
-  .container { margin:12px auto; padding:12px; }
-  .section { padding:16px; margin-bottom:16px; }
-  .section h2 { font-size:1.05rem; margin-bottom:10px; }
-  input,select,textarea {
-    padding:10px 12px;
-    margin-bottom:10px;
-    font-size:0.95rem;
-  }
-  textarea { min-height:100px; }
-  .coordinate-box { padding:10px 12px; font-size:0.9rem; }
-  #map { height:220px; }
-  button { padding:12px; font-size:1rem; }
+/* 전체 레이아웃 */
+.container {
+  max-width: 900px;
+  margin: 24px auto;
+  padding: 20px;
+}
+
+/* 섹션 카드 */
+.section {
+  background: #ffffff;
+  border-radius: 14px;
+  padding: 24px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  margin-bottom: 28px;
+}
+
+/* 섹션 제목 */
+.section h2 {
+  margin-bottom: 16px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #e5e7eb;
+  color: #1e3a8a;
+}
+
+/* 입력 요소 */
+input,
+select,
+textarea {
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  padding: 12px 14px;
+  width: 100%;
+  margin-bottom: 16px;
+  font-size: 1rem;
+  background-color: #ffffff;
+}
+
+/* 포커스 */
+input:focus,
+select:focus,
+textarea:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 2px rgba(59,130,246,0.15);
+}
+
+/* 텍스트 영역 */
+textarea {
+  min-height: 140px;
+  resize: vertical;
+  line-height: 1.7;
+}
+
+/* 좌표 표시 */
+.coordinate-box {
+  background: #eef2ff;
+  padding: 12px 14px;
+  border-radius: 10px;
+  margin-bottom: 12px;
+  font-weight: 500;
+}
+
+/* 지도 */
+#map {
+  width: 100%;
+  height: 320px;
+  border-radius: 14px;
+  margin-top: 12px;
+}
+
+/* 기록 표시 */
+.board-item {
+  white-space: pre-line;
+  background: #f8fafc;
+  padding: 16px;
+  border-radius: 12px;
+  line-height: 1.6;
+  font-size: 0.95rem;
+}
+
+/* 버튼 */
+button {
+  font-size: 1.05rem;
 }
 </style>
 </head>
@@ -87,47 +105,49 @@ textarea {
 <body>
 <div class="container">
 
-<h1 class="text-2xl font-bold text-center text-blue-700 mb-4">
-🚑 무등산 산악사고 기록
+<h1 class="text-2xl font-bold text-center text-blue-700 mb-6">
+무등산 산악사고 기록
 </h1>
 
 <form id="recordForm">
 
 <!-- 현장정보 -->
 <div class="section">
-<h2>현장정보</h2>
+<h2 class="text-xl font-semibold">현장정보</h2>
 
 <input type="datetime-local" name="도착시간" required>
 <input type="text" name="사고장소" placeholder="사고장소" required>
 <input type="text" name="주증상" placeholder="환자 증상" required>
-
+</div>
   
 <div id="locationDisplay" class="coordinate-box">위도: , 경도:</div>
 <button type="button" id="getLocation"
-class="bg-green-600 text-white w-full rounded">
+class="bg-green-600 text-white px-4 py-2 rounded">
 🌐 현장도착 좌표
 </button>
 
-<input type="hidden" name="사고좌표" id="hiddenCoordinate">
+
 <div id="map"></div>
+
+
 
 <!-- GCS -->
 <div class="section">
-<h2>의식평가(GCS)</h2>
+<h2 class="text-xl font-semibold">의식평가(GCS)</h2>
 
 <select id="eye">
-<option value="4">E4 자발</option>
-<option value="3">E3 음성</option>
-<option value="2">E2 통증</option>
-<option value="1">E1 무반응</option>
+<option value="4">E4 자발: 자발적으로 눈을 뜬다</option>
+<option value="3">E3 음성: 말로 지시했을때 눈을 뜬다</option>
+<option value="2">E2 통증: 통증 자극에 의해 눈을 뜬다</option>
+<option value="1">E1 무반응: 어떠한 자극에도 눈을 뜨지 못한다</option>
 </select>
 
 <select id="verbal">
-<option value="5">V5 지남력</option>
-<option value="4">V4 혼란</option>
-<option value="3">V3 부적절</option>
-<option value="2">V2 신음</option>
-<option value="1">V1 무반응</option>
+<option value="5">V5 지남력: 정확한 반응(6하원칙에 지남력 있는 상태)</option>
+<option value="4">V4 혼란: 대화 혼란(대화가능하나 계속적 대화 교환 안됨)</option>
+<option value="3">V3 부적절: 언어혼란(동문서답)</option>
+<option value="2">V2 신음: 이해할 수 없는 소리</option>
+<option value="1">V1 무반응: 반응 없음</option>
 </select>
 
 <select id="motor">
@@ -140,13 +160,14 @@ class="bg-green-600 text-white w-full rounded">
 </select>
 
 <div class="mt-2">
-<strong>GCS 결과:</strong> <span id="gcsResult"></span>
+<strong>의식평가(GCS) 결과:</strong>
+<span id="gcsResult"></span>
 </div>
 </div>
 
 <!-- 환자정보 -->
 <div class="section">
-<h2>환자정보</h2>
+<h2 class="text-xl font-semibold">환자정보</h2>
 <input type="text" name="환자이름" placeholder="이름" required>
 <input type="date" name="생년월일" required>
 <input type="text" name="거주지" placeholder="거주지" required>
@@ -154,19 +175,19 @@ class="bg-green-600 text-white w-full rounded">
 
 <!-- 응급처치 -->
 <div class="section">
-<h2>응급처치</h2>
+<h2 class="text-xl font-semibold">응급처치</h2>
 <textarea name="응급처치"></textarea>
 </div>
 
 <button type="submit"
-class="w-full bg-blue-600 text-white py-3 rounded">
+class="w-full bg-blue-600 text-white py-4 rounded">
 기록 저장 및 공유
 </button>
 
 </form>
 
 <div class="section">
-<h2>작성기록</h2>
+<h2 class="text-xl font-semibold">작성기록</h2>
 <div id="savedData"></div>
 </div>
 
@@ -178,61 +199,58 @@ const GOOGLE_SCRIPT_URL =
 
 /* GCS 계산 */
 function calcGCS(){
-  const t=+eye.value+ +verbal.value+ +motor.value;
-  const s=t===15?"정상":t>=13?"졸림":t>=9?"혼미":t>=4?"반혼수":"혼수";
-  gcsResult.textContent=`${t}점 (${s})`;
+  const t = +eye.value + +verbal.value + +motor.value;
+  const s = t===15 ? "정상" : t>=13 ? "졸림" : t>=9 ? "혼미" : t>=4 ? "반혼수" : "혼수";
+  gcsResult.textContent = `${t}점 (${s})`;
 }
-["eye","verbal","motor"].forEach(id=>document.getElementById(id).onchange=calcGCS);
+["eye","verbal","motor"].forEach(id => document.getElementById(id).onchange = calcGCS);
 calcGCS();
 
 /* GPS */
-getLocation.onclick=()=>{
-navigator.geolocation.getCurrentPosition(p=>{
-const lat=p.coords.latitude, lng=p.coords.longitude;
-const txt=`위도:${lat}, 경도:${lng}`;
-locationDisplay.textContent=txt;
-hiddenCoordinate.value=txt;
+getLocation.onclick = () => {
+  navigator.geolocation.getCurrentPosition(p => {
+    const lat = p.coords.latitude;
+    const lng = p.coords.longitude;
+    const txt = `위도:${lat}, 경도:${lng}`;
+    locationDisplay.textContent = txt;
+    hiddenCoordinate.value = txt;
 
-const loc=new kakao.maps.LatLng(lat,lng);
-const map=new kakao.maps.Map(document.getElementById("map"),{center:loc,level:3});
-new kakao.maps.Marker({position:loc,map});
-});
+    const loc = new kakao.maps.LatLng(lat, lng);
+    const map = new kakao.maps.Map(document.getElementById("map"), { center: loc, level: 3 });
+    new kakao.maps.Marker({ position: loc, map });
+  });
 };
 
 /* 저장 + 전송 + 공유 */
-recordForm.onsubmit=async e=>{
-e.preventDefault();
+recordForm.onsubmit = async e => {
+  e.preventDefault();
 
-let data={}, text="";
-new FormData(recordForm).forEach((v,k)=>{data[k]=v; text+=`${k}: ${v}\n`;});
-data["GCS"]=gcsResult.textContent;
-text+=`GCS: ${gcsResult.textContent}`;
+  let data = {}, text = "";
+  new FormData(recordForm).forEach((v,k)=>{ data[k]=v; text+=`${k}: ${v}\n`; });
+  data["GCS"] = gcsResult.textContent;
+  text += `GCS: ${gcsResult.textContent}`;
 
-savedData.innerHTML=`<div class="board-item">${text}</div>`;
+  savedData.innerHTML = `<div class="board-item">${text}</div>`;
 
-/* TXT 저장 */
-const blob=new Blob([text],{type:"text/plain"});
-const a=document.createElement("a");
-a.href=URL.createObjectURL(blob);
-a.download="무등산_환자기록.txt";
-a.click();
+  const blob = new Blob([text], {type:"text/plain"});
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "무등산_환자기록.txt";
+  a.click();
 
-/* Google 자동 전송 */
-fetch(GOOGLE_SCRIPT_URL,{
-method:"POST",
-body:JSON.stringify(data)
-}).catch(()=>{});
+  fetch(GOOGLE_SCRIPT_URL,{
+    method:"POST",
+    body:JSON.stringify(data)
+  }).catch(()=>{});
 
-/* 공유 */
-if(navigator.share){
-navigator.share({
-title:"무등산 산악사고 기록",
-text:text
-});
-}
+  if(navigator.share){
+    navigator.share({
+      title:"무등산 산악사고 기록",
+      text:text
+    });
+  }
 };
 </script>
 
 </body>
 </html>
-
