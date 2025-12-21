@@ -8,7 +8,7 @@
 <script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=ff9e145029506d6e4c72d1f2b01ea424&libraries=services"></script>
 
 <style>
-/* ================= 기본 (라이트) ================= */
+/* ================= 공통 ================= */
 body {
   font-family: Arial, sans-serif;
   padding: 16px;
@@ -18,32 +18,32 @@ body {
 }
 h1, h2, h4 { text-align: center; }
 
-button {
-  width: 100%;
-  height: 64px;
-  font-size: 1.3rem;
-  margin: 10px 0;
-  border-radius: 16px;
-  border: none;
-  background: #2DB400;
-  color: white;
-  font-weight: bold;
-}
-
-/* 🔥 모든 입력창 크기 완전 통일 */
-input {
+/* 🔥 버튼·입력창 완전 통일 */
+.ui-control {
   width: 100%;
   height: 64px;
   box-sizing: border-box;
   font-size: 1.3rem;
   padding: 16px;
-  margin: 8px 0 16px 0;
-  border-radius: 14px;
+  margin: 10px 0;
+  border-radius: 16px;
+  font-weight: bold;
+}
+
+/* 버튼 */
+button.ui-control {
+  border: none;
+  background: #2DB400;
+  color: #ffffff;
+}
+
+/* 입력창 */
+input.ui-control {
   border: 3px solid #2DB400;
   background: #ffffff;
 }
 
-/* 좌표 표시 박스 */
+/* 좌표 박스 */
 .box {
   background: #ffffff;
   border-radius: 16px;
@@ -52,7 +52,6 @@ input {
   text-align: center;
   font-size: 1.5rem;
   font-weight: 800;
-  letter-spacing: 0.5px;
 }
 
 /* 안내 */
@@ -79,32 +78,23 @@ input {
   bottom: 0;
   left: 0;
   width: 100%;
-  background: #2DB400;
   padding: 14px;
-  text-align: center;
-}
-.bottom-fixed button {
-  background: #ffffff;
-  color: #2DB400;
-  font-size: 1.4rem;
-  height: 70px;
-  border-radius: 18px;
+  background: #2DB400;
 }
 
 /* ================= 🌙 다크모드 ================= */
 @media (prefers-color-scheme: dark) {
-
   body {
     background: #020617;
     color: #e5e7eb;
   }
 
-  button {
+  button.ui-control {
     background: #22c55e;
     color: #022c22;
   }
 
-  input {
+  input.ui-control {
     background: #020617;
     color: #f8fafc;
     border-color: #22c55e;
@@ -128,11 +118,6 @@ input {
   .bottom-fixed {
     background: #022c22;
   }
-
-  .bottom-fixed button {
-    background: #22c55e;
-    color: #022c22;
-  }
 }
 </style>
 </head>
@@ -142,7 +127,7 @@ input {
 <h4>[ 무등산국립공원 - 구조대 ]</h4>
 <h1>🆘 산악사고 위치파악</h1>
 
-<button id="getLocation">📍 내 위치 확인</button>
+<button id="getLocation" class="ui-control">📍 내 위치 확인</button>
 
 <div class="box" id="coord">위치 미확인</div>
 
@@ -156,19 +141,25 @@ input {
 <h2>🌐 요구조자 위치좌표 입력</h2>
 
 <input type="number" step="any" inputmode="decimal"
-       id="otherLatitude" placeholder="대상 위도">
+       id="otherLatitude" class="ui-control"
+       placeholder="대상 위도">
 
 <input type="number" step="any" inputmode="decimal"
-       id="otherLongitude" placeholder="대상 경도">
+       id="otherLongitude" class="ui-control"
+       placeholder="대상 경도">
 
-<button onclick="showLocations()">📍 대상 위치 지도 보기</button>
+<button onclick="showLocations()" class="ui-control">
+📍 대상 위치 지도 보기
+</button>
 
 <div id="distanceInfo" class="box"></div>
 <div id="mapComparison" class="map"></div>
 
-<!-- 하단 고정 -->
+<!-- 🔥 크기 통일된 하단 버튼 -->
 <div class="bottom-fixed">
-  <button id="kakaoRoute">🧭 요구조자 위치 경로 따라가기</button>
+  <button id="kakaoRoute" class="ui-control">
+    🧭 요구조자 위치 경로 따라가기
+  </button>
 </div>
 
 <script>
