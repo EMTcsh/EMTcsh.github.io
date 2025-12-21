@@ -4,9 +4,15 @@
 <meta charset="UTF-8">
 <title>무등산 실시간 산행 현황</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <script src="https://oapi.map.naver.com/openapi/v3/maps.js?ncpClientId=g2u4orbiqf"></script>
+
 <style>
-html, body, #map { width:100%; height:100%; margin:0; }
+html, body, #map {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+}
 </style>
 </head>
 <body>
@@ -27,11 +33,16 @@ function load() {
   fetch(API_URL)
     .then(r => r.json())
     .then(data => {
+
       markers.forEach(m => m.setMap(null));
       markers = [];
 
       data.forEach(p => {
         if (!p.lat || !p.lng) return;
+
+        const lat = Number(p.lat);
+        const lng = Number(p.lng);
+        if (isNaN(lat) || isNaN(lng)) return;
 
         const color =
           p.status === '산행중' ? '#007bff' :
@@ -40,26 +51,27 @@ function load() {
 
         const marker = new naver.maps.Marker({
           map,
-          position: new naver.maps.LatLng(p.lat, p.lng),
+          position: new naver.maps.LatLng(lat, lng),
           title: p.phone,
           icon: {
             content: `
               <div style="
-                width:16px;
-                height:16px;
+                width:18px;
+                height:18px;
                 background:${color};
                 border-radius:50%;
-                border:2px solid white;
-                box-shadow:0 0 4px rgba(0,0,0,0.6);
+                border:2px solid #fff;
+                box-shadow:0 0 6px rgba(0,0,0,0.6);
               "></div>
             `,
-            anchor: new naver.maps.Point(8, 8)
+            anchor: new naver.maps.Point(9, 9)
           }
         });
 
         markers.push(marker);
       });
-    });
+    })
+    .catch(err => console.error(err));
 }
 
 load();
