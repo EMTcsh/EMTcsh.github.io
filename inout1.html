@@ -4,22 +4,19 @@
 <meta charset="UTF-8">
 <title>무등산 실시간 산행 현황</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <script src="https://oapi.map.naver.com/openapi/v3/maps.js?ncpClientId=g2u4orbiqf"></script>
+
 <style>
 html, body, #map {
   width: 100%;
   height: 100%;
   margin: 0;
 }
-.marker {
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  border: 2px solid #fff;
-}
 </style>
 </head>
 <body>
+
 <div id="map"></div>
 
 <script>
@@ -33,40 +30,58 @@ const map = new naver.maps.Map('map', {
 let markers = [];
 
 function load() {
-  fetch(API_URL + '?t=' + Date.now()) // 캐시 방지
+  fetch(API_URL)
     .then(res => res.json())
     .then(data => {
+
+      // 기존 마커 제거
       markers.forEach(m => m.setMap(null));
       markers = [];
 
       data.forEach(p => {
+
+        // 🔴 좌표 없으면 스킵
+        if (!p.lat || !p.lng) return;
+
         const lat = Number(p.lat);
         const lng = Number(p.lng);
-        if (!lat || !lng) return;
+
+        // 🔴 숫자 변환 실패 시 스킵
+        if (isNaN(lat) || isNaN(lng)) return;
 
         const color =
           p.status === '산행중' ? '#007bff' :
           p.status === '이동중' ? '#ff9800' :
-          '#2ecc71';
+          '#4caf50';
 
         const marker = new naver.maps.Marker({
-          map,
+          map: map,
           position: new naver.maps.LatLng(lat, lng),
-          title: p.phone,
+          title: p.phone || '',
           icon: {
-            content: `<div class="marker" style="background:${color}"></div>`,
-            anchor: new naver.maps.Point(9, 9)
+            content: `
+              <div style="
+                width:16px;
+                height:16px;
+                background:${color};
+                border-radius:50%;
+                border:2px solid white;
+                box-shadow:0 0 4px rgba(0,0,0,0.6);
+              "></div>
+            `,
+            anchor: new naver.maps.Point(8, 8)
           }
         });
 
         markers.push(marker);
       });
     })
-    .catch(err => console.error(err));
+    .catch(err => console.error("지도 데이터 오류:", err));
 }
 
 load();
 setInterval(load, 60000);
 </script>
+
 </body>
 </html>
