@@ -20,49 +20,57 @@ h1, h2, h4 { text-align: center; }
 
 button {
   width: 100%;
-  padding: 16px;
-  font-size: 18px;
+  height: 64px;
+  font-size: 1.3rem;
   margin: 10px 0;
-  border-radius: 14px;
+  border-radius: 16px;
   border: none;
   background: #2DB400;
   color: white;
   font-weight: bold;
 }
 
-.box {
-  background: #ffffff;
+/* 🔥 모든 입력창 크기 완전 통일 */
+input {
+  width: 100%;
+  height: 64px;
+  box-sizing: border-box;
+  font-size: 1.3rem;
+  padding: 16px;
+  margin: 8px 0 16px 0;
   border-radius: 14px;
-  padding: 22px;
-  margin-top: 12px;
-  text-align: center;
-  font-size: 1.4rem;
-  font-weight: 700;
+  border: 3px solid #2DB400;
+  background: #ffffff;
 }
 
+/* 좌표 표시 박스 */
+.box {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 24px;
+  margin-top: 12px;
+  text-align: center;
+  font-size: 1.5rem;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+}
+
+/* 안내 */
 .guide {
   margin-top: 16px;
   padding: 16px;
   background: #e8f5e9;
   border-left: 6px solid #2DB400;
-  border-radius: 10px;
+  border-radius: 12px;
   font-size: 15px;
 }
 
-.coord-input {
-  width: 100%;
-  font-size: 1.3rem;
-  padding: 16px;
-  margin: 8px 0 16px 0;
-  border: 3px solid #2DB400;
-  border-radius: 10px;
-}
-
+/* 지도 */
 .map {
   width: 100%;
   height: 280px;
   margin-top: 12px;
-  border-radius: 14px;
+  border-radius: 16px;
 }
 
 /* 하단 고정 */
@@ -78,21 +86,28 @@ button {
 .bottom-fixed button {
   background: #ffffff;
   color: #2DB400;
-  font-size: 1.3rem;
-  border-radius: 16px;
+  font-size: 1.4rem;
+  height: 70px;
+  border-radius: 18px;
 }
 
 /* ================= 🌙 다크모드 ================= */
 @media (prefers-color-scheme: dark) {
 
   body {
-    background: #0f172a;
+    background: #020617;
     color: #e5e7eb;
   }
 
   button {
     background: #22c55e;
     color: #022c22;
+  }
+
+  input {
+    background: #020617;
+    color: #f8fafc;
+    border-color: #22c55e;
   }
 
   .box {
@@ -104,12 +119,6 @@ button {
     background: #052e16;
     border-left-color: #22c55e;
     color: #dcfce7;
-  }
-
-  .coord-input {
-    background: #020617;
-    color: #f8fafc;
-    border-color: #22c55e;
   }
 
   .map {
@@ -147,12 +156,10 @@ button {
 <h2>🌐 요구조자 위치좌표 입력</h2>
 
 <input type="number" step="any" inputmode="decimal"
-       id="otherLatitude" class="coord-input"
-       placeholder="대상 위도">
+       id="otherLatitude" placeholder="대상 위도">
 
 <input type="number" step="any" inputmode="decimal"
-       id="otherLongitude" class="coord-input"
-       placeholder="대상 경도">
+       id="otherLongitude" placeholder="대상 경도">
 
 <button onclick="showLocations()">📍 대상 위치 지도 보기</button>
 
@@ -170,53 +177,52 @@ let targetLat, targetLng;
 
 /* 내 위치 */
 getLocation.onclick = () => {
-navigator.geolocation.getCurrentPosition(pos => {
-  currentLat = pos.coords.latitude;
-  currentLng = pos.coords.longitude;
-  coord.textContent =
-    `${currentLat.toFixed(6)} / ${currentLng.toFixed(6)}`;
-}, () => alert("위치 정보를 불러올 수 없습니다."));
+  navigator.geolocation.getCurrentPosition(pos => {
+    currentLat = pos.coords.latitude;
+    currentLng = pos.coords.longitude;
+    coord.textContent =
+      `${currentLat.toFixed(6)} / ${currentLng.toFixed(6)}`;
+  }, () => alert("위치 정보를 불러올 수 없습니다."));
 };
 
 /* 경로 따라가기 */
 kakaoRoute.onclick = () => {
-if (!targetLat || !targetLng) {
-  alert("대상 위치를 먼저 확인하세요.");
-  return;
-}
-location.href =
-`kakaomap://route?ep=${targetLat},${targetLng}&by=FOOT`;
+  if (!targetLat || !targetLng) {
+    alert("대상 위치를 먼저 확인하세요.");
+    return;
+  }
+  location.href =
+    `kakaomap://route?ep=${targetLat},${targetLng}&by=FOOT`;
 };
 
 /* 대상 위치 표시 */
 function showLocations() {
-targetLat = parseFloat(otherLatitude.value);
-targetLng = parseFloat(otherLongitude.value);
+  targetLat = parseFloat(otherLatitude.value);
+  targetLng = parseFloat(otherLongitude.value);
 
-if (!currentLat || !currentLng || isNaN(targetLat) || isNaN(targetLng)) {
-  alert("좌표를 정확히 입력하세요.");
-  return;
-}
+  if (!currentLat || !currentLng || isNaN(targetLat) || isNaN(targetLng)) {
+    alert("좌표를 정확히 입력하세요.");
+    return;
+  }
 
-const map = new kakao.maps.Map(mapComparison, {
-  center: new kakao.maps.LatLng(targetLat, targetLng),
-  level: 7
-});
+  const map = new kakao.maps.Map(mapComparison, {
+    center: new kakao.maps.LatLng(targetLat, targetLng),
+    level: 7
+  });
 
-const myPos = new kakao.maps.LatLng(currentLat, currentLng);
-const otherPos = new kakao.maps.LatLng(targetLat, targetLng);
+  const myPos = new kakao.maps.LatLng(currentLat, currentLng);
+  const otherPos = new kakao.maps.LatLng(targetLat, targetLng);
 
-new kakao.maps.Marker({ position: myPos, map });
-new kakao.maps.Marker({ position: otherPos, map });
+  new kakao.maps.Marker({ position: myPos, map });
+  new kakao.maps.Marker({ position: otherPos, map });
 
-const line = new kakao.maps.Polyline({ path: [myPos, otherPos] });
-const distance = line.getLength();
+  const line = new kakao.maps.Polyline({ path: [myPos, otherPos] });
+  const distance = line.getLength();
 
-distanceInfo.textContent =
-`직선거리: ${(distance / 1000).toFixed(2)} km`;
+  distanceInfo.textContent =
+    `직선거리: ${(distance / 1000).toFixed(2)} km`;
 }
 </script>
 
 </body>
 </html>
-
