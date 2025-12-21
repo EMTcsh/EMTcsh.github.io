@@ -2,23 +2,72 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>무등산국립공원 안전산행 Check IN/OUT</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>무등산국립공원 안전산행</title>
 
 <style>
-body { font-family: Arial, sans-serif; max-width:480px; margin:auto; text-align:center; padding:20px; }
-input, button { width:100%; padding:12px; margin:6px 0; font-size:16px; border-radius:8px; }
-button.start { background:#007BFF; color:#fff; }
-button.mid   { background:#FFC107; }
-button.end   { background:#28A745; color:#fff; }
-#message { font-size:18px; margin-top:10px; font-weight:bold; }
+body {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  max-width: 480px;
+  margin: auto;
+  padding: 16px;
+  background: #f4f6f8;
+}
+
+h2 {
+  margin-bottom: 16px;
+}
+
+input {
+  width: 100%;
+  padding: 14px;
+  font-size: 18px;
+  border-radius: 10px;
+  border: 1px solid #ccc;
+  margin-bottom: 12px;
+}
+
+button {
+  width: 100%;
+  padding: 16px;
+  font-size: 18px;
+  border-radius: 12px;
+  border: none;
+  margin: 8px 0;
+  font-weight: bold;
+}
+
+button.start { background: #007bff; color: white; }
+button.mid   { background: #ffc107; }
+button.end   { background: #28a745; color: white; }
+
+button:active {
+  transform: scale(0.98);
+}
+
+#message {
+  margin-top: 14px;
+  font-size: 17px;
+  font-weight: bold;
+}
+
+.notice {
+  font-size: 14px;
+  color: #555;
+  margin-top: 12px;
+}
 </style>
 </head>
 <body>
 
-<h2>무등산국립공원 안전산행</h2>
+<h2>🟢 무등산 안전산행</h2>
 
-<input id="phone" placeholder="전화번호 입력">
+<input
+  id="phone"
+  type="tel"
+  inputmode="numeric"
+  placeholder="전화번호 (숫자만)"
+>
 
 <button class="start" onclick="send('start')">입구 체크인</button>
 <button class="mid" onclick="send('mid')">산행 중</button>
@@ -26,41 +75,68 @@ button.end   { background:#28A745; color:#fff; }
 
 <div id="message"></div>
 
+<div class="notice">
+📍 위치 권한을 허용해야 정상 전송됩니다.<br>
+📶 통신 불안 시 전송이 지연될 수 있습니다.
+</div>
+
 <script>
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwWDFctYxqQlETrA3SDVeM9wYGWb0WDX7nfHnJKaQdwZT_pk8p_kLN8sAVN3uUhwDyq/exec";
-let startTime;
+const SCRIPT_URL =
+  "https://script.google.com/macros/s/AKfycbwWDFctYxqQlETrA3SDVeM9wYGWb0WDX7nfHnJKaQdwZT_pk8p_kLN8sAVN3uUhwDyq/exec";
+
+let startTime = null;
 
 function send(type) {
-  const phone = document.getElementById('phone').value;
-  if (!phone) return alert("전화번호 입력");
+  const phone = document.getElementById('phone').value.trim();
+  if (!phone) {
+    alert("전화번호를 입력하세요");
+    return;
+  }
 
-  navigator.geolocation.getCurrentPosition(pos => {
-    const now = new Date();
-    if (type === 'start') startTime = now;
+  document.getElementById('message').textContent = "📡 위치 확인 중…";
 
-    const data = {
-      phone,
-      type,
-      lat: pos.coords.latitude,
-      lng: pos.coords.longitude,
-      timestamp: now.toISOString(),
-      mapLink: `https://map.kakao.com/link/map/${pos.coords.latitude},${pos.coords.longitude}`,
-      duration: type === 'end' && startTime
-        ? ((now - startTime)/60000).toFixed(1) + "분"
-        : ""
-    };
+  navigator.geolocation.getCurrentPosition(
+    pos => {
+      const now = new Date();
+      if (type === 'start') startTime = now;
 
-    fetch(SCRIPT_URL, {
-      method: "POST",
-      mode: "no-cors",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(data)
-    });
+      const data = {
+        phone,
+        type,
+        lat: pos.coords.latitude,
+        lng: pos.coords.longitude,
+        timestamp: now.toISOString(),
+        mapLink: `https://map.kakao.com/link/map/${pos.coords.latitude},${pos.coords.longitude}`,
+        duration:
+          type === 'end' && startTime
+            ? ((now - startTime) / 60000).toFixed(1) + "분"
+            : ""
+      };
 
-    document.getElementById('message').textContent = "전송 완료";
-    setTimeout(()=>document.getElementById('message').textContent="",2000);
-  });
+      fetch(SCRIPT_URL, {
+        method: "POST",
+        mode: "no-cors",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data)
+      });
+
+      document.getElementById('message').textContent = "✅ 전송 완료";
+      setTimeout(() => {
+        document.getElementById('message').textContent = "";
+      }, 2000);
+    },
+    err => {
+      alert("위치 정보를 가져올 수 없습니다.\nGPS를 켜주세요.");
+      document.getElementById('message').textContent = "";
+    },
+    {
+      enableHighAccuracy: true,
+      timeout: 10000,
+      maximumAge: 0
+    }
+  );
 }
 </script>
+
 </body>
 </html>
