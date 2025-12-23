@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>근무표 - 이미지 업로드 및 표시</title>
+    <style>
+        /* 기본 스타일 */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            height: 100vh;
+        }
+
+        /* 상단 제목 스타일 */
+        .header {
+            background-color: #3498db;
+            color: white;
+            text-align: center;
+            width: 100%;
+            padding: 20px 0;
+            font-size: 28px;
+            font-weight: bold;
+            letter-spacing: 2px;
+        }
+
+        /* 이미지 업로드 및 삭제 부분 */
+        .upload-btn-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 80%;
+            max-width: 1200px;
+            margin-top: 30px;
+        }
+
+        /* 이미지 컨테이너 스타일 */
+        .image-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 30px;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            width: 1800px;
+        }
+
+        .image-container img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 10px;
+            margin-bottom: 10px;
+        }
+
+        .image-container button {
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 8px 15px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s ease;
+        }
+
+        .image-container button:hover {
+            background-color: #c0392b;
+        }
+
+        .input-file {
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 상단 제목 -->
+    <div class="header">
+    비상근무 / 거점근무 / 근무[휴무]표 
+    </div>
+<br>
+    <br>
+    
+    <!-- 이미지 업로드 및 삭제 기능 -->      
+        <div class="image-container" id="imageContainer0">
+            <input type="file" class="input-file" id="imageInput0" accept="image/*">
+            <div>
+                <img id="uploadedImage0" alt="업로드된 이미지">
+            </div>
+            <button id="deleteImage0" style="display: none;">삭제</button>
+        </div>
+
+        <div class="image-container" id="imageContainer1">
+            <input type="file" class="input-file" id="imageInput1" accept="image/*">
+            <div>
+                <img id="uploadedImage1" alt="업로드된 이미지">
+            </div>
+            <button id="deleteImage1" style="display: none;">삭제</button>
+        </div>
+
+        <div class="image-container" id="imageContainer2">
+            <input type="file" class="input-file" id="imageInput2" accept="image/*">
+            <div>
+                <img id="uploadedImage2" alt="업로드된 이미지">
+            </div>
+            <button id="deleteImage2" style="display: none;">삭제</button>
+        </div>
+
+        <div class="image-container" id="imageContainer3">
+            <input type="file" class="input-file" id="imageInput3" accept="image/*">
+            <div>
+                <img id="uploadedImage3" alt="업로드된 이미지">
+            </div>
+            <button id="deleteImage3" style="display: none;">삭제</button>
+        </div>
+
+        <div class="image-container" id="imageContainer4">
+            <input type="file" class="input-file" id="imageInput4" accept="image/*">
+            <div>
+                <img id="uploadedImage4" alt="업로드된 이미지">
+            </div>
+            <button id="deleteImage4" style="display: none;">삭제</button>
+        </div>
+
+        <div class="image-container" id="imageContainer5">
+            <input type="file" class="input-file" id="imageInput5" accept="image/*">
+            <div>
+                <img id="uploadedImage5" alt="업로드된 이미지">
+            </div>
+            <button id="deleteImage5" style="display: none;">삭제</button>
+        </div>
+    </div>
+
+    <script>
+        function setupImageUpload(inputId, imageId, deleteBtnId, containerId) {
+            const inputElement = document.getElementById(inputId);
+            const imageElement = document.getElementById(imageId);
+            const deleteBtn = document.getElementById(deleteBtnId);
+            const container = document.getElementById(containerId);
+
+            // 페이지 로드 시 로컬 스토리지에 저장된 이미지가 있으면 표시
+            if (localStorage.getItem(imageId)) {
+                imageElement.src = localStorage.getItem(imageId);
+                deleteBtn.style.display = 'block';
+            }
+
+            // 이미지 업로드 처리
+            inputElement.addEventListener('change', function(event) {
+                var file = event.target.files[0];
+                if (file) {
+                    var reader = new FileReader();
+                    reader.onload = function(e) {
+                        imageElement.src = e.target.result;
+                        // 로컬 스토리지에 이미지 데이터 저장
+                        localStorage.setItem(imageId, e.target.result);
+                        deleteBtn.style.display = 'block';
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+
+            // 이미지 삭제 처리
+            deleteBtn.addEventListener('click', function() {
+                imageElement.src = '';
+                localStorage.removeItem(imageId);
+                deleteBtn.style.display = 'none';
+            });
+        }
+
+        // 각 이미지에 대한 업로드 및 삭제 기능 설정
+        setupImageUpload('imageInput0', 'uploadedImage0', 'deleteImage0', 'imageContainer0');
+        setupImageUpload('imageInput1', 'uploadedImage1', 'deleteImage1', 'imageContainer1');
+        setupImageUpload('imageInput2', 'uploadedImage2', 'deleteImage2', 'imageContainer2');
+        setupImageUpload('imageInput3', 'uploadedImage3', 'deleteImage3', 'imageContainer3');
+        setupImageUpload('imageInput4', 'uploadedImage4', 'deleteImage4', 'imageContainer4');
+        setupImageUpload('imageInput5', 'uploadedImage5', 'deleteImage5', 'imageContainer5');
+    </script>
+
+</body>
+</html>
