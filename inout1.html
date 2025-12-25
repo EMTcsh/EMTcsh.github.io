@@ -49,10 +49,9 @@ function load() {
 
       const hasCheckout = {};
 
-      // 1️⃣ 체크아웃 존재 여부 먼저 판단
+      // 1️⃣ 체크아웃(하산완료) 여부 확인
       data.forEach(p => {
-        if (!p.phone || !p.status) return;
-        if (p.status === '체크아웃' || p.status === '완료') {
+        if (p.status === '체크아웃' || p.status === '하산완료') {
           hasCheckout[p.phone] = true;
         }
       });
@@ -61,18 +60,18 @@ function load() {
       data.forEach(p => {
         if (!p.lat || !p.lng || !p.status) return;
 
-        // ❌ 체크아웃 이후 산행중 마커 제거
+        // ❌ 체크아웃 후 산행중 마커 제거
         if (p.status === '산행중' && hasCheckout[p.phone]) return;
 
         const lat = Number(p.lat);
         const lng = Number(p.lng);
         if (isNaN(lat) || isNaN(lng)) return;
 
-        const color =
-          p.status === '체크인' ? '#2196f3' :
-          p.status === '산행중' ? '#ff9800' :
-          p.status === '체크아웃' ? '#4caf50' :
-          '#9e9e9e';
+        let color = '#9e9e9e';
+        if (p.status === '체크인') color = '#2196f3';      // 🔵 파랑
+        if (p.status === '산행중') color = '#ff9800';      // 🟠 주황
+        if (p.status === '체크아웃' || p.status === '하산완료')
+          color = '#4caf50';                               // 🟢 초록
 
         const marker = new naver.maps.Marker({
           map,
@@ -105,4 +104,3 @@ setInterval(load, REFRESH_INTERVAL);
 
 </body>
 </html>
-
