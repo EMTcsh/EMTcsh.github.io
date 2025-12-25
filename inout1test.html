@@ -13,17 +13,6 @@ html, body, #map {
   height: 100%;
   margin: 0;
 }
-
-/* 🔴 경고 깜빡임 */
-.blink {
-  animation: blink 1s infinite;
-}
-
-@keyframes blink {
-  0%   { opacity: 1; }
-  50%  { opacity: 0.2; }
-  100% { opacity: 1; }
-}
 </style>
 </head>
 <body>
@@ -31,88 +20,34 @@ html, body, #map {
 <div id="map"></div>
 
 <script>
-/********************************
- * 설정
- ********************************/
 const API_URL = "https://script.google.com/macros/s/AKfycbwWDFctYxqQlETrA3SDVeM9wYGWb0WDX7nfHnJKaQdwZT_pk8p_kLN8sAVN3uUhwDyq/exec";
-const REFRESH_INTERVAL = 60000;
-const CHECKIN_WARNING_MINUTES = 360;
 
-/********************************
- * 지도
- ********************************/
 const map = new naver.maps.Map('map', {
   center: new naver.maps.LatLng(35.1117, 126.9985),
   zoom: 13
 });
 
 let markers = [];
-let infoWindow = new naver.maps.InfoWindow({ anchorSkew: true });
 
-function minutesDiff(time) {
-  return (Date.now() - new Date(time)) / 60000;
-}
-
-/********************************
- * 데이터 로드
- ********************************/
 function load() {
   fetch(API_URL)
-    .then(res => res.json())
+    .then(r => r.json())
     .then(data => {
 
       markers.forEach(m => m.setMap(null));
       markers = [];
 
-      /* phone + status 최신 기록 */
-      const latest = {};
       data.forEach(p => {
-        if (!p.phone || !p.status || !p.timestamp) return;
-        const key = `${p.phone}_${p.status}`;
-        if (!latest[key] || new Date(p.timestamp) > new Date(latest[key].timestamp)) {
-          latest[key] = p;
-        }
-      });
-
-      /* phone별 체크아웃 여부 */
-      const checkedOut = {};
-      Object.values(latest).forEach(p => {
-        if (p.status === '체크아웃' || p.status === '완료') {
-          checkedOut[p.phone] = true;
-        }
-      });
-
-      /* 마커 표시 */
-      Object.values(latest).forEach(p => {
-
-        // 체크아웃 후 산행중/이동중 제거
-        if (
-          checkedOut[p.phone] &&
-          (p.status === '산행중' || p.status === '이동중')
-        ) return;
-
         if (!p.lat || !p.lng) return;
+
         const lat = Number(p.lat);
         const lng = Number(p.lng);
         if (isNaN(lat) || isNaN(lng)) return;
 
-        let color = '#4caf50';
-        let blinkClass = '';
-        let warning = false;
-
-        /* ⏳ 체크인 장시간 미체크아웃 경고 */
-        if (p.status === '체크인') {
-          const diff = minutesDiff(p.timestamp);
-          if (diff >= CHECKIN_WARNING_MINUTES && !checkedOut[p.phone]) {
-            color = '#f44336'; // 🔴 빨강
-            blinkClass = 'blink';
-            warning = true;
-          }
-        }
-
-        if (p.status === '산행중') color = '#007bff';
-        if (p.status === '이동중') color = '#ff9800';
-        if (p.status === '체크아웃') color = '#9e9e9e';
+        const color =
+          p.status === '산행중' ? '#007bff' :
+          p.status === '이동중' ? '#ff9800' :
+          '#4caf50';
 
         const marker = new naver.maps.Marker({
           map,
@@ -120,7 +55,7 @@ function load() {
           title: p.phone,
           icon: {
             content: `
-              <div class="${blinkClass}" style="
+              <div style="
                 width:18px;
                 height:18px;
                 background:${color};
@@ -133,18 +68,6 @@ function load() {
           }
         });
 
-        naver.maps.Event.addListener(marker, 'click', () => {
-          infoWindow.setContent(`
-            <div style="padding:10px;font-size:13px;">
-              <b>📱 ${p.phone}</b><br>
-              🏷 상태: ${p.status}${warning ? ' ⚠️ 장시간 미체크아웃' : ''}<br>
-              ⏰ ${p.timestamp}<br>
-              📍 ${lat.toFixed(6)}, ${lng.toFixed(6)}
-            </div>
-          `);
-          infoWindow.open(map, marker);
-        });
-
         markers.push(marker);
       });
     })
@@ -152,7 +75,7 @@ function load() {
 }
 
 load();
-setInterval(load, REFRESH_INTERVAL);
+setInterval(load, 60000);
 </script>
 
 </body>
