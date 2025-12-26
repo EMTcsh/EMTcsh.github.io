@@ -5,108 +5,130 @@
 <title>무등산원효분소 재난안전장비 일일 점검일지</title>
 
 <style>
-body {
-    font-family: Arial, sans-serif;
-    margin: 10px;
-    font-size: 14px;
-}
-
-h1 {
-    text-align: center;
-    font-size: 20px;
-    margin-bottom: 6px;
-}
-
-p {
-    text-align: right;
-    margin-bottom: 6px;
-}
-
-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 14px;
-}
-
-th, td {
-    border: 1px solid #000;
-    padding: 4px;
-    text-align: center;
-    vertical-align: middle;
-}
-
-th {
-    background: #eee;
-}
-
-.section-title td {
-    background: #e0f7fa;
-    font-weight: bold;
-    text-align: left;
-    padding-left: 6px;
-}
-
-textarea {
-    width: 100%;
-    height: 26px;
-    resize: none;
-    font-size: 14px;
-}
-
-input[type="text"],
-input[type="date"] {
-    font-size: 14px;
-    width: 140px;
-}
-
-button {
-    padding: 6px 12px;
-}
-
-/* ======================
-   🔥 A4 1장 강제 인쇄
-   ====================== */
-@media print {
-
-    @page {
-        size: A4 portrait;
-        margin: 5mm;
-    }
-
     body {
-        margin: 0;
-        font-size: 17px;
+        font-family: Arial, sans-serif;
+        margin: 20px;
     }
 
     h1 {
+        text-align: center;
+        margin-bottom: 15px;
         font-size: 22px;
-        margin-bottom: 6px;
+    }
+
+    p {
+        text-align: right;
+        font-size: 16px;
+        margin-bottom: 10px;
     }
 
     table {
-        font-size: 17px;
-        page-break-inside: avoid;
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 15px;
+        font-size: 16px;
     }
 
-    tr, td, th {
-        page-break-inside: avoid !important;
-        page-break-after: avoid !important;
+    th, td {
+        border: 1px solid #ccc;
+        padding: 6px;
+        text-align: center;
+        vertical-align: middle;
+    }
+
+    th {
+        background-color: #f2f2f2;
+        font-weight: bold;
+    }
+
+    .section-title td {
+        background-color: #e0f7fa;
+        font-weight: bold;
+        text-align: left;
+        padding-left: 8px;
+    }
+
+    input[type="date"],
+    input[type="text"],
+    textarea {
+        padding: 4px;
+        width: 95%;
+        font-size: 15px;
     }
 
     textarea {
-        height: 28px;
-        font-size: 16px;
+        resize: vertical;
+        height: 40px;
     }
 
-    input {
-        font-size: 16px;
-        border: none;
+    .btn-container {
+        text-align: center;
+        margin-top: 10px;
     }
 
     button {
-        display: none;
+        padding: 8px 14px;
+        font-size: 14px;
+        cursor: pointer;
     }
-}
+
+    /* =======================
+       A4 인쇄 전용 스타일
+       ======================= */
+    @media print {
+
+        @page {
+            size: A4;
+            margin: 8mm;
+        }
+
+        body {
+            margin: 0;
+            font-size: 18px;
+        }
+
+        h1 {
+            font-size: 26px;
+            margin-bottom: 12px;
+        }
+
+        p {
+            font-size: 18px;
+            margin-bottom: 8px;
+        }
+
+        table {
+            font-size: 18px;
+            page-break-inside: avoid;
+        }
+
+        th, td {
+            border: 1px solid #000;
+            padding: 6px;
+            line-height: 1.4;
+        }
+
+        .section-title td {
+            font-size: 19px;
+            font-weight: bold;
+        }
+
+        input[type="date"],
+        input[type="text"],
+        textarea {
+            font-size: 18px;
+            border: none;
+        }
+
+        textarea {
+            height: 48px;
+        }
+
+        button,
+        .btn-container {
+            display: none;
+        }
+    }
 </style>
 </head>
 
@@ -114,41 +136,107 @@ button {
 
 <h1>무등산원효분소 재난안전장비 일일 점검일지</h1>
 
-<p>점검일: <input type="date"></p>
-
-<table>
-<tr class="section-title"><td colspan="4">상황관리</td></tr>
-<tr><th>항목</th><th>정상</th><th>이상</th><th>점검내용</th></tr>
-
-<tr><td>재난상황판</td><td><input type="checkbox"></td><td><input type="checkbox"></td><td><textarea></textarea></td></tr>
-<tr><td>탐방로 CCTV</td><td><input type="checkbox"></td><td><input type="checkbox"></td><td><textarea></textarea></td></tr>
-<tr><td>산불 CCTV</td><td><input type="checkbox"></td><td><input type="checkbox"></td><td><textarea></textarea></td></tr>
-<tr><td>자동통제시스템</td><td><input type="checkbox"></td><td><input type="checkbox"></td><td><textarea></textarea></td></tr>
-<tr><td>전광판</td><td><input type="checkbox"></td><td><input type="checkbox"></td><td><textarea></textarea></td></tr>
-<tr><td>우량경보시설</td><td><input type="checkbox"></td><td><input type="checkbox"></td><td><textarea></textarea></td></tr>
-<tr><td>AWS</td><td><input type="checkbox"></td><td><input type="checkbox"></td><td><textarea></textarea></td></tr>
-
-<tr class="section-title"><td colspan="4">출동준비</td></tr>
-<tr><th>항목</th><th>완료</th><th>정비</th><th>내용</th></tr>
-
-<tr><td>구급장비</td><td><input type="checkbox"></td><td><input type="checkbox"></td><td><textarea></textarea></td></tr>
-<tr><td>구조장비</td><td><input type="checkbox"></td><td><input type="checkbox"></td><td><textarea></textarea></td></tr>
-<tr><td>산불진화</td><td><input type="checkbox"></td><td><input type="checkbox"></td><td><textarea></textarea></td></tr>
-<tr><td>AED</td><td><input type="checkbox"></td><td><input type="checkbox"></td><td><textarea></textarea></td></tr>
-<tr><td>무전기</td><td><input type="checkbox"></td><td><input type="checkbox"></td><td><textarea></textarea></td></tr>
-<tr><td>단말기</td><td><input type="checkbox"></td><td><input type="checkbox"></td><td><textarea></textarea></td></tr>
-<tr><td>업무폰</td><td><input type="checkbox"></td><td><input type="checkbox"></td><td><textarea></textarea></td></tr>
-
-<tr class="section-title"><td colspan="4">차량관리</td></tr>
-<tr><th>차량</th><th>정상</th><th>불량</th><th>내용</th></tr>
-<tr><td>산불진화차 3116</td><td><input type="checkbox"></td><td><input type="checkbox"></td><td><textarea></textarea></td></tr>
-</table>
-
-<p style="text-align:right; margin-top:6px;">
-점검자: <input type="text"> 확인자: <input type="text">
+<p>
+    점검일:
+    <input type="date" style="width: 160px; text-align: right;">
 </p>
 
-<button onclick="window.print()">프린트</button>
+<table>
+    <tr class="section-title"><td colspan="4">상황관리</td></tr>
+    <tr>
+        <th>항목</th>
+        <th>정상</th>
+        <th>이상발생</th>
+        <th>점검내용</th>
+    </tr>
+
+    <tr>
+        <td>재난상황판(8개)</td>
+        <td><input type="checkbox"></td>
+        <td><input type="checkbox"></td>
+        <td><textarea></textarea></td>
+    </tr>
+    <tr>
+        <td>탐방로 CCTV(30개)</td>
+        <td><input type="checkbox"></td>
+        <td><input type="checkbox"></td>
+        <td><textarea></textarea></td>
+    </tr>
+    <tr>
+        <td>산불 CCTV(8개)</td>
+        <td><input type="checkbox"></td>
+        <td><input type="checkbox"></td>
+        <td><textarea></textarea></td>
+    </tr>
+    <tr>
+        <td>자동통제시스템(21개)</td>
+        <td><input type="checkbox"></td>
+        <td><input type="checkbox"></td>
+        <td><textarea></textarea></td>
+    </tr>
+    <tr>
+        <td>재해문자 전광판(7개)</td>
+        <td><input type="checkbox"></td>
+        <td><input type="checkbox"></td>
+        <td><textarea></textarea></td>
+    </tr>
+    <tr>
+        <td>자동우량경보시설(10개)</td>
+        <td><input type="checkbox"></td>
+        <td><input type="checkbox"></td>
+        <td><textarea></textarea></td>
+    </tr>
+    <tr>
+        <td>AWS(1개)</td>
+        <td><input type="checkbox"></td>
+        <td><input type="checkbox"></td>
+        <td><textarea></textarea></td>
+    </tr>
+
+    <tr class="section-title"><td colspan="4">출동준비</td></tr>
+    <tr>
+        <th>항목</th>
+        <th>준비완료</th>
+        <th>정비필요</th>
+        <th>점검내용</th>
+    </tr>
+
+    <tr><td>구급장비</td><td><input type="checkbox"></td><td><input type="checkbox"></td><td><textarea></textarea></td></tr>
+    <tr><td>구조장비</td><td><input type="checkbox"></td><td><input type="checkbox"></td><td><textarea></textarea></td></tr>
+    <tr><td>산불진화장비</td><td><input type="checkbox"></td><td><input type="checkbox"></td><td><textarea></textarea></td></tr>
+    <tr><td>AED</td><td><input type="checkbox"></td><td><input type="checkbox"></td><td><textarea></textarea></td></tr>
+    <tr><td>무전기</td><td><input type="checkbox"></td><td><input type="checkbox"></td><td><textarea></textarea></td></tr>
+    <tr><td>산불신고단말기</td><td><input type="checkbox"></td><td><input type="checkbox"></td><td><textarea></textarea></td></tr>
+    <tr><td>업무용 핸드폰</td><td><input type="checkbox"></td><td><input type="checkbox"></td><td><textarea></textarea></td></tr>
+
+    <tr class="section-title"><td colspan="4">차량관리</td></tr>
+    <tr>
+        <th>항목</th>
+        <th>작동</th>
+        <th>불량</th>
+        <th>점검내용</th>
+    </tr>
+    <tr>
+        <td>산불진화차 3116</td>
+        <td><input type="checkbox"></td>
+        <td><input type="checkbox"></td>
+        <td><textarea></textarea></td>
+    </tr>
+</table>
+
+<div style="display:flex; justify-content:flex-end; gap:10px; margin-top:5px;">
+    <label>점검자:</label>
+    <input type="text" style="width:150px; text-align:right;">
+</div>
+
+<div style="display:flex; justify-content:flex-end; gap:10px; margin-top:5px;">
+    <label>확인자:</label>
+    <input type="text" style="width:150px; text-align:right;">
+</div>
+
+<div class="btn-container">
+    <button onclick="window.print()">프린트 / PDF 저장</button>
+</div>
 
 </body>
 </html>
