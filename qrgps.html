@@ -32,7 +32,7 @@ button { background:#d32f2f; color:white; border:none; border-radius:6px; cursor
     </div>
   
     <div class="small">
-        ※ 문자전송은 <b>무등산 특수산악구조대</b>로 연결됩니다
+        ※ 문자전송은 <b>무등산119특수산악구조대</b>로 연결됩니다
     </div>
   <br>
   
@@ -44,14 +44,11 @@ button { background:#d32f2f; color:white; border:none; border-radius:6px; cursor
 let map, userMarker;
 let currentLat = null, currentLng = null;
 let markers = [];
-const RESCUE_NUMBER = [
-  "01066650113",
-  "01031901187"
-];
+const RESCUE_NUMBER = "01066650113";
 const GOOGLE_SHEET_API = "https://script.google.com/macros/s/AKfycbyTOMmbvCIDZ5VpxWQS5hdjdXdwcvoYsva-Ljtd2Y81lBfuSsPJ-jYhdMPhhxz31jHCaQ/exec";
 
 // 지도 초기화
-function initMap(latInit = 35.131295, lngInit = 126.948047) {
+function initMap(latInit = 35.162321, lngInit = 126.980342) {
     map = new kakao.maps.Map(document.getElementById("map"), {
         center: new kakao.maps.LatLng(latInit, lngInit),
         level: 3
