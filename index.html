@@ -14,15 +14,11 @@ body {
   font-family: Arial, sans-serif;
   line-height: 1.6;
 }
-
-/* 전체 레이아웃 */
 .container {
   max-width: 900px;
   margin: 24px auto;
   padding: 20px;
 }
-
-/* 섹션 카드 */
 .section {
   background: #ffffff;
   border-radius: 14px;
@@ -30,16 +26,12 @@ body {
   box-shadow: 0 4px 12px rgba(0,0,0,0.08);
   margin-bottom: 28px;
 }
-
-/* 섹션 제목 */
 .section h2 {
   margin-bottom: 16px;
   padding-bottom: 8px;
   border-bottom: 1px solid #e5e7eb;
   color: #1e3a8a;
 }
-
-/* 입력 요소 */
 input,
 select,
 textarea {
@@ -51,8 +43,6 @@ textarea {
   font-size: 1rem;
   background-color: #ffffff;
 }
-
-/* 포커스 */
 input:focus,
 select:focus,
 textarea:focus {
@@ -60,15 +50,11 @@ textarea:focus {
   border-color: #3b82f6;
   box-shadow: 0 0 0 2px rgba(59,130,246,0.15);
 }
-
-/* 텍스트 영역 */
 textarea {
   min-height: 140px;
   resize: vertical;
   line-height: 1.7;
 }
-
-/* 좌표 표시 */
 .coordinate-box {
   background: #eef2ff;
   padding: 12px 14px;
@@ -76,16 +62,12 @@ textarea {
   margin-bottom: 12px;
   font-weight: 500;
 }
-
-/* 지도 */
 #map {
   width: 100%;
   height: 320px;
   border-radius: 14px;
   margin-top: 12px;
 }
-
-/* 기록 표시 */
 .board-item {
   white-space: pre-line;
   background: #f8fafc;
@@ -94,8 +76,6 @@ textarea {
   line-height: 1.6;
   font-size: 0.95rem;
 }
-
-/* 버튼 */
 button {
   font-size: 1.05rem;
 }
@@ -118,7 +98,7 @@ button {
 <input type="datetime-local" name="도착시간" required>
 <input type="text" name="사고장소" placeholder="사고장소" required>
 <input type="text" name="주증상" placeholder="환자 증상" required>  
-  
+
 <div id="locationDisplay" class="coordinate-box">위도: , 경도:</div>
 <button type="button" id="getLocation"
 class="bg-green-600 text-white px-4 py-2 rounded">
@@ -127,8 +107,6 @@ class="bg-green-600 text-white px-4 py-2 rounded">
 
 <input type="hidden" name="사고좌표" id="hiddenCoordinate">
 <div id="map"></div>
-
-
 </div>
 
 <!-- GCS -->
@@ -136,18 +114,18 @@ class="bg-green-600 text-white px-4 py-2 rounded">
 <h2 class="text-xl font-semibold">의식평가(GCS)</h2>
 
 <select id="eye">
-<option value="4">E4 자발: 자발적으로 눈을 뜬다</option>
-<option value="3">E3 음성: 말로 지시했을때 눈을 뜬다</option>
-<option value="2">E2 통증: 통증 자극에 의해 눈을 뜬다</option>
-<option value="1">E1 무반응: 어떠한 자극에도 눈을 뜨지 못한다</option>
+<option value="4">E4 자발</option>
+<option value="3">E3 음성</option>
+<option value="2">E2 통증</option>
+<option value="1">E1 무반응</option>
 </select>
 
 <select id="verbal">
-<option value="5">V5 지남력: 정확한 반응(6하원칙에 지남력 있는 상태)</option>
-<option value="4">V4 혼란: 대화 혼란(대화가능하나 계속적 대화 교환 안됨)</option>
-<option value="3">V3 부적절: 언어혼란(동문서답)</option>
-<option value="2">V2 신음: 이해할 수 없는 소리</option>
-<option value="1">V1 무반응: 반응 없음</option>
+<option value="5">V5 지남력</option>
+<option value="4">V4 혼란</option>
+<option value="3">V3 부적절</option>
+<option value="2">V2 신음</option>
+<option value="1">V1 무반응</option>
 </select>
 
 <select id="motor">
@@ -168,9 +146,13 @@ class="bg-green-600 text-white px-4 py-2 rounded">
 <!-- 환자정보 -->
 <div class="section">
 <h2 class="text-xl font-semibold">환자정보</h2>
+
 <input type="text" name="환자이름" placeholder="이름" required>
 <input type="date" name="생년월일" required>
 <input type="text" name="거주지" placeholder="거주지" required>
+
+<!-- 연락처 추가 -->
+<input type="tel" name="연락처" placeholder="연락처 (예: 010-1234-5678)" required>
 </div>
 
 <!-- 응급처치 -->
