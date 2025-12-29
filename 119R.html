@@ -19,6 +19,16 @@ h1 {
   margin-bottom: 20px;
 }
 
+input {
+  width: 100%;
+  max-width: 360px;
+  padding: 14px;
+  margin-bottom: 15px;
+  font-size: 16px;
+  border-radius: 8px;
+  border: none;
+}
+
 button {
   width: 100%;
   max-width: 360px;
@@ -47,7 +57,14 @@ button:active {
 <body>
 
 <h1>🆘 무등산 산악구조 요청</h1>
-<p>아래 버튼을 누르면<br>위치 확인 링크가 문자로 전송됩니다.</p>
+<p>문자를 받을 번호를 입력한 후<br>버튼을 눌러주세요.</p>
+
+<input
+  type="tel"
+  id="phone"
+  placeholder="받는 사람 번호 (예: 01012345678)"
+  inputmode="tel"
+/>
 
 <button onclick="sendSMS()">📩 위치 링크 문자 보내기</button>
 
@@ -57,7 +74,13 @@ button:active {
 
 <script>
 function sendSMS() {
-  const phone = "01066650113"; // 🔴 받는 번호 (필요시 수정)
+  const phone = document.getElementById("phone").value.trim();
+
+  if (!phone) {
+    alert("받는 사람 번호를 입력해주세요.");
+    return;
+  }
+
   const link = "https://emtcsh.github.io/119gps.html";
 
   const message =
