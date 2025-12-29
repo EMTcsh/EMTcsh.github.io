@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>🆘 무등산 산악구조 요청</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body {
+  font-family: Arial, sans-serif;
+  background: #111;
+  color: #fff;
+  text-align: center;
+  padding: 30px;
+}
+
+h1 {
+  color: #ff4d4d;
+  margin-bottom: 20px;
+}
+
+button {
+  width: 100%;
+  max-width: 360px;
+  padding: 18px;
+  font-size: 18px;
+  font-weight: bold;
+  border: none;
+  border-radius: 10px;
+  background: #ff4d4d;
+  color: #fff;
+  cursor: pointer;
+}
+
+button:active {
+  background: #cc0000;
+}
+
+.footer {
+  margin-top: 30px;
+  font-size: 13px;
+  color: #aaa;
+}
+</style>
+</head>
+
+<body>
+
+<h1>🆘 무등산 산악구조 요청</h1>
+<p>아래 버튼을 누르면<br>위치 확인 링크가 문자로 전송됩니다.</p>
+
+<button onclick="sendSMS()">📩 위치 링크 문자 보내기</button>
+
+<div class="footer">
+※ 문자 전송 버튼은 휴대폰에서 직접 눌러야 합니다
+</div>
+
+<script>
+function sendSMS() {
+  const phone = "01066650113"; // 🔴 받는 번호 (필요시 수정)
+  const link = "https://emtcsh.github.io/119gps.html";
+
+  const message =
+    "[119 구조요청]\n" +
+    "아래 링크를 눌러 위치를 확인하세요.\n" +
+    link;
+
+  const encoded = encodeURIComponent(message);
+
+  // iOS / Android 분기
+  const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+  const smsURL = isIOS
+    ? `sms:${phone}&body=${encoded}`
+    : `sms:${phone}?body=${encoded}`;
+
+  window.location.href = smsURL;
+}
+</script>
+
+</body>
+</html>
