@@ -8,20 +8,18 @@
 <!-- 카카오 지도 -->
 <script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=ff9e145029506d6e4c72d1f2b01ea424&libraries=services"></script>
 
-<style>
-*{
-  box-sizing:border-box; /* ⭐ 전체 박스 계산 안정화 */
-}
+<!-- proj4 -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/proj4js/2.9.0/proj4.js"></script>
 
+<style>
+*{box-sizing:border-box}
 body{
   margin:0;
-  padding-bottom:100px; /* 하단 액션바 공간 */
-  font-family:system-ui, -apple-system, Arial;
+  padding-bottom:100px;
+  font-family:system-ui,Arial;
   background:#0f172a;
   color:#fff;
 }
-
-/* 상단 */
 .header{
   padding:14px;
   text-align:center;
@@ -29,20 +27,15 @@ body{
   font-weight:700;
   background:#020617;
 }
-
-/* 카드 */
 .card{
   background:#020617;
   border-radius:16px;
   padding:14px;
   margin:12px;
 }
-
-/* 입력 */
-select,
-input{
+select,input{
   width:100%;
-  min-height:56px;        /* ⭐ 터치 영역 확보 */
+  min-height:56px;
   padding:18px;
   margin-top:10px;
   font-size:18px;
@@ -51,8 +44,6 @@ input{
   background:#1e293b;
   color:#fff;
 }
-
-/* 결과 */
 pre{
   white-space:pre-wrap;
   line-height:1.6;
@@ -62,16 +53,12 @@ pre{
   border-radius:14px;
   padding:14px;
 }
-
-/* 지도 */
 #map{
   height:240px;
   margin:12px;
   border-radius:16px;
   overflow:hidden;
 }
-
-/* 하단 액션바 */
 .action-bar{
   position:fixed;
   bottom:0;
@@ -81,7 +68,6 @@ pre{
   display:flex;
   gap:10px;
   padding:10px;
-  box-shadow:0 -4px 10px rgba(0,0,0,0.4);
 }
 .action-bar button{
   flex:1;
@@ -90,13 +76,9 @@ pre{
   font-weight:700;
   border:none;
   border-radius:16px;
-  background:linear-gradient(135deg,#22c55e,#16a34a);
-  color:#020617;
 }
-.action-bar button.secondary{
-  background:#334155;
-  color:#fff;
-}
+.primary{background:linear-gradient(135deg,#22c55e,#16a34a);color:#020617}
+.secondary{background:#334155;color:#fff}
 </style>
 </head>
 
@@ -109,78 +91,55 @@ pre{
     <option value="dd">도좌표 입력</option>
     <option value="dms">도분초 입력</option>
   </select>
-
-  <input id="lat" inputmode="decimal" placeholder="위도 (35.131486 / 35 7 53.35)">
-  <input id="lon" inputmode="decimal" placeholder="경도 (126.947881 / 126 56 52.37)">
+  <input id="lat" placeholder="위도 (35.131486 / 35 7 53.35)">
+  <input id="lon" placeholder="경도 (126.947881 / 126 56 52.37)">
 </div>
 
 <div class="card">
-  <pre id="result">좌표를 입력하고 하단 [변환]을 누르세요</pre>
+  <pre id="result">좌표 입력 후 [변환]을 누르세요</pre>
 </div>
 
 <div id="map"></div>
 
 <div class="action-bar">
-  <button onclick="convert()">📍 변환</button>
+  <button class="primary" onclick="convertAll()">📍 변환</button>
   <button class="secondary" onclick="copyResult()">📋 복사</button>
   <button class="secondary" onclick="shareResult()">📤 공유</button>
 </div>
 
 <script>
-/* ===== 도분초 → 도 ===== */
+/* ===== EPSG ===== */
+proj4.defs("EPSG:5179",
+"+proj=tmerc +lat_0=38 +lon_0=127.5 +k=0.9996 +x_0=1000000 +y_0=2000000 +ellps=GRS80 +units=m +no_defs");
+
+/* ===== 변환 유틸 ===== */
 function dmsToDecimal(v){
   const p=v.trim().split(/\s+/).map(Number);
   return p[0]+p[1]/60+p[2]/3600;
 }
-
-/* ===== 도 → 도분초 ===== */
 function toDMS(deg){
   const d=Math.floor(deg);
-  const mFloat=(deg-d)*60;
-  const m=Math.floor(mFloat);
-  const s=((mFloat-m)*60).toFixed(2);
+  const m=Math.floor((deg-d)*60);
+  const s=(((deg-d)*60-m)*60).toFixed(2);
   return `${d}° ${m}′ ${s}″`;
 }
 
-/* ===== WGS84 → TM (간이) ===== */
-function wgs84ToTM(lat,lon){
-  const a=6378137;
-  const f=1/298.257222101;
-  const lon0=127*Math.PI/180;
-
-  const e2=2*f-f*f;
-  const latR=lat*Math.PI/180;
-  const lonR=lon*Math.PI/180;
-
-  const N=a/Math.sqrt(1-e2*Math.sin(latR)**2);
-  const A=(lonR-lon0)*Math.cos(latR);
-
-  return{
-    x:Math.floor(N*A+200000),
-    y:Math.floor(N*Math.log(Math.tan(Math.PI/4+latR/2))+500000)
-  };
-}
-
 /* ===== 국가지점번호 ===== */
-function nationalPoint(tm){
-  return `${Math.floor(tm.x/100)} ${Math.floor(tm.y/100)}`;
+function nationalPoint(x,y){
+  return `${Math.floor(x/100)} ${Math.floor(y/100)}`;
 }
 
 /* ===== 지도 ===== */
 let map,marker;
 function showMap(lat,lon){
-  map=new kakao.maps.Map(document.getElementById('map'),{
-    center:new kakao.maps.LatLng(lat,lon),
-    level:3
-  });
-  marker=new kakao.maps.Marker({
-    position:new kakao.maps.LatLng(lat,lon)
-  });
+  const pos=new kakao.maps.LatLng(lat,lon);
+  map=new kakao.maps.Map(document.getElementById('map'),{center:pos,level:3});
+  marker=new kakao.maps.Marker({position:pos});
   marker.setMap(map);
 }
 
-/* ===== 변환 ===== */
-function convert(){
+/* ===== 메인 변환 ===== */
+function convertAll(){
   let lat,lon;
   if(mode.value==="dd"){
     lat=parseFloat(latInput.value);
@@ -195,44 +154,40 @@ function convert(){
     return;
   }
 
-  const tm=wgs84ToTM(lat,lon);
+  /* UTM-K (정확) */
+  const utm=proj4("WGS84","EPSG:5179",[lon,lat]);
+  const x=Math.floor(utm[0]);
+  const y=Math.floor(utm[1]);
 
   result.textContent=
-`📍 도분초
-${toDMS(lat)} N
-${toDMS(lon)} E
+`📌 WGS84
+DD : ${lat.toFixed(6)}, ${lon.toFixed(6)}
+DMS: ${toDMS(lat)} N / ${toDMS(lon)} E
 
-🗺️ TM 좌표
-X ${tm.x}
-Y ${tm.y}
+🧭 UTM-K (EPSG:5179)
+E ${x}
+N ${y}
 
 🏔️ 국가지점번호
-${nationalPoint(tm)}
+${nationalPoint(x,y)}
 `;
 
   navigator.vibrate?.([80,40,80]);
   showMap(lat,lon);
 }
 
-/* ===== 복사 ===== */
+/* ===== 복사 / 공유 ===== */
 function copyResult(){
   navigator.clipboard.writeText(result.textContent);
-  navigator.vibrate?.(100);
-  alert("좌표 복사 완료");
+  alert("복사 완료");
 }
-
-/* ===== 공유 ===== */
 function shareResult(){
-  if(navigator.share){
-    navigator.share({
-      title:"현장 좌표",
-      text:result.textContent
-    });
-  }else{
-    copyResult();
-  }
+  navigator.share
+    ? navigator.share({title:"현장 좌표",text:result.textContent})
+    : copyResult();
 }
 
+/* DOM */
 const latInput=document.getElementById("lat");
 const lonInput=document.getElementById("lon");
 const mode=document.getElementById("mode");
@@ -241,3 +196,4 @@ const result=document.getElementById("result");
 
 </body>
 </html>
+
