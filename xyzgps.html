@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>좌표 변환 & 지도 표시</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<!-- 카카오 지도 -->
+<script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=YOUR_KAKAO_KEY"></script>
+
+<style>
+body {
+  font-family: 'Segoe UI', Arial, sans-serif;
+  background: #f1f3f6;
+  margin: 0;
+  padding: 15px;
+}
+
+/* 카드 공통 */
+.card {
+  background: #fff;
+  border-radius: 14px;
+  padding: 16px;
+  margin-bottom: 14px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+}
+
+/* 제목 */
+h3 {
+  margin: 0 0 10px;
+  text-align: center;
+}
+
+/* 입력 */
+select, input {
+  width: 100%;
+  padding: 12px;
+  margin-top: 8px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  font-size: 15px;
+}
+
+/* 버튼 */
+button {
+  width: 100%;
+  margin-top: 12px;
+  padding: 14px;
+  font-size: 16px;
+  font-weight: bold;
+  color: #fff;
+  background: linear-gradient(135deg, #007bff, #0056d2);
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+}
+button:active {
+  transform: scale(0.98);
+}
+
+/* 결과 */
+pre {
+  white-space: pre-wrap;
+  background: #0f172a;
+  color: #e5e7eb;
+  padding: 14px;
+  border-radius: 10px;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+/* 지도 */
+#map {
+  height: 280px;
+  border-radius: 14px;
+  overflow: hidden;
+}
+</style>
+</head>
+<body>
+
+<div class="card">
+  <h3>📍 좌표 변환기</h3>
+
+  <select id="mode">
+    <option value="dd">도좌표 입력</option>
+    <option value="dms">도분초 입력</option>
+  </select>
+
+  <input id="lat" placeholder="위도 (예: 35.131486 / 35 7 53.35)">
+  <input id="lon" placeholder="경도 (예: 126.947881 / 126 56 52.37)">
+
+  <button onclick="convert()">📐 좌표 변환</button>
+</div>
+
+<div class="card">
+  <pre id="result">좌표를 입력하세요</pre>
+</div>
+
+<div class="card">
+  <div id="map"></div>
+</div>
+
+<script>
+// ===== 도분초 → 도 =====
+function dmsToDecimal(v) {
+  const p = v.trim().split(/\s+/).map(Number);
+  return p[0] + p[1]/60 + p[2]/3600;
+}
+
+// ===== 도 → 도분초 =====
+function toDMS(deg) {
+  const d = Math.floor(deg);
+  const mFloat = (deg - d) * 60;
+  const m = Math.floor(mFloat);
+  const s = ((mFloat - m) * 60).toFixed(2);
+  return `${d}° ${m}′ ${s}″`;
+}
+
+// ===== WGS84 → TM (EPSG:5186) =====
+function wgs84ToTM(lat, lon) {
+  const a = 6378137;
+  const f = 1 / 298.257222101;
+  const lon0 = 127 * Math.PI / 180;
+
+  const e2 = 2*f - f*f;
+  const latR = lat * Math.PI / 180;
+  const lonR = lon * Math.PI / 180;
+
+  const N = a / Math.sqrt(1 - e2 * Math.sin(latR)**2);
+  const A = (lonR - lon0) * Math.cos(latR);
+
+  const x = Math.floor(N * A + 200000);
+  const y = Math.floor(N * Math.log(Math.tan(Math.PI/4 + latR/2)) + 500000);
+
+  return { x, y };
+}
+
+// ===== 국가지점번호 =====
+function nationalPoint(tm) {
+  return `${Math.floor(tm.x/100)} ${Math.floor(tm.y/100)}`;
+}
+
+// ===== 지도 =====
+let map, marker;
+function showMap(lat, lon) {
+  const container = document.getElementById('map');
+  map = new kakao.maps.Map(container, {
+    center: new kakao.maps.LatLng(lat, lon),
+    level: 3
+  });
+
+  marker = new kakao.maps.Marker({
+    position: new kakao.maps.LatLng(lat, lon)
+  });
+  marker.setMap(map);
+}
+
+// ===== 변환 =====
+function convert() {
+  let lat, lon;
+  const mode = document.getElementById("mode").value;
+
+  if (mode === "dd") {
+    lat = parseFloat(latInput.value);
+    lon = parseFloat(lonInput.value);
+  } else {
+    lat = dmsToDecimal(latInput.value);
+    lon = dmsToDecimal(lonInput.value);
+  }
+
+  const tm = wgs84ToTM(lat, lon);
+
+  document.getElementById("result").textContent =
+`▶ 도좌표
+${lat}, ${lon}
+
+▶ 도분초
+${toDMS(lat)} N
+${toDMS(lon)} E
+
+▶ TM 좌표 (EPSG:5186)
+X ${tm.x}
+Y ${tm.y}
+
+▶ 국가지점번호 (100m)
+${nationalPoint(tm)}
+`;
+
+  showMap(lat, lon);
+}
+
+const latInput = document.getElementById("lat");
+const lonInput = document.getElementById("lon");
+</script>
+
+</body>
+</html>
