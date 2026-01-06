@@ -72,13 +72,13 @@ pre{
 .action-bar button{
   flex:1;
   padding:18px;
-  font-size:17px;
+  font-size:16px;
   font-weight:700;
   border:none;
   border-radius:16px;
 }
 .primary{background:linear-gradient(135deg,#22c55e,#16a34a);color:#020617}
-.secondary{background:#334155;color:#fff}
+.share{background:#0ea5e9;color:#020617}
 </style>
 </head>
 
@@ -100,15 +100,14 @@ pre{
 </div>
 
 <div class="card">
-  <pre id="result">좌표 입력 또는 지도 클릭</pre>
+  <pre id="result">좌표 입력 후 [변환]을 누르세요</pre>
 </div>
 
 <div id="map"></div>
 
 <div class="action-bar">
   <button class="primary" onclick="convert()">📍 변환</button>
-  <button class="secondary" onclick="sendKakao()">📨 카카오톡</button>
-  <button class="secondary" onclick="sendSMS()">📩 SMS</button>
+  <button class="share" onclick="shareAll()">📤 공유</button>
 </div>
 
 <script>
@@ -127,34 +126,20 @@ function toDMS(d){
   const S=(((d-D)*60-M)*60).toFixed(2);
   return `${D}° ${M}′ ${S}″`;
 }
-
-/* 국가지점번호 */
 function national(x,y){
   return `${Math.floor(x/100)} ${Math.floor(y/100)}`;
 }
 
 /* 지도 */
-let map,marker;
-function initMap(lat=35.131486,lon=126.947881){
-  const pos=new kakao.maps.LatLng(lat,lon);
-  map=new kakao.maps.Map(mapDiv,{center:pos,level:3});
+let map, marker;
+function initMap(){
+  const pos=new kakao.maps.LatLng(35.131486,126.947881);
+  map=new kakao.maps.Map(mapDiv,{center:pos,level:4});
   marker=new kakao.maps.Marker({position:pos});
   marker.setMap(map);
-
-  kakao.maps.event.addListener(map,'click',e=>{
-    latInput.value=e.latLng.getLat().toFixed(6);
-    lonInput.value=e.latLng.getLng().toFixed(6);
-    mode.value="dd";
-    convert();
-  });
-}
-function moveMap(lat,lon){
-  const pos=new kakao.maps.LatLng(lat,lon);
-  marker.setPosition(pos);
-  map.setCenter(pos);
 }
 
-/* 메인 변환 */
+/* 변환 */
 function convert(){
   let lat,lon;
 
@@ -180,36 +165,52 @@ function convert(){
   const y=Math.floor(utm[1]);
 
   result.textContent=
-`📌 WGS84
-DD : ${lat.toFixed(6)}, ${lon.toFixed(6)}
-DMS: ${toDMS(lat)} / ${toDMS(lon)}
+`🆘 구조 위치
 
-🧭 UTM-K
+WGS84
+위도: ${lat.toFixed(6)}
+경도: ${lon.toFixed(6)}
+
+도분초
+${toDMS(lat)} / ${toDMS(lon)}
+
+UTM-K
 E ${x}
 N ${y}
 
-🏔 국가지점번호
+국가지점번호
 ${national(x,y)}
 `;
 
-  moveMap(lat,lon);
+  const pos=new kakao.maps.LatLng(lat,lon);
+  marker.setPosition(pos);
+  map.setCenter(pos);
 }
 
-/* 전송 */
-function message(){
+/* 공유 */
+function buildMessage(){
   const t=result.textContent;
-  const m=t.match(/DD\s:\s([0-9.\-]+),\s([0-9.\-]+)/);
+  const m=t.match(/위도:\s([0-9.\-]+)[\s\S]*?경도:\s([0-9.\-]+)/);
   if(!m) return null;
-  const lat=m[1],lon=m[2];
-  return `📍 구조 위치\n위도:${lat}\n경도:${lon}\nhttps://map.kakao.com/link/map/${lat},${lon}`;
+  const lat=m[1], lon=m[2];
+  return `🆘 구조 위치 공유\n\n${t}\n📍 지도\nhttps://map.kakao.com/link/map/${lat},${lon}`;
 }
-function sendKakao(){
-  const msg=message(); if(!msg) return;
-  window.open("https://sharer.kakao.com/talk/friends/picker/link?text="+encodeURIComponent(msg));
-}
-function sendSMS(){
-  const msg=message(); if(!msg) return;
-  location.href=`sms:?body=${encodeURIComponent(msg)}`;
+
+function shareAll(){
+  const msg=buildMessage();
+  if(!msg) return alert("좌표를 먼저 변환하세요.");
+
+  if(navigator.share){
+    navigator.share({
+      title:"현장 좌표 공유",
+      text:msg
+    });
+  }else{
+    window.open(
+      "https://sharer.kakao.com/talk/friends/picker/link?text="+
+      encodeURIComponent(msg)
+    );
+  }
 }
 
 /* DOM */
