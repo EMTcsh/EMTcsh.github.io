@@ -2,10 +2,10 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<title>현장 좌표 변환기</title>
+<title>🆘 현장 좌표 변환기</title>
 <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
 
-<!-- 카카오 지도 -->
+<!-- Kakao Map -->
 <script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=ff9e145029506d6e4c72d1f2b01ea424&libraries=services"></script>
 
 <!-- proj4 -->
@@ -15,7 +15,7 @@
 *{box-sizing:border-box}
 body{
   margin:0;
-  padding-bottom:110px;
+  padding-bottom:100px;
   font-family:system-ui,Arial;
   background:#0f172a;
   color:#fff;
@@ -33,11 +33,10 @@ body{
   padding:14px;
   margin:12px;
 }
-select,input{
+input{
   width:100%;
   min-height:56px;
   padding:18px;
-  margin-top:10px;
   font-size:18px;
   border-radius:14px;
   border:none;
@@ -57,22 +56,21 @@ pre{
   height:240px;
   margin:12px;
   border-radius:16px;
-  overflow:hidden;
 }
 .action-bar{
   position:fixed;
   bottom:0;
   left:0;
   right:0;
-  background:#020617;
   display:flex;
   gap:10px;
   padding:10px;
+  background:#020617;
 }
-.action-bar button{
+button{
   flex:1;
   padding:18px;
-  font-size:17px;
+  font-size:18px;
   font-weight:700;
   border:none;
   border-radius:16px;
@@ -86,143 +84,106 @@ pre{
 
 <div class="header">🆘 현장 좌표 변환기</div>
 
-<!-- 위도/경도 입력 -->
 <div class="card">
-  <select id="mode">
-    <option value="dd">도좌표 입력</option>
-    <option value="dms">도분초 입력</option>
-  </select>
-  <input id="lat" placeholder="위도 (35.131486 / 35 7 53.35)">
-  <input id="lon" placeholder="경도 (126.947881 / 126 56 52.37)">
-</div>
-
-<!-- 국가지점번호 입력 -->
-<div class="card">
-  <input id="np" placeholder="국가지점번호 입력 (예: 960가 1940다 / 960 1940)">
+  <input id="input" placeholder="위경도 / 도분초 / 국가지점번호 (예: 가 34567 나 123456)">
 </div>
 
 <div class="card">
-  <pre id="result">좌표 입력 후 변환 버튼을 누르세요</pre>
+  <pre id="result">좌표 입력 후 [변환]을 누르세요</pre>
 </div>
 
 <div id="map"></div>
 
 <div class="action-bar">
-  <button class="primary" onclick="convertFromLatLon()">📍 좌표 변환</button>
-  <button class="secondary" onclick="convertFromNational()">🏔️ 국가지점번호 변환</button>
+  <button class="primary" onclick="convert()">📍 변환</button>
+  <button class="secondary" onclick="copyResult()">📋 복사</button>
+  <button class="secondary" onclick="shareResult()">📤 공유</button>
 </div>
 
 <script>
-/* ===== EPSG ===== */
+/* EPSG */
 proj4.defs("EPSG:5179",
 "+proj=tmerc +lat_0=38 +lon_0=127.5 +k=0.9996 +x_0=1000000 +y_0=2000000 +ellps=GRS80 +units=m +no_defs");
 
-/* ===== 유틸 ===== */
-function dmsToDecimal(v){
-  const p=v.trim().split(/\s+/).map(Number);
-  return p[0]+p[1]/60+p[2]/3600;
-}
-function toDMS(deg){
-  const d=Math.floor(deg);
-  const m=Math.floor((deg-d)*60);
-  const s=(((deg-d)*60-m)*60).toFixed(2);
-  return `${d}° ${m}′ ${s}″`;
-}
-function nationalPoint(x,y){
-  return `${Math.floor(x/100)} ${Math.floor(y/100)}`;
+/* 한글 매핑 */
+const xKor={7:'가',8:'나',9:'다',10:'라',11:'마',12:'바',13:'사'};
+const yKor={13:'가',14:'나',15:'다',16:'라',17:'마',18:'바',19:'사',20:'아'};
+const xKorR=Object.fromEntries(Object.entries(xKor).map(([k,v])=>[v,+k]));
+const yKorR=Object.fromEntries(Object.entries(yKor).map(([k,v])=>[v,+k]));
+
+/* 유틸 */
+function toDMS(d){
+  const D=Math.floor(d);
+  const M=Math.floor((d-D)*60);
+  const S=(((d-D)*60-M)*60).toFixed(2);
+  return `${D}° ${M}′ ${S}″`;
 }
 
-/* ===== 한글 매핑 ===== */
-const xHangul={가:7,나:8,다:9,라:10,마:11,바:12,사:13};
-const yHangul={가:13,나:14,다:15,라:16,마:17,바:18,사:19,아:20};
-
-/* ===== 지도 ===== */
+/* 지도 */
 let map,marker;
 function showMap(lat,lon){
-  const pos=new kakao.maps.LatLng(lat,lon);
-  map=new kakao.maps.Map(document.getElementById('map'),{center:pos,level:3});
-  marker=new kakao.maps.Marker({position:pos});
+  const p=new kakao.maps.LatLng(lat,lon);
+  map=new kakao.maps.Map(document.getElementById("map"),{center:p,level:3});
+  marker=new kakao.maps.Marker({position:p});
   marker.setMap(map);
 }
 
-/* ===== 위도/경도 → 전체 ===== */
-function convertFromLatLon(){
+/* 메인 변환 */
+function convert(){
+  const v=document.getElementById("input").value.trim();
   let lat,lon;
-  if(mode.value==="dd"){
-    lat=parseFloat(latInput.value);
-    lon=parseFloat(lonInput.value);
-  }else{
-    lat=dmsToDecimal(latInput.value);
-    lon=dmsToDecimal(lonInput.value);
+
+  /* 국가지점번호 */
+  if(/[가-아]/.test(v)){
+    const m=v.match(/([가-아])\s*(\d+)\s*([가-아])\s*(\d+)/);
+    if(!m){alert("국가지점번호 형식 오류");return;}
+
+    const x=xKorR[m[1]]*100000+Number(m[2]);
+    const y=yKorR[m[3]]*100000+Number(m[4]);
+    [lon,lat]=proj4("EPSG:5179","WGS84",[x,y]);
   }
-  if(isNaN(lat)||isNaN(lon)){
-    alert("좌표를 정확히 입력하세요");
-    return;
+  /* 도분초 */
+  else if(v.includes(" ")){
+    const p=v.split(/[ ,]+/).map(Number);
+    lat=p[0]+p[1]/60+p[2]/3600;
+    lon=p[3]+p[4]/60+p[5]/3600;
   }
+  /* 도좌표 */
+  else{
+    [lat,lon]=v.split(/[ ,]+/).map(Number);
+  }
+
+  if(isNaN(lat)||isNaN(lon)){alert("좌표 인식 실패");return;}
 
   const utm=proj4("WGS84","EPSG:5179",[lon,lat]);
-  const x=Math.floor(utm[0]);
-  const y=Math.floor(utm[1]);
+  const x=Math.floor(utm[0]),y=Math.floor(utm[1]);
 
-  result.textContent=
+  document.getElementById("result").textContent=
 `📌 WGS84
 DD : ${lat.toFixed(6)}, ${lon.toFixed(6)}
-DMS: ${toDMS(lat)} N / ${toDMS(lon)} E
+DMS: ${toDMS(lat)} / ${toDMS(lon)}
 
-🧭 UTM-K (EPSG:5179)
+🧭 UTM-K
 E ${x}
 N ${y}
 
 🏔️ 국가지점번호
-${nationalPoint(x,y)}
-`;
+${xKor[Math.floor(x/100000)]} ${x%100000}
+${yKor[Math.floor(y/100000)]} ${y%100000}`;
+
   showMap(lat,lon);
 }
 
-/* ===== 국가지점번호 → 좌표 ===== */
-function convertFromNational(){
-  const input=np.value.replace(/\s+/g,'');
-  const nums=input.match(/\d+/g);
-  const hanguls=input.match(/[가-아]/g)||[];
-
-  if(!nums||nums.length!==2){
-    alert("국가지점번호 형식 오류");
-    return;
-  }
-
-  let xBase=0,yBase=0;
-  hanguls.forEach(h=>{
-    if(xHangul[h]) xBase=xHangul[h]*100000;
-    if(yHangul[h]) yBase=yHangul[h]*100000;
-  });
-
-  const x=xBase+Number(nums[0])*100;
-  const y=yBase+Number(nums[1])*100;
-
-  const wgs=proj4("EPSG:5179","WGS84",[x,y]);
-  const lon=wgs[0], lat=wgs[1];
-
-  result.textContent=
-`🏔️ 국가지점번호
-${np.value}
-
-🧭 UTM-K (EPSG:5179)
-E ${Math.floor(x)}
-N ${Math.floor(y)}
-
-📌 WGS84
-DD : ${lat.toFixed(6)}, ${lon.toFixed(6)}
-DMS: ${toDMS(lat)} N / ${toDMS(lon)} E
-`;
-  showMap(lat,lon);
+/* 복사 / 공유 */
+function copyResult(){
+  navigator.clipboard.writeText(result.textContent);
+  alert("복사 완료");
 }
-
-/* DOM */
-const latInput=document.getElementById("lat");
-const lonInput=document.getElementById("lon");
-const mode=document.getElementById("mode");
-const np=document.getElementById("np");
-const result=document.getElementById("result");
+function shareResult(){
+  navigator.share
+   ? navigator.share({title:"현장 좌표",text:result.textContent})
+   : copyResult();
+}
 </script>
 
 </body>
