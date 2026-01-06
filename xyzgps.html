@@ -15,7 +15,7 @@
 *{box-sizing:border-box}
 body{
   margin:0;
-  padding-bottom:90px;
+  padding-bottom:110px;
   font-family:system-ui,Arial;
   background:#0f172a;
   color:#fff;
@@ -33,10 +33,11 @@ body{
   padding:14px;
   margin:12px;
 }
-input{
+select,input{
   width:100%;
   min-height:56px;
   padding:18px;
+  margin-top:10px;
   font-size:18px;
   border-radius:14px;
   border:none;
@@ -58,22 +59,26 @@ pre{
   border-radius:16px;
   overflow:hidden;
 }
-button{
-  width:100%;
+.action-bar{
+  position:fixed;
+  bottom:0;
+  left:0;
+  right:0;
+  background:#020617;
+  display:flex;
+  gap:10px;
+  padding:10px;
+}
+.action-bar button{
+  flex:1;
   padding:18px;
-  margin-top:12px;
-  font-size:18px;
+  font-size:17px;
   font-weight:700;
   border:none;
   border-radius:16px;
-  background:linear-gradient(135deg,#22c55e,#16a34a);
-  color:#020617;
 }
-.small{
-  font-size:13px;
-  color:#cbd5f5;
-  margin-top:6px;
-}
+.primary{background:linear-gradient(135deg,#22c55e,#16a34a);color:#020617}
+.secondary{background:#334155;color:#fff}
 </style>
 </head>
 
