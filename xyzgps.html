@@ -12,25 +12,67 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/proj4js/2.9.0/proj4.js"></script>
 
 <style>
-body{margin:0;background:#0f172a;color:#fff;font-family:system-ui}
-.header{padding:14px;text-align:center;font-weight:700;background:#020617}
-.card{background:#020617;margin:12px;padding:14px;border-radius:14px}
-input,select,button{
-  width:100%;padding:16px;margin-top:10px;
-  border-radius:12px;border:none;font-size:16px
+*{box-sizing:border-box}
+body{
+  margin:0;
+  padding-bottom:90px;
+  font-family:system-ui,Arial;
+  background:#0f172a;
+  color:#fff;
 }
-input,select{background:#1e293b;color:#fff}
-button{font-weight:700}
-.primary{background:#22c55e;color:#020617}
-.secondary{background:#334155;color:#fff}
+.header{
+  padding:14px;
+  text-align:center;
+  font-size:18px;
+  font-weight:700;
+  background:#020617;
+}
+.card{
+  background:#020617;
+  border-radius:16px;
+  padding:14px;
+  margin:12px;
+}
+input{
+  width:100%;
+  min-height:56px;
+  padding:18px;
+  font-size:18px;
+  border-radius:14px;
+  border:none;
+  background:#1e293b;
+  color:#fff;
+}
 pre{
-  background:#020617;border:1px solid #1e293b;
-  padding:14px;border-radius:14px;white-space:pre-wrap
+  white-space:pre-wrap;
+  line-height:1.6;
+  font-size:15px;
+  background:#020617;
+  border:1px solid #1e293b;
+  border-radius:14px;
+  padding:14px;
 }
-#map{height:260px;margin:12px;border-radius:14px}
-.action-bar{
-  position:fixed;bottom:0;left:0;right:0;
-  background:#020617;display:flex;gap:8px;padding:10px
+#map{
+  height:240px;
+  margin:12px;
+  border-radius:16px;
+  overflow:hidden;
+}
+button{
+  width:100%;
+  padding:18px;
+  margin-top:12px;
+  font-size:18px;
+  font-weight:700;
+  border:none;
+  border-radius:16px;
+  background:linear-gradient(135deg,#22c55e,#16a34a);
+  color:#020617;
+}
+.small{
+  font-size:13px;
+  color:#cbd5f5;
+  margin-top:6px;
 }
 </style>
 </head>
