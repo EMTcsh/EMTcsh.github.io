@@ -1,190 +1,554 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-<meta charset="UTF-8">
-<title>🆘 현장 좌표 변환기</title>
-<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🆘 Memo GPS Rescue</title>
+    
+   <!-- 카카오지도 API -->
+   <script type="text/javascript" src="https://openapi.map.naver.com/openapi/v3/maps.js?ncpClientId=g2u4orbiqf"></script> <!-- 네이버 지도 API -->
+      
+   <!-- 입력 버튼 스타일 -->
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+        h2, h3 {
+            text-align: center;
+        }
+        #memo {
+            width: 100%;
+            height: 200px;
+            margin-bottom: 10px;
+        }
+        .button-container {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+        .button {
+            flex: 1;
+            padding: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+            margin: 0 5px;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .button img {
+            width: 20px;
+            height: 20px;
+            margin-right: 5px;
+        }
+        .coordinate-box {
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin-top: 10px;
+            background-color:    #f0f0f0;
+            border-radius: 5px;
+        }   
+        #savedMemos div {
+            border: 1px solid #ddd;
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+        }
+        #map, .map {
+            height: 400px;
+            width: 100%;
+            margin-top: 20px;
+        }
+        #locationDisplay, #dmsCoordinates, .info {
+            margin-top: 10px;
+            font-weight: bold;
+        }
 
-<!-- Kakao Map -->
-<script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=ff9e145029506d6e4c72d1f2b01ea424"></script>
 
-<!-- proj4 -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/proj4js/2.9.0/proj4.js"></script>
-
-<style>
-*{box-sizing:border-box}
-body{
-  margin:0;
-  padding-bottom:100px;
-  font-family:system-ui,Arial;
-  background:#0f172a;
-  color:#fff;
-}
-.header{
-  padding:14px;
-  text-align:center;
-  font-size:18px;
-  font-weight:700;
-  background:#020617;
-}
-.card{
-  background:#020617;
-  border-radius:16px;
-  padding:14px;
-  margin:12px;
-}
-input{
-  width:100%;
-  min-height:56px;
-  padding:18px;
-  font-size:18px;
-  border-radius:14px;
-  border:none;
-  background:#1e293b;
-  color:#fff;
-}
-pre{
-  white-space:pre-wrap;
-  line-height:1.6;
-  font-size:15px;
-  background:#020617;
-  border:1px solid #1e293b;
-  border-radius:14px;
-  padding:14px;
-}
-#map{
-  height:240px;
-  margin:12px;
-  border-radius:16px;
-}
-.action-bar{
-  position:fixed;
-  bottom:0;
-  left:0;
-  right:0;
-  display:flex;
-  gap:10px;
-  padding:10px;
-  background:#020617;
-}
-button{
-  flex:1;
-  padding:18px;
-  font-size:18px;
-  font-weight:700;
-  border:none;
-  border-radius:16px;
-}
-.primary{background:linear-gradient(135deg,#22c55e,#16a34a);color:#020617}
-.secondary{background:#334155;color:#fff}
-</style>
+    </style>
 </head>
-
 <body>
 
-<div class="header">🆘 현장 좌표 변환기</div>
-
-<div class="card">
-  <input id="input" placeholder="위경도 / 도분초 / 국가지점번호 (예: 가 34567 나 123456)">
+<center><h5>국립공원 특수산악구조팀</h5></center>
+<h2>🆘 Memo GPS Rescue</h2>
+<br>
+<div id="savedMemos"></div>
+     <!-- 공유 버튼 -->
+  <button id="button" onclick="shareMemos()">📕 Memo 공유</button>
+      <br>
+  <br>
+   <!-- 입력 버튼 -->
+<textarea id="memo" placeholder="여기에 메모를 입력하세요..."></textarea>
+<div class="button-container">
+    <button class="button" onclick="saveMemo()">
+        <img src="https://img.icons8.com/ios-filled/50/ffffff/save.png" alt="저장"> Memo 추가
+    </button>
+    <button class="button" onclick="printPagemap()">
+        <img src="https://img.icons8.com/ios-filled/50/ffffff/download.png" alt="공유"> Map. 저장
+    </button>
+    <button class="button" onclick="printPagememo()">
+         <img src="https://img.icons8.com/ios-filled/50/ffffff/download.png" alt="지도 저장"> Memo 저장
+    </button>
 </div>
+    <br>
 
-<div class="card">
-  <pre id="result">좌표 입력 후 [변환]을 누르세요</pre>
-</div>
+<!-- 내 위치 확인 -->     
+<h3>🌐 My GPS 좌표</h3>
+<button id="getLocation">내 위치 확인</button>
+    
+<div class="coordinate-box" id="locationDisplay">위도: , 경도: </div>
+<div class="coordinate-box" id="dmsCoordinates">도분초: </div>
 
-<div id="map"></div>
+<div id="myLocation" class="info">📍 Map Location</div>
 
-<div class="action-bar">
-  <button class="primary" onclick="convert()">📍 변환</button>
-  <button class="secondary" onclick="copyResult()">📋 복사</button>
-  <button class="secondary" onclick="shareResult()">📤 공유</button>
-</div>
+<div id="map"></div> <!-- 지도 컨테이너 -->
+    
+<!-- 상대방 위치 확인 -->
+<h3>🌐 Target GPS 좌표</h3>
+<div id="distanceInfo" class="info"></div>
+<label for="otherLatitude">좌표 위도:</label>
+<input type="text" id="otherLatitude" placeholder="상대방 위도 입력" required><br>
+<label for="otherLongitude">좌표 경도:</label>
+<input type="text" id="otherLongitude" placeholder="상대방 경도 입력" required><br><br>
+<button id="showLocations" onclick="showLocations()">대상 위치 보기</button>
+<div id="myLocation" class="info">📍 Map Location</div>
+<div id="distanceInfo" class="info"></div>
+<div id="mapComparison" class="map"></div> <!-- 상대 위치 지도 컨테이너 -->
 
 <script>
-/* EPSG */
-proj4.defs("EPSG:5179",
-"+proj=tmerc +lat_0=38 +lon_0=127.5 +k=0.9996 +x_0=1000000 +y_0=2000000 +ellps=GRS80 +units=m +no_defs");
+    let latitude, longitude;
+    const memos = [];
 
-/* 한글 매핑 */
-const xKor={7:'가',8:'나',9:'다',10:'라',11:'마',12:'바',13:'사'};
-const yKor={13:'가',14:'나',15:'다',16:'라',17:'마',18:'바',19:'사',20:'아'};
-const xKorR=Object.fromEntries(Object.entries(xKor).map(([k,v])=>[v,+k]));
-const yKorR=Object.fromEntries(Object.entries(yKor).map(([k,v])=>[v,+k]));
+    // 메모 추가
+    function saveMemo() {
+        const memo = document.getElementById('memo').value;
+        if (memo) {
+            const timestamp = new Date().toLocaleString();
+            const memoWithTimestamp = `${timestamp}: ${memo}`;
+            memos.push(memoWithTimestamp);
+            const savedMemosDiv = document.getElementById('savedMemos');
+            const memoElement = document.createElement('div');
+            memoElement.textContent = memoWithTimestamp;
+            savedMemosDiv.appendChild(memoElement);
+            document.getElementById('memo').value = '';
+        } else {
+            alert('메모를 입력해주세요.');
+        }
+    }
 
-/* 유틸 */
-function toDMS(d){
-  const D=Math.floor(d);
-  const M=Math.floor((d-D)*60);
-  const S=(((d-D)*60-M)*60).toFixed(2);
-  return `${D}° ${M}′ ${S}″`;
+    // 메모 다운로드
+    function downloadMemos() {
+        const blob = new Blob([memos.join('\n')], { type: 'text/plain' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'memos.txt';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    }
+
+    // 메모 공유
+    function shareMemos() {
+        if (navigator.share) {
+            const memoText = memos.join('\n');
+
+            const mapLinkGoogle = `https://www.google.com/maps?q=${latitude},${longitude}`;
+            const mapLinkKakao = `https://map.kakao.com/link/map/Location,${latitude},${longitude}`;
+
+            const shareContent = `메모:\n${memoText}\n\n지도 좌표:\n위도: ${latitude}, 경도: ${longitude}\n\n지도 링크:\nGoogle: ${mapLinkGoogle}\nKakao: ${mapLinkKakao}`;
+
+            navigator.share({
+                title: 'Memo 및 위치 공유',
+                text: shareContent
+            })
+            .then(() => console.log('메모가 공유되었습니다.'))
+            .catch(error => console.error('공유 오류:', error));
+        } else {
+            alert("이 브라우저는 공유 기능을 지원하지 않습니다.");
+        }
+    }
+
+    // 현재 위치 가져오기
+    document.getElementById('getLocation').addEventListener('click', function() {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(showPosition, showError);
+        } else {
+            alert("이 브라우저는 위치 정보를 지원하지 않습니다.");
+        }
+    });
+
+    // 위치 표시
+    function showPosition(position) {
+    latitude = position.coords.latitude;
+    longitude = position.coords.longitude;
+    document.getElementById('locationDisplay').textContent = `위도: ${latitude}, 경도: ${longitude}`;
+
+    // UTM-K (GRS80) (EPSG:5179)로 변환
+    const utmK = proj4("WGS84", "EPSG:5179", [longitude, latitude]);
+
+    const utmX = Math.floor(utmK[0]);
+    const utmY = Math.floor(utmK[1]);
+
+    // 메모에 변환된 좌표 입력
+    document.getElementById('memo').value = `내 위치 좌표: ${latitude}, ${longitude} (UTM-K: X=${utmX}, Y=${utmY})`;
+
+    const dmsCoordinates = convertToDMS(latitude, longitude);
+    document.getElementById('dmsCoordinates').textContent = `도분초: ${dmsCoordinates}`;
+
+    const mapOptions = {
+        center: new naver.maps.LatLng(latitude, longitude),
+        zoom: 15
+    };
+
+    const map = new naver.maps.Map('map', mapOptions);
+    new naver.maps.Marker({
+        position: new naver.maps.LatLng(latitude, longitude),
+        map: map
+    });
 }
 
-/* 지도 */
-let map,marker;
-function showMap(lat,lon){
-  const p=new kakao.maps.LatLng(lat,lon);
-  map=new kakao.maps.Map(document.getElementById("map"),{center:p,level:3});
-  marker=new kakao.maps.Marker({position:p});
-  marker.setMap(map);
-}
+      // 도분초 좌표 변환
+    function convertToDMS(lat, lon) {
+        const latDeg = Math.floor(Math.abs(lat));
+        const latMin = Math.floor((Math.abs(lat) - latDeg) * 60);
+        const latSec = ((Math.abs(lat) - latDeg) * 60 - latMin) * 60;
 
-/* 메인 변환 */
-function convert(){
-  const v=document.getElementById("input").value.trim();
-  let lat,lon;
+        const lonDeg = Math.floor(Math.abs(lon));
+        const lonMin = Math.floor((Math.abs(lon) - lonDeg) * 60);
+        const lonSec = ((Math.abs(lon) - lonDeg) * 60 - lonMin) * 60;
 
-  /* 국가지점번호 */
-  if(/[가-아]/.test(v)){
-    const m=v.match(/([가-아])\s*(\d+)\s*([가-아])\s*(\d+)/);
-    if(!m){alert("국가지점번호 형식 오류");return;}
+        const latDirection = lat >= 0 ? 'N' : 'S';
+        const lonDirection = lon >= 0 ? 'E' : 'W';
 
-    const x=xKorR[m[1]]*100000+Number(m[2]);
-    const y=yKorR[m[3]]*100000+Number(m[4]);
-    [lon,lat]=proj4("EPSG:5179","WGS84",[x,y]);
-  }
-  /* 도분초 */
-  else if(v.includes(" ")){
-    const p=v.split(/[ ,]+/).map(Number);
-    lat=p[0]+p[1]/60+p[2]/3600;
-    lon=p[3]+p[4]/60+p[5]/3600;
-  }
-  /* 도좌표 */
-  else{
-    [lat,lon]=v.split(/[ ,]+/).map(Number);
-  }
+        return `${latDeg}° ${latMin}' ${latSec.toFixed(2)}" ${latDirection}, ${lonDeg}° ${lonMin}' ${lonSec.toFixed(2)}" ${lonDirection}`;
+    }
 
-  if(isNaN(lat)||isNaN(lon)){alert("좌표 인식 실패");return;}
+    // 위치 오류 처리
+    function showError(error) {
+        switch (error.code) {
+            case error.PERMISSION_DENIED:
+                alert("사용자가 위치 정보를 허용하지 않았습니다.");
+                break;
+            case error.POSITION_UNAVAILABLE:
+                alert("위치 정보를 사용할 수 없습니다.");
+                break;
+            case error.TIMEOUT:
+                alert("위치 정보 요청이 시간 초과되었습니다.");
+                break;
+            case error.UNKNOWN_ERROR:
+                alert("알 수 없는 오류가 발생했습니다.");
+                break;
+        }
+    }
 
-  const utm=proj4("WGS84","EPSG:5179",[lon,lat]);
-  const x=Math.floor(utm[0]),y=Math.floor(utm[1]);
+    // 도분초 좌표 변환
+    function convertToDMS(lat, lon) {
+        const latDeg = Math.floor(Math.abs(lat));
+        const latMin = Math.floor((Math.abs(lat) - latDeg) * 60);
+        const latSec = ((Math.abs(lat) - latDeg) * 60 - latMin) * 60;
 
-  document.getElementById("result").textContent=
-`📌 WGS84
-DD : ${lat.toFixed(6)}, ${lon.toFixed(6)}
-DMS: ${toDMS(lat)} / ${toDMS(lon)}
+        const lonDeg = Math.floor(Math.abs(lon));
+        const lonMin = Math.floor((Math.abs(lon) - lonDeg) * 60);
+        const lonSec = ((Math.abs(lon) - lonDeg) * 60 - lonMin) * 60;
 
-🧭 UTM-K
-E ${x}
-N ${y}
+        const latDirection = lat >= 0 ? 'N' : 'S';
+        const lonDirection = lon >= 0 ? 'E' : 'W';
 
-🏔️ 국가지점번호
-${xKor[Math.floor(x/100000)]} ${x%100000}
-${yKor[Math.floor(y/100000)]} ${y%100000}`;
+        return `${latDeg}° ${latMin}' ${latSec.toFixed(2)}" ${latDirection}, ${lonDeg}° ${lonMin}' ${lonSec.toFixed(2)}" ${lonDirection}`;
+    }
 
-  showMap(lat,lon);
-}
+    // 상대방 위치 비교
+    function showLocations() {
+        const otherLatitude = parseFloat(document.getElementById('otherLatitude').value);
+        const otherLongitude = parseFloat(document.getElementById('otherLongitude').value);
 
-/* 복사 / 공유 */
-function copyResult(){
-  navigator.clipboard.writeText(result.textContent);
-  alert("복사 완료");
-}
-function shareResult(){
-  navigator.share
-   ? navigator.share({title:"현장 좌표",text:result.textContent})
-   : copyResult();
-}
+        if (latitude && longitude && !isNaN(otherLatitude) && !isNaN(otherLongitude)) {
+            const mapOptions = {
+                center: new naver.maps.LatLng(latitude, longitude),
+                zoom: 10
+            };
+
+            const mapComparison = new naver.maps.Map('mapComparison', mapOptions);
+
+            // 내 위치 마커
+            new naver.maps.Marker({
+                position: new naver.maps.LatLng(latitude, longitude),
+                map: mapComparison,
+                title: "내 위치"
+            });
+
+            // 상대방 위치 마커
+            const otherPosition = new naver.maps.LatLng(otherLatitude, otherLongitude);
+            new naver.maps.Marker({
+                position: otherPosition,
+                map: mapComparison,
+                title: "상대방 위치"
+            });
+
+            // 거리 계산
+            const distance = naver.maps.geometry.spherical.computeDistanceBetween(
+                new naver.maps.LatLng(latitude, longitude),
+                otherPosition
+            );
+
+            // 거리 정보 표시
+            document.getElementById('distanceInfo').textContent = `두 위치 간의 거리: ${(distance / 1000).toFixed(2)} km`;
+
+            // 지도 중앙에 두 위치 표시
+            const bounds = new naver.maps.LatLngBounds();
+            bounds.extend(new naver.maps.LatLng(latitude, longitude));
+            bounds.extend(otherPosition);
+            mapComparison.fitBounds(bounds);
+        } else {
+            alert("모든 위치 정보를 올바르게 입력해주세요.");
+        }
+    } 
+</script>  
+<br>
+
+<!-- 산악구조 Time Recording 공지 게시판 표시 섹션 -->
+    <title>Discord 초대 링크</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 10px;
+        }
+        .discord-link {
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 10px;
+            margin: 10px 0;
+            text-align: center;
+            background-color: #f4f4f4;
+        }
+        a {
+            text-decoration: none;
+            color: #7289DA; /* Discord 블루 색상 */
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<!-- DMS to Decimal Degrees Converter -->
+<h3>🌐 DMS 좌표 -> D 좌표 변환</h3> 
+<label for="dmsLat">DMS 위도:</label>
+<input type="text" id="dmsLat" placeholder="위도 입력 (예: 37° 30' 0'' N)" 입력>
+<br>
+<label for="dmsLon">DMS 경도:</label>
+<input type="text" id="dmsLon" placeholder="경도 입력 (예: 127° 0' 0'' E)" 입력>
+<br>
+<button id="convertDMS">변환하기</button>
+<h4>ℹ️ 변환 결과</h4>
+<p id="decimalResult"></p>
+
+  <script>                       
+   // DMS 좌표를 도좌표로 변환
+     document.getElementById('convertDMS').addEventListener('click', function() {
+        const dmsLat = document.getElementById('dmsLat').value;
+        const dmsLon = document.getElementById('dmsLon').value;
+
+        const decimalLat = convertDMSToDecimal(dmsLat);
+        const decimalLon = convertDMSToDecimal(dmsLon);
+
+        if (decimalLat !== null && decimalLon !== null) {
+            document.getElementById('decimalResult').textContent = `위도: ${decimalLat.toFixed(6)}, 경도: ${decimalLon.toFixed(6)}`;
+        } else {
+            document.getElementById('decimalResult').textContent = "유효한 DMS 형식으로 입력해주세요.";
+        }
+    });
+
+    // DMS 문자열을 도좌표로 변환하는 함수
+    function convertDMSToDecimal(dms) {
+        const parts = dms.match(/(\d+)[°\s]+(\d+)'?\s*(\d*\.?\d*)?"?\s*([NS,EW])?/);
+        if (!parts) return null;
+
+        let degrees = parseFloat(parts[1]);
+        const minutes = parseFloat(parts[2]) / 60;
+        const seconds = parseFloat(parts[3]) / 3600;
+        const direction = parts[4];
+
+        let decimal = degrees + minutes + seconds;
+        if (direction === 'S' || direction === 'W') {
+            decimal *= -1;
+        }
+        return decimal;
+    }
+
+</script>  
+<br>
+
+<!--좌표 국가지점번호 변환-->
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>좌표 국가지점번호 변환</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/proj4js/2.7.5/proj4.js"></script>
+</head>
+<body>
+    <h3>🌐 D 좌표 -> 국가지점번호 변환</h3>
+    <label for="lat">WGS84 위도:</label>
+    <input type="text" id="lat" placeholder="위도 입력 (예: 37.000000)">
+    <br>
+    <label for="lon">WGS84 경도:</label>
+    <input type="text" id="lon" placeholder="경도 입력 (예: 127.000000)">
+    <br>
+    <label for="epsg">EPSG 코드 선택:</label>
+    <select id="epsg">
+        <option value="5179">UTM-K (GRS80) (EPSG:5179)</option>
+        <option value="5178">UTM-K (Bessel) (EPSG:5178)</option>        
+    </select>
+    <br>
+    <button id="convert">변환하기</button>
+    <h4>ℹ️ 변환 결과</h4>
+    <p id="result"></p>
+
+    <script>
+        // EPSG 정의
+        proj4.defs("EPSG:5178", "+proj=tmerc +lat_0=38 +lon_0=127.5 +k=0.9996 +x_0=1000000 +y_0=2000000 +ellps=bessel +units=m +no_defs +towgs84=-115.80,474.99,674.11,1.16,-2.31,-1.63,6.43");
+        proj4.defs("EPSG:5179", "+proj=tmerc +lat_0=38 +lon_0=127.5 +k=0.9996 +x_0=1000000 +y_0=2000000 +ellps=GRS80 +units=m +no_defs");
+
+        document.getElementById('convert').addEventListener('click', function() {
+            const lat = parseFloat(document.getElementById('lat').value);
+            const lon = parseFloat(document.getElementById('lon').value);
+            const selectedEpsg = document.getElementById('epsg').value;
+
+            if (isNaN(lat) || isNaN(lon)) {
+                document.getElementById('result').textContent = "유효한 좌표를 입력하세요.";
+                return;
+            }
+
+            // WGS84에서 선택된 EPSG로 변환
+            const utmK = proj4("WGS84", `EPSG:${selectedEpsg}`, [lon, lat]);
+
+            // x와 y의 앞자리 숫자 추출
+            const xValue = Math.floor(utmK[0]);
+            const yValue = Math.floor(utmK[1]);
+
+            // 한글 매핑
+            const xMapping = {
+                7: '가',
+                8: '나',
+                9: '다',
+                10: '라',
+                11: '마',
+                12: '바',
+                13: '사'
+            };
+
+            const yMapping = {
+                13: '가',
+                14: '나',
+                15: '다',
+                16: '라',
+                17: '마',
+                18: '바',
+                19: '사',
+                20: '아'
+            };
+
+            // 앞자리 숫자 결정
+            const firstDigitX = Math.floor(xValue / 100000); // x의 앞자리
+            const firstDigitY = Math.floor(yValue / 100000); // y의 앞자리
+
+            // 매핑된 한글 결정
+            const xOutput = xMapping[firstDigitX] || '';
+            const yOutput = yMapping[firstDigitY] || '';
+
+            // 결과 출력
+            document.getElementById('result').textContent = `E 좌표: ${Math.floor(utmK[0])} (${xOutput}), N 좌표: ${Math.floor(utmK[1])} (${yOutput})`;
+        });
+
+    </script>
+
+<br>
+
+   <!-- UTM-K to WGS84 변환 섹션 -->
+<h3>🌐 국가지점번호 -> D 좌표 변환</h3>
+<label for="utmX">UTM-K E 좌표:</label>
+<input type="text" id="utmX" placeholder="동향값 앞 E 좌표 (X: 6자리 입력)">
+<br>
+첫번째 가:7, 나:8, 다;9, 라:10, 마:11, 바:12, 사:13.
+<br>
+<label for="utmY">UTM-K N 좌표:</label>
+<input type="text" id="utmY" placeholder="북향값 뒤 N 좌표 (Y: 7자리 입력)">
+<br>
+두번째 가:13, 나:14, 다:15, 라:16, 마:17, 바:18, 사:19, 아:20. 
+<br>
+<button id="convertToWGS84">변환하기</button>
+<h4>ℹ️ 변환 결과</h4>
+<p id="wgs84Result"></p>
+
+<script>
+    document.getElementById('convertToWGS84').addEventListener('click', function() {
+        const utmX = parseFloat(document.getElementById('utmX').value);
+        const utmY = parseFloat(document.getElementById('utmY').value);
+
+        if (isNaN(utmX) || isNaN(utmY)) {
+            document.getElementById('wgs84Result').textContent = "유효한 UTM-K 좌표를 입력하세요.";
+            return;
+        }
+
+        // UTM-K에서 WGS84로 변환
+        const wgs84 = proj4("EPSG:5179", "WGS84", [utmX, utmY]);
+
+        document.getElementById('wgs84Result').textContent = `위도: ${wgs84[1].toFixed(6)}, 경도: ${wgs84[0].toFixed(6)}`;
+    });
+  
+  // 메모 프린트
+    function printPagememo() {
+        var memoContent = document.getElementById('savedMemos').innerHTML;
+
+        var printWindow = window.open('', '', 'height=600, width=800');
+        printWindow.document.write('<html><head><title>산악구조 기록</title>');
+        printWindow.document.write('<style> body { font-family: Arial, sans-serif; margin: 20px; } </style>');
+        printWindow.document.write('</head><body>');
+        printWindow.document.write('<h2>🆘 산악구조 Time Recording</h2>');
+        printWindow.document.write('<h4>📕 Memo Record</h4>');
+        printWindow.document.write(memoContent);  // Memo content
+        printWindow.document.write('</body></html>');
+        printWindow.document.close();
+        printWindow.print();
+    }
+   // 지도 프린트
+    function printPagemap() {
+        var mapContent = document.getElementById('map').innerHTML;
+
+        var printWindow = window.open('', '', 'height=600, width=800');
+        printWindow.document.write('<html><head><title>산악구조 기록</title>');
+        printWindow.document.write('<style> body { font-family: Arial, sans-serif; margin: 20px; } </style>');
+        printWindow.document.write('</head><body>');
+        printWindow.document.write('<h2>🆘 산악구조 Time Recording</h2>');
+        printWindow.document.write('<h4>📍 지도 위치</h4>');
+        printWindow.document.write(mapContent);  // Map content
+        printWindow.document.write('</body></html>');
+        printWindow.document.close();
+        printWindow.print();
+    }
 </script>
+<br>
+
+   </body>
+</html>
+
+    <br>   
+   
+</body>
+</html>
+
+<!--공지 안내-->
+<div class="discord-link">    
+    <p> Ver. 0.9.26. E-mail: paramedic@knps.or.kr. </p> 
+    <a href="https://discord.gg/ryaMRTAhwP" target="_blank"> 문의: 🐸 국립공원 안전사고 연구회 </a>
+</div>
 
 </body>
 </html>
