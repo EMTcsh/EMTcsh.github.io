@@ -270,7 +270,7 @@ function shareAll(){
   if(!result.textContent.includes("위도")) return alert("먼저 변환하세요");
   const m=result.textContent.match(/위도:\s([0-9.\-]+)[\s\S]*?경도:\s([0-9.\-]+)/);
   const lat=m[1], lon=m[2];
-  const msg=`🆘 구조 위치 공유\n\n${result.textContent}\n📍 https://map.kakao.com/link/map/${lat},${lon}`;
+  const msg=`🆘 위치 공유\n\n${result.textContent}\n📍 https://map.kakao.com/link/map/${lat},${lon}`;
   navigator.share?navigator.share({text:msg}):alert(msg);
 }
 
