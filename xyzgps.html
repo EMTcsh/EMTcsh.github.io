@@ -15,7 +15,7 @@
 *{box-sizing:border-box}
 body{
   margin:0;
-  padding-bottom:110px;
+  padding-bottom:120px;
   font-family:system-ui,Arial;
   background:#0f172a;
   color:#fff;
@@ -54,10 +54,24 @@ pre{
   padding:14px;
 }
 #map{
-  height:240px;
+  height:260px;
   margin:12px;
   border-radius:16px;
   overflow:hidden;
+  position:relative;
+}
+#coordOverlay{
+  position:absolute;
+  top:10px;
+  left:50%;
+  transform:translateX(-50%);
+  background:rgba(2,6,23,.85);
+  padding:10px 14px;
+  border-radius:12px;
+  font-size:14px;
+  border:1px solid #1e293b;
+  z-index:10;
+  text-align:center;
 }
 .action-bar{
   position:fixed;
@@ -72,13 +86,14 @@ pre{
 .action-bar button{
   flex:1;
   padding:18px;
-  font-size:16px;
+  font-size:15px;
   font-weight:700;
   border:none;
   border-radius:16px;
 }
 .primary{background:linear-gradient(135deg,#22c55e,#16a34a);color:#020617}
 .share{background:#0ea5e9;color:#020617}
+.copy{background:#facc15;color:#020617}
 </style>
 </head>
 
@@ -96,17 +111,20 @@ pre{
 </div>
 
 <div class="card">
-  <input id="np" placeholder="국가지점번호 입력 (예: 960 1940)">
+  <input id="np" placeholder="국가지점번호 (예: 960 1940)">
 </div>
 
 <div class="card">
   <pre id="result">좌표 입력 후 [변환]을 누르세요</pre>
 </div>
 
-<div id="map"></div>
+<div id="map">
+  <div id="coordOverlay">📍 위치 대기중</div>
+</div>
 
 <div class="action-bar">
   <button class="primary" onclick="convert()">📍 변환</button>
+  <button class="copy" onclick="copyCoords()">📋 복사</button>
   <button class="share" onclick="shareAll()">📤 공유</button>
 </div>
 
@@ -114,6 +132,13 @@ pre{
 /* EPSG */
 proj4.defs("EPSG:5179",
 "+proj=tmerc +lat_0=38 +lon_0=127.5 +k=0.9996 +x_0=1000000 +y_0=2000000 +ellps=GRS80 +units=m +no_defs");
+
+/* DOM */
+const latInput = document.getElementById("lat");
+const lonInput = document.getElementById("lon");
+const np = document.getElementById("np");
+const mode = document.getElementById("mode");
+const result = document.getElementById("result");
 
 /* 유틸 */
 function dmsToDD(v){
@@ -129,14 +154,55 @@ function toDMS(d){
 function national(x,y){
   return `${Math.floor(x/100)} ${Math.floor(y/100)}`;
 }
+function calcDistance(lat1, lon1, lat2, lon2){
+  const R=6371000;
+  const r=d=>d*Math.PI/180;
+  const dLat=r(lat2-lat1);
+  const dLon=r(lon2-lon1);
+  const a=Math.sin(dLat/2)**2+
+          Math.cos(r(lat1))*Math.cos(r(lat2))*
+          Math.sin(dLon/2)**2;
+  return Math.round(R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a)));
+}
 
 /* 지도 */
-let map, marker;
+let map, marker, myMarker, myLat, myLon;
+
 function initMap(){
-  const pos=new kakao.maps.LatLng(35.131486,126.947881);
-  map=new kakao.maps.Map(mapDiv,{center:pos,level:4});
-  marker=new kakao.maps.Marker({position:pos});
+  const center=new kakao.maps.LatLng(35.131486,126.947881);
+  map=new kakao.maps.Map(mapDiv,{center,level:4});
+
+  marker=new kakao.maps.Marker({
+    image:new kakao.maps.MarkerImage(
+      "https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/marker_red.png",
+      new kakao.maps.Size(30,42)
+    )
+  });
   marker.setMap(map);
+
+  if(navigator.geolocation){
+    navigator.geolocation.getCurrentPosition(pos=>{
+      myLat=pos.coords.latitude;
+      myLon=pos.coords.longitude;
+      const myPos=new kakao.maps.LatLng(myLat,myLon);
+
+      myMarker=new kakao.maps.Marker({
+        position:myPos,
+        image:new kakao.maps.MarkerImage(
+          "https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/markerStar.png",
+          new kakao.maps.Size(24,35)
+        )
+      });
+      myMarker.setMap(map);
+      map.setCenter(myPos);
+      updateOverlay(myLat,myLon);
+    });
+  }
+}
+
+function updateOverlay(lat,lon){
+  coordOverlay.innerHTML=
+    `📍 현재 좌표<br>위도 ${lat.toFixed(6)}<br>경도 ${lon.toFixed(6)}`;
 }
 
 /* 변환 */
@@ -164,6 +230,11 @@ function convert(){
   const x=Math.floor(utm[0]);
   const y=Math.floor(utm[1]);
 
+  let distText="";
+  if(myLat&&myLon){
+    distText=`\n📏 내 위치까지 거리: ${calcDistance(myLat,myLon,lat,lon)} m`;
+  }
+
   result.textContent=
 `🆘 좌표 위치
 
@@ -175,51 +246,38 @@ WGS84
 ${toDMS(lat)} / ${toDMS(lon)}
 
 UTM-K
-E ${x}
-N ${y}
+E ${x}  N ${y}
 
 국가지점번호
 ${national(x,y)}
-`;
+${distText}`;
 
   const pos=new kakao.maps.LatLng(lat,lon);
   marker.setPosition(pos);
   map.setCenter(pos);
+  updateOverlay(lat,lon);
+}
+
+/* 복사 */
+function copyCoords(){
+  if(!result.textContent.includes("위도")) return alert("먼저 변환하세요");
+  navigator.clipboard.writeText(result.textContent)
+    .then(()=>alert("📋 좌표 복사 완료"));
 }
 
 /* 공유 */
-function buildMessage(){
-  const t=result.textContent;
-  const m=t.match(/위도:\s([0-9.\-]+)[\s\S]*?경도:\s([0-9.\-]+)/);
-  if(!m) return null;
-  const lat=m[1], lon=m[2];
-  return `🆘 구조 위치 공유\n\n${t}\n📍 지도\nhttps://map.kakao.com/link/map/${lat},${lon}`;
-}
-
 function shareAll(){
-  const msg=buildMessage();
-  if(!msg) return alert("좌표를 먼저 변환하세요.");
-
-  if(navigator.share){
-    navigator.share({
-      title:"현장 좌표 공유",
-      text:msg
-    });
-  }else{
-    window.open(
-      "https://sharer.kakao.com/talk/friends/picker/link?text="+
-      encodeURIComponent(msg)
-    );
-  }
+  if(!result.textContent.includes("위도")) return alert("먼저 변환하세요");
+  const m=result.textContent.match(/위도:\s([0-9.\-]+)[\s\S]*?경도:\s([0-9.\-]+)/);
+  const lat=m[1], lon=m[2];
+  const msg=`🆘 구조 위치 공유\n\n${result.textContent}\n📍 https://map.kakao.com/link/map/${lat},${lon}`;
+  navigator.share?navigator.share({text:msg}):alert(msg);
 }
 
-/* DOM */
-const latInput=lat;
-const lonInput=lon;
 const mapDiv=document.getElementById("map");
-
 initMap();
 </script>
 
 </body>
 </html>
+
