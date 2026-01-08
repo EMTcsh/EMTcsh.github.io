@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<title>🆘 현장 좌표 변환기 (DD / DMS / MGRS / TM / UTM-K)</title>
+<title>🆘 현장 좌표 변환기</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
 <!-- Kakao Map -->
@@ -14,70 +14,14 @@
 
 <style>
 *{box-sizing:border-box}
-body{
-  margin:0;
-  padding-bottom:110px;
-  font-family:system-ui,Arial;
-  background:#0f172a;
-  color:#fff;
-}
-.header{
-  padding:14px;
-  text-align:center;
-  font-size:18px;
-  font-weight:700;
-  background:#020617;
-}
-.card{
-  background:#020617;
-  border-radius:16px;
-  padding:14px;
-  margin:12px;
-}
-select,input{
-  width:100%;
-  min-height:56px;
-  padding:18px;
-  margin-top:10px;
-  font-size:18px;
-  border-radius:14px;
-  border:none;
-  background:#1e293b;
-  color:#fff;
-}
-pre{
-  white-space:pre-wrap;
-  line-height:1.6;
-  font-size:15px;
-  background:#020617;
-  border:1px solid #1e293b;
-  border-radius:14px;
-  padding:14px;
-}
-#map{
-  height:240px;
-  margin:12px;
-  border-radius:16px;
-  overflow:hidden;
-}
-.action-bar{
-  position:fixed;
-  bottom:0;
-  left:0;
-  right:0;
-  background:#020617;
-  display:flex;
-  gap:10px;
-  padding:10px;
-}
-.action-bar button{
-  flex:1;
-  padding:18px;
-  font-size:17px;
-  font-weight:700;
-  border:none;
-  border-radius:16px;
-}
+body{margin:0;padding-bottom:120px;font-family:system-ui;background:#0f172a;color:#fff}
+.header{padding:14px;text-align:center;font-size:18px;font-weight:700;background:#020617}
+.card{background:#020617;border-radius:16px;padding:14px;margin:12px}
+select,input{width:100%;min-height:56px;padding:18px;margin-top:10px;font-size:18px;border-radius:14px;border:none;background:#1e293b;color:#fff}
+pre{white-space:pre-wrap;line-height:1.6;font-size:15px;background:#020617;border:1px solid #1e293b;border-radius:14px;padding:14px}
+#map{height:260px;margin:12px;border-radius:16px;overflow:hidden}
+.action-bar{position:fixed;bottom:0;left:0;right:0;background:#020617;display:flex;gap:8px;padding:10px}
+.action-bar button{flex:1;padding:16px;font-size:16px;font-weight:700;border:none;border-radius:16px}
 .primary{background:linear-gradient(135deg,#22c55e,#16a34a);color:#020617}
 .secondary{background:#334155;color:#fff}
 .hide{display:none}
@@ -86,7 +30,7 @@ pre{
 
 <body>
 
-<div class="header">🆘 현장 좌표 변환기 (DD / DMS / MGRS / TM)</div>
+<div class="header">🆘 현장 좌표 변환기</div>
 
 <div class="card">
   <select id="mode" onchange="updateInputs()">
@@ -96,74 +40,55 @@ pre{
     <option value="tm">TM / UTM-K</option>
   </select>
 
-  <input id="lat" placeholder="위도 (35.131486)">
-  <input id="lon" placeholder="경도 (126.947881)">
-
-  <input id="mgrsInput" class="hide" placeholder="군사좌표 (52SDG1234567890)">
-
-  <input id="tmX" class="hide" placeholder="TM / UTM-K X (Easting)">
-  <input id="tmY" class="hide" placeholder="TM / UTM-K Y (Northing)">
+  <input id="lat" placeholder="위도">
+  <input id="lon" placeholder="경도">
+  <input id="mgrsInput" class="hide" placeholder="MGRS">
+  <input id="tmX" class="hide" placeholder="TM X">
+  <input id="tmY" class="hide" placeholder="TM Y">
 </div>
 
 <div class="card">
-  <pre id="result">좌표 입력 또는 지도 클릭</pre>
+  <pre id="result">좌표 입력 또는 현재위치 버튼</pre>
 </div>
 
 <div id="map"></div>
 
 <div class="action-bar">
+  <button class="secondary" onclick="goCurrent()">📡 현재위치</button>
   <button class="primary" onclick="convert()">📍 변환</button>
-  <button class="secondary" onclick="sendKakao()">📨 카카오톡</button>
-  <button class="secondary" onclick="sendSMS()">📩 SMS</button>
+  <button class="secondary" onclick="sendKakao()">📨 카카오</button>
 </div>
 
 <script>
-/* EPSG:5179 (UTM-K / TM-K) */
+/* TM-K */
 proj4.defs("EPSG:5179",
 "+proj=tmerc +lat_0=38 +lon_0=127.5 +k=0.9996 +x_0=1000000 +y_0=2000000 +ellps=GRS80 +units=m +no_defs");
 
-/* DOM */
-const mode = document.getElementById("mode");
-const latInput = document.getElementById("lat");
-const lonInput = document.getElementById("lon");
-const mgrsInput = document.getElementById("mgrsInput");
-const tmX = document.getElementById("tmX");
-const tmY = document.getElementById("tmY");
-const result = document.getElementById("result");
+const mode=modeEl=document.getElementById("mode");
+const latInput=document.getElementById("lat");
+const lonInput=document.getElementById("lon");
+const mgrsInput=document.getElementById("mgrsInput");
+const tmX=document.getElementById("tmX");
+const tmY=document.getElementById("tmY");
+const result=document.getElementById("result");
 
-/* 입력 전환 */
 function updateInputs(){
-  latInput.classList.add("hide");
-  lonInput.classList.add("hide");
-  mgrsInput.classList.add("hide");
-  tmX.classList.add("hide");
-  tmY.classList.add("hide");
-
-  if(mode.value==="dd" || mode.value==="dms"){
-    latInput.classList.remove("hide");
-    lonInput.classList.remove("hide");
-  }
+  [latInput,lonInput,mgrsInput,tmX,tmY].forEach(i=>i.classList.add("hide"));
+  if(mode.value==="dd"||mode.value==="dms"){latInput.classList.remove("hide");lonInput.classList.remove("hide")}
   if(mode.value==="mgrs") mgrsInput.classList.remove("hide");
-  if(mode.value==="tm"){
-    tmX.classList.remove("hide");
-    tmY.classList.remove("hide");
-  }
+  if(mode.value==="tm"){tmX.classList.remove("hide");tmY.classList.remove("hide")}
 }
 
-/* 유틸 */
 function dmsToDD(v){
   const p=v.trim().split(/\s+/).map(Number);
   return p[0]+p[1]/60+p[2]/3600;
 }
 function toDMS(d){
-  const D=Math.floor(d);
-  const M=Math.floor((d-D)*60);
+  const D=Math.floor(d),M=Math.floor((d-D)*60);
   const S=(((d-D)*60-M)*60).toFixed(2);
   return `${D}° ${M}′ ${S}″`;
 }
-function national(x,y){
-  return `${Math.floor(x/100)} ${Math.floor(y/100)}`;
-}
+function national(x,y){return `${Math.floor(x/100)} ${Math.floor(y/100)}`}
 
 /* 지도 */
 let map,marker;
@@ -176,87 +101,52 @@ function initMap(lat=35.131486,lon=126.947881){
   kakao.maps.event.addListener(map,'click',e=>{
     latInput.value=e.latLng.getLat().toFixed(6);
     lonInput.value=e.latLng.getLng().toFixed(6);
-    mode.value="dd";
-    updateInputs();
-    convert();
+    mode.value="dd";updateInputs();convert();
   });
 }
 function moveMap(lat,lon){
-  if(!map || !marker) return;
+  if(!map||!marker)return;
   const pos=new kakao.maps.LatLng(lat,lon);
-  marker.setPosition(pos);
-  map.setCenter(pos);
+  marker.setPosition(pos);map.setCenter(pos);
+}
+
+/* 현재 위치 */
+function goCurrent(){
+  navigator.geolocation.getCurrentPosition(p=>{
+    const lat=p.coords.latitude,lon=p.coords.longitude;
+    latInput.value=lat.toFixed(6);
+    lonInput.value=lon.toFixed(6);
+    mode.value="dd";updateInputs();
+    moveMap(lat,lon);convert();
+  },()=>alert("위치 권한 필요"),{enableHighAccuracy:true});
 }
 
 /* 변환 */
 function convert(){
-  let lat, lon;
-
+  let lat,lon;
   try{
-    if(mode.value==="dd"){
-      lat=parseFloat(latInput.value);
-      lon=parseFloat(lonInput.value);
-    }
-    else if(mode.value==="dms"){
-      lat=dmsToDD(latInput.value);
-      lon=dmsToDD(lonInput.value);
-    }
-    else if(mode.value==="mgrs"){
-      const p=mgrs.toPoint(mgrsInput.value.trim());
-      lon=p[0]; lat=p[1];
-    }
-    else if(mode.value==="tm"){
-      const p=proj4("EPSG:5179","WGS84",[
-        parseFloat(tmX.value),
-        parseFloat(tmY.value)
-      ]);
-      lon=p[0]; lat=p[1];
-    }
-  }catch{
-    alert("좌표 형식 오류");
-    return;
-  }
-
-  if(isNaN(lat)||isNaN(lon)){
-    alert("좌표 오류");
-    return;
-  }
-
+    if(mode.value==="dd"){lat=parseFloat(latInput.value);lon=parseFloat(lonInput.value)}
+    else if(mode.value==="dms"){lat=dmsToDD(latInput.value);lon=dmsToDD(lonInput.value)}
+    else if(mode.value==="mgrs"){[lon,lat]=mgrs.toPoint(mgrsInput.value)}
+    else if(mode.value==="tm"){[lon,lat]=proj4("EPSG:5179","WGS84",[+tmX.value,+tmY.value])}
+  }catch{return alert("좌표 오류")}
   const tm=proj4("WGS84","EPSG:5179",[lon,lat]);
-  const mgrsCode=mgrs.forward([lon,lat],5);
-
+  const m=mgrs.forward([lon,lat],5);
   result.textContent=
-`📌 WGS84
-DD : ${lat.toFixed(6)}, ${lon.toFixed(6)}
+`DD : ${lat.toFixed(6)}, ${lon.toFixed(6)}
 DMS: ${toDMS(lat)} / ${toDMS(lon)}
-
-🧭 TM / UTM-K
-E ${Math.floor(tm[0])}
-N ${Math.floor(tm[1])}
-
-🏔 국가지점번호
-${national(tm[0],tm[1])}
-
-🎖 군사좌표 (MGRS)
-${mgrsCode}
-`;
-
+TM : E ${tm[0]|0} / N ${tm[1]|0}
+국가지점: ${national(tm[0],tm[1])}
+MGRS: ${m}`;
   moveMap(lat,lon);
 }
 
 /* 전송 */
-function message(){
-  const m=result.textContent.match(/DD\s:\s([0-9.\-]+),\s([0-9.\-]+)/);
-  if(!m) return null;
-  return `📍 구조 위치\n위도:${m[1]}\n경도:${m[2]}\nhttps://map.kakao.com/link/map/${m[1]},${m[2]}`;
-}
 function sendKakao(){
-  const msg=message(); if(!msg) return;
+  const t=result.textContent.match(/DD\s:\s([0-9.\-]+),\s([0-9.\-]+)/);
+  if(!t)return;
+  const msg=`📍 위치\n위도:${t[1]}\n경도:${t[2]}\nhttps://map.kakao.com/link/map/${t[1]},${t[2]}`;
   window.open("https://sharer.kakao.com/talk/friends/picker/link?text="+encodeURIComponent(msg));
-}
-function sendSMS(){
-  const msg=message(); if(!msg) return;
-  location.href=`sms:?body=${encodeURIComponent(msg)}`;
 }
 
 updateInputs();
