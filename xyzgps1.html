@@ -14,45 +14,27 @@
 body{margin:0;padding-bottom:120px;font-family:system-ui;background:#0f172a;color:#fff}
 .header{padding:14px;text-align:center;font-size:18px;font-weight:700;background:#020617}
 .card{background:#020617;border-radius:16px;padding:14px;margin:12px}
-select,input{width:100%;min-height:56px;padding:18px;margin-top:10px;font-size:18px;border-radius:14px;border:none;background:#1e293b;color:#fff}
 pre{white-space:pre-wrap;line-height:1.6;font-size:15px;background:#020617;border:1px solid #1e293b;border-radius:14px;padding:14px}
 #map{height:260px;margin:12px;border-radius:16px}
 .action-bar{position:fixed;bottom:0;left:0;right:0;background:#020617;display:flex;gap:8px;padding:10px}
 .action-bar button{flex:1;padding:16px;font-size:16px;font-weight:700;border:none;border-radius:16px}
 .primary{background:linear-gradient(135deg,#22c55e,#16a34a);color:#020617}
 .secondary{background:#334155;color:#fff}
-.hide{display:none}
 </style>
 </head>
 
 <body>
 
-<div class="header">🆘 현장 좌표 변환기</div>
+<div class="header">🆘 현위치 좌표 (DMS / MGRS)</div>
 
 <div class="card">
-  <select id="mode" onchange="updateInputs()">
-    <option value="dd">도좌표 (DD)</option>
-    <option value="dms">도분초 (DMS)</option>
-    <option value="mgrs">군사좌표 (MGRS)</option>
-    <option value="tm">TM / UTM-K</option>
-  </select>
-
-  <input id="lat" placeholder="위도">
-  <input id="lon" placeholder="경도">
-  <input id="mgrsInput" class="hide" placeholder="MGRS">
-  <input id="tmX" class="hide" placeholder="TM X">
-  <input id="tmY" class="hide" placeholder="TM Y">
-</div>
-
-<div class="card">
-  <pre id="result">좌표 입력 또는 현재위치 버튼</pre>
+  <pre id="result">📡 현재위치 버튼을 눌러주세요</pre>
 </div>
 
 <div id="map"></div>
 
 <div class="action-bar">
-  <button class="secondary" onclick="goCurrent()">📡 현재위치</button>
-  <button class="primary" onclick="convert()">📍 변환</button>
+  <button class="primary" onclick="goCurrent()">📡 현재위치</button>
   <button class="secondary" onclick="shareAll()">📤 공유</button>
 </div>
 
@@ -61,31 +43,16 @@ pre{white-space:pre-wrap;line-height:1.6;font-size:15px;background:#020617;borde
 proj4.defs("EPSG:5179",
 "+proj=tmerc +lat_0=38 +lon_0=127.5 +k=0.9996 +x_0=1000000 +y_0=2000000 +ellps=GRS80 +units=m +no_defs");
 
-const mode=document.getElementById("mode");
-const latInput=document.getElementById("lat");
-const lonInput=document.getElementById("lon");
-const mgrsInput=document.getElementById("mgrsInput");
-const tmX=document.getElementById("tmX");
-const tmY=document.getElementById("tmY");
-const result=document.getElementById("result");
-
-function updateInputs(){
-  [latInput,lonInput,mgrsInput,tmX,tmY].forEach(i=>i.classList.add("hide"));
-  if(mode.value==="dd"||mode.value==="dms"){latInput.classList.remove("hide");lonInput.classList.remove("hide")}
-  if(mode.value==="mgrs") mgrsInput.classList.remove("hide");
-  if(mode.value==="tm"){tmX.classList.remove("hide");tmY.classList.remove("hide")}
-}
-
-function dmsToDD(v){
-  const p=v.trim().split(/\s+/).map(Number);
-  return p[0]+p[1]/60+p[2]/3600;
-}
+/* 유틸 */
 function toDMS(d){
-  const D=Math.floor(d),M=Math.floor((d-D)*60);
+  const D=Math.floor(d);
+  const M=Math.floor((d-D)*60);
   const S=(((d-D)*60-M)*60).toFixed(2);
   return `${D}° ${M}′ ${S}″`;
 }
-function national(x,y){return `${Math.floor(x/100)} ${Math.floor(y/100)}`}
+function national(x,y){
+  return `${Math.floor(x/100)} ${Math.floor(y/100)}`;
+}
 
 /* 지도 */
 let map,marker;
@@ -94,12 +61,6 @@ function initMap(lat=35.131486,lon=126.947881){
   map=new kakao.maps.Map(document.getElementById("map"),{center:pos,level:3});
   marker=new kakao.maps.Marker({position:pos});
   marker.setMap(map);
-
-  kakao.maps.event.addListener(map,'click',e=>{
-    latInput.value=e.latLng.getLat().toFixed(6);
-    lonInput.value=e.latLng.getLng().toFixed(6);
-    mode.value="dd";updateInputs();convert();
-  });
 }
 function moveMap(lat,lon){
   if(!map||!marker)return;
@@ -110,33 +71,29 @@ function moveMap(lat,lon){
 
 /* 현재 위치 */
 function goCurrent(){
+  if(!navigator.geolocation){
+    alert("위치 사용 불가");
+    return;
+  }
+
   navigator.geolocation.getCurrentPosition(p=>{
-    const lat=p.coords.latitude,lon=p.coords.longitude;
-    latInput.value=lat.toFixed(6);
-    lonInput.value=lon.toFixed(6);
-    mode.value="dd";updateInputs();
-    convert();
-  },()=>alert("위치 권한 필요"),{enableHighAccuracy:true});
-}
+    const lat=p.coords.latitude;
+    const lon=p.coords.longitude;
 
-/* 변환 */
-function convert(){
-  let lat,lon;
-  try{
-    if(mode.value==="dd"){lat=+latInput.value;lon=+lonInput.value}
-    else if(mode.value==="dms"){lat=dmsToDD(latInput.value);lon=dmsToDD(lonInput.value)}
-    else if(mode.value==="mgrs"){[lon,lat]=mgrs.toPoint(mgrsInput.value)}
-    else if(mode.value==="tm"){[lon,lat]=proj4("EPSG:5179","WGS84",[+tmX.value,+tmY.value])}
-  }catch{return alert("좌표 오류")}
-  const tm=proj4("WGS84","EPSG:5179",[lon,lat]);
-  const mgrsCode=mgrs.forward([lon,lat],5);
+    const tm=proj4("WGS84","EPSG:5179",[lon,lat]);
+    const mgrsCode=mgrs.forward([lon,lat],5);
 
-  result.textContent=
-`📌 도좌표 (DD)
+    result.textContent =
+`📍 현재 위치 좌표
+
+📌 도좌표 (DD)
 ${lat.toFixed(6)}, ${lon.toFixed(6)}
 
 📐 도분초 (DMS)
 ${toDMS(lat)} / ${toDMS(lon)}
+
+🎖 군사좌표 (MGRS)
+${mgrsCode}
 
 🧭 TM / UTM-K
 E ${Math.floor(tm[0])}
@@ -144,29 +101,30 @@ N ${Math.floor(tm[1])}
 
 🏔 국가지점번호
 ${national(tm[0],tm[1])}
+`;
 
-🎖 군사좌표 (MGRS)
-${mgrsCode}`;
-
-  moveMap(lat,lon);
+    moveMap(lat,lon);
+  },
+  ()=>alert("위치 권한 필요"),
+  {enableHighAccuracy:true,timeout:8000});
 }
 
 /* 공유 */
 function shareAll(){
-  const text=result.textContent;
-  if(!text)return alert("공유할 좌표 없음");
-  const m=text.match(/([0-9.\-]+),\s([0-9.\-]+)/);
+  const t=result.textContent;
+  if(!t)return;
+  const m=t.match(/([0-9.\-]+),\s([0-9.\-]+)/);
+  if(!m)return;
   const link=`https://map.kakao.com/link/map/${m[1]},${m[2]}`;
-  const msg=`🆘 구조 위치 좌표\n\n${text}\n\n📍 지도보기\n${link}`;
+  const msg=`🆘 현재 위치 좌표\n\n${t}\n\n📍 지도\n${link}`;
 
   if(navigator.share){
-    navigator.share({title:"구조 위치",text:msg});
+    navigator.share({title:"현재 위치",text:msg});
   }else{
     window.open("https://sharer.kakao.com/talk/friends/picker/link?text="+encodeURIComponent(msg));
   }
 }
 
-updateInputs();
 initMap();
 </script>
 
