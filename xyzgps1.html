@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<title>🆘 현장 좌표 변환기 (군사좌표 포함)</title>
+<title>🆘 현장 좌표 변환기 (DD / DMS / MGRS / TM / UTM-K)</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
 <!-- Kakao Map -->
@@ -80,23 +80,29 @@ pre{
 }
 .primary{background:linear-gradient(135deg,#22c55e,#16a34a);color:#020617}
 .secondary{background:#334155;color:#fff}
+.hide{display:none}
 </style>
 </head>
 
 <body>
 
-<div class="header">🆘 현장 좌표 변환기 (군사좌표)</div>
+<div class="header">🆘 현장 좌표 변환기 (DD / DMS / MGRS / TM)</div>
 
 <div class="card">
-  <select id="mode">
+  <select id="mode" onchange="updateInputs()">
     <option value="dd">도좌표 (DD)</option>
     <option value="dms">도분초 (DMS)</option>
     <option value="mgrs">군사좌표 (MGRS)</option>
+    <option value="tm">TM / UTM-K</option>
   </select>
-  <input id="lat" placeholder="위도 (35.131486 / 35 7 53.35)">
-  <input id="lon" placeholder="경도 (126.947881 / 126 56 52.37)">
-  <input id="mgrsInput" placeholder="군사좌표 (예: 52SDG1234567890)">
-  <input id="np" placeholder="국가지점번호 (예: 960 1940)">
+
+  <input id="lat" placeholder="위도 (35.131486)">
+  <input id="lon" placeholder="경도 (126.947881)">
+
+  <input id="mgrsInput" class="hide" placeholder="군사좌표 (52SDG1234567890)">
+
+  <input id="tmX" class="hide" placeholder="TM / UTM-K X (Easting)">
+  <input id="tmY" class="hide" placeholder="TM / UTM-K Y (Northing)">
 </div>
 
 <div class="card">
@@ -112,9 +118,37 @@ pre{
 </div>
 
 <script>
-/* EPSG */
+/* EPSG:5179 (UTM-K / TM-K) */
 proj4.defs("EPSG:5179",
 "+proj=tmerc +lat_0=38 +lon_0=127.5 +k=0.9996 +x_0=1000000 +y_0=2000000 +ellps=GRS80 +units=m +no_defs");
+
+/* DOM */
+const mode = document.getElementById("mode");
+const latInput = document.getElementById("lat");
+const lonInput = document.getElementById("lon");
+const mgrsInput = document.getElementById("mgrsInput");
+const tmX = document.getElementById("tmX");
+const tmY = document.getElementById("tmY");
+const result = document.getElementById("result");
+
+/* 입력 전환 */
+function updateInputs(){
+  latInput.classList.add("hide");
+  lonInput.classList.add("hide");
+  mgrsInput.classList.add("hide");
+  tmX.classList.add("hide");
+  tmY.classList.add("hide");
+
+  if(mode.value==="dd" || mode.value==="dms"){
+    latInput.classList.remove("hide");
+    lonInput.classList.remove("hide");
+  }
+  if(mode.value==="mgrs") mgrsInput.classList.remove("hide");
+  if(mode.value==="tm"){
+    tmX.classList.remove("hide");
+    tmY.classList.remove("hide");
+  }
+}
 
 /* 유틸 */
 function dmsToDD(v){
@@ -135,7 +169,7 @@ function national(x,y){
 let map,marker;
 function initMap(lat=35.131486,lon=126.947881){
   const pos=new kakao.maps.LatLng(lat,lon);
-  map=new kakao.maps.Map(mapDiv,{center:pos,level:3});
+  map=new kakao.maps.Map(document.getElementById("map"),{center:pos,level:3});
   marker=new kakao.maps.Marker({position:pos});
   marker.setMap(map);
 
@@ -143,6 +177,7 @@ function initMap(lat=35.131486,lon=126.947881){
     latInput.value=e.latLng.getLat().toFixed(6);
     lonInput.value=e.latLng.getLng().toFixed(6);
     mode.value="dd";
+    updateInputs();
     convert();
   });
 }
@@ -156,35 +191,28 @@ function moveMap(lat,lon){
 function convert(){
   let lat,lon;
 
-  if(mode.value==="mgrs"){
-    try{
-      const ll=mgrs.toPoint(mgrsInput.value.trim());
-      lon=ll[0]; lat=ll[1];
-    }catch{
-      return alert("군사좌표(MGRS) 형식 오류");
-    }
-  }
-  else if(np.value){
-    const p=np.value.trim().split(/\s+/).map(Number);
-    if(p.length!==2) return alert("국가지점번호 오류");
-    const wgs=proj4("EPSG:5179","WGS84",[p[0]*100,p[1]*100]);
-    lon=wgs[0]; lat=wgs[1];
-  }
-  else{
+  try{
     if(mode.value==="dd"){
       lat=parseFloat(latInput.value);
       lon=parseFloat(lonInput.value);
-    }else{
+    }
+    else if(mode.value==="dms"){
       lat=dmsToDD(latInput.value);
       lon=dmsToDD(lonInput.value);
     }
+    else if(mode.value==="mgrs"){
+      [lon,lat]=mgrs.toPoint(mgrsInput.value.trim());
+    }
+    else if(mode.value==="tm"){
+      [lon,lat]=proj4("EPSG:5179","WGS84",[parseFloat(tmX.value),parseFloat(tmY.value)]);
+    }
+  }catch{
+    return alert("좌표 형식 오류");
   }
 
   if(isNaN(lat)||isNaN(lon)) return alert("좌표 오류");
 
-  const utm=proj4("WGS84","EPSG:5179",[lon,lat]);
-  const x=Math.floor(utm[0]);
-  const y=Math.floor(utm[1]);
+  const tm=proj4("WGS84","EPSG:5179",[lon,lat]);
   const mgrsCode=mgrs.forward([lon,lat],5);
 
   result.textContent=
@@ -192,12 +220,12 @@ function convert(){
 DD : ${lat.toFixed(6)}, ${lon.toFixed(6)}
 DMS: ${toDMS(lat)} / ${toDMS(lon)}
 
-🧭 UTM-K
-E ${x}
-N ${y}
+🧭 TM / UTM-K
+E ${Math.floor(tm[0])}
+N ${Math.floor(tm[1])}
 
 🏔 국가지점번호
-${national(x,y)}
+${national(tm[0],tm[1])}
 
 🎖 군사좌표 (MGRS)
 ${mgrsCode}
@@ -208,11 +236,9 @@ ${mgrsCode}
 
 /* 전송 */
 function message(){
-  const t=result.textContent;
-  const m=t.match(/DD\s:\s([0-9.\-]+),\s([0-9.\-]+)/);
+  const m=result.textContent.match(/DD\s:\s([0-9.\-]+),\s([0-9.\-]+)/);
   if(!m) return null;
-  const lat=m[1],lon=m[2];
-  return `📍 구조 위치\n위도:${lat}\n경도:${lon}\nhttps://map.kakao.com/link/map/${lat},${lon}`;
+  return `📍 구조 위치\n위도:${m[1]}\n경도:${m[2]}\nhttps://map.kakao.com/link/map/${m[1]},${m[2]}`;
 }
 function sendKakao(){
   const msg=message(); if(!msg) return;
@@ -223,12 +249,7 @@ function sendSMS(){
   location.href=`sms:?body=${encodeURIComponent(msg)}`;
 }
 
-/* DOM */
-const latInput=lat;
-const lonInput=lon;
-const mgrsInput=document.getElementById("mgrsInput");
-const mapDiv=document.getElementById("map");
-
+updateInputs();
 initMap();
 </script>
 
