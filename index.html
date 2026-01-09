@@ -95,11 +95,15 @@ button {
 <div class="section">
 <h2 class="text-xl font-semibold">현장정보</h2>
 
+<!-- ✅ 출동대원 이름 추가 -->
+<input type="text" name="출동대원" placeholder="출동대원 이름 (예: 홍길동, 김구조)" required>
+
 <input type="datetime-local" name="도착시간" required>
 <input type="text" name="사고장소" placeholder="사고장소" required>
 <input type="text" name="주증상" placeholder="환자 증상" required>  
 
 <div id="locationDisplay" class="coordinate-box">위도: , 경도:</div>
+
 <button type="button" id="getLocation"
 class="bg-green-600 text-white px-4 py-2 rounded">
 🌐 현장도착 좌표
@@ -109,38 +113,41 @@ class="bg-green-600 text-white px-4 py-2 rounded">
 <div id="map"></div>
 </div>
 
-<!-- GCS -->
+<!-- ===== GCS ===== -->
 <div class="section">
-<h2 class="text-xl font-semibold">의식평가(GCS)</h2>
+    <h2 class="text-xl font-semibold">의식수준 평가(GCS)</h2>
 
-<select id="eye">
-<option value="4">E4 자발</option>
-<option value="3">E3 음성</option>
-<option value="2">E2 통증</option>
-<option value="1">E1 무반응</option>
-</select>
+    <label>눈 뜨기 반응 (E)</label>
+    <select id="eye">
+        <option value="4">자발적으로 눈을 뜬다</option>
+        <option value="3">말로 지시했을때 눈을 뜬다</option>
+        <option value="2">통증 자극에 의해 눈을 뜬다</option>
+        <option value="1">어떠한 자극에도 눈을 뜨지 못한다</option>
+    </select>
 
-<select id="verbal">
-<option value="5">V5 지남력</option>
-<option value="4">V4 혼란</option>
-<option value="3">V3 부적절</option>
-<option value="2">V2 신음</option>
-<option value="1">V1 무반응</option>
-</select>
+    <label>언어 반응 (V)</label>
+    <select id="verbal">
+        <option value="5">정확한 반응(6하원칙에 지남력 있는 상태)</option>
+        <option value="4">대화 혼란(대화가능하나, 계속적 대화 교환 안됨)</option>
+        <option value="3">언어혼란(동문서답, 혼란된 말을 함)</option>
+        <option value="2">이해 할수 없는 소리(신음소리만)</option>
+        <option value="1">반응이 없음(아무런 소리를 내지 않음)</option>
+    </select>
 
-<select id="motor">
-<option value="6">M6 명령수행</option>
-<option value="5">M5 국소회피</option>
-<option value="4">M4 움츠림</option>
-<option value="3">M3 이상굴곡</option>
-<option value="2">M2 이상신전</option>
-<option value="1">M1 무반응</option>
-</select>
+    <label>운동 반응 (M)</label>
+    <select id="motor">
+        <option value="6">명령에 따름(간단한 명령에 따라 운동기능 수행)</option>
+        <option value="5">통증 자극 국소화 반응(명령은 따지 않지만, 자극을 가하면 피하거나 치우려고 함) </option>
+        <option value="4">통증 자극 움츠림(통증 자극을 피하려고 함, 치우려고 하지는 않음)</option>
+        <option value="3">통증 자극 이상굴곡(통증 자극에 앞으로 구부리거나 몸쪽으로 접음)</option>
+        <option value="2">통증 자극 이상신전(통증 자극에 뒤로 젖히거나 모에서 멀리 뻗음)(</option>
+        <option value="1">전혀 움직이지 않음(무반응, 자가호흡 없음)</option>
+    </select>
 
-<div class="mt-2">
-<strong>의식평가(GCS) 결과:</strong>
-<span id="gcsResult"></span>
-</div>
+    <div id="gcsResultContainer" style="margin-top:10px; display:none;">
+        <strong>의식평가(GCS) 결과:</strong>
+        <span id="gcsResult"></span>
+    </div>
 </div>
 
 <!-- 환자정보 -->
@@ -150,8 +157,6 @@ class="bg-green-600 text-white px-4 py-2 rounded">
 <input type="text" name="환자이름" placeholder="이름" required>
 <input type="date" name="생년월일" required>
 <input type="text" name="거주지" placeholder="거주지" required>
-
-<!-- 연락처 추가 -->
 <input type="tel" name="연락처" placeholder="연락처 (예: 010-1234-5678)" required>
 </div>
 
@@ -198,7 +203,10 @@ getLocation.onclick = () => {
     hiddenCoordinate.value = txt;
 
     const loc = new kakao.maps.LatLng(lat, lng);
-    const map = new kakao.maps.Map(document.getElementById("map"), { center: loc, level: 3 });
+    const map = new kakao.maps.Map(document.getElementById("map"), {
+      center: loc,
+      level: 3
+    });
     new kakao.maps.Marker({ position: loc, map });
   });
 };
@@ -208,7 +216,11 @@ recordForm.onsubmit = async e => {
   e.preventDefault();
 
   let data = {}, text = "";
-  new FormData(recordForm).forEach((v,k)=>{ data[k]=v; text+=`${k}: ${v}\n`; });
+  new FormData(recordForm).forEach((v,k)=>{
+    data[k]=v;
+    text+=`${k}: ${v}\n`;
+  });
+
   data["GCS"] = gcsResult.textContent;
   text += `GCS: ${gcsResult.textContent}`;
 
