@@ -12,7 +12,6 @@
 body {
   background: #f0f2f5;
   font-family: Arial, sans-serif;
-  line-height: 1.6;
 }
 .container {
   max-width: 900px;
@@ -20,64 +19,31 @@ body {
   padding: 20px;
 }
 .section {
-  background: #ffffff;
+  background: #fff;
   border-radius: 14px;
   padding: 24px;
   box-shadow: 0 4px 12px rgba(0,0,0,0.08);
   margin-bottom: 28px;
 }
-.section h2 {
-  margin-bottom: 16px;
-  padding-bottom: 8px;
-  border-bottom: 1px solid #e5e7eb;
-  color: #1e3a8a;
-}
-input,
-select,
-textarea {
-  border: 1px solid #cbd5e1;
-  border-radius: 10px;
-  padding: 12px 14px;
+input, select, textarea {
   width: 100%;
+  padding: 12px;
   margin-bottom: 16px;
-  font-size: 1rem;
-  background-color: #ffffff;
-}
-input:focus,
-select:focus,
-textarea:focus {
-  outline: none;
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 2px rgba(59,130,246,0.15);
-}
-textarea {
-  min-height: 140px;
-  resize: vertical;
-  line-height: 1.7;
+  border-radius: 10px;
+  border: 1px solid #cbd5e1;
 }
 .coordinate-box {
-  background: #eef2ff;
-  padding: 12px 14px;
-  border-radius: 10px;
-  margin-bottom: 12px;
-  font-weight: 500;
+  background:#eef2ff;
+  padding:12px;
+  border-radius:10px;
+  margin-bottom:12px;
 }
-#map {
-  width: 100%;
-  height: 320px;
-  border-radius: 14px;
-  margin-top: 12px;
-}
+#map { height:320px; border-radius:14px; }
 .board-item {
-  white-space: pre-line;
-  background: #f8fafc;
-  padding: 16px;
-  border-radius: 12px;
-  line-height: 1.6;
-  font-size: 0.95rem;
-}
-button {
-  font-size: 1.05rem;
+  white-space:pre-line;
+  background:#f8fafc;
+  padding:16px;
+  border-radius:12px;
 }
 </style>
 </head>
@@ -95,17 +61,13 @@ button {
 <div class="section">
 <h2 class="text-xl font-semibold">현장정보</h2>
 
-<!-- ✅ 출동대원 이름 추가 -->
-<input type="text" name="출동대원" placeholder="출동대원 이름 (예: 홍길동, 김구조)" required>
-
+<input name="출동대원" placeholder="출동대원 이름" required>
 <input type="datetime-local" name="도착시간" required>
-<input type="text" name="사고장소" placeholder="사고장소" required>
-<input type="text" name="주증상" placeholder="환자 증상" required>  
+<input name="사고장소" placeholder="사고장소" required>
+<input name="주증상" placeholder="주증상" required>
 
 <div id="locationDisplay" class="coordinate-box">위도: , 경도:</div>
-
-<button type="button" id="getLocation"
-class="bg-green-600 text-white px-4 py-2 rounded">
+<button type="button" id="getLocation" class="bg-green-600 text-white px-4 py-2 rounded">
 🌐 현장도착 좌표
 </button>
 
@@ -148,16 +110,16 @@ class="bg-green-600 text-white px-4 py-2 rounded">
         <strong>의식평가(GCS) 결과:</strong>
         <span id="gcsResult"></span>
     </div>
+</div>"gcsResult"></span></div>
 </div>
 
 <!-- 환자정보 -->
 <div class="section">
 <h2 class="text-xl font-semibold">환자정보</h2>
-
-<input type="text" name="환자이름" placeholder="이름" required>
+<input name="환자이름" placeholder="이름" required>
 <input type="date" name="생년월일" required>
-<input type="text" name="거주지" placeholder="거주지" required>
-<input type="tel" name="연락처" placeholder="연락처 (예: 010-1234-5678)" required>
+<input name="거주지" placeholder="거주지" required>
+<input name="연락처" placeholder="연락처" required>
 </div>
 
 <!-- 응급처치 -->
@@ -166,9 +128,8 @@ class="bg-green-600 text-white px-4 py-2 rounded">
 <textarea name="응급처치"></textarea>
 </div>
 
-<button type="submit"
-class="w-full bg-blue-600 text-white py-4 rounded">
-기록 저장 및 공유
+<button class="w-full bg-blue-600 text-white py-4 rounded">
+기록 저장
 </button>
 
 </form>
@@ -181,70 +142,62 @@ class="w-full bg-blue-600 text-white py-4 rounded">
 </div>
 
 <script>
-const GOOGLE_SCRIPT_URL =
-"https://script.google.com/macros/s/AKfycbxm_oLeGMIGh5PRokCURztVx6-1Ijug2KtuGbsFH-cZVOKE5LgaKDnLbTgFl2sWWDdkwA/exec";
+const GOOGLE_SCRIPT_URL = "📌여기에_배포_URL";
 
-/* GCS 계산 */
-function calcGCS(){
-  const t = +eye.value + +verbal.value + +motor.value;
-  const s = t===15 ? "정상" : t>=13 ? "졸림" : t>=9 ? "혼미" : t>=4 ? "반혼수" : "혼수";
-  gcsResult.textContent = `${t}점 (${s})`;
+/* ===== GCS 계산 ===== */
+function calculateGCS() {
+    const e = parseInt(document.getElementById("eye").value);
+    const v = parseInt(document.getElementById("verbal").value);
+    const m = parseInt(document.getElementById("motor").value);
+
+    const total = e + v + m;
+
+    let state = '';
+    if (total === 15) state = '정상-alert';
+    else if (total >= 13) state = '졸림-drowsy';
+    else if (total >= 9) state = '혼미-stupor';
+    else if (total >= 4) state = '반혼수-semicoma';
+    else state = '혼수-coma';
+
+    document.getElementById("gcsResult").innerText = `${total}점 (${state})`;
+    document.getElementById("gcsResultContainer").style.display = "block";
 }
-["eye","verbal","motor"].forEach(id => document.getElementById(id).onchange = calcGCS);
-calcGCS();
+
+["eye","verbal","motor"].forEach(id => {
+    document.getElementById(id).addEventListener("change", calculateGCS);
+});
+calculateGCS();
+
 
 /* GPS */
+let map, marker;
 getLocation.onclick = () => {
   navigator.geolocation.getCurrentPosition(p => {
-    const lat = p.coords.latitude;
-    const lng = p.coords.longitude;
-    const txt = `위도:${lat}, 경도:${lng}`;
-    locationDisplay.textContent = txt;
-    hiddenCoordinate.value = txt;
+    const lat=p.coords.latitude, lng=p.coords.longitude;
+    locationDisplay.textContent=`위도:${lat}, 경도:${lng}`;
+    hiddenCoordinate.value=`${lat},${lng}`;
 
-    const loc = new kakao.maps.LatLng(lat, lng);
-    const map = new kakao.maps.Map(document.getElementById("map"), {
-      center: loc,
-      level: 3
-    });
-    new kakao.maps.Marker({ position: loc, map });
+    const loc=new kakao.maps.LatLng(lat,lng);
+    if(!map){
+      map=new kakao.maps.Map(mapDiv,{center:loc,level:3});
+      marker=new kakao.maps.Marker({map});
+    }
+    marker.setPosition(loc);
+    map.setCenter(loc);
   });
 };
 
-/* 저장 + 전송 + 공유 */
-recordForm.onsubmit = async e => {
+/* 저장 */
+recordForm.onsubmit = e => {
   e.preventDefault();
+  let data={}, text="";
+  new FormData(recordForm).forEach((v,k)=>{data[k]=v;text+=`${k}: ${v}\n`;});
+  data["GCS"]=gcsResult.textContent;
 
-  let data = {}, text = "";
-  new FormData(recordForm).forEach((v,k)=>{
-    data[k]=v;
-    text+=`${k}: ${v}\n`;
-  });
+  savedData.innerHTML=`<div class="board-item">${text}GCS: ${data["GCS"]}</div>`;
 
-  data["GCS"] = gcsResult.textContent;
-  text += `GCS: ${gcsResult.textContent}`;
-
-  savedData.innerHTML = `<div class="board-item">${text}</div>`;
-
-  const blob = new Blob([text], {type:"text/plain"});
-  const a = document.createElement("a");
-  a.href = URL.createObjectURL(blob);
-  a.download = "무등산_환자기록.txt";
-  a.click();
-
-  fetch(GOOGLE_SCRIPT_URL,{
-    method:"POST",
-    body:JSON.stringify(data)
-  }).catch(()=>{});
-
-  if(navigator.share){
-    navigator.share({
-      title:"무등산 산악사고 기록",
-      text:text
-    });
-  }
+  fetch(GOOGLE_SCRIPT_URL,{method:"POST",body:JSON.stringify(data)});
 };
 </script>
-
 </body>
 </html>
