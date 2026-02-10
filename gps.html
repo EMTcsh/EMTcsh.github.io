@@ -55,17 +55,6 @@ function toggleConsent() {
 
 <header>🆘 무등산 산악구조 요청</header>
 
-<div class="small">
- 생명 보호를 위한 구조·구급 목적의 위치정보 제공 서비스
-</div>
-
-<section class="info">
-  <div id="gpsInfo">📍 현재 위치 확인 중...</div>
-  <br>
-  <br>
-  <button onclick="sendSMSAndCall()">✉️ 산악구조대에게 문자전송</button>
-</section>
-
 <!-- 위치정보 수집·이용 안내 (토글) -->
 <div class="consent-box">
   <div class="consent-title" onclick="toggleConsent()">
@@ -81,8 +70,15 @@ function toggleConsent() {
   </div>
 </div>
 
+<section class="info">
+  <div id="gpsInfo">📍 현재 위치 확인 중...</div>
+  <br>
+  <br>
+  <button onclick="sendSMSAndCall()">✉️ 산악구조대에게 문자전송</button>
+</section>
+
 <div class="small">
-※ 문자전송은 <b>무등산 특수산악구조대</b>로 연결됩니다
+※ 생명 보호를 위한 구조·구급 목적의 위치정보 제공 서비스 입니다. 문자전송은 <b>무등산 특수산악구조대</b>로 연결됩니다
 </div>
 
 <br>
