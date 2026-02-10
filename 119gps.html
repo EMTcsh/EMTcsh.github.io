@@ -2,44 +2,87 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<title>🆘 산악사고 구조요청</title>
+<title>🆘 산악사고 구조요청 위치확인</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=ff9e145029506d6e4c72d1f2b01ea424&libraries=services"></script>
+
 <style>
 body { margin:0; font-family: Arial, sans-serif; background:#f5f5f5; }
 header { background:#b71c1c; color:white; padding:14px; text-align:center; font-size:20px; }
 #map { width:100%; height:450px; }
-section { padding:15px; padding-bottom:30px; }
-textarea, button { width:90%; padding:10px; margin-top:8px; font-size:16px; }
-textarea { resize:vertical; }
-button { background:#d32f2f; color:white; border:none; border-radius:6px; cursor:pointer; font-size:18px; }
+
+section { padding:15px; }
+button {
+  width:90%; padding:14px; font-size:18px;
+  background:#d32f2f; color:white;
+  border:none; border-radius:6px;
+}
+
 .info { background:white; padding:12px; border-radius:6px; margin-bottom:10px; }
-.small { font-size:14px; color:#555; }
+.small { font-size:14px; color:#555; padding:0 15px; }
+
+/* 위치정보 안내 토글 */
+.consent-box { padding:0 15px; margin-top:10px; }
+.consent-title {
+  font-size:14px;
+  font-weight:bold;
+  background:#f2f2f2;
+  padding:10px;
+  border-radius:6px;
+  cursor:pointer;
+}
+.consent-detail {
+  display:none;
+  font-size:13px;
+  margin-top:8px;
+  padding:10px;
+  background:#fafafa;
+  border-radius:6px;
+  line-height:1.6;
+}
 </style>
+
+<script>
+function toggleConsent() {
+  const d = document.getElementById("consentDetail");
+  d.style.display = (d.style.display === "none" || d.style.display === "")
+    ? "block" : "none";
+}
+</script>
 </head>
+
 <body>
 
-<header>🆘 무등산 산악구조 요청</header>
-    <div class="info">
-      <section>
-    <div class="info" id="gpsInfo">📍 현재 위치 확인 중...</div>
+<header>🆘 무등산 산악사고 구조요청</header>
 
-    <button onclick="sendSMSAndCall()">✉️ 산악구조대 문자전송</button>
-   </section>  
+<!-- 위치정보 수집·이용 안내 (토글) -->
+<div class="consent-box">
+  <div class="consent-title" onclick="toggleConsent()">
+    구조요청 위치정보 수집·이용 안내 (자세히 보기 클릭)
+  </div>
+  <div class="consent-detail" id="consentDetail">
+    산악사고 등 긴급 상황 발생 시 구조·구급 요청을 목적으로 운영됩니다.<br>
+    구조 요청 과정에서 <b>GPS 위치정보, 휴대전화 번호, 구조요청 시간</b>을 수집하며,<br>
+    수집된 정보는 <b>신속한 구조·구급 활동 수행을 위한 용도에 한하여 사용</b>됩니다.<br>
+    해당 정보는 구조·구급 목적 외 다른 용도로는 사용되지 않으며,<br>
+    관련 법령에 따라 적절한 보안 조치를 통해 관리됩니다.<br><br>
+    <b>[문자 전송]</b> 버튼을 선택할 경우 위 위치정보 수집·이용에 동의한 것으로 간주됩니다.
+  </div>
+</div>
 
-        <b>📋 전달사항</b>
-        <textarea id="condition" placeholder="내용 입력 후 문자전송 버튼 클릭"></textarea>
-    </div>
-  
-    <div class="small">
-        ※ 문자전송은 <b>무등산 특수산악구조대</b>로 연결됩니다
-    </div>
+<section class="info">
+  <div id="gpsInfo">📍 현재 위치 확인 중...</div>
   <br>
-  
+  <button onclick="sendSMSAndCall()">✉️ 산악구조대에게 문자전송</button>
+</section>
+
+<div class="small">
+※ 생명 보호를 위한 구조·구급 목적의 위치정보 제공<br>
+※ 문자전송은 <b>무등산 특수산악구조대</b>로 연결됩니다
+</div>
+
+<br>
 <div id="map"></div>
-
-
-
 <script>
 let map, userMarker;
 let currentLat = null, currentLng = null;
@@ -50,136 +93,78 @@ const RESCUE_NUMBER = [
 const GOOGLE_SHEET_API = "https://script.google.com/macros/s/AKfycbxN0drmcVnMXm3ozh7Yi_5TPRngcraDcOiHnyjPZca3spWFfU74AJMP4a4U8Nt9pnOM/exec";
                           
 // 지도 초기화
-function initMap(latInit = 35.131295, lngInit = 126.948047) {
-    map = new kakao.maps.Map(document.getElementById("map"), {
-        center: new kakao.maps.LatLng(latInit, lngInit),
-        level: 3
-    });
-    userMarker = new kakao.maps.Marker({ map: map });
+function initMap(lat = 35.131295, lng = 126.948047) {
+  map = new kakao.maps.Map(document.getElementById("map"), {
+    center: new kakao.maps.LatLng(lat, lng),
+    level: 3
+  });
+  userMarker = new kakao.maps.Marker({ map });
 }
 initMap();
 
-// GPS 실시간 추적
+// GPS 추적
 if (navigator.geolocation) {
-    navigator.geolocation.watchPosition(
-        pos => {
-            currentLat = pos.coords.latitude;
-            currentLng = pos.coords.longitude;
-            const loc = new kakao.maps.LatLng(currentLat, currentLng);
-            map.setCenter(loc);
-            userMarker.setPosition(loc);
-            document.getElementById("gpsInfo").innerHTML = `
-                📍 현재 위치<br>위도: ${currentLat.toFixed(6)}<br>경도: ${currentLng.toFixed(6)}
-            `;
-        },
-        err => {
-            document.getElementById("gpsInfo").innerHTML = "📍 위치 확인 실패: 위치 권한을 허용해주세요.";
-            console.error(err);
-        },
-        { enableHighAccuracy:true, maximumAge:0, timeout:5000 }
-    );
-} else {
-    document.getElementById("gpsInfo").innerHTML = "📍 현재 브라우저에서 GPS를 지원하지 않습니다.";
+  navigator.geolocation.watchPosition(
+    pos => {
+      currentLat = pos.coords.latitude;
+      currentLng = pos.coords.longitude;
+
+      const lat = currentLat.toFixed(6);
+      const lng = currentLng.toFixed(6);
+
+      const loc = new kakao.maps.LatLng(lat, lng);
+      map.setCenter(loc);
+      userMarker.setPosition(loc);
+
+      document.getElementById("gpsInfo").innerHTML = `
+        📍 <b>현재 위치</b><br>
+        위도: ${lat}<br>
+        경도: ${lng}
+      `;
+    },
+    () => {
+      document.getElementById("gpsInfo").innerHTML =
+        "📍 위치 확인 실패: 위치 권한을 허용해주세요.";
+    },
+    { enableHighAccuracy:true }
+  );
 }
 
-// 모든 구조 요청 불러오기 및 지도 표시
-function loadAllRequests() {
-    fetch(GOOGLE_SHEET_API + "?action=get")
-        .then(res => res.json())
-        .then(data => {
-            if (!Array.isArray(data)) return;
-            markers.forEach(m => m.setMap(null));
-            markers = [];
-            data.forEach(item => {
-                const pos = new kakao.maps.LatLng(item.lat, item.lng);
-                const marker = new kakao.maps.Marker({ map: map, position: pos });
-                markers.push(marker);
-                const kakaoMapURL = `http://map.kakao.com/link/map/${item.lat},${item.lng}`;
-                const infowindow = new kakao.maps.InfoWindow({
-                    content: `<div style="padding:5px; max-width:220px;">
-                                <b>증상:</b> ${item.condition}<br>
-                                <b>위도:</b> ${item.lat}<br>
-                                <b>경도:</b> ${item.lng}<br>
-                                <a href="${kakaoMapURL}" target="_blank">카카오맵 열기</a>
-                              </div>`
-                });
-                kakao.maps.event.addListener(marker, 'click', () => infowindow.open(map, marker));
-            });
-        })
-        .catch(err => console.error("구조 요청 불러오기 실패", err));
-}
-setInterval(loadAllRequests, 5000);
-
-// SMS 전송 + 구글 시트 저장
+// 문자 전송 + 시트 저장
 function sendSMSAndCall() {
-    if (currentLat === null || currentLng === null) {
-        alert("현재 위치를 확인할 수 없습니다. 위치 권한을 허용해주세요.");
-        return;
-    }
-    const condition = document.getElementById("condition").value || "-";
-    const destLat = currentLat.toFixed(6);
-    const destLng = currentLng.toFixed(6);
-    const kakaoMapLink = `http://map.kakao.com/link/map/${destLat},${destLng}`;
-    const payload = {
-        lat: parseFloat(destLat),
-        lng: parseFloat(destLng),
-        condition,
-        kakaoMapURL: kakaoMapLink
-    };
-    fetch(GOOGLE_SHEET_API, { method: "POST", body: JSON.stringify(payload) })
-        .then(res => { if(res.ok){ alert("구조 요청이 전송되었습니다!"); loadAllRequests(); }})
-        .catch(err => console.error("시트 저장 실패", err));
-    if (/Mobi|Android/i.test(navigator.userAgent)) {
-        location.href = `sms:${RESCUE_NUMBER}?body=${encodeURIComponent(
-`🚨 [산악구조요청] 요구조자 현위치
+  if (!currentLat || !currentLng) {
+    alert("현재 위치를 확인할 수 없습니다.");
+    return;
+  }
 
-📍 위도: ${payload.lat}
-📍 경도: ${payload.lng}
+  const lat = currentLat.toFixed(6);
+  const lng = currentLng.toFixed(6);
+  const kakaoMapURL = `https://map.kakao.com/link/map/${lat},${lng}`;
 
-🗺 지도 링크
-카카오맵: ${kakaoMapLink}
+  fetch(GOOGLE_SHEET_API, {
+    method: "POST",
+    body: JSON.stringify({
+      lat: Number(lat),
+      lng: Number(lng),
+      kakaoMapURL,
+      condition: "-"
+    })
+  });
 
-☎️ 전화 통화 시 위도·경도를 그대로 읽어주세요.
-`
-        )}`;
-    } else {
-        alert("모바일에서만 문자 기능이 작동합니다.\n메시지 내용:\n" +
-`🚨 [산악구조요청] 요구조자 현위치
+  const smsText = `
+🚨 [산악구조요청]
+📍 위도: ${lat}
+📍 경도: ${lng}
+🗺 카카오맵: ${kakaoMapURL}
+`;
 
-📍 위도: ${payload.lat}
-📍 경도: ${payload.lng}
-
-🗺 지도 링크
-카카오맵: ${kakaoMapLink}
-
-☎️ 전화 통화 시 위도·경도를 그대로 읽어주세요.`
-        );
-    }
+  if (/Mobi|Android/i.test(navigator.userAgent)) {
+    location.href =
+      `sms:${RESCUE_NUMBER}?body=${encodeURIComponent(smsText)}`;
+  } else {
+    alert("모바일에서만 문자 전송이 가능합니다.\n\n" + smsText);
+  }
 }
-
-// 내 위치 공유 버튼
-document.getElementById('shareCoords').onclick = () => {
-    if (!currentLat || !currentLng) {
-        alert("위치를 먼저 확인하세요.");
-        return;
-    }
-    const kakaoMapLink = `http://map.kakao.com/link/map/${currentLat},${currentLng}`;
-    const shareMessage = `🚨 [산악구조요청] 요구조자 현위치
-
-📍 위도: ${currentLat}
-📍 경도: ${currentLng}
-
-🗺 지도 링크
-카카오맵: ${kakaoMapLink}
-
-☎️ 전화 통화 시 위도·경도를 그대로 읽어주세요.`;
-    if (navigator.share) {
-        navigator.share({ title: "[산악구조요청] GPS 좌표 공유", text: shareMessage }).catch(() => {});
-    } else {
-        navigator.clipboard.writeText(shareMessage);
-        alert("공유 미지원 → 좌표가 클립보드에 복사되었습니다.");
-    }
-};
 </script>
 
 </body>
