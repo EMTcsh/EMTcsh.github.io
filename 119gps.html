@@ -20,14 +20,6 @@ button { background:#d32f2f; color:white; border:none; border-radius:6px; cursor
 <body>
 
 <header>🆘 무등산 산악구조 요청</header>
-
-    <div class="small">
-<b>📍 위치정보 수집·이용 안내</b><br>
-  본 서비스는 구조 요청 시 <b>GPS 위치정보와 요청 시각</b>을 수집하며,
-이 정보는 구조·구급 목적에만 사용됩니다.<br>
-<b>[문자 전송 버튼]</b>을 누르면 위치정보 수집·이용에 동의한 것으로 간주됩니다.
-</div>
-  
     <div class="info">
       <section>
     <div class="info" id="gpsInfo">📍 현재 위치 확인 중...</div>
@@ -40,7 +32,7 @@ button { background:#d32f2f; color:white; border:none; border-radius:6px; cursor
     </div>
   
     <div class="small">
-        ※ 문자전송은 <b>무등산 119특수산악구조대</b>로 연결됩니다
+        ※ 문자전송은 <b>무등산119특수산악구조대</b>로 연결됩니다
     </div>
   <br>
   
@@ -53,10 +45,10 @@ let map, userMarker;
 let currentLat = null, currentLng = null;
 let markers = [];
 const RESCUE_NUMBER = "01080020860";
-const GOOGLE_SHEET_API = "https://script.google.com/macros/s/AKfycbxN0drmcVnMXm3ozh7Yi_5TPRngcraDcOiHnyjPZca3spWFfU74AJMP4a4U8Nt9pnOM/exec";
+const GOOGLE_SHEET_API = "https://script.google.com/macros/s/AKfycbwR_WOHslJnvmdI9K0Vckgr1k6_ZPJVdgF6ynwxVxXJ1qlzHw9nxc3HPVM8mn_qp7k/exec";
 
 // 지도 초기화
-function initMap(latInit = 35.131295, lngInit = 126.948047) {
+function initMap(latInit = 35.162321, lngInit = 126.980342) {
     map = new kakao.maps.Map(document.getElementById("map"), {
         center: new kakao.maps.LatLng(latInit, lngInit),
         level: 3
