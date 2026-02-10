@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>무등산 산악구조 🆘링크 문자 보내기</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body {
+  font-family: Arial, sans-serif;
+  background: #111;
+  color: #fff;
+  text-align: center;
+  padding: 30px;
+}
+
+h1 {
+  color: #ff4d4d;
+  margin-bottom: 20px;
+}
+
+input {
+  width: 90%;
+  max-width: 360px;
+  padding: 14px;
+  margin-bottom: 15px;
+  font-size: 16px;
+  border-radius: 8px;
+  border: none;
+}
+
+button {
+  width: 100%;
+  max-width: 360px;
+  padding: 18px;
+  font-size: 18px;
+  font-weight: bold;
+  border: none;
+  border-radius: 10px;
+  background: #ff4d4d;
+  color: #fff;
+  cursor: pointer;
+}
+
+button:active {
+  background: #cc0000;
+}
+
+.footer {
+  margin-top: 30px;
+  font-size: 13px;
+  color: #aaa;
+}
+</style>
+</head>
+
+<body>
+
+<h1>무등산 산악구조 🆘링크 문자 보내기</h1>
+<p>문자를 받을 번호를 입력한 후<br>버튼을 눌러주세요.</p>
+
+<input
+  type="tel"
+  id="phone"
+  placeholder="받는 사람 번호 (예: 01012345678)"
+  inputmode="tel"
+/>
+
+<button onclick="sendSMS()">📩 위치 링크 문자 보내기</button>
+
+<div class="footer">
+※ 문자 전송 버튼은 휴대폰에서 직접 눌러야 합니다
+</div>
+
+<script>
+function sendSMS() {
+  const phone = document.getElementById("phone").value.trim();
+
+  if (!phone) {
+    alert("받는 사람 번호를 입력해주세요.");
+    return;
+  }
+
+  const link = "https://emtcsh.github.io/qrgps.html";
+
+  const message =
+    "[무등산 산악구조 요청]\n" +
+    "아래 링크를 눌러 위치를 확인하세요.\n" +
+    link;
+
+  const encoded = encodeURIComponent(message);
+
+  // iOS / Android 분기
+  const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+  const smsURL = isIOS
+    ? `sms:${phone}&body=${encoded}`
+    : `sms:${phone}?body=${encoded}`;
+
+  window.location.href = smsURL;
+}
+</script>
+
+</body>
+</html>
