@@ -25,16 +25,22 @@ a.maplink { color:#d32f2f; font-weight:bold; text-decoration:none; }
 <body>
 
 <header>🆘 무등산 산악구조 요청</header>
-
+<div class="small">
+ 생명 보호를 위한 구조·구급 목적의 위치정보 제공 서비스
+  </div>
+  
 <section class="info">
   <div id="gpsInfo">📍 현재 위치 확인 중...</div>
-  <button onclick="sendSMSAndCall()">✉️ 산악구조대 문자전송</button>
+  <button onclick="sendSMSAndCall()">✉️ 산악구조대에게 문자전송</button>
 </section>
 
 <div class="small">
-<b>📍 위치정보 수집·이용 안내</b><br>
-GPS 위치정보와 요청 시각은 구조·구급 목적에만 사용됩니다.<br>
-<b>[문자 전송]</b>을 누르면 동의한 것으로 간주됩니다.
+<b>📍 [위치정보 수집·이용 안내]</b><br>
+산악사고 등 긴급 상황 발생 시 구조·구급 요청을 목적으로 운영됩니다.<br>
+구조 요청 과정에서 <b>GPS 위치정보, 휴대전화 번호, 구조요청 시간</b>을 수집하며,<br>
+수집된 정보는 <b>신속한 구조·구급 활동 수행을 위한 용도에 한하여 사용</b>됩니다.<br>
+해당 정보는 구조·구급 목적 외 다른 용도로는 사용되지 않으며, 관련 법령에 따라 적절한 보안 조치를 통해 관리됩니다.<br>
+<b>[문자 전송]</b> 버튼을 선택할 경우 위 위치정보 수집·이용에 동의한 것으로 간주됩니다.
 </div>
 
 <div class="small">
@@ -81,9 +87,6 @@ if (navigator.geolocation) {
         📍 <b>현재 위치</b><br>
         위도: ${lat}<br>
         경도: ${lng}<br><br>
-        🗺 <a class="maplink" href="${kakaoMapURL}" target="_blank">
-        카카오맵에서 위치 보기
-        </a>
       `;
     },
     () => {
