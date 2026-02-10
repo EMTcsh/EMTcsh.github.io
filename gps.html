@@ -10,38 +10,77 @@
 body { margin:0; font-family: Arial, sans-serif; background:#f5f5f5; }
 header { background:#b71c1c; color:white; padding:14px; text-align:center; font-size:20px; }
 #map { width:100%; height:450px; }
+
 section { padding:15px; }
 button {
   width:90%; padding:14px; font-size:18px;
   background:#d32f2f; color:white;
   border:none; border-radius:6px;
 }
+
 .info { background:white; padding:12px; border-radius:6px; margin-bottom:10px; }
 .small { font-size:14px; color:#555; padding:0 15px; }
-a.maplink { color:#d32f2f; font-weight:bold; text-decoration:none; }
+
+/* 위치정보 안내 토글 */
+.consent-box { padding:0 15px; margin-top:10px; }
+.consent-title {
+  font-size:14px;
+  font-weight:bold;
+  background:#f2f2f2;
+  padding:10px;
+  border-radius:6px;
+  cursor:pointer;
+}
+.consent-detail {
+  display:none;
+  font-size:13px;
+  margin-top:8px;
+  padding:10px;
+  background:#fafafa;
+  border-radius:6px;
+  line-height:1.6;
+}
 </style>
+
+<script>
+function toggleConsent() {
+  const d = document.getElementById("consentDetail");
+  d.style.display = (d.style.display === "none" || d.style.display === "")
+    ? "block" : "none";
+}
+</script>
 </head>
 
 <body>
 
 <header>🆘 무등산 산악구조 요청</header>
+
 <div class="small">
- 생명 보호를 위한 구조·구급 목적의 위치정보 제공 서비스로
- 문자전송은 <b>무등산 특수산악구조대</b>로 연결됩니다.
-  </div>
-  
+ 생명 보호를 위한 구조·구급 목적의 위치정보 제공 서비스
+</div>
+
 <section class="info">
   <div id="gpsInfo">📍 현재 위치 확인 중...</div>
   <button onclick="sendSMSAndCall()">✉️ 산악구조대에게 문자전송</button>
 </section>
 
+<!-- 위치정보 수집·이용 안내 (토글) -->
+<div class="consent-box">
+  <div class="consent-title" onclick="toggleConsent()">
+    📍 위치정보 수집·이용 안내 (자세히 보기)
+  </div>
+  <div class="consent-detail" id="consentDetail">
+    산악사고 등 긴급 상황 발생 시 구조·구급 요청을 목적으로 운영됩니다.<br>
+    구조 요청 과정에서 <b>GPS 위치정보, 휴대전화 번호, 구조요청 시간</b>을 수집하며,<br>
+    수집된 정보는 <b>신속한 구조·구급 활동 수행을 위한 용도에 한하여 사용</b>됩니다.<br>
+    해당 정보는 구조·구급 목적 외 다른 용도로는 사용되지 않으며,<br>
+    관련 법령에 따라 적절한 보안 조치를 통해 관리됩니다.<br><br>
+    <b>[문자 전송]</b> 버튼을 선택할 경우 위 위치정보 수집·이용에 동의한 것으로 간주됩니다.
+  </div>
+</div>
+
 <div class="small">
-<b>📍 [위치정보 수집·이용 안내]</b><br>
-산악사고 등 긴급 상황 발생 시 구조·구급 요청을 목적으로 운영됩니다.<br>
-구조 요청 과정에서 <b>GPS 위치정보, 휴대전화 번호, 구조요청 시간</b>을 수집하며,<br>
-수집된 정보는 <b>신속한 구조·구급 활동 수행을 위한 용도에 한하여 사용</b>됩니다.<br>
-해당 정보는 구조·구급 목적 외 다른 용도로는 사용되지 않으며, 관련 법령에 따라 적절한 보안 조치를 통해 관리됩니다.<br>
-<b>[문자 전송]</b> 버튼을 선택할 경우 위 위치정보 수집·이용에 동의한 것으로 간주됩니다.
+※ 문자전송은 <b>무등산 특수산악구조대</b>로 연결됩니다
 </div>
 
 <br>
@@ -74,7 +113,6 @@ if (navigator.geolocation) {
 
       const lat = currentLat.toFixed(6);
       const lng = currentLng.toFixed(6);
-      const kakaoMapURL = `https://map.kakao.com/link/map/${lat},${lng}`;
 
       const loc = new kakao.maps.LatLng(lat, lng);
       map.setCenter(loc);
@@ -83,7 +121,7 @@ if (navigator.geolocation) {
       document.getElementById("gpsInfo").innerHTML = `
         📍 <b>현재 위치</b><br>
         위도: ${lat}<br>
-        경도: ${lng}<br><br>
+        경도: ${lng}
       `;
     },
     () => {
@@ -105,14 +143,13 @@ function sendSMSAndCall() {
   const lng = currentLng.toFixed(6);
   const kakaoMapURL = `https://map.kakao.com/link/map/${lat},${lng}`;
 
-  // 🔹 GAS와 완전 일치 payload
   fetch(GOOGLE_SHEET_API, {
     method: "POST",
     body: JSON.stringify({
       lat: Number(lat),
       lng: Number(lng),
-      kakaoMapURL: kakaoMapURL,
-      condition: "-"   // 입력창 제거 대응
+      kakaoMapURL,
+      condition: "-"
     })
   });
 
