@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>위치정보 수집·이용 동의서</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<style>
+body {
+  font-family: Arial, sans-serif;
+  background: #f4f6f8;
+  margin: 0;
+  padding: 20px;
+}
+.container {
+  max-width: 700px;
+  margin: auto;
+  background: #ffffff;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+h1 {
+  font-size: 20px;
+  margin-bottom: 15px;
+}
+.section {
+  margin-bottom: 15px;
+}
+.section h2 {
+  font-size: 15px;
+  margin-bottom: 6px;
+}
+.section p, .section li {
+  font-size: 14px;
+  line-height: 1.6;
+}
+ul {
+  padding-left: 18px;
+}
+.checkbox {
+  margin-top: 20px;
+  font-size: 14px;
+}
+button {
+  width: 100%;
+  padding: 12px;
+  font-size: 16px;
+  background: #0066cc;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  margin-top: 15px;
+}
+button:disabled {
+  background: #aaa;
+}
+.footer {
+  font-size: 12px;
+  color: #666;
+  margin-top: 15px;
+  text-align: center;
+}
+.info {
+  font-size: 13px;
+  margin-top: 10px;
+  color: #333;
+}
+</style>
+</head>
+
+<body>
+<div class="container">
+  <h1>📍 위치정보 수집·이용 동의서</h1>
+
+  <div class="section">
+    <p>
+      본인은 「개인정보 보호법」 및 「위치정보의 보호 및 이용 등에 관한 법률」에 따라
+      위치정보 수집·이용 목적과 내용을 충분히 이해하였으며,
+      이에 동의합니다.
+    </p>
+  </div>
+
+  <div class="section">
+    <h2>1. 수집·이용 목적</h2>
+    <ul>
+      <li>긴급 상황 발생 시 위치 확인</li>
+      <li>구조·구급·안전 관리 업무 수행</li>
+    </ul>
+  </div>
+
+  <div class="section">
+    <h2>2. 수집하는 정보</h2>
+    <ul>
+      <li>GPS 위치정보(위도, 경도)</li>
+      <li>동의 시각</li>
+    </ul>
+  </div>
+
+  <div class="section">
+    <h2>3. 보유 및 이용 기간</h2>
+    <p>수집 목적 달성 시까지 보유 후 파기합니다.</p>
+  </div>
+
+  <div class="section">
+    <h2>4. 동의 거부 권리</h2>
+    <p>
+      동의를 거부할 권리가 있으며, 거부 시 위치 기반 서비스 이용에 제한이 있을 수 있습니다.
+    </p>
+  </div>
+
+  <div class="info">
+    동의 일자: <strong><span id="today"></span></strong><br>
+    GPS 좌표: <strong><span id="gps">미수집</span></strong>
+  </div>
+
+  <div class="checkbox">
+    <label>
+      <input type="checkbox" id="agree" onclick="toggleButton()">
+      본인은 위치정보 수집·이용에 동의합니다.
+    </label>
+  </div>
+
+  <button id="submitBtn" disabled onclick="submitForm()">동의 완료</button>
+
+  <div class="footer">
+    ※ 본 동의서는 개인식별정보 없이 전자적으로 수집·보관됩니다.
+  </div>
+</div>
+
+<script>
+// 오늘 날짜 자동 표시
+window.onload = function () {
+  const today = new Date();
+  const yyyy = today.getFullYear();
+  const mm = String(today.getMonth() + 1).padStart(2, '0');
+  const dd = String(today.getDate()).padStart(2, '0');
+  document.getElementById("today").innerText = `${yyyy}-${mm}-${dd}`;
+};
+
+function toggleButton() {
+  document.getElementById("submitBtn").disabled =
+    !document.getElementById("agree").checked;
+}
+
+function submitForm() {
+  if (!navigator.geolocation) {
+    alert("이 기기에서는 위치정보를 사용할 수 없습니다.");
+    return;
+  }
+
+  navigator.geolocation.getCurrentPosition(
+    function (position) {
+      const lat = position.coords.latitude.toFixed(6);
+      const lon = position.coords.longitude.toFixed(6);
+      const time = new Date().toISOString();
+
+      document.getElementById("gps").innerText =
+        `위도 ${lat}, 경도 ${lon}`;
+
+      // 📌 여기서 서버/시트로 전송 가능
+      console.log({
+        latitude: lat,
+        longitude: lon,
+        agreed_at: time
+      });
+
+      alert("위치정보 동의가 완료되었습니다.");
+    },
+    function () {
+      alert("위치정보 접근이 거부되었습니다.");
+    }
+  );
+}
+</script>
+</body>
+</html>
