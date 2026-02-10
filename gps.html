@@ -91,17 +91,15 @@ function sendSMSAndCall() {
     return;
   }
 
-  const condition = document.getElementById("condition").value || "-";
   const now = new Date().toISOString();
   const lat = currentLat.toFixed(6);
   const lng = currentLng.toFixed(6);
   const kakaoMapLink = `http://map.kakao.com/link/map/${lat},${lng}`;
 
-  // ✅ 익명 동의 포함 payload
+  // ✅ 익명 동의 포함 payload (GPS만)
   const payload = {
     lat: parseFloat(lat),
     lng: parseFloat(lng),
-    condition,
     agreed_at: now,
     consent_type: "구조요청 버튼 클릭"
   };
@@ -126,3 +124,4 @@ function sendSMSAndCall() {
 
 </body>
 </html>
+
