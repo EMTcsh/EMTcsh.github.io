@@ -44,9 +44,11 @@ button { background:#d32f2f; color:white; border:none; border-radius:6px; cursor
 let map, userMarker;
 let currentLat = null, currentLng = null;
 let markers = [];
-const RESCUE_NUMBER = "01080020860";
+const RESCUE_NUMBER = [
+  "01080020860"
+];
 const GOOGLE_SHEET_API = "https://script.google.com/macros/s/AKfycbxN0drmcVnMXm3ozh7Yi_5TPRngcraDcOiHnyjPZca3spWFfU74AJMP4a4U8Nt9pnOM/exec";
-
+                          
 // 지도 초기화
 function initMap(latInit = 35.131295, lngInit = 126.948047) {
     map = new kakao.maps.Map(document.getElementById("map"), {
