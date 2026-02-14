@@ -77,7 +77,7 @@
           지도/위성 전환
         </button>
 
-         <button onclick="window.open('https://fd.forest.go.kr/ffas/pubConn/movePage/main_simple.do?systemCode=ffasout_c', '_blank', 'noopener')" class="w-full mt-1 bg-purple-600 hover:bg-purple-700 text-white font-semibold py-1.5 px-3 rounded-lg shadow-md text-sm"> 실시간 산불정보 </button> 
+        <button onclick="window.open('https://fd.forest.go.kr/ffas/pubConn/movePage/main_simple.do?systemCode=ffasout_c', '_blank', 'noopener')" class="w-full mt-1 bg-purple-600 hover:bg-purple-700 text-white font-semibold py-1.5 px-3 rounded-lg shadow-md text-sm"> 실시간 산불정보 </button> 
         <button onclick="window.open('https://sanbul.forest.go.kr/map_zone2/login.aspx', '_blank', 'noopener')" class="w-full mt-1 bg-purple-600 hover:bg-purple-700 text-white font-semibold py-1.5 px-3 rounded-lg shadow-md text-sm"> 산불상황관제시스템 </button> 
         <button onclick="window.open('http://forestfire.nifos.go.kr/menu.action?menuNum=1', '_blank', 'noopener')" class="w-full mt-1 bg-purple-600 hover:bg-purple-700 text-white font-semibold py-1.5 px-3 rounded-lg shadow-md text-sm"> 산불위험예보시스템 </button> 
         <button onclick="window.open('https://emtcsh.github.io/Boards.html', '_blank', 'noopener')" class="w-full mt-1 bg-purple-600 hover:bg-purple-700 text-white font-semibold py-1.5 px-3 rounded-lg shadow-md text-sm"> 비상대응 상황판 </button> 
@@ -111,12 +111,11 @@
       { lat: 35.152931, lng: 126.964767, type: "fire", risk: "공원구역", date: "2025-03-22", description: "화암동 335-4 쓰레기소각" },
       { lat: 35.117806, lng: 126.944922, type: "fire", risk: "공원구역 인근", date: "2025-02-21", description: "소태동 산184 쓰레기소각" },
        { lat: 35.128633, lng: 126.969805,type: "fire", risk: "공원구역", date: "2025-02-14", description: "증심사 수관보관함 입구" },
-      { lat: 35.128917, lng: 126.969963,type: "fire", risk: "공원구역", date: "2025-02-14", description: "증심사 수관보관함 대웅전 좌측" },
-      { lat: 35.128760, lng: 126.970289,type: "fire", risk: "공원구역", date: "2025-02-14", description: "증심사 수관보관함 대웅전 우측" },
-      { lat: 35.122244, lng: 126.997229,type: "fire", risk: "공원구역", date: "2025-02-14", description: "약사사 수관보관함 입구" },
-      { lat: 35.133144, lng: 126.961055,type: "fire", risk: "공원구역", date: "2025-02-14", description: "뭅빈정사 수관보관함 입구" },
-      { lat: 35.1286067, lng: 126.9699645,type: "fire", risk: "공원구역", date: "2024-09-29", description: "운림동 산143-1 용접불씨" }
-      
+      { lat: 35.128917, lng: 126.969963,type: "normal", risk: "공원구역", date: "2025-02-14", description: "증심사 수관보관함 대웅전 좌측" },
+      { lat: 35.128760, lng: 126.970289,type: "normal", risk: "공원구역", date: "2025-02-14", description: "증심사 수관보관함 대웅전 우측" },
+      { lat: 35.122244, lng: 126.997229,type: "normal", risk: "공원구역", date: "2025-02-14", description: "약사사 수관보관함 입구" },
+      { lat: 35.133144, lng: 126.961055,type: "normal", risk: "공원구역", date: "2025-02-14", description: "뭅빈정사 수관보관함 입구" },
+      { lat: 35.1286067, lng: 126.9699645,type: "normal", risk: "공원구역", date: "2024-09-29", description: "운림동 산143-1 용접불씨" }
     ];
 
     function initMap() {
@@ -161,11 +160,11 @@
           url: "https://cdn-icons-png.flaticon.com/512/3300/3300341.png",
           size: new naver.maps.Size(32, 32),
           origin: new naver.maps.Point(0, 0),
-          anchor: new naver.maps.Point(16, 32)
+          anchor: new naver.maps.Point(16, 16) // 중심 기준
         };
       } else {
         return {
-          url: "https://naver-maps.github.io/maps.js/docs/img/example/pin_default.png",
+          url: "https://navermaps.github.io/maps.js/docs/img/example/pin_default.png",
           size: new naver.maps.Size(32, 50),
           origin: new naver.maps.Point(0, 0),
           anchor: new naver.maps.Point(16, 50)
@@ -243,4 +242,5 @@
   </script>
 </body>
 </html>
+
 
