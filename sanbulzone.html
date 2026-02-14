@@ -86,7 +86,7 @@
         <hr class="border-gray-200"/>
 
         <div class="space-y-2">
-          <h3 class="text-xl font-bold text-gray-800">과거 산불발생 정보</h3>
+          <h3 class="text-xl font-bold text-gray-800">산불발생정보/수관보관함위치</h3>
           <div id="infoPanel" class="info-panel bg-gray-50 p-3 rounded-lg border border-gray-200 text-gray-700 text-sm">
             마커를 클릭하여 상세 정보를 확인하세요.
           </div>
@@ -151,14 +151,14 @@
     function getMarkerIcon(data) {
       if (data.type === "fire") {
         return {
-          url: "https://cdn-icons-png.flaticon.com/512/684/684908.png", // 빨간 핀
+          url: "https://navermaps.github.io/maps.js/docs/img/example/pin_default.png", // 기본 파란 핀
           size: new naver.maps.Size(32, 32),
           origin: new naver.maps.Point(0, 0),
           anchor: new naver.maps.Point(16, 32)
         };
       } else {
         return {
-          url: "https://navermaps.github.io/maps.js/docs/img/example/pin_default.png", // 기본 파란 핀
+          url: "https://ssl.pstatic.net/static/maps/m/poi_pin_blue.png", // 네이버 다른 블루 핀
           size: new naver.maps.Size(32, 50),
           origin: new naver.maps.Point(0, 0),
           anchor: new naver.maps.Point(16, 50)
