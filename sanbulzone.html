@@ -86,7 +86,7 @@
         <hr class="border-gray-200"/>
 
         <div class="space-y-2">
-          <h3 class="text-xl font-bold text-gray-800">산불발생정보/수관보관함 위치</h3>
+          <h3 class="text-xl font-bold text-gray-800">과거 산불발생 정보</h3>
           <div id="infoPanel" class="info-panel bg-gray-50 p-3 rounded-lg border border-gray-200 text-gray-700 text-sm">
             마커를 클릭하여 상세 정보를 확인하세요.
           </div>
@@ -103,19 +103,17 @@
     let isSatellite = false;
     let isAddingPoint = false;
 
-    // 산불 및 일반 위험 데이터
     const landslideData = [
-      { lat: 35.1286067, lng: 126.9699645, type: "fire", risk: "공원구역", date: "2024-09-29", description: "운림동 산143-1 용접불씨" },
-      { lat: 35.128633, lng: 126.969805, type: "fire", risk: "공원구역", date: "2025-02-14", description: "증심사 공양간 화재" },
-      { lat: 35.1615699, lng: 126.9861449, type: "fire", risk: "공원구역", date: "2025-03-22", description: "금곡동 산166-2 담배불씨" },
-      { lat: 35.152931, lng: 126.964767, type: "fire", risk: "공원구역", date: "2025-03-22", description: "화암동 335-4 쓰레기소각" },
-      { lat: 35.117806, lng: 126.944922, type: "fire", risk: "공원구역 인근", date: "2025-02-21", description: "소태동 산184 쓰레기소각" },
-      { lat: 35.128633, lng: 126.969805,type: "normal", risk: "공원구역", date: "2025-02-14", description: "증심사 수관보관함 입구" },
-      { lat: 35.128917, lng: 126.969963,type: "normal", risk: "공원구역", date: "2025-02-14", description: "증심사 수관보관함 대웅전 좌측" },
-      { lat: 35.128760, lng: 126.970289,type: "normal", risk: "공원구역", date: "2025-02-14", description: "증심사 수관보관함 대웅전 우측" },
-      { lat: 35.122244, lng: 126.997229,type: "normal", risk: "공원구역", date: "2025-02-14", description: "약사사 수관보관함 입구" },
-      { lat: 35.133144, lng: 126.961055,type: "normal", risk: "공원구역", date: "2025-02-14", description: "문빈정사 수관보관함 입구" }
- 
+      { lat: 35.1286067, lng: 126.9699645, type: "fire", date: "2024-09-29", description: "운림동 산143-1 용접불씨" },
+      { lat: 35.128633, lng: 126.969805, type: "fire", date: "2025-02-14", description: "증심사 공양간 화재" },
+      { lat: 35.1615699, lng: 126.9861449, type: "fire", date: "2025-03-22", description: "금곡동 산166-2 담배불씨" },
+      { lat: 35.152931, lng: 126.964767, type: "fire", date: "2025-03-22", description: "화암동 335-4 쓰레기소각" },
+      { lat: 35.117806, lng: 126.944922, type: "fire", date: "2025-02-21", description: "소태동 산184 쓰레기소각" },
+      { lat: 35.128633, lng: 126.969805,type: "normal", date: "2025-02-14", description: "증심사 수관보관함 입구" },
+      { lat: 35.128917, lng: 126.969963,type: "normal", date: "2025-02-14", description: "증심사 수관보관함 대웅전 좌측" },
+      { lat: 35.128760, lng: 126.970289,type: "normal", date: "2025-02-14", description: "증심사 수관보관함 대웅전 우측" },
+      { lat: 35.122244, lng: 126.997229,type: "normal", date: "2025-02-14", description: "약사사 수관보관함 입구" },
+      { lat: 35.133144, lng: 126.961055,type: "normal", date: "2025-02-14", description: "문빈정사 수관보관함 입구" }
     ];
 
     function initMap() {
@@ -128,12 +126,10 @@
 
       renderMarkers();
 
-      // 지도 클릭 시 마커 추가
       naver.maps.Event.addListener(map, 'click', function(e) {
         if (isAddingPoint) {
           const newLat = e.coord.lat();
           const newLng = e.coord.lng();
-
           landslideData.push({
             lat: newLat,
             lng: newLng,
@@ -141,10 +137,8 @@
             date: new Date().toISOString().slice(0, 10),
             description: "새롭게 추가된 위험 지역"
           });
-
           renderMarkers();
           isAddingPoint = false;
-
           document.getElementById("addPointBtn").textContent = "지도에서 클릭하여 표시";
           document.getElementById("addPointBtn").classList.remove("bg-red-500", "hover:bg-red-600");
           document.getElementById("addPointBtn").classList.add("bg-blue-600", "hover:bg-blue-700");
@@ -153,18 +147,18 @@
       });
     }
 
-    // 아이콘 반환
+    // 빨간색 핀 아이콘으로 산불 표시
     function getMarkerIcon(data) {
       if (data.type === "fire") {
         return {
-          url: "https://cdn-icons-png.flaticon.com/512/3300/3300341.png",
+          url: "https://cdn-icons-png.flaticon.com/512/684/684908.png", // 빨간 핀
           size: new naver.maps.Size(32, 32),
           origin: new naver.maps.Point(0, 0),
-          anchor: new naver.maps.Point(16, 16) // 중심 기준
+          anchor: new naver.maps.Point(16, 32)
         };
       } else {
         return {
-          url: "https://navermaps.github.io/maps.js/docs/img/example/pin_default.png",
+          url: "https://navermaps.github.io/maps.js/docs/img/example/pin_default.png", // 기본 파란 핀
           size: new naver.maps.Size(32, 50),
           origin: new naver.maps.Point(0, 0),
           anchor: new naver.maps.Point(16, 50)
@@ -172,7 +166,6 @@
       }
     }
 
-    // 마커 렌더링
     function renderMarkers() {
       markers.forEach(marker => marker.setMap(null));
       markers = [];
@@ -199,7 +192,6 @@
       });
     }
 
-    // 지도 클릭 모드
     document.getElementById("addPointBtn").addEventListener("click", () => {
       isAddingPoint = true;
       document.getElementById("addPointBtn").textContent = "지도에서 위치를 클릭하세요...";
@@ -208,7 +200,6 @@
       document.getElementById("infoPanel").innerHTML = "<strong class='text-red-500'>지도 클릭 모드 활성화됨.</strong><br>지도에서 마커를 추가할 위치를 클릭하세요.";
     });
 
-    // 좌표 입력 추가
     document.getElementById("addByCoordBtn").addEventListener("click", () => {
       const lat = parseFloat(document.getElementById("latInput").value);
       const lng = parseFloat(document.getElementById("lngInput").value);
@@ -232,7 +223,6 @@
       document.getElementById("lngInput").value = "";
     });
 
-    // 지도/위성 전환
     document.getElementById("toggleMapTypeBtn").addEventListener("click", () => {
       isSatellite = !isSatellite;
       map.setMapTypeId(isSatellite ? naver.maps.MapTypeId.SATELLITE : naver.maps.MapTypeId.NORMAL);
