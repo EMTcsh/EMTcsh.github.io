@@ -119,11 +119,9 @@
 
       renderMarkers();
 
-     naver.maps.Event.addListener(marker, 'click', () => {
-  // 좌표 가져오기
+    naver.maps.Event.addListener(marker, 'click', () => {
   const latlng = new naver.maps.LatLng(data.lat, data.lng);
 
-  // 역지오코딩 요청
   naver.maps.Service.reverseGeocode({
     coords: latlng,
     orders: [naver.maps.Service.OrderType.ADDR, naver.maps.Service.OrderType.ROAD_ADDR].join(',')
@@ -135,11 +133,10 @@
       }
     }
 
-    // infoPanel 업데이트
     document.getElementById("infoPanel").innerHTML = `
       <h3 class="text-xl font-semibold">${data.date}</h3>
       <p class="mt-2 text-base"><strong>타입:</strong> ${data.type === "fire" ? "산불발생" : "일반 위험"}</p>
-      <p class="mt-1 text-base"><strong>위치:</strong> ${data.lat}, ${data.lng}</p>
+      <p class="mt-1 text-base"><strong>위치:</strong> ${data.lat.toFixed(6)}, ${data.lng.toFixed(6)}</p>
       <p class="mt-1 text-base"><strong>주소:</strong> ${address}</p>
       <p class="mt-1 text-base"><strong>설명:</strong> ${data.description}</p>
     `;
