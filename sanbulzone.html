@@ -119,29 +119,26 @@
 
       renderMarkers();
 
-    naver.maps.Event.addListener(marker, 'click', () => {
-  const latlng = new naver.maps.LatLng(data.lat, data.lng);
-
-  naver.maps.Service.reverseGeocode({
-    coords: latlng,
-    orders: [naver.maps.Service.OrderType.ADDR, naver.maps.Service.OrderType.ROAD_ADDR].join(',')
-  }, (status, response) => {
-    let address = "주소 정보 없음";
-    if (status === naver.maps.Service.Status.OK) {
-      if (response.result.total > 0) {
-        address = response.result.items[0].address || response.result.items[0].roadAddress || "주소 정보 없음";
-      }
+      naver.maps.Event.addListener(map, 'click', function(e) {
+        if (isAddingPoint) {
+          const newLat = e.coord.lat();
+          const newLng = e.coord.lng();
+          landslideData.push({
+            lat: newLat,
+            lng: newLng,
+            type: "normal",
+            date: new Date().toISOString().slice(0, 10),
+            description: "새롭게 추가된 위험 지역"
+          });
+          renderMarkers();
+          isAddingPoint = false;
+          document.getElementById("addPointBtn").textContent = "지도에서 클릭하여 표시";
+          document.getElementById("addPointBtn").classList.remove("bg-red-500", "hover:bg-red-600");
+          document.getElementById("addPointBtn").classList.add("bg-blue-600", "hover:bg-blue-700");
+          document.getElementById("infoPanel").innerHTML = "새로운 위험 지점이 추가되었습니다. 마커를 클릭하여 상세 정보를 확인하세요.";
+        }
+      });
     }
-
-    document.getElementById("infoPanel").innerHTML = `
-      <h3 class="text-xl font-semibold">${data.date}</h3>
-      <p class="mt-2 text-base"><strong>타입:</strong> ${data.type === "fire" ? "산불발생" : "일반 위험"}</p>
-      <p class="mt-1 text-base"><strong>위치:</strong> ${data.lat.toFixed(6)}, ${data.lng.toFixed(6)}</p>
-      <p class="mt-1 text-base"><strong>주소:</strong> ${address}</p>
-      <p class="mt-1 text-base"><strong>설명:</strong> ${data.description}</p>
-    `;
-  });
-});
 
     function getMarkerIcon(data) {
       if (data.type === "fire") {
@@ -172,12 +169,24 @@
         });
 
         naver.maps.Event.addListener(marker, 'click', () => {
-          document.getElementById("infoPanel").innerHTML = `
-            <h3 class="text-xl font-semibold">${data.date}</h3>
-            <p class="mt-2 text-base"><strong>타입:</strong> ${data.type === "fire" ? "산불발생" : "일반 위험"}</p>
-            <p class="mt-1 text-base"><strong>위치:</strong> ${data.lat}, ${data.lng}</p>
-            <p class="mt-1 text-base"><strong>설명:</strong> ${data.description}</p>
-          `;
+          const latlng = new naver.maps.LatLng(data.lat, data.lng);
+          naver.maps.Service.reverseGeocode({
+            coords: latlng,
+            orders: [naver.maps.Service.OrderType.ADDR, naver.maps.Service.OrderType.ROAD_ADDR].join(',')
+          }, (status, response) => {
+            let address = "주소 정보 없음";
+            if (status === naver.maps.Service.Status.OK && response.result.total > 0) {
+              address = response.result.items[0].address || response.result.items[0].roadAddress || "주소 정보 없음";
+            }
+
+            document.getElementById("infoPanel").innerHTML = `
+              <h3 class="text-xl font-semibold">${data.date}</h3>
+              <p class="mt-2 text-base"><strong>타입:</strong> ${data.type === "fire" ? "산불발생" : "일반 위험"}</p>
+              <p class="mt-1 text-base"><strong>위치:</strong> ${data.lat.toFixed(6)}, ${data.lng.toFixed(6)}</p>
+              <p class="mt-1 text-base"><strong>주소:</strong> ${address}</p>
+              <p class="mt-1 text-base"><strong>설명:</strong> ${data.description}</p>
+            `;
+          });
         });
 
         markers.push(marker);
