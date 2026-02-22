@@ -67,6 +67,15 @@
           </button>
         </div>
 
+        <input type="text" id="addressInput"
+  placeholder="주소 입력 (예: 광주광역시 무등산 증심사)"
+  class="w-full mt-1 px-2 py-1 border rounded-md"/>
+
+<button id="addByAddressBtn"
+  class="w-full mt-1 bg-green-600 hover:bg-green-700 text-white font-semibold py-1.5 px-3 rounded-lg shadow-md text-sm">
+  주소로 위치 표시
+</button>
+
         <hr class="border-gray-200"/>
 
         <button id="addPointBtn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-1.5 px-3 rounded-lg shadow-md text-sm">
@@ -99,7 +108,7 @@
   </main>
 
   <!-- Naver Maps API -->
-  <script src="https://oapi.map.naver.com/openapi/v3/maps.js?ncpClientId=g2u4orbiqf"></script>
+ <script src="https://oapi.map.naver.com/openapi/v3/maps.js?ncpClientId=g2u4orbiqf&submodules=geocoder"></script>
   <script>
     let map;
     let markers = [];
@@ -233,6 +242,53 @@
     });
 
     window.addEventListener('DOMContentLoaded', initMap);
+// 주소 검색 → 위경도 변환 → 마커 추가
+document.getElementById("addByAddressBtn").addEventListener("click", () => {
+  const address = document.getElementById("addressInput").value;
+
+  if (!address) {
+    document.getElementById("infoPanel").innerHTML =
+      "<strong class='text-red-500'>오류:</strong> 주소를 입력하세요.";
+    return;
+  }
+
+  naver.maps.Service.geocode({
+    query: address
+  }, function(status, response) {
+
+    if (status !== naver.maps.Service.Status.OK) {
+      document.getElementById("infoPanel").innerHTML =
+        "<strong class='text-red-500'>주소 검색 실패</strong>";
+      return;
+    }
+
+    const result = response.v2.addresses[0];
+    const lat = parseFloat(result.y);
+    const lng = parseFloat(result.x);
+
+    // 지도 이동
+    map.setCenter(new naver.maps.LatLng(lat, lng));
+    map.setZoom(15);
+
+    // 기존 데이터 배열에 추가
+    landslideData.push({
+      lat: lat,
+      lng: lng,
+      type: "normal",
+      date: new Date().toISOString().slice(0, 10),
+      description: "주소 입력 위치 (" + address + ")"
+    });
+
+    renderMarkers();
+
+    document.getElementById("infoPanel").innerHTML =
+      "주소 위치가 지도에 표시되었습니다.<br><strong>위도:</strong> " + lat +
+      "<br><strong>경도:</strong> " + lng;
+
+    document.getElementById("addressInput").value = "";
+  });
+});
+    
   </script>
 </body>
 </html>
