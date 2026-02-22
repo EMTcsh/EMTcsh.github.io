@@ -1,142 +1,89 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>무등산 산불관리 상황판</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <style>
-    html, body {
-      height: 100%;
-      margin: 0;
-      padding: 0;
-      display: flex;
-      flex-direction: column;
-      background-color: #f3f4f6;
-    }
-    #map-container {
-      flex: 1;
-      position: relative;
-    }
-    #map {
-      height: 100%;
-      width: 100%;
-      border-radius: 0.5rem;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    }
-    .info-panel {
-      max-height: 300px;
-      overflow-y: auto;
-    }
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>무등산 산불관리 상황판</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    background-color: #f3f4f6;
+  }
+  #map-container { flex: 1; position: relative; }
+  #map { height: 100%; width: 100%; border-radius: 0.5rem; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+  .info-panel { max-height: 300px; overflow-y: auto; }
+</style>
 </head>
 <body class="bg-gray-100">
 
-  <div class="p-4 sm:p-8">
-    <header class="text-center">
-      <h1 class="text-3xl sm:text-4xl font-extrabold text-gray-800 tracking-tight">무등산 산불관리 상황판</h1>
-      <p class="mt-2 text-lg text-gray-600">위성 지도를 통해 산불 위험 지역을 모니터링하고 관리합니다.</p>
-    </header>
+<div class="p-4 sm:p-8">
+  <header class="text-center">
+    <h1 class="text-3xl sm:text-4xl font-extrabold text-gray-800 tracking-tight">무등산 산불관리 상황판</h1>
+    <p class="mt-2 text-lg text-gray-600">위성 지도를 통해 산불 위험 지역을 모니터링하고 관리합니다.</p>
+  </header>
+</div>
+
+<main class="flex flex-col lg:flex-row p-4 sm:p-8 pt-0 gap-8 overflow-hidden">
+  <div id="map-container" class="relative w-full h-screen">
+    <div id="map" class="w-full h-full"></div>
+
+    <div class="absolute top-4 right-4 w-72 bg-white p-6 rounded-xl shadow-lg space-y-6">
+      <h3>무등산국립공원 현황</h3>
+      <p>마커 클릭 시 상세 정보 확인 가능</p>
+    </div>
   </div>
 
-  <main class="flex flex-col lg:flex-row p-4 sm:p-8 pt-0 gap-8 overflow-hidden">
-    <!-- 지도 영역 -->
-    <div id="map-container" class="relative w-full h-screen">
-      <div id="map" class="w-full h-full"></div>
+  <div class="w-full lg:w-1/4 bg-white p-4 rounded-xl shadow-lg space-y-4">
+    <button id="toggleMapTypeBtn" class="w-full bg-gray-500 hover:bg-gray-600 text-white font-semibold py-1.5 px-3 rounded-lg shadow-md text-sm">지도/위성 전환</button>
+    <button id="addPointBtn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-1.5 px-3 rounded-lg shadow-md text-sm">지도에서 클릭하여 표시</button>
 
-      <div class="absolute top-4 right-4 w-72 bg-white p-6 rounded-xl shadow-lg space-y-6">
-        <h3>무등산국립공원 현황</h3>
-        <p>진화자원: 고성능 산불진화차량(벤츠유니목-U5023 중량 8.5t, 물탱크 4,000L, 방수량 분당 2,800L)</p>
-        <p>장비현황: 감시카메라 3대, 진화차량 4대, 개인진화장비</p>
-        <p>총 탐방로: 37구간 96.76km / 개방 탐방로: 36구간 95.96km / 통제 탐방로: 1구간 0.8km</p>
-        <p>감시초소 0개, 통제소 2개, 인화물질보관함 4개</p>
-        <p>산불 집중관리 지구: 제1수원지 편백나무 숲, 주남마을, 덕산골, 소태골, 등촌마을, 요산요수, 풍암제, 화암마을, 배재마을, 평촌마을, 덕의마을, 금곡마을, 안양암</p>
-        <p>인근사찰: 증심사, 약사사, 문빈정사, 원효사, 관음암, 영광사, 안양암, 명지암, 광륵사</p>
+    <hr class="border-gray-200"/>
+
+    <div class="space-y-2">
+      <h3 class="text-xl font-bold text-gray-800">상세내용</h3>
+      <div id="infoPanel" class="info-panel bg-gray-50 p-3 rounded-lg border border-gray-200 text-gray-700 text-sm">
+        마커를 클릭하여 상세 정보를 확인하세요.
       </div>
     </div>
+  </div>
+</main>
 
-    <!-- 제어판 -->
-    <div class="w-full lg:w-1/4 bg-white p-4 rounded-xl shadow-lg space-y-4">
-      <div class="space-y-3">
-        <button id="toggleMapTypeBtn" class="w-full bg-gray-500 hover:bg-gray-600 text-white font-semibold py-1.5 px-3 rounded-lg shadow-md text-sm">
-          지도/위성 전환
-        </button>
-        <button id="addPointBtn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-1.5 px-3 rounded-lg shadow-md text-sm">
-          지도에서 클릭하여 표시
-        </button>
-
-        <button onclick="window.open('https://fd.forest.go.kr', '_blank', 'noopener')" class="w-full mt-1 bg-purple-600 hover:bg-purple-700 text-white font-semibold py-1.5 px-3 rounded-lg shadow-md text-sm"> 
-          실시간 산불정보 </button>
-        <button onclick="window.open('http://forestfire.nifos.go.kr', '_blank', 'noopener')" class="w-full mt-1 bg-purple-600 hover:bg-purple-700 text-white font-semibold py-1.5 px-3 rounded-lg shadow-md text-sm"> 
-          산불위험예보시스템 </button>
-        <button onclick="window.open('https://sanbul.forest.go.kr', '_blank', 'noopener')" class="w-full mt-1 bg-purple-600 hover:bg-purple-700 text-white font-semibold py-1.5 px-3 rounded-lg shadow-md text-sm"> 
-          산불상황관제시스템 </button>         
-        <button onclick="window.open('https://www.knps.or.kr/front/portal/safe/acsCtrList.do?menuNo=8000340', '_blank', 'noopener')" class="w-full mt-1 bg-purple-600 hover:bg-purple-700 text-white font-semibold py-1.5 px-3 rounded-lg shadow-md text-sm"> 
-          탐방로 통제정보 </button>
-        <button onclick="window.open('https://mudeung.github.io/rescue/monitorcall.html', '_blank', 'noopener')" class="w-full mt-1 bg-purple-600 hover:bg-purple-700 text-white font-semibold py-1.5 px-3 rounded-lg shadow-md text-sm"> 
-          비상대응 상황판 </button> 
-
-        <hr class="border-gray-200"/>
-
-        <div class="space-y-2">
-          <h3 class="text-xl font-bold text-gray-800">상세내용</h3>
-          <div id="infoPanel" class="info-panel bg-gray-50 p-3 rounded-lg border border-gray-200 text-gray-700 text-sm">
-            마커를 클릭하여 상세 정보를 확인하세요.
-          </div>
-        </div>
-      </div>
-    </div>
-  </main>
-
-  <script src="https://oapi.map.naver.com/openapi/v3/maps.js?ncpClientId=g2u4orbiqf&submodules=geocoder"></script>
-  <script>
+<script src="https://oapi.map.naver.com/openapi/v3/maps.js?ncpClientId=g2u4orbiqf&submodules=geocoder"></script>
+<script>
 let map;
 let markers = [];
 let isSatellite = false;
 let isAddingPoint = false;
 
+// 기존 데이터에 address 필드 포함
 const landslideData = [
-  { lat: 35.1286067, lng: 126.9699645, type: "fire", date: "2024-09-29", address: "광주광역시 동구 운림동 56", description: "증심사 공양간 화재" },
-  { lat: 35.1615699, lng: 126.9861449, type: "fire", date: "2025-03-22", address: "광주광역시 북구 금곡동 산166-2", description: "담배불씨" },
-  { lat: 35.152931, lng: 126.964767, type: "fire", date: "2025-03-22", address: "광주광역시 북구 화암동 335-4", description: "쓰레기소각" },
-  { lat: 35.117806, lng: 126.944922, type: "fire", date: "2025-02-21", address: "광주광역시 동구 소태동 산 184", description: "쓰레기소각" },
-  { lat: 35.128633, lng: 126.969805,type: "normal", date: "2025-02-14", description: "증심사 수관보관함 입구" },
-  { lat: 35.128917, lng: 126.969963,type: "normal", date: "2025-02-14", description: "증심사 수관보관함 대웅전 좌측" },
-  { lat: 35.128760, lng: 126.970289,type: "normal", date: "2025-02-14", description: "증심사 수관보관함 대웅전 우측" },
-  { lat: 35.122244, lng: 126.972229,type: "normal", date: "2025-02-14", description: "약사사 수관보관함 입구" },
-  { lat: 35.133144, lng: 126.961055,type: "normal", date: "2025-02-14", description: "문빈정사 수관보관함 입구" },
-  { lat: 35.14833232, lng: 126.98574731,type: "normal", date: "2025-02-14", description: "원효사 수관보관함 입구" },
-  { lat: 35.14853961, lng: 126.98554150,type: "normal", date: "2025-02-14", description: "원효사 수관보관함 대웅전 앞" }
+  { lat: 35.1286067, lng: 126.9699645, type: "fire", date: "2024-09-29", address: "동구 운림동 56", description: "증심사 공양간 화재" },
+  { lat: 35.1615699, lng: 126.9861449, type: "fire", date: "2025-03-22", address: "북구 금곡동 산166-2", description: "담배불씨" },
+  { lat: 35.152931, lng: 126.964767, type: "fire", date: "2025-03-22", address: "북구 화암동 335-4", description: "쓰레기소각" },
+  { lat: 35.117806, lng: 126.944922, type: "fire", date: "2025-02-21", address: "동구 소태동 산184", description: "쓰레기소각" }
 ];
 
-// 마커 아이콘 선택
+// 마커 아이콘
 function getMarkerIcon(data) {
   return data.type === "fire"
-    ? { url: "https://maps.gstatic.com/mapfiles/ms2/micons/red-dot.png", size: new naver.maps.Size(32,32), anchor: new naver.maps.Point(16,32)}
-    : { url: "https://ssl.pstatic.net/static/maps/m/poi_pin_blue.png", size: new naver.maps.Size(32,50), anchor: new naver.maps.Point(16,50)};
+    ? { url: "https://maps.gstatic.com/mapfiles/ms2/micons/red-dot.png", size: new naver.maps.Size(32,32), anchor: new naver.maps.Point(16,32) }
+    : { url: "https://ssl.pstatic.net/static/maps/m/poi_pin_blue.png", size: new naver.maps.Size(32,50), anchor: new naver.maps.Point(16,50) };
 }
 
-// infoPanel에 좌표 + 주소 + 설명 표시
+// infoPanel 표시
 function showInfo(data) {
-  const latlng = new naver.maps.LatLng(data.lat, data.lng);
-  naver.maps.Service.reverseGeocode({
-    coords: latlng,
-    orders: [naver.maps.Service.OrderType.ADDR, naver.maps.Service.OrderType.ROAD_ADDR].join(',')
-  }, (status, response) => {
-    let address = "주소 정보 없음";
-    if (status === naver.maps.Service.Status.OK && response.result.total > 0) {
-      const item = response.result.items[0];
-      address = item.roadAddress || item.address || "주소 정보 없음";
-    }
-
-    document.getElementById("infoPanel").innerHTML = `
-      <h3 class="text-xl font-semibold">${data.date}</h3>
-      <p class="mt-2 text-base"><strong>타입:</strong> ${data.type === "fire" ? "산불발생" : "일반 위험"}</p>
-      <p class="mt-1 text-base"><strong>위치:</strong> ${data.lat.toFixed(6)}, ${data.lng.toFixed(6)}</p>
-      <p class="mt-1 text-base"><strong>주소:</strong> ${address}</p>
-      <p class="mt-1 text-base"><strong>설명:</strong> ${data.description}</p>
-    `;
-  });
+  document.getElementById("infoPanel").innerHTML = `
+    <h3 class="text-xl font-semibold">${data.date}</h3>
+    <p class="mt-2 text-base"><strong>타입:</strong> ${data.type === "fire" ? "산불발생" : "일반 위험"}</p>
+    <p class="mt-1 text-base"><strong>위치:</strong> ${data.lat.toFixed(6)}, ${data.lng.toFixed(6)}</p>
+    <p class="mt-1 text-base"><strong>주소:</strong> ${data.address || "주소 정보 없음"}</p>
+    <p class="mt-1 text-base"><strong>설명:</strong> ${data.description}</p>
+  `;
 }
 
 // 마커 렌더링
@@ -168,26 +115,43 @@ function initMap() {
 
   renderMarkers();
 
+  // 지도 클릭으로 새 마커 추가
   naver.maps.Event.addListener(map, 'click', function(e) {
-    if (isAddingPoint) {
-      const newLat = e.coord.lat();
-      const newLng = e.coord.lng();
-      const newPoint = {
-        lat: newLat,
-        lng: newLng,
-        type: "normal",
-        date: new Date().toISOString().slice(0,10),
-        description: "새롭게 추가된 위험 지역"
-      };
-      landslideData.push(newPoint);
-      renderMarkers();
-      showInfo(newPoint); // 새 마커 클릭 없이 바로 infoPanel 표시
+    if (!isAddingPoint) return;
 
-      isAddingPoint = false;
-      document.getElementById("addPointBtn").textContent = "지도에서 클릭하여 표시";
-      document.getElementById("addPointBtn").classList.remove("bg-red-500", "hover:bg-red-600");
-      document.getElementById("addPointBtn").classList.add("bg-blue-600", "hover:bg-blue-700");
-    }
+    const newLat = e.coord.lat();
+    const newLng = e.coord.lng();
+    const newPoint = {
+      lat: newLat,
+      lng: newLng,
+      type: "normal",
+      date: new Date().toISOString().slice(0,10),
+      description: "새롭게 추가된 위험 지역",
+      address: "" // 나중에 채움
+    };
+    landslideData.push(newPoint);
+    renderMarkers();
+
+    // 주소 가져오기
+    const latlng = new naver.maps.LatLng(newLat, newLng);
+    naver.maps.Service.reverseGeocode({
+      coords: latlng,
+      orders: [naver.maps.Service.OrderType.ADDR, naver.maps.Service.OrderType.ROAD_ADDR].join(',')
+    }, (status, response) => {
+      if (status === naver.maps.Service.Status.OK && response.result.total > 0) {
+        const item = response.result.items[0];
+        newPoint.address = item.roadAddress || item.address || "주소 정보 없음";
+      } else {
+        newPoint.address = "주소 정보 없음";
+      }
+      // 새 마커 infoPanel에 바로 표시
+      showInfo(newPoint);
+    });
+
+    isAddingPoint = false;
+    document.getElementById("addPointBtn").textContent = "지도에서 클릭하여 표시";
+    document.getElementById("addPointBtn").classList.remove("bg-red-500", "hover:bg-red-600");
+    document.getElementById("addPointBtn").classList.add("bg-blue-600", "hover:bg-blue-700");
   });
 }
 
@@ -207,5 +171,6 @@ document.getElementById("toggleMapTypeBtn").addEventListener("click", () => {
 
 window.addEventListener('DOMContentLoaded', initMap);
 </script>
+
 </body>
 </html>
