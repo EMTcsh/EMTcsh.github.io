@@ -89,126 +89,123 @@
   </main>
 
   <script src="https://oapi.map.naver.com/openapi/v3/maps.js?ncpClientId=g2u4orbiqf&submodules=geocoder"></script>
-  <script>
-    let map;
-    let markers = [];
-    let isSatellite = false;
-    let isAddingPoint = false;
+ <script>
+let map;
+let markers = [];
+let isSatellite = false;
+let isAddingPoint = false;
 
-    const landslideData = [
-      { lat: 35.1286067, lng: 126.9699645, type: "fire", date: "2024-09-29", description: "증심사 공양간 화재" },
-      { lat: 35.1615699, lng: 126.9861449, type: "fire", date: "2025-03-22", description: "금곡동 산166-2 담배불씨" },
-      { lat: 35.152931, lng: 126.964767, type: "fire", date: "2025-03-22", description: "화암동 335-4 쓰레기소각" },
-      { lat: 35.117806, lng: 126.944922, type: "fire", date: "2025-02-21", description: "소태동 산184 쓰레기소각" },
-      { lat: 35.128633, lng: 126.969805,type: "normal", date: "2025-02-14", description: "증심사 수관보관함 입구" },
-      { lat: 35.128917, lng: 126.969963,type: "normal", date: "2025-02-14", description: "증심사 수관보관함 대웅전 좌측" },
-      { lat: 35.128760, lng: 126.970289,type: "normal", date: "2025-02-14", description: "증심사 수관보관함 대웅전 우측" },
-      { lat: 35.122244, lng: 126.972229,type: "normal", date: "2025-02-14", description: "약사사 수관보관함 입구" },
-      { lat: 35.133144, lng: 126.961055,type: "normal", date: "2025-02-14", description: "문빈정사 수관보관함 입구" },
-      { lat: 35.14833232, lng: 126.98574731,type: "normal", date: "2025-02-14", description: "원효사 수관보관함 입구" },
-      { lat: 35.14853961, lng: 126.98554150,type: "normal", date: "2025-02-14", description: "원효사 수관보관함 대웅전 앞" }
-    ];
+const landslideData = [
+  { lat: 35.1286067, lng: 126.9699645, type: "fire", date: "2024-09-29", description: "증심사 공양간 화재" },
+  { lat: 35.1615699, lng: 126.9861449, type: "fire", date: "2025-03-22", description: "금곡동 산166-2 담배불씨" },
+  { lat: 35.152931, lng: 126.964767, type: "fire", date: "2025-03-22", description: "화암동 335-4 쓰레기소각" },
+  { lat: 35.117806, lng: 126.944922, type: "fire", date: "2025-02-21", description: "소태동 산184 쓰레기소각" },
+  { lat: 35.128633, lng: 126.969805,type: "normal", date: "2025-02-14", description: "증심사 수관보관함 입구" },
+  { lat: 35.128917, lng: 126.969963,type: "normal", date: "2025-02-14", description: "증심사 수관보관함 대웅전 좌측" },
+  { lat: 35.128760, lng: 126.970289,type: "normal", date: "2025-02-14", description: "증심사 수관보관함 대웅전 우측" },
+  { lat: 35.122244, lng: 126.972229,type: "normal", date: "2025-02-14", description: "약사사 수관보관함 입구" },
+  { lat: 35.133144, lng: 126.961055,type: "normal", date: "2025-02-14", description: "문빈정사 수관보관함 입구" },
+  { lat: 35.14833232, lng: 126.98574731,type: "normal", date: "2025-02-14", description: "원효사 수관보관함 입구" },
+  { lat: 35.14853961, lng: 126.98554150,type: "normal", date: "2025-02-14", description: "원효사 수관보관함 대웅전 앞" }
+];
 
-    function initMap() {
-      map = new naver.maps.Map('map', {
-        center: new naver.maps.LatLng(35.1346, 126.9880),
-        zoom: 13,
-        zoomControl: true,
-        mapTypeControl: true
-      });
+// 마커 아이콘 선택
+function getMarkerIcon(data) {
+  return data.type === "fire"
+    ? { url: "https://maps.gstatic.com/mapfiles/ms2/micons/red-dot.png", size: new naver.maps.Size(32,32), anchor: new naver.maps.Point(16,32)}
+    : { url: "https://ssl.pstatic.net/static/maps/m/poi_pin_blue.png", size: new naver.maps.Size(32,50), anchor: new naver.maps.Point(16,50)};
+}
 
+// infoPanel에 좌표 + 주소 + 설명 표시
+function showInfo(data) {
+  const latlng = new naver.maps.LatLng(data.lat, data.lng);
+  naver.maps.Service.reverseGeocode({
+    coords: latlng,
+    orders: [naver.maps.Service.OrderType.ADDR, naver.maps.Service.OrderType.ROAD_ADDR].join(',')
+  }, (status, response) => {
+    let address = "주소 정보 없음";
+    if (status === naver.maps.Service.Status.OK && response.result.total > 0) {
+      const item = response.result.items[0];
+      address = item.roadAddress || item.address || "주소 정보 없음";
+    }
+
+    document.getElementById("infoPanel").innerHTML = `
+      <h3 class="text-xl font-semibold">${data.date}</h3>
+      <p class="mt-2 text-base"><strong>타입:</strong> ${data.type === "fire" ? "산불발생" : "일반 위험"}</p>
+      <p class="mt-1 text-base"><strong>위치:</strong> ${data.lat.toFixed(6)}, ${data.lng.toFixed(6)}</p>
+      <p class="mt-1 text-base"><strong>주소:</strong> ${address}</p>
+      <p class="mt-1 text-base"><strong>설명:</strong> ${data.description}</p>
+    `;
+  });
+}
+
+// 마커 렌더링
+function renderMarkers() {
+  markers.forEach(marker => marker.setMap(null));
+  markers = [];
+
+  landslideData.forEach(data => {
+    const marker = new naver.maps.Marker({
+      position: new naver.maps.LatLng(data.lat, data.lng),
+      map: map,
+      title: data.description,
+      icon: getMarkerIcon(data)
+    });
+
+    naver.maps.Event.addListener(marker, 'click', () => showInfo(data));
+    markers.push(marker);
+  });
+}
+
+// 지도 초기화
+function initMap() {
+  map = new naver.maps.Map('map', {
+    center: new naver.maps.LatLng(35.1346, 126.9880),
+    zoom: 13,
+    zoomControl: true,
+    mapTypeControl: true
+  });
+
+  renderMarkers();
+
+  naver.maps.Event.addListener(map, 'click', function(e) {
+    if (isAddingPoint) {
+      const newLat = e.coord.lat();
+      const newLng = e.coord.lng();
+      const newPoint = {
+        lat: newLat,
+        lng: newLng,
+        type: "normal",
+        date: new Date().toISOString().slice(0,10),
+        description: "새롭게 추가된 위험 지역"
+      };
+      landslideData.push(newPoint);
       renderMarkers();
+      showInfo(newPoint); // 새 마커 클릭 없이 바로 infoPanel 표시
 
-      naver.maps.Event.addListener(map, 'click', function(e) {
-        if (isAddingPoint) {
-          const newLat = e.coord.lat();
-          const newLng = e.coord.lng();
-          landslideData.push({
-            lat: newLat,
-            lng: newLng,
-            type: "normal",
-            date: new Date().toISOString().slice(0, 10),
-            description: "새롭게 추가된 위험 지역"
-          });
-          renderMarkers();
-          isAddingPoint = false;
-          document.getElementById("addPointBtn").textContent = "지도에서 클릭하여 표시";
-          document.getElementById("addPointBtn").classList.remove("bg-red-500", "hover:bg-red-600");
-          document.getElementById("addPointBtn").classList.add("bg-blue-600", "hover:bg-blue-700");
-          document.getElementById("infoPanel").innerHTML = "새로운 위험 지점이 추가되었습니다. 마커를 클릭하여 상세 정보를 확인하세요.";
-        }
-      });
+      isAddingPoint = false;
+      document.getElementById("addPointBtn").textContent = "지도에서 클릭하여 표시";
+      document.getElementById("addPointBtn").classList.remove("bg-red-500", "hover:bg-red-600");
+      document.getElementById("addPointBtn").classList.add("bg-blue-600", "hover:bg-blue-700");
     }
+  });
+}
 
-    function getMarkerIcon(data) {
-      if (data.type === "fire") {
-        return {
-          url: "https://maps.gstatic.com/mapfiles/ms2/micons/red-dot.png",
-          size: new naver.maps.Size(32, 32),
-          anchor: new naver.maps.Point(16, 32)
-        };
-      } else {
-        return {
-          url: "https://ssl.pstatic.net/static/maps/m/poi_pin_blue.png",
-          size: new naver.maps.Size(32, 50),
-          anchor: new naver.maps.Point(16, 50)
-        };
-      }
-    }
+// 버튼 이벤트
+document.getElementById("addPointBtn").addEventListener("click", () => {
+  isAddingPoint = true;
+  document.getElementById("addPointBtn").textContent = "지도에서 위치를 클릭하세요...";
+  document.getElementById("addPointBtn").classList.remove("bg-blue-600", "hover:bg-blue-700");
+  document.getElementById("addPointBtn").classList.add("bg-red-500", "hover:bg-red-600");
+  document.getElementById("infoPanel").innerHTML = "<strong class='text-red-500'>지도 클릭 모드 활성화됨.</strong><br>지도에서 마커를 추가할 위치를 클릭하세요.";
+});
 
-    function renderMarkers() {
-      markers.forEach(marker => marker.setMap(null));
-      markers = [];
+document.getElementById("toggleMapTypeBtn").addEventListener("click", () => {
+  isSatellite = !isSatellite;
+  map.setMapTypeId(isSatellite ? naver.maps.MapTypeId.SATELLITE : naver.maps.MapTypeId.NORMAL);
+});
 
-      landslideData.forEach(data => {
-        const marker = new naver.maps.Marker({
-          position: new naver.maps.LatLng(data.lat, data.lng),
-          map: map,
-          title: data.description,
-          icon: getMarkerIcon(data)
-        });
-
-        // 마커 클릭 시 좌표 + 주소 + 설명 표시
-        naver.maps.Event.addListener(marker, 'click', () => {
-          const latlng = new naver.maps.LatLng(data.lat, data.lng);
-          naver.maps.Service.reverseGeocode({
-            coords: latlng,
-            orders: [naver.maps.Service.OrderType.ADDR, naver.maps.Service.OrderType.ROAD_ADDR].join(',')
-          }, (status, response) => {
-            let address = "주소 정보 없음";
-            if (status === naver.maps.Service.Status.OK && response.result.total > 0) {
-              const item = response.result.items[0];
-              address = item.roadAddress || item.address || "주소 정보 없음";
-            }
-
-            document.getElementById("infoPanel").innerHTML = `
-              <h3 class="text-xl font-semibold">${data.date}</h3>
-              <p class="mt-2 text-base"><strong>타입:</strong> ${data.type === "fire" ? "산불발생" : "일반 위험"}</p>
-              <p class="mt-1 text-base"><strong>위치:</strong> ${data.lat.toFixed(6)}, ${data.lng.toFixed(6)}</p>
-              <p class="mt-1 text-base"><strong>주소:</strong> ${address}</p>
-              <p class="mt-1 text-base"><strong>설명:</strong> ${data.description}</p>
-            `;
-          });
-        });
-
-        markers.push(marker);
-      });
-    }
-
-    document.getElementById("addPointBtn").addEventListener("click", () => {
-      isAddingPoint = true;
-      document.getElementById("addPointBtn").textContent = "지도에서 위치를 클릭하세요...";
-      document.getElementById("addPointBtn").classList.remove("bg-blue-600", "hover:bg-blue-700");
-      document.getElementById("addPointBtn").classList.add("bg-red-500", "hover:bg-red-600");
-      document.getElementById("infoPanel").innerHTML = "<strong class='text-red-500'>지도 클릭 모드 활성화됨.</strong><br>지도에서 마커를 추가할 위치를 클릭하세요.";
-    });
-
-    document.getElementById("toggleMapTypeBtn").addEventListener("click", () => {
-      isSatellite = !isSatellite;
-      map.setMapTypeId(isSatellite ? naver.maps.MapTypeId.SATELLITE : naver.maps.MapTypeId.NORMAL);
-    });
-
-    window.addEventListener('DOMContentLoaded', initMap);
-  </script>
+window.addEventListener('DOMContentLoaded', initMap);
+</script>
 </body>
 </html>
