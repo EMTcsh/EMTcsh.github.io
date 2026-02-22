@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>무등산 산불관리 상황판</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      background-color: #f3f4f6;
+    }
+    #map-container {
+      flex: 1;
+      position: relative;
+    }
+    #map {
+      height: 100%;
+      width: 100%;
+      border-radius: 0.5rem;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    .info-panel {
+      max-height: 300px;
+      overflow-y: auto;
+    }
+  </style>
+</head>
+<body class="bg-gray-100">
+
+  <div class="p-4 sm:p-8">
+    <header class="text-center">
+      <h1 class="text-3xl sm:text-4xl font-extrabold text-gray-800 tracking-tight">무등산 산불관리 상황판</h1>
+      <p class="mt-2 text-lg text-gray-600">위성 지도를 통해 산불 위험 지역을 모니터링하고 관리합니다.</p>
+    </header>
+  </div>
+
+  <main class="flex flex-col lg:flex-row p-4 sm:p-8 pt-0 gap-8 overflow-hidden">
+    <!-- 지도 영역 -->
+    <div id="map-container" class="relative w-full h-screen">
+      <div id="map" class="w-full h-full"></div>
+
+      <div class="absolute top-4 right-4 w-72 bg-white p-6 rounded-xl shadow-lg space-y-6">
+        <h3>무등산국립공원 산불관리 현황</h3>
+        <P>진화자원: 고성능 산불진화차량(벤츠유니목-U5023 중량 8.5t, 물탱크 4,000L, 방수량 분당 2,800L)</P>
+        <p>장비현황: 감시카메라3대, 진화차량4대, 팀진화장비, 개인진화장비, 기타장비</p>
+        <p>총 탐방로: 37구간 96.76km / 개방 탐방로: 36구간 95.96km / 통제 탐방로: 1구간 0.8km</p>
+        <p>감시초소 0개, 통제소 2개, 인화물질보관함 4개</p>
+        <p>산불 집중관리 지구: 제1수원지 편백나무 숲, 주남마을, 덕산골, 소태골, 등촌마을, 요산요수, 풍암제, 화암, 배재, 평촌, 덕의, 금곡마을, 안양암</p>
+        <p>인근사찰: 증심사, 약사사, 문빈정사, 원효사, 관음암, 영광사, 안양암, 명지암, 광륵사</p>
+      </div>
+    </div>
+
+    <!-- 제어판 -->
+    <div class="w-1/6 bg-white p-4 rounded-xl shadow-lg space-y-4 flex-shrink-0">
+      <div class="space-y-3">
+        <h2 class="text-xl font-bold text-gray-800">지도 제어</h2>
+        <div>
+          <input type="text" id="latInput" placeholder="위도 (예: 35.1)" class="w-full px-2 py-1 border rounded-md"/>
+          <input type="text" id="lngInput" placeholder="경도 (예: 126.9)" class="w-full mt-1 px-2 py-1 border rounded-md"/>
+          <button id="addByCoordBtn" class="w-full mt-1 bg-green-600 hover:bg-green-700 text-white font-semibold py-1.5 px-3 rounded-lg shadow-md text-sm">
+            좌표로 위험 지역 표시
+          </button>
+        </div>
+
+        <hr class="border-gray-200"/>
+
+        <button id="addPointBtn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-1.5 px-3 rounded-lg shadow-md text-sm">
+          지도에서 클릭하여 표시
+        </button>
+        <button id="toggleMapTypeBtn" class="w-full bg-gray-500 hover:bg-gray-600 text-white font-semibold py-1.5 px-3 rounded-lg shadow-md text-sm">
+          지도/위성 전환
+        </button>
+        <button onclick="window.open('https://fd.forest.go.kr', '_blank', 'noopener')" class="w-full mt-1 bg-purple-600 hover:bg-purple-700 text-white font-semibold py-1.5 px-3 rounded-lg shadow-md text-sm"> 
+          실시간 산불정보 </button> 
+        <button onclick="window.open('https://sanbul.forest.go.kr', '_blank', 'noopener')" class="w-full mt-1 bg-purple-600 hover:bg-purple-700 text-white font-semibold py-1.5 px-3 rounded-lg shadow-md text-sm"> 
+          산불상황관제시스템 </button> 
+        <button onclick="window.open('http://forestfire.nifos.go.kr', '_blank', 'noopener')" class="w-full mt-1 bg-purple-600 hover:bg-purple-700 text-white font-semibold py-1.5 px-3 rounded-lg shadow-md text-sm"> 
+          산불위험예보시스템 </button> 
+        <button onclick="window.open('https://mudeung.github.io/rescue/monitorcall.html', '_blank', 'noopener')" class="w-full mt-1 bg-purple-600 hover:bg-purple-700 text-white font-semibold py-1.5 px-3 rounded-lg shadow-md text-sm"> 
+          비상대응 상황판 </button> 
+        <button onclick="window.open('https://www.knps.or.kr/front/portal/safe/acsCtrList.do?menuNo=8000340', '_blank', 'noopener')" class="w-full mt-1 bg-purple-600 hover:bg-purple-700 text-white font-semibold py-1.5 px-3 rounded-lg shadow-md text-sm"> 
+          탐방로 통제정보 </button>
+
+        <hr class="border-gray-200"/>
+
+        <div class="space-y-2">
+          <h3 class="text-xl font-bold text-gray-800">산불발생정보/사찰수관보관함</h3>
+          <div id="infoPanel" class="info-panel bg-gray-50 p-3 rounded-lg border border-gray-200 text-gray-700 text-sm">
+            마커를 클릭하여 상세 정보를 확인하세요.
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Naver Maps API -->
+  <script src="https://oapi.map.naver.com/openapi/v3/maps.js?ncpClientId=g2u4orbiqf"></script>
+  <script>
+    let map;
+    let markers = [];
+    let isSatellite = false;
+    let isAddingPoint = false;
+
+    const landslideData = [
+      { lat: 35.1286067, lng: 126.9699645, type: "fire", date: "2024-09-29", description: "증심사 공양간 화재" },
+      { lat: 35.1615699, lng: 126.9861449, type: "fire", date: "2025-03-22", description: "금곡동 산166-2 담배불씨" },
+      { lat: 35.152931, lng: 126.964767, type: "fire", date: "2025-03-22", description: "화암동 335-4 쓰레기소각" },
+      { lat: 35.117806, lng: 126.944922, type: "fire", date: "2025-02-21", description: "소태동 산184 쓰레기소각" },
+      { lat: 35.128633, lng: 126.969805,type: "normal", date: "2025-02-14", description: "증심사 수관보관함 입구" },
+      { lat: 35.128917, lng: 126.969963,type: "normal", date: "2025-02-14", description: "증심사 수관보관함 대웅전 좌측" },
+      { lat: 35.128760, lng: 126.970289,type: "normal", date: "2025-02-14", description: "증심사 수관보관함 대웅전 우측" },
+      { lat: 35.122244, lng: 126.972229,type: "normal", date: "2025-02-14", description: "약사사 수관보관함 입구" },
+      { lat: 35.133144, lng: 126.961055,type: "normal", date: "2025-02-14", description: "문빈정사 수관보관함 입구" },
+      { lat: 35.14861832, lng: 126.98427671,type: "normal", date: "2025-02-14", description: "원효사 수관보관함 입구" },
+      { lat: 35.14834566, lng: 126.98426579,type: "normal", date: "2025-02-14", description: "원효사 수관보관함 대웅전 앞" }
+    ];
+
+    function initMap() {
+      map = new naver.maps.Map('map', {
+        center: new naver.maps.LatLng(35.119158, 127.003814),
+        zoom: 13,
+        zoomControl: true,
+        mapTypeControl: true
+      });
+
+      renderMarkers();
+
+      naver.maps.Event.addListener(map, 'click', function(e) {
+        if (isAddingPoint) {
+          const newLat = e.coord.lat();
+          const newLng = e.coord.lng();
+          landslideData.push({
+            lat: newLat,
+            lng: newLng,
+            type: "normal",
+            date: new Date().toISOString().slice(0, 10),
+            description: "새롭게 추가된 위험 지역"
+          });
+          renderMarkers();
+          isAddingPoint = false;
+          document.getElementById("addPointBtn").textContent = "지도에서 클릭하여 표시";
+          document.getElementById("addPointBtn").classList.remove("bg-red-500", "hover:bg-red-600");
+          document.getElementById("addPointBtn").classList.add("bg-blue-600", "hover:bg-blue-700");
+          document.getElementById("infoPanel").innerHTML = "새로운 위험 지점이 추가되었습니다. 마커를 클릭하여 상세 정보를 확인하세요.";
+        }
+      });
+    }
+
+    // 빨간색 핀 아이콘으로 산불 표시
+    function getMarkerIcon(data) {
+      if (data.type === "fire") {
+        return {
+          url: "https://navermaps.github.io/maps.js/docs/img/example/pin_default.png", // 기본 파란 핀          
+          size: new naver.maps.Size(32, 32),
+          origin: new naver.maps.Point(0, 0),
+          anchor: new naver.maps.Point(16, 32)
+        };
+      } else {
+        return {
+          url: "https://ssl.pstatic.net/static/maps/m/poi_pin_blue.png", // 네이버 다른 블루 핀
+          size: new naver.maps.Size(32, 50),
+          origin: new naver.maps.Point(0, 0),
+          anchor: new naver.maps.Point(16, 50)
+        };
+      }
+    }
+
+    function renderMarkers() {
+      markers.forEach(marker => marker.setMap(null));
+      markers = [];
+
+      landslideData.forEach(data => {
+        const marker = new naver.maps.Marker({
+          position: new naver.maps.LatLng(data.lat, data.lng),
+          map: map,
+          title: data.description,
+          icon: getMarkerIcon(data)
+        });
+
+        naver.maps.Event.addListener(marker, 'click', () => {
+          const infoPanel = document.getElementById("infoPanel");
+          infoPanel.innerHTML = `
+            <h3 class="text-xl font-semibold">${data.date}</h3>
+            <p class="mt-2 text-base"><strong>타입:</strong> ${data.type === "fire" ? "산불발생" : "일반 위험"}</p>
+            <p class="mt-1 text-base"><strong>위치:</strong> ${data.lat}, ${data.lng}</p>
+            <p class="mt-1 text-base"><strong>설명:</strong> ${data.description}</p>
+          `;
+        });
+
+        markers.push(marker);
+      });
+    }
+
+    document.getElementById("addPointBtn").addEventListener("click", () => {
+      isAddingPoint = true;
+      document.getElementById("addPointBtn").textContent = "지도에서 위치를 클릭하세요...";
+      document.getElementById("addPointBtn").classList.remove("bg-blue-600", "hover:bg-blue-700");
+      document.getElementById("addPointBtn").classList.add("bg-red-500", "hover:bg-red-600");
+      document.getElementById("infoPanel").innerHTML = "<strong class='text-red-500'>지도 클릭 모드 활성화됨.</strong><br>지도에서 마커를 추가할 위치를 클릭하세요.";
+    });
+
+    document.getElementById("addByCoordBtn").addEventListener("click", () => {
+      const lat = parseFloat(document.getElementById("latInput").value);
+      const lng = parseFloat(document.getElementById("lngInput").value);
+
+      if (isNaN(lat) || isNaN(lng)) {
+        document.getElementById("infoPanel").innerHTML = "<strong class='text-red-500'>오류:</strong> 올바른 위도와 경도 값을 입력하세요.";
+        return;
+      }
+
+      landslideData.push({
+        lat: lat,
+        lng: lng,
+        type: "normal",
+        date: new Date().toISOString().slice(0, 10),
+        description: "좌표로 추가된 위험 지역"
+      });
+
+      renderMarkers();
+      document.getElementById("infoPanel").innerHTML = "새로운 위험 지점이 추가되었습니다. 마커를 클릭하여 상세 정보를 확인하세요.";
+      document.getElementById("latInput").value = "";
+      document.getElementById("lngInput").value = "";
+    });
+
+    document.getElementById("toggleMapTypeBtn").addEventListener("click", () => {
+      isSatellite = !isSatellite;
+      map.setMapTypeId(isSatellite ? naver.maps.MapTypeId.SATELLITE : naver.maps.MapTypeId.NORMAL);
+    });
+
+    window.addEventListener('DOMContentLoaded', initMap);
+  </script>
+</body>
+</html>
+
