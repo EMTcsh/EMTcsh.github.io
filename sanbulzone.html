@@ -133,7 +133,7 @@ function showInfo(data) {
       <h3 class="text-xl font-semibold">${data.date}</h3>
       <p class="mt-2 text-base"><strong>타입:</strong> ${data.type === "fire" ? "산불발생" : "일반 위험"}</p>
       <p class="mt-1 text-base"><strong>위치:</strong> ${data.lat.toFixed(6)}, ${data.lng.toFixed(6)}</p>
-      <p class="mt-1 text-base"><strong>주소:</strong> ${address}</p>
+      
       <p class="mt-1 text-base"><strong>설명:</strong> ${data.description}</p>
     `;
   });
