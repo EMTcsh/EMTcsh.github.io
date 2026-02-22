@@ -56,7 +56,7 @@
     </div>
 
     <!-- 제어판 -->
-    <div class="w-1/6 bg-white p-4 rounded-xl shadow-lg space-y-4 flex-shrink-0">
+    <div class="w-full lg:w-1-4 bg-white p-4 rounded-xl shadow-lg space-y-4 flex-shrink-0">
       <div class="space-y-3">
         <h2 class="text-xl font-bold text-gray-800">좌표/주소 위치검색</h2>
         <div>
@@ -131,7 +131,7 @@
 
     function initMap() {
       map = new naver.maps.Map('map', {
-        center: new naver.maps.LatLng(35.119158, 127.003814),
+        center: new naver.maps.LatLng(35.1346, 126.9880),
         zoom: 13,
         zoomControl: true,
         mapTypeControl: true
@@ -162,22 +162,20 @@
 
     // 빨간색 핀 아이콘으로 산불 표시
     function getMarkerIcon(data) {
-      if (data.type === "fire") {
-        return {
-          url: "https://navermaps.github.io/maps.js/docs/img/example/pin_default.png", // 기본 파란 핀          
-          size: new naver.maps.Size(32, 32),
-          origin: new naver.maps.Point(0, 0),
-          anchor: new naver.maps.Point(16, 32)
-        };
-      } else {
-        return {
-          url: "https://ssl.pstatic.net/static/maps/m/poi_pin_blue.png", // 네이버 다른 블루 핀
-          size: new naver.maps.Size(32, 50),
-          origin: new naver.maps.Point(0, 0),
-          anchor: new naver.maps.Point(16, 50)
-        };
-      }
-    }
+  if (data.type === "fire") {
+    return {
+      url: "https://maps.gstatic.com/mapfiles/ms2/micons/red-dot.png",
+      size: new naver.maps.Size(32, 32),
+      anchor: new naver.maps.Point(16, 32)
+    };
+  } else {
+    return {
+      url: "https://ssl.pstatic.net/static/maps/m/poi_pin_blue.png",
+      size: new naver.maps.Size(32, 50),
+      anchor: new naver.maps.Point(16, 50)
+    };
+  }
+}
 
     function renderMarkers() {
       markers.forEach(marker => marker.setMap(null));
@@ -261,6 +259,12 @@ document.getElementById("addByAddressBtn").addEventListener("click", () => {
         "<strong class='text-red-500'>주소 검색 실패</strong>";
       return;
     }
+
+   if (!response.v2.addresses || response.v2.addresses.length === 0) {
+  document.getElementById("infoPanel").innerHTML =
+    "<strong class='text-red-500'>검색 결과가 없습니다.</strong>";
+  return;
+}
 
     const result = response.v2.addresses[0];
     const lat = parseFloat(result.y);
