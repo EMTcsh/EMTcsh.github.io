@@ -99,7 +99,7 @@ button{width:100%;padding:14px;border-radius:12px;font-size:16px;font-weight:600
 </div>
 
 <script>
-const SERVER_URL="https://script.google.com/macros/s/AKfycbzlomCAxIqxNLLLXeoI_7PZzP9WguNFk3OH84Nzgcxhncm1mLx6LuqNbcAgniODAFgDIQ/exec";
+const SERVER_URL="https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec";
 
 let voiceInterval=null;
 const mainBody=document.getElementById("mainBody");
@@ -110,7 +110,13 @@ let patientID="PT-"+Date.now();
 let monitorMap, monitorMarkers=[];
 
 // 🔊 중증 알림
-function speakCritical(){if(!('speechSynthesis' in window)) return; speechSynthesis.cancel(); const msg=new SpeechSynthesisUtterance("중증 환자입니다. 즉시 기도와 호흡을 확인하십시오."); msg.lang="ko-KR"; speechSynthesis.speak(msg);}
+function speakCritical(){
+  if(!('speechSynthesis' in window)) return;
+  speechSynthesis.cancel();
+  const msg=new SpeechSynthesisUtterance("중증 환자입니다. 즉시 기도와 호흡을 확인하십시오.");
+  msg.lang="ko-KR";
+  speechSynthesis.speak(msg);
+}
 function startCriticalAlert(){if(voiceInterval)return; speakCritical(); voiceInterval=setInterval(speakCritical,10000);}
 function stopCriticalAlert(){if(voiceInterval){clearInterval(voiceInterval);voiceInterval=null;} speechSynthesis.cancel();}
 
@@ -139,17 +145,19 @@ function calculateGCS(){
 calculateGCS();
 
 // 📍 GPS
-getLocation.onclick=()=>{navigator.geolocation.getCurrentPosition(p=>{
-  const lat=p.coords.latitude; const lng=p.coords.longitude;
-  locationDisplay.textContent=`위도:${lat}, 경도:${lng}`;
-  hiddenCoordinate.value=`${lat},${lng}`;
-  const loc=new kakao.maps.LatLng(lat,lng);
-  const mapObj=new kakao.maps.Map(document.getElementById("map"),{center:loc,level:3});
-  new kakao.maps.Marker({position:loc,map:mapObj});
-});};
+document.getElementById("getLocation").onclick=()=>{
+  navigator.geolocation.getCurrentPosition(p=>{
+    const lat=p.coords.latitude; const lng=p.coords.longitude;
+    document.getElementById("locationDisplay").textContent=`위도:${lat}, 경도:${lng}`;
+    document.getElementById("hiddenCoordinate").value=`${lat},${lng}`;
+    const loc=new kakao.maps.LatLng(lat,lng);
+    const mapObj=new kakao.maps.Map(document.getElementById("map"),{center:loc,level:3});
+    new kakao.maps.Marker({position:loc,map:mapObj});
+  });
+};
 
 // 기록 저장
-recordForm.onsubmit=async e=>{
+document.getElementById("recordForm").onsubmit=async e=>{
   e.preventDefault();
   let formData={};
   new FormData(recordForm).forEach((v,k)=>formData[k]=v);
@@ -161,7 +169,7 @@ recordForm.onsubmit=async e=>{
     formData.longitude=parts[1].trim();
   }
   let text=""; for(let k in formData){text+=`${k}: ${formData[k]}\n`;}
-  savedData.innerHTML=`<div class="board-item">${text}</div>`;
+  document.getElementById("savedData").innerHTML=`<div class="board-item">${text}</div>`;
   try{
     const res=await fetch(SERVER_URL,{
       method:"POST",
@@ -188,23 +196,17 @@ async function updateMonitor(){
   try{
     const res=await fetch(SERVER_URL);
     const data=await res.json();
-    // 기존 마커 제거
     monitorMarkers.forEach(m=>m.setMap(null));
     monitorMarkers=[];
     data.forEach(d=>{
       if(d.latitude && d.longitude){
-        const pos=new kakao.maps.LatLng(d.latitude, d.longitude);
+        const pos=new kakao.maps.LatLng(d.latitude,d.longitude);
         const marker=new kakao.maps.Marker({position:pos,map:monitorMap});
-        // GCS 색상 반영
-        const gcs=d.GCS || "";
-        if(gcs.includes("중증")) marker.setMap(null); // 중증이면 별도 처리 가능
         monitorMarkers.push(marker);
       }
     });
   }catch(err){console.error("모니터링 실패:",err);}
 }
-
-// 5초마다 새 데이터 체크
 setInterval(updateMonitor,5000);
 updateMonitor();
 </script>
