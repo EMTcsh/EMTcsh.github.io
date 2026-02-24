@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🚑 구조 현장 통합 시스템</title>
+
+<script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=여기에앱키"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+body{margin:0;font-family:Arial;background:#111;color:#fff;}
+header{background:#b71c1c;padding:15px;text-align:center;font-size:20px;}
+.container{padding:15px;}
+.card{background:#222;padding:15px;margin-bottom:15px;border-radius:10px;}
+input{width:100%;padding:10px;font-size:18px;margin-top:5px;}
+#map{width:100%;height:250px;border-radius:10px;}
+.severeFlash{animation:flash 0.6s infinite;}
+@keyframes flash{0%{background:#b71c1c;}50%{background:#400;}100%{background:#b71c1c;}}
+</style>
+</head>
+
+<body>
+
+<header>🚨 구조 현장 GCS 통합 시스템</header>
+
+<div class="container">
+
+<div class="card">
+<h3>환자 ID</h3>
+<div id="patientID"></div>
+</div>
+
+<div class="card">
+<h3>GCS 점수 입력</h3>
+<input type="number" id="gcsInput" min="3" max="15">
+<div id="severeDuration"></div>
+</div>
+
+<div class="card">
+<h3>현재 위치</h3>
+<div id="map"></div>
+</div>
+
+<div class="card">
+<h3>GCS 변화 그래프</h3>
+<canvas id="gcsChart"></canvas>
+</div>
+
+</div>
+
+<script>
+const SERVER_URL="https://script.google.com/macros/s/AKfycbzlomCAxIqxNLLLXeoI_7PZzP9WguNFk3OH84Nzgcxhncm1mLx6LuqNbcAgniODAFgDIQ/exec";
+let patientID;
+let map; let marker;
+let currentLat=null; let currentLng=null;
+let severeStartTime=null; let severeTimer=null; let prolongedTriggered=false;
+let gcsData=[]; let timeLabels=[];
+
+/* 환자 ID 생성 */
+function generatePatientID(){
+  const now=new Date();
+  const random=Math.floor(Math.random()*1000);
+  return "PT-"+now.getFullYear().toString().slice(-2)+
+         (now.getMonth()+1).toString().padStart(2,'0')+
+         now.getDate().toString().padStart(2,'0')+"-"+
+         now.getHours().toString().padStart(2,'0')+
+         now.getMinutes().toString().padStart(2,'0')+
+         random;
+}
+
+/* 지도 초기화 */
+function initMap(lat,lng){
+  const container=document.getElementById("map");
+  const options={center:new kakao.maps.LatLng(lat,lng),level:3};
+  map=new kakao.maps.Map(container,options);
+  marker=new kakao.maps.Marker({position:new kakao.maps.LatLng(lat,lng)});
+  marker.setMap(map);
+}
+
+/* 지도 업데이트 */
+function updateMap(lat,lng){
+  const newPos=new kakao.maps.LatLng(lat,lng);
+  marker.setPosition(newPos);
+  map.setCenter(newPos);
+}
+
+/* 음성 */
+function speakAlert(msg){
+  const speech=new SpeechSynthesisUtterance(msg);
+  speech.lang="ko-KR";
+  window.speechSynthesis.speak(speech);
+}
+
+/* 10초 반복 음성 */
+setInterval(()=>{
+  if(severeStartTime){
+    speakAlert("중증 환자입니다.");
+  }
+},10000);
+
+/* 오프라인 저장 */
+function saveToLocal(data){
+  let queue=JSON.parse(localStorage.getItem("offlineQueue"))||[];
+  queue.push(data);
+  localStorage.setItem("offlineQueue",JSON.stringify(queue));
+}
+
+/* 서버 전송 */
+function sendData(payload){
+  fetch(SERVER_URL,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)})
+  .then(res=>{if(!res.ok) throw new Error()})
+  .catch(()=>{saveToLocal(payload)});
+}
+
+/* 재전송 */
+setInterval(()=>{
+  let queue=JSON.parse(localStorage.getItem("offlineQueue"))||[];
+  if(queue.length===0) return;
+  fetch(SERVER_URL,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(queue[0])})
+  .then(res=>{if(res.ok){queue.shift();localStorage.setItem("offlineQueue",JSON.stringify(queue));}})
+  .catch(()=>{});
+},10000);
+
+/* GCS 그래프 */
+const ctx=document.getElementById("gcsChart").getContext("2d");
+const chart=new Chart(ctx,{type:"line",data:{labels:timeLabels,datasets:[{label:"GCS",data:gcsData,borderWidth:2,tension:0.3}]},options:{scales:{y:{min:3,max:15}}}});
+
+function updateChart(score){
+  const now=new Date();
+  const t=now.getHours()+":"+now.getMinutes()+":"+now.getSeconds();
+  timeLabels.push(t); gcsData.push(score); chart.update();
+}
+
+/* 중증 체크 */
+function checkGCS(score){
+  const now=new Date();
+  if(score<=8){
+    document.body.classList.add("severeFlash");
+    if(!severeStartTime){
+      severeStartTime=now;
+      severeTimer=setInterval(()=>{
+        const elapsed=Math.floor((new Date()-severeStartTime)/1000);
+        document.getElementById("severeDuration").innerText="중증 지속: "+elapsed+"초";
+        if(elapsed>=180 && !prolongedTriggered){
+          prolongedTriggered=true;
+          alert("🚨 중증 3분 이상 지속!");
+          speakAlert("중증 환자가 3분 이상 지속되고 있습니다.");
+        }
+      },1000);
+    }
+  } else {
+    document.body.classList.remove("severeFlash");
+    severeStartTime=null; prolongedTriggered=false; clearInterval(severeTimer);
+    document.getElementById("severeDuration").innerText="";
+  }
+}
+
+/* GCS 입력 이벤트 */
+document.getElementById("gcsInput").addEventListener("input",function(){
+  const score=parseInt(this.value); if(!score) return;
+  updateChart(score); checkGCS(score);
+  const payload={patientID:patientID,gcs:score,latitude:currentLat,longitude:currentLng,timestamp:new Date().toISOString()};
+  sendData(payload);
+});
+
+/* GPS 획득 */
+navigator.geolocation.getCurrentPosition(pos=>{
+  currentLat=pos.coords.latitude; currentLng=pos.coords.longitude;
+  initMap(currentLat,currentLng);
+});
+
+/* 초기화 */
+patientID=generatePatientID();
+document.getElementById("patientID").innerText=patientID;
+
+</script>
+
+</body>
+</html>
