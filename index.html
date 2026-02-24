@@ -9,70 +9,22 @@
 <script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=ff9e145029506d6e4c72d1f2b01ea424&libraries"></script>
 
 <style>
-body{
-background:#eef1f5;
-font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
-}
-
-.critical-mode{
-animation:criticalFlash 0.8s infinite;
-}
-
+body{background:#eef1f5;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;}
+.critical-mode{animation:criticalFlash 0.8s infinite;}
 @keyframes criticalFlash{
 0%{background:#fee2e2;}
 50%{background:#dc2626;}
 100%{background:#fee2e2;}
 }
-
 .card{
-background:#fff;
-border-radius:14px;
-padding:16px;
-margin-bottom:16px;
-box-shadow:0 2px 8px rgba(0,0,0,0.05);
-border-left:5px solid #2563eb;
-}
-
-.card h2{
-font-weight:700;
-font-size:15px;
-margin-bottom:10px;
-color:#1e3a8a;
-}
-
-input,select,textarea{
-width:100%;
-border:1px solid #d1d5db;
-border-radius:10px;
-padding:12px;
-margin-bottom:10px;
-font-size:15px;
-background:#f9fafb;
-}
-
+background:#fff;border-radius:14px;padding:16px;margin-bottom:16px;
+box-shadow:0 2px 8px rgba(0,0,0,0.05);border-left:5px solid #2563eb;}
+.card h2{font-weight:700;font-size:15px;margin-bottom:10px;color:#1e3a8a;}
+input,select,textarea{width:100%;border:1px solid #d1d5db;border-radius:10px;padding:12px;margin-bottom:10px;font-size:15px;background:#f9fafb;}
 textarea{min-height:100px;}
-
-button{
-width:100%;
-padding:14px;
-border-radius:12px;
-font-size:16px;
-font-weight:600;
-}
-
-.coordinate-box{
-background:#e0e7ff;
-padding:10px;
-border-radius:8px;
-font-size:13px;
-margin-bottom:8px;
-}
-
-#map{
-width:100%;
-height:220px;
-border-radius:12px;
-}
+button{width:100%;padding:14px;border-radius:12px;font-size:16px;font-weight:600;}
+.coordinate-box{background:#e0e7ff;padding:10px;border-radius:8px;font-size:13px;margin-bottom:8px;}
+#map{width:100%;height:220px;border-radius:12px;}
 </style>
 </head>
 
@@ -91,28 +43,20 @@ border-radius:12px;
 <input type="text" name="사고장소" placeholder="사고장소" required>
 <input type="text" name="주증상" placeholder="환자 증상" required>
 
-<div id="locationDisplay" class="coordinate-box">
-위도: -, 경도: -
-</div>
-
-<button type="button" id="getLocation" class="bg-green-600 text-white mb-2">
-🌐 현장 좌표 가져오기
-</button>
-
+<div id="locationDisplay" class="coordinate-box">위도: -, 경도: -</div>
+<button type="button" id="getLocation" class="bg-green-600 text-white mb-2">🌐 현장 좌표 가져오기</button>
 <input type="hidden" name="사고좌표" id="hiddenCoordinate">
 <div id="map"></div>
 </div>
 
 <div class="card">
 <h2>🧠 GCS</h2>
-
 <select id="eye">
 <option value="4">자발적</option>
 <option value="3">언어반응</option>
 <option value="2">통증반응</option>
 <option value="1">무반응</option>
 </select>
-
 <select id="verbal">
 <option value="5">정확</option>
 <option value="4">혼란</option>
@@ -120,7 +64,6 @@ border-radius:12px;
 <option value="2">신음</option>
 <option value="1">무반응</option>
 </select>
-
 <select id="motor">
 <option value="6">명령수행</option>
 <option value="5">국소화</option>
@@ -153,78 +96,51 @@ GCS: <span id="gcsResult"></span>
 </div>
 
 <button type="submit" class="bg-blue-600 text-white mb-4">
-저장 + 공유
+💾 저장 + 공유
 </button>
 
 </form>
 
 <script>
-
 const SERVER_URL="https://script.google.com/macros/s/AKfycbzlomCAxIqxNLLLXeoI_7PZzP9WguNFk3OH84Nzgcxhncm1mLx6LuqNbcAgniODAFgDIQ/exec";
-
 let fieldMap;
 let criticalSpoken=false;
 
-/* 🔊 음성 안내 */
+/* 🔊 중증환자 음성 안내 */
 function speakCritical(){
 speechSynthesis.cancel();
-
 const msg=new SpeechSynthesisUtterance(
 "중증환자입니다. 기도와 호흡을 확보하세요."
 );
-
-msg.lang="ko-KR";
-msg.rate=0.95;
-msg.pitch=1;
-msg.volume=1;
-
+msg.lang="ko-KR"; msg.rate=0.95; msg.pitch=1; msg.volume=1;
 speechSynthesis.speak(msg);
 }
 
 function calculateGCS(){
-const total=
-parseInt(eye.value)+
-parseInt(verbal.value)+
-parseInt(motor.value);
-
+const total=parseInt(eye.value)+parseInt(verbal.value)+parseInt(motor.value);
 gcsResult.textContent=total+"점";
-
 if(total<=8){
 gcsWarning.style.display="block";
 mainBody.classList.add("critical-mode");
-
-if(!criticalSpoken){
-speakCritical();
-navigator.vibrate?.([300,100,300]);
-criticalSpoken=true;
-}
-
+if(!criticalSpoken){speakCritical();navigator.vibrate?.([300,100,300]);criticalSpoken=true;}
 }else{
 gcsWarning.style.display="none";
 mainBody.classList.remove("critical-mode");
 criticalSpoken=false;
 }
 }
-
 [eye,verbal,motor].forEach(el=>el.addEventListener("change",calculateGCS));
 calculateGCS();
 
-/* GPS */
+/* GPS 좌표 */
 getLocation.onclick=()=>{
 navigator.geolocation.getCurrentPosition(p=>{
 const lat=p.coords.latitude;
 const lng=p.coords.longitude;
-
 locationDisplay.textContent=`위도:${lat}, 경도:${lng}`;
 hiddenCoordinate.value=`${lat},${lng}`;
-
 const loc=new kakao.maps.LatLng(lat,lng);
-
-fieldMap=new kakao.maps.Map(document.getElementById("map"),{
-center:loc,
-level:3
-});
-
+fieldMap=new kakao.maps.Map(document.getElementById("map"),{center:loc,level:3});
 new kakao.maps.Marker({position:loc,map:fieldMap});
 });
 };
@@ -232,23 +148,20 @@ new kakao.maps.Marker({position:loc,map:fieldMap});
 /* 저장 + 공유 */
 recordForm.onsubmit=async e=>{
 e.preventDefault();
-
 const data={};
 new FormData(recordForm).forEach((v,k)=>data[k]=v);
 data.GCS=gcsResult.textContent;
 
-if(data.사고좌표){
-const sp=data.사고좌표.split(",");
-data.latitude=sp[0];
-data.longitude=sp[1];
-}
+if(data.사고좌표){const sp=data.사고좌표.split(",");data.latitude=sp[0];data.longitude=sp[1];}
 
+/* Google Sheet 전송 */
 await fetch(SERVER_URL,{
 method:"POST",
 headers:{"Content-Type":"application/json"},
 body:JSON.stringify(data)
 });
 
+/* 공유 메시지 */
 const shareText=
 `🚑 무등산 산악사고 구급기록
 출동대원: ${data.출동대원}
@@ -257,10 +170,10 @@ GCS: ${data.GCS}
 증상: ${data.주증상}
 위치: ${data.latitude||"-"}, ${data.longitude||"-"}`;
 
+/* 모바일 공유 / PC 클립보드 복사 */
 if(navigator.share){
-try{
-await navigator.share({title:"산악사고 구급기록",text:shareText});
-}catch(err){}
+try{await navigator.share({title:"산악사고 구급기록",text:shareText});}
+catch(err){}
 }else{
 await navigator.clipboard.writeText(shareText);
 alert("저장 완료\n공유 내용이 복사되었습니다.");
@@ -269,7 +182,6 @@ return;
 
 alert("저장 및 공유 완료");
 };
-
 </script>
 
 </body>
