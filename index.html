@@ -92,14 +92,13 @@ GCS: <span id="gcsResult"></span>
 <textarea name="응급처치"></textarea>
 </div>
 
-<button type="submit" class="bg-blue-600 text-white mb-4">
-💾 저장 + 공유
-</button>
+<button type="submit" class="bg-blue-600 text-white mb-4">💾 저장 + 공유</button>
+<button type="button" id="kakaoShare" class="bg-yellow-400 text-white mb-4">📲 카톡으로 공유</button>
 
 </form>
 
 <script>
-const SERVER_URL="https://script.google.com/macros/s/AKfycbyrItg1ibnKBBrcfE88s99tdKgnVWO5ccU1WN6N6J43aFy3GGNtQFS90Mo9yD_BOx3gfg/exec"; // Apps Script 웹앱 exec URL
+const SERVER_URL="https://script.google.com/macros/s/AKfycbyrItg1ibnKBBrcfE88s99tdKgnVWO5ccU1WN6N6J43aFy3GGNtQFS90Mo9yD_BOx3gfg/exec"; // Apps Script 웹앱 URL
 const recordForm=document.getElementById("recordForm");
 const eye=document.getElementById("eye");
 const verbal=document.getElementById("verbal");
@@ -110,9 +109,11 @@ const mainBody=document.getElementById("mainBody");
 const locationDisplay=document.getElementById("locationDisplay");
 const hiddenCoordinate=document.getElementById("hiddenCoordinate");
 const getLocation=document.getElementById("getLocation");
+const kakaoShareBtn=document.getElementById("kakaoShare");
 
 let fieldMap;
 let criticalSpoken=false;
+let shareText="";
 
 function speakCritical(){
   speechSynthesis.cancel();
@@ -157,12 +158,19 @@ recordForm.onsubmit=async e=>{
   data.GCS=gcsResult.textContent;
   if(data.사고좌표){ const sp=data.사고좌표.split(","); data.latitude=sp[0]; data.longitude=sp[1]; }
 
-  // GET 요청용 URL 생성 (CORS 문제 회피)
-  const queryString = new URLSearchParams(data).toString();
-  const requestUrl = SERVER_URL + "?" + queryString;
+  shareText=`🚑 무등산 산악사고 구급기록
+출동대원: ${data.출동대원}
+환자: ${data.환자이름}
+GCS: ${data.GCS}
+증상: ${data.주증상}
+위치: ${data.latitude||"-"}, ${data.longitude||"-"}`;
 
   try{
-    const res = await fetch(requestUrl);
+    const res = await fetch(SERVER_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
     const result = await res.json();
     if(result.status !== "success"){ alert("저장 실패: "+result.message); return; }
   }catch(err){
@@ -171,23 +179,31 @@ recordForm.onsubmit=async e=>{
   }
 
   // 공유
-  const shareText=`🚑 무등산 산악사고 구급기록
-출동대원: ${data.출동대원}
-환자: ${data.환자이름}
-GCS: ${data.GCS}
-증상: ${data.주증상}
-위치: ${data.latitude||"-"}, ${data.longitude||"-"}`;
-
   if(navigator.share){
-    try{ await navigator.share({title:"산악사고 구급기록",text:shareText}); }catch(err){ alert("공유 취소됨"); }
+    try{ await navigator.share({title:"산악사고 구급기록",text:shareText}); }catch(err){ 
+      await navigator.clipboard.writeText(shareText);
+      alert("✅ 저장 완료!\n공유가 취소되어 클립보드에 복사되었습니다."); 
+      return;
+    }
   }else{
     await navigator.clipboard.writeText(shareText);
-    alert("저장 완료\n공유 내용이 클립보드에 복사되었습니다.");
+    alert("✅ 저장 완료!\n공유 내용이 클립보드에 복사되었습니다."); 
     return;
   }
 
-  alert("저장 및 공유 완료");
+  alert("✅ 저장 및 공유 완료");
+};
+
+// 카카오톡 공유 버튼
+kakaoShareBtn.onclick = () => {
+  if(!window.Kakao.isInitialized()) window.Kakao.init('YOUR_KAKAO_JS_KEY');
+  window.Kakao.Link.sendDefault({
+    objectType: 'text',
+    text: shareText,
+    link: { mobileWebUrl: location.href, webUrl: location.href }
+  });
 };
 </script>
+
 </body>
 </html>
