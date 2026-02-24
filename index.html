@@ -27,7 +27,6 @@ button{width:100%;padding:14px;border-radius:12px;font-size:16px;font-weight:600
 <div class="header">🚑 무등산 산악사고 통합 기록</div>
 
 <form id="recordForm">
-
 <!-- 현장정보 -->
 <div class="card">
 <h2>📍 현장정보</h2>
@@ -35,7 +34,6 @@ button{width:100%;padding:14px;border-radius:12px;font-size:16px;font-weight:600
 <input type="datetime-local" name="도착시간" required>
 <input type="text" name="사고장소" placeholder="사고장소" required>
 <input type="text" name="주증상" placeholder="환자 증상" required>
-
 <div id="locationDisplay" class="coordinate-box">위도: -, 경도: -</div>
 <button type="button" id="getLocation" class="bg-green-600 text-white mb-2">🌐 현장 좌표 가져오기</button>
 <input type="hidden" name="사고좌표" id="hiddenCoordinate">
@@ -66,7 +64,6 @@ button{width:100%;padding:14px;border-radius:12px;font-size:16px;font-weight:600
 <option value="2">통증 이상신전</option>
 <option value="1">무반응</option>
 </select>
-
 <div class="font-bold text-lg mt-2">GCS: <span id="gcsResult"></span></div>
 <div id="gcsWarning" style="display:none;margin-top:10px;padding:10px;border-radius:10px;background:#fee2e2;color:#b91c1c;font-weight:600;">
 🚨 중증 의식저하 — 즉시 기도/호흡/순환 확인 필요
@@ -96,27 +93,28 @@ button{width:100%;padding:14px;border-radius:12px;font-size:16px;font-weight:600
 <div id="savedData"></div>
 </div>
 
+<div class="card">
+<h2>🗺️ 실시간 모니터링</h2>
+<div id="monitorMap" style="width:100%;height:400px;border-radius:12px;"></div>
+</div>
+
 <script>
 const SERVER_URL="https://script.google.com/macros/s/AKfycbzlomCAxIqxNLLLXeoI_7PZzP9WguNFk3OH84Nzgcxhncm1mLx6LuqNbcAgniODAFgDIQ/exec";
+
 let voiceInterval=null;
 const mainBody=document.getElementById("mainBody");
 const eye=document.getElementById("eye");
 const verbal=document.getElementById("verbal");
 const motor=document.getElementById("motor");
 let patientID="PT-"+Date.now();
+let monitorMap, monitorMarkers=[];
 
-// 중증 음성 알림
-function speakCritical(){
-  if(!('speechSynthesis' in window)) return;
-  speechSynthesis.cancel();
-  const msg=new SpeechSynthesisUtterance("중증 환자입니다. 즉시 기도와 호흡을 확인하십시오.");
-  msg.lang="ko-KR";
-  speechSynthesis.speak(msg);
-}
-function startCriticalAlert(){if(voiceInterval) return; speakCritical(); voiceInterval=setInterval(speakCritical,10000);}
+// 🔊 중증 알림
+function speakCritical(){if(!('speechSynthesis' in window)) return; speechSynthesis.cancel(); const msg=new SpeechSynthesisUtterance("중증 환자입니다. 즉시 기도와 호흡을 확인하십시오."); msg.lang="ko-KR"; speechSynthesis.speak(msg);}
+function startCriticalAlert(){if(voiceInterval)return; speakCritical(); voiceInterval=setInterval(speakCritical,10000);}
 function stopCriticalAlert(){if(voiceInterval){clearInterval(voiceInterval);voiceInterval=null;} speechSynthesis.cancel();}
 
-// GCS 계산
+// 🧠 GCS 계산
 function calculateGCS(){
   const total=parseInt(eye.value)+parseInt(verbal.value)+parseInt(motor.value);
   let state='',color='';
@@ -126,7 +124,6 @@ function calculateGCS(){
   else{state='혼수';color='#000';}
   gcsResult.textContent=`${total}점 (${state})`;
   gcsResult.style.color=color;
-
   if(total<=8){
     gcsWarning.style.display="block";
     mainBody.classList.add("critical-mode");
@@ -141,10 +138,9 @@ function calculateGCS(){
 [eye,verbal,motor].forEach(el=>el.addEventListener("change",calculateGCS));
 calculateGCS();
 
-// GPS
+// 📍 GPS
 getLocation.onclick=()=>{navigator.geolocation.getCurrentPosition(p=>{
-  const lat=p.coords.latitude;
-  const lng=p.coords.longitude;
+  const lat=p.coords.latitude; const lng=p.coords.longitude;
   locationDisplay.textContent=`위도:${lat}, 경도:${lng}`;
   hiddenCoordinate.value=`${lat},${lng}`;
   const loc=new kakao.maps.LatLng(lat,lng);
@@ -152,27 +148,20 @@ getLocation.onclick=()=>{navigator.geolocation.getCurrentPosition(p=>{
   new kakao.maps.Marker({position:loc,map:mapObj});
 });};
 
-// 기록 저장 + fetch 전송
+// 기록 저장
 recordForm.onsubmit=async e=>{
   e.preventDefault();
   let formData={};
   new FormData(recordForm).forEach((v,k)=>formData[k]=v);
   formData["GCS"]=gcsResult.textContent;
   formData["patientID"]=patientID;
-
-  // 좌표 안전 처리
   if(formData["사고좌표"] && formData["사고좌표"].includes(",")){
     const parts=formData["사고좌표"].split(",");
     formData.latitude=parts[0].trim();
     formData.longitude=parts[1].trim();
   }
-
-  // 화면 기록
-  let text="";
-  for(let k in formData){text+=`${k}: ${formData[k]}\n`;}
+  let text=""; for(let k in formData){text+=`${k}: ${formData[k]}\n`;}
   savedData.innerHTML=`<div class="board-item">${text}</div>`;
-
-  // 서버 전송
   try{
     const res=await fetch(SERVER_URL,{
       method:"POST",
@@ -180,13 +169,45 @@ recordForm.onsubmit=async e=>{
       body:JSON.stringify(formData)
     });
     const textRes=await res.text();
-    console.log("서버 응답:", textRes);
+    console.log("서버 응답:",textRes);
     alert("서버 전송 완료");
   }catch(err){
-    console.error("서버 전송 실패:", err);
+    console.error("서버 전송 실패:",err);
     alert("서버 전송 실패 - 콘솔 확인");
   }
 };
+
+// 🔴 실시간 모니터링 지도
+function initMonitorMap(){
+  monitorMap=new kakao.maps.Map(document.getElementById("monitorMap"),{center:new kakao.maps.LatLng(35.145,126.888),level:7});
+}
+initMonitorMap();
+
+// 📡 실시간 업데이트
+async function updateMonitor(){
+  try{
+    const res=await fetch(SERVER_URL);
+    const data=await res.json();
+    // 기존 마커 제거
+    monitorMarkers.forEach(m=>m.setMap(null));
+    monitorMarkers=[];
+    data.forEach(d=>{
+      if(d.latitude && d.longitude){
+        const pos=new kakao.maps.LatLng(d.latitude, d.longitude);
+        const marker=new kakao.maps.Marker({position:pos,map:monitorMap});
+        // GCS 색상 반영
+        const gcs=d.GCS || "";
+        if(gcs.includes("중증")) marker.setMap(null); // 중증이면 별도 처리 가능
+        monitorMarkers.push(marker);
+      }
+    });
+  }catch(err){console.error("모니터링 실패:",err);}
+}
+
+// 5초마다 새 데이터 체크
+setInterval(updateMonitor,5000);
+updateMonitor();
 </script>
+
 </body>
 </html>
