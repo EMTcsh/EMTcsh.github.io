@@ -1,181 +1,71 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html>
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>🚑 무등산 상황실 대시보드</title>
-
-<script src="https://cdn.tailwindcss.com"></script>
-<script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=ff9e145029506d6e4c72d1f2b01ea424&libraries=services"></script>
-
-<style>
-body{background:#eef2f7;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;}
-.card{
-background:#fff;
-border-radius:14px;
-padding:16px;
-margin-bottom:16px;
-box-shadow:0 2px 8px rgba(0,0,0,0.05);
-}
-.stat{font-size:24px;font-weight:800;}
-#map{width:100%;height:600px;border-radius:14px;}
-.critical-banner{
-display:none;
-background:#dc2626;
-color:#fff;
-padding:12px;
-border-radius:12px;
-font-weight:700;
-margin-bottom:16px;
-animation:blink 1s infinite;
-text-align:center;
-}
-@keyframes blink{
-0%{opacity:1;}
-50%{opacity:0.3;}
-100%{opacity:1;}
-}
-</style>
+  <meta charset="UTF-8">
+  <title>실시간 출동 모니터링</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    table { border-collapse: collapse; width: 100%; }
+    th, td { border: 1px solid #ccc; padding: 8px; text-align: center; }
+    th { background-color: #f4f4f4; }
+    .alert { background-color: #ff4c4c; color: white; font-weight: bold; animation: blink 1s infinite; }
+    @keyframes blink { 0%, 50%, 100% { opacity: 1; } 25%, 75% { opacity: 0; } }
+  </style>
 </head>
+<body>
+  <h2>오늘 출동 데이터 모니터</h2>
+  <table id="dataTable">
+    <thead>
+      <tr id="tableHeader"></tr>
+    </thead>
+    <tbody id="tableBody"></tbody>
+  </table>
 
-<body class="p-4">
+  <script>
+    // 데이터 가져오기 및 테이블 갱신
+    async function fetchData() {
+      google.script.run.withSuccessHandler(renderTable).getTodayData();
+    }
 
-<h1 class="text-2xl font-bold text-blue-700 mb-4">
-🚑 무등산 상황실 대시보드
-</h1>
+    function renderTable(data) {
+      const headerRow = document.getElementById("tableHeader");
+      const body = document.getElementById("tableBody");
 
-<div id="criticalBanner" class="critical-banner">
-🚨 현재 중증 환자 발생!
-</div>
-
-<div class="grid grid-cols-3 gap-4 mb-4">
-  <div class="card text-center">
-    <div>전체 출동</div>
-    <div id="totalCount" class="stat text-blue-600">0</div>
-  </div>
-  <div class="card text-center">
-    <div>🔴 중증 환자</div>
-    <div id="criticalCount" class="stat text-red-600">0</div>
-  </div>
-  <div class="card text-center">
-    <div>최근 출동</div>
-    <div id="latestDispatch" class="text-sm mt-1">-</div>
-  </div>
-</div>
-
-<div id="map"></div>
-
-<script>
-
-const SERVER_URL="https://script.google.com/macros/s/AKfycbyrItg1ibnKBBrcfE88s99tdKgnVWO5ccU1WN6N6J43aFy3GGNtQFS90Mo9yD_BOx3gfg/exec";
-
-let map;
-let markers=[];
-let infoWindows=[];
-
-// 지도 초기화
-function initMap(){
-  map=new kakao.maps.Map(document.getElementById("map"),{
-    center:new kakao.maps.LatLng(35.145,126.888),
-    level:7
-  });
-}
-initMap();
-
-// 마커 이미지
-function createMarkerImage(isCritical){
-  const imageSrc = isCritical
-    ? "https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/marker_red.png"
-    : "https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/markerStar.png";
-
-  return new kakao.maps.MarkerImage(
-    imageSrc,
-    new kakao.maps.Size(24,35)
-  );
-}
-
-// 대시보드 업데이트
-async function updateDashboard(){
-  try{
-    const res=await fetch(SERVER_URL);
-    const data=await res.json();
-
-    markers.forEach(m=>m.setMap(null));
-    markers=[];
-    infoWindows=[];
-
-    let total=0;
-    let critical=0;
-
-    data.forEach(d=>{
-      if(d.latitude && d.longitude){
-
-        total++;
-
-        const gcsScore=parseInt(d.GCS);
-        const isCritical = gcsScore<=8;
-
-        if(isCritical) critical++;
-
-        const pos=new kakao.maps.LatLng(d.latitude,d.longitude);
-
-        const marker=new kakao.maps.Marker({
-          position:pos,
-          map:map,
-          image:createMarkerImage(isCritical)
-        });
-
-        const infoContent=`
-          <div style="padding:10px;font-size:13px;line-height:1.6">
-            <b>환자:</b> ${d.환자이름||"-"}<br>
-            <b>출동대원:</b> ${d.출동대원||"-"}<br>
-            <b>사고장소:</b> ${d.사고장소||"-"}<br>
-            <b>주증상:</b> ${d.주증상||"-"}<br>
-            <b>GCS:</b> ${d.GCS||"-"}<br>
-            <b>연락처:</b> ${d.연락처||"-"}<br>
-            <b>도착시간:</b> ${d.도착시간||"-"}
-          </div>
-        `;
-
-        const infoWindow=new kakao.maps.InfoWindow({
-          content:infoContent
-        });
-
-        kakao.maps.event.addListener(marker,'click',()=>{
-          infoWindows.forEach(i=>i.close());
-          infoWindow.open(map,marker);
-        });
-
-        markers.push(marker);
-        infoWindows.push(infoWindow);
+      // 헤더
+      headerRow.innerHTML = "";
+      if (!data || data.length === 0) {
+        body.innerHTML = "<tr><td colspan='10'>오늘 데이터가 없습니다.</td></tr>";
+        return;
       }
-    });
 
-    // 통계 반영
-    document.getElementById("totalCount").textContent=total;
-    document.getElementById("criticalCount").textContent=critical;
+      const headers = Object.keys(data[0]);
+      headers.forEach(h => {
+        const th = document.createElement("th");
+        th.textContent = h;
+        headerRow.appendChild(th);
+      });
 
-    if(data.length>0){
-      const latest=data[data.length-1];
-      document.getElementById("latestDispatch").textContent=
-        `${latest.출동대원||"-"} / ${latest.사고장소||"-"}`;
+      // 본문
+      body.innerHTML = "";
+      data.forEach(row => {
+        const tr = document.createElement("tr");
+        headers.forEach(h => {
+          const td = document.createElement("td");
+          td.textContent = row[h];
+
+          // GCS 기준 경고 표시
+          if (h === "GCS" && parseInt(row[h], 10) <= 8) {
+            td.classList.add("alert");
+          }
+          tr.appendChild(td);
+        });
+        body.appendChild(tr);
+      });
     }
 
-    // 🔴 중증 배너
-    if(critical>0){
-      document.getElementById("criticalBanner").style.display="block";
-    }else{
-      document.getElementById("criticalBanner").style.display="none";
-    }
-
-  }catch(err){
-    console.error("대시보드 오류:",err);
-  }
-}
-
-setInterval(updateDashboard,5000);
-updateDashboard();
-
-</script>
+    // 5초마다 갱신
+    setInterval(fetchData, 5000);
+    fetchData();
+  </script>
 </body>
 </html>
