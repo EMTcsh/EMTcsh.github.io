@@ -27,7 +27,6 @@ button{width:100%;padding:14px;border-radius:12px;font-size:16px;font-weight:600
 <div class="header">🚑 무등산 산악사고 구급 기록</div>
 
 <form id="recordForm">
-<!-- 현장정보 -->
 <div class="card">
 <h2>📍 현장정보</h2>
 <input type="text" name="출동대원" placeholder="출동대원 이름" required>
@@ -40,7 +39,6 @@ button{width:100%;padding:14px;border-radius:12px;font-size:16px;font-weight:600
 <div id="map"></div>
 </div>
 
-<!-- GCS -->
 <div class="card">
 <h2>🧠 GCS</h2>
 <select id="eye">
@@ -70,7 +68,6 @@ button{width:100%;padding:14px;border-radius:12px;font-size:16px;font-weight:600
 </div>
 </div>
 
-<!-- 환자정보 -->
 <div class="card">
 <h2>👤 환자정보</h2>
 <input type="text" name="환자이름" placeholder="이름" required>
@@ -79,7 +76,6 @@ button{width:100%;padding:14px;border-radius:12px;font-size:16px;font-weight:600
 <input type="tel" name="연락처" placeholder="연락처" required>
 </div>
 
-<!-- 응급처치 -->
 <div class="card">
 <h2>🚨 응급처치</h2>
 <textarea name="응급처치" placeholder="처치 내용 입력"></textarea>
@@ -99,49 +95,28 @@ button{width:100%;padding:14px;border-radius:12px;font-size:16px;font-weight:600
 </div>
 
 <script>
-const SERVER_URL="https://script.google.com/macros/s/AKfycbzlomCAxIqxNLLLXeoI_7PZzP9WguNFk3OH84Nzgcxhncm1mLx6LuqNbcAgniODAFgDIQ/exec"; // ← 배포 URL 교체
+const SERVER_URL="https://script.google.com/macros/s/AKfycbzlomCAxIqxNLLLXeoI_7PZzP9WguNFk3OH84Nzgcxhncm1mLx6LuqNbcAgniODAFgDIQ/exec"; // 배포 URL로 교체
 
-let voiceInterval=null;
-const mainBody=document.getElementById("mainBody");
-const eye=document.getElementById("eye");
-const verbal=document.getElementById("verbal");
-const motor=document.getElementById("motor");
 let patientID="PT-"+Date.now();
 let monitorMap, monitorMarkers=[];
 
-// 🔊 중증 알림
-function speakCritical(){if(!('speechSynthesis' in window)) return; speechSynthesis.cancel(); const msg=new SpeechSynthesisUtterance("중증 환자입니다. 즉시 기도와 호흡을 확인하십시오."); msg.lang="ko-KR"; speechSynthesis.speak(msg);}
-function startCriticalAlert(){if(voiceInterval)return; speakCritical(); voiceInterval=setInterval(speakCritical,10000);}
-function stopCriticalAlert(){if(voiceInterval){clearInterval(voiceInterval);voiceInterval=null;} speechSynthesis.cancel();}
-
-// 🧠 GCS 계산
+// GCS 계산
 function calculateGCS(){
-  const total=parseInt(eye.value)+parseInt(verbal.value)+parseInt(motor.value);
-  let state='',color='';
-  if(total>=13){state='경도';color='#16a34a';}
-  else if(total>=9){state='중등도';color='#f59e0b';}
-  else if(total>=4){state='중증';color='#dc2626';}
-  else{state='혼수';color='#000';}
-  gcsResult.textContent=`${total}점 (${state})`;
-  gcsResult.style.color=color;
-  if(total<=8){
-    gcsWarning.style.display="block";
-    mainBody.classList.add("critical-mode");
-    if(navigator.vibrate) navigator.vibrate([500,300,500]);
-    startCriticalAlert();
-  } else {
-    gcsWarning.style.display="none";
-    mainBody.classList.remove("critical-mode");
-    stopCriticalAlert();
-  }
+  const eye=parseInt(document.getElementById("eye").value);
+  const verbal=parseInt(document.getElementById("verbal").value);
+  const motor=parseInt(document.getElementById("motor").value);
+  const total=eye+verbal+motor;
+  const gcsResult=document.getElementById("gcsResult");
+  gcsResult.textContent=`${total}점`;
 }
-[eye,verbal,motor].forEach(el=>el.addEventListener("change",calculateGCS));
+[...document.querySelectorAll("#eye,#verbal,#motor")].forEach(el=>el.addEventListener("change",calculateGCS));
 calculateGCS();
 
-// 📍 GPS
+// GPS
 document.getElementById("getLocation").onclick=()=>{
   navigator.geolocation.getCurrentPosition(p=>{
-    const lat=p.coords.latitude; const lng=p.coords.longitude;
+    const lat=p.coords.latitude;
+    const lng=p.coords.longitude;
     document.getElementById("locationDisplay").textContent=`위도:${lat}, 경도:${lng}`;
     document.getElementById("hiddenCoordinate").value=`${lat},${lng}`;
     const loc=new kakao.maps.LatLng(lat,lng);
@@ -153,43 +128,38 @@ document.getElementById("getLocation").onclick=()=>{
 // 기록 저장
 document.getElementById("recordForm").onsubmit=async e=>{
   e.preventDefault();
-  let formData={};
+  const formData={};
   new FormData(recordForm).forEach((v,k)=>formData[k]=v);
-  formData["GCS"]=gcsResult.textContent;
+  formData["GCS"]=document.getElementById("gcsResult").textContent;
   formData["patientID"]=patientID;
-  if(formData["사고좌표"] && formData["사고좌표"].includes(",")){
-    const parts=formData["사고좌표"].split(",");
+  if(formData.사고좌표?.includes(",")){
+    const parts=formData.사고좌표.split(",");
     formData.latitude=parts[0].trim();
     formData.longitude=parts[1].trim();
   }
 
-  // 기록 화면에 표시
-  let text=""; for(let k in formData){text+=`${k}: ${formData[k]}\n`;}
-  document.getElementById("savedData").innerHTML=`<div class="board-item">${text}</div>`;
+  document.getElementById("savedData").innerHTML=`<pre>${JSON.stringify(formData,null,2)}</pre>`;
 
   try{
     const res=await fetch(SERVER_URL,{
       method:"POST",
-      headers:{"Content-Type":"application/json"},
-      body:JSON.stringify(formData),
-      mode:"cors"
+      body:JSON.stringify(formData)
     });
-    const result=await res.json();
-    if(result.status==="success") alert("서버 전송 완료");
-    else alert("서버 전송 실패: "+result.message);
+    alert("서버 전송 완료");
   }catch(err){
     console.error(err);
     alert("서버 전송 실패 - 콘솔 확인");
   }
 };
 
-// 🔴 실시간 모니터링 지도
+// 실시간 모니터링 지도
 function initMonitorMap(){
-  monitorMap=new kakao.maps.Map(document.getElementById("monitorMap"),{center:new kakao.maps.LatLng(35.145,126.888),level:7});
+  monitorMap=new kakao.maps.Map(document.getElementById("monitorMap"),{
+    center:new kakao.maps.LatLng(35.145,126.888), level:7
+  });
 }
 initMonitorMap();
 
-// 📡 실시간 업데이트
 async function updateMonitor(){
   try{
     const res=await fetch(SERVER_URL);
@@ -199,15 +169,13 @@ async function updateMonitor(){
     data.forEach(d=>{
       if(d.latitude && d.longitude){
         const pos=new kakao.maps.LatLng(d.latitude,d.longitude);
-        const marker=new kakao.maps.Marker({position:pos,map:monitorMap});
-        monitorMarkers.push(marker);
+        monitorMarkers.push(new kakao.maps.Marker({position:pos,map:monitorMap}));
       }
     });
-  }catch(err){console.error("모니터링 실패:",err);}
+  }catch(err){console.error(err);}
 }
 setInterval(updateMonitor,5000);
 updateMonitor();
 </script>
-
 </body>
 </html>
