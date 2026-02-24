@@ -4,10 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>🚑 무등산 산악사고 구급 기록</title>
-
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=ff9e145029506d6e4c72d1f2b01ea424&libraries=services"></script>
-
 <style>
 body{background:#eef1f5;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;}
 .critical-mode{animation:criticalFlash 0.8s infinite;}
@@ -27,7 +25,6 @@ button{width:100%;padding:14px;border-radius:12px;font-size:16px;font-weight:600
 #map{width:100%;height:220px;border-radius:12px;}
 </style>
 </head>
-
 <body id="mainBody" class="px-4">
 
 <div class="text-center font-bold text-xl my-4 text-blue-700">
@@ -102,7 +99,7 @@ GCS: <span id="gcsResult"></span>
 </form>
 
 <script>
-const SERVER_URL="https://script.google.com/macros/s/AKfycbyrItg1ibnKBBrcfE88s99tdKgnVWO5ccU1WN6N6J43aFy3GGNtQFS90Mo9yD_BOx3gfg/exec"; // 실제 Apps Script 웹앱 URL
+const SERVER_URL="https://script.google.com/macros/s/AKfycbyrItg1ibnKBBrcfE88s99tdKgnVWO5ccU1WN6N6J43aFy3GGNtQFS90Mo9yD_BOx3gfg/exec"; // Apps Script 웹앱 exec URL
 const recordForm=document.getElementById("recordForm");
 const eye=document.getElementById("eye");
 const verbal=document.getElementById("verbal");
@@ -160,15 +157,14 @@ recordForm.onsubmit=async e=>{
   data.GCS=gcsResult.textContent;
   if(data.사고좌표){ const sp=data.사고좌표.split(","); data.latitude=sp[0]; data.longitude=sp[1]; }
 
-  // 서버 전송
+  // GET 요청용 URL 생성 (CORS 문제 회피)
+  const queryString = new URLSearchParams(data).toString();
+  const requestUrl = SERVER_URL + "?" + queryString;
+
   try{
-    const res=await fetch(SERVER_URL,{
-      method:"POST",
-      headers:{"Content-Type":"application/json"},
-      body:JSON.stringify(data)
-    });
-    const result=await res.json().catch(()=>({status:"error",message:"서버응답없음"}));
-    if(result.status!=="success"){ alert("저장 실패: "+result.message); return; }
+    const res = await fetch(requestUrl);
+    const result = await res.json();
+    if(result.status !== "success"){ alert("저장 실패: "+result.message); return; }
   }catch(err){
     alert("서버 전송 실패: "+err.message);
     return;
