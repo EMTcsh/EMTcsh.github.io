@@ -102,7 +102,7 @@ GCS: <span id="gcsResult"></span>
 </form>
 
 <script>
-const SERVER_URL="https://script.google.com/macros/s/AKfycbw686MCjBNLO_9Eoj1CYqqRj3ds9Z6Jzj7-z1MpGt9tnpHGNFch9ulwlWtOmxB7mmHBsg/exec"; // Google Apps Script 웹앱 URL
+const SERVER_URL="https://script.google.com/macros/s/AKfycbw686MCjBNLO_9Eoj1CYqqRj3ds9Z6Jzj7-z1MpGt9tnpHGNFch9ulwlWtOmxB7mmHBsg/exec"; // 실제 Apps Script 웹앱 URL
 const recordForm=document.getElementById("recordForm");
 const eye=document.getElementById("eye");
 const verbal=document.getElementById("verbal");
@@ -141,6 +141,7 @@ function calculateGCS(){
 calculateGCS();
 
 getLocation.onclick=()=>{
+  if(!navigator.geolocation){ alert("위치 정보를 지원하지 않는 브라우저입니다."); return; }
   navigator.geolocation.getCurrentPosition(p=>{
     const lat=p.coords.latitude;
     const lng=p.coords.longitude;
@@ -149,7 +150,7 @@ getLocation.onclick=()=>{
     const loc=new kakao.maps.LatLng(lat,lng);
     fieldMap=new kakao.maps.Map(document.getElementById("map"),{center:loc,level:3});
     new kakao.maps.Marker({position:loc,map:fieldMap});
-  });
+  }, err=>{ alert("위치 정보를 가져오지 못했습니다: "+err.message); });
 };
 
 recordForm.onsubmit=async e=>{
@@ -182,7 +183,7 @@ GCS: ${data.GCS}
 위치: ${data.latitude||"-"}, ${data.longitude||"-"}`;
 
   if(navigator.share){
-    try{ await navigator.share({title:"산악사고 구급기록",text:shareText}); }catch(err){}
+    try{ await navigator.share({title:"산악사고 구급기록",text:shareText}); }catch(err){ alert("공유 취소됨"); }
   }else{
     await navigator.clipboard.writeText(shareText);
     alert("저장 완료\n공유 내용이 클립보드에 복사되었습니다.");
