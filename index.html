@@ -6,7 +6,7 @@
 <title>🚑 무등산 산악사고 구급 기록</title>
 
 <script src="https://cdn.tailwindcss.com"></script>
-<script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=ff9e145029506d6e4c72d1f2b01ea424&libraries"></script>
+<script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=ff9e145029506d6e4c72d1f2b01ea424&libraries=services"></script>
 
 <style>
 body{background:#eef1f5;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;}
@@ -102,85 +102,101 @@ GCS: <span id="gcsResult"></span>
 </form>
 
 <script>
-const SERVER_URL="https://script.google.com/macros/s/AKfycbzlomCAxIqxNLLLXeoI_7PZzP9WguNFk3OH84Nzgcxhncm1mLx6LuqNbcAgniODAFgDIQ/exec";
+/* ---------------------- 초기 변수 ---------------------- */
+const SERVER_URL="https://script.google.com/macros/s/AKfycbzlomCAxIqxNLLLXeoI_7PZzP9WguNFk3OH84Nzgcxhncm1mLx6LuqNbcAgniODAFgDIQ/exec"; // 실제 배포 웹앱 URL
+const recordForm = document.getElementById("recordForm");
+const eye = document.getElementById("eye");
+const verbal = document.getElementById("verbal");
+const motor = document.getElementById("motor");
+const gcsResult = document.getElementById("gcsResult");
+const gcsWarning = document.getElementById("gcsWarning");
+const mainBody = document.getElementById("mainBody");
+const locationDisplay = document.getElementById("locationDisplay");
+const hiddenCoordinate = document.getElementById("hiddenCoordinate");
+const getLocation = document.getElementById("getLocation");
+
 let fieldMap;
 let criticalSpoken=false;
 
-/* 🔊 중증환자 음성 안내 */
+/* ---------------------- GCS 계산 + 경고 ---------------------- */
 function speakCritical(){
-speechSynthesis.cancel();
-const msg=new SpeechSynthesisUtterance(
-"중증환자입니다. 기도와 호흡을 확보하세요."
-);
-msg.lang="ko-KR"; msg.rate=0.95; msg.pitch=1; msg.volume=1;
-speechSynthesis.speak(msg);
+  speechSynthesis.cancel();
+  const msg = new SpeechSynthesisUtterance(
+    "중증환자입니다. 기도와 호흡을 확보하세요."
+  );
+  msg.lang="ko-KR"; msg.rate=0.95; msg.pitch=1; msg.volume=1;
+  speechSynthesis.speak(msg);
 }
 
 function calculateGCS(){
-const total=parseInt(eye.value)+parseInt(verbal.value)+parseInt(motor.value);
-gcsResult.textContent=total+"점";
-if(total<=8){
-gcsWarning.style.display="block";
-mainBody.classList.add("critical-mode");
-if(!criticalSpoken){speakCritical();navigator.vibrate?.([300,100,300]);criticalSpoken=true;}
-}else{
-gcsWarning.style.display="none";
-mainBody.classList.remove("critical-mode");
-criticalSpoken=false;
-}
+  const total = parseInt(eye.value) + parseInt(verbal.value) + parseInt(motor.value);
+  gcsResult.textContent = total + "점";
+  if(total <= 8){
+    gcsWarning.style.display="block";
+    mainBody.classList.add("critical-mode");
+    if(!criticalSpoken){ speakCritical(); navigator.vibrate?.([300,100,300]); criticalSpoken=true; }
+  } else {
+    gcsWarning.style.display="none";
+    mainBody.classList.remove("critical-mode");
+    criticalSpoken=false;
+  }
 }
 [eye,verbal,motor].forEach(el=>el.addEventListener("change",calculateGCS));
 calculateGCS();
 
-/* GPS 좌표 */
-getLocation.onclick=()=>{
-navigator.geolocation.getCurrentPosition(p=>{
-const lat=p.coords.latitude;
-const lng=p.coords.longitude;
-locationDisplay.textContent=`위도:${lat}, 경도:${lng}`;
-hiddenCoordinate.value=`${lat},${lng}`;
-const loc=new kakao.maps.LatLng(lat,lng);
-fieldMap=new kakao.maps.Map(document.getElementById("map"),{center:loc,level:3});
-new kakao.maps.Marker({position:loc,map:fieldMap});
-});
+/* ---------------------- GPS 좌표 ---------------------- */
+getLocation.onclick = () => {
+  navigator.geolocation.getCurrentPosition(p=>{
+    const lat = p.coords.latitude;
+    const lng = p.coords.longitude;
+    locationDisplay.textContent = `위도:${lat}, 경도:${lng}`;
+    hiddenCoordinate.value = `${lat},${lng}`;
+    const loc = new kakao.maps.LatLng(lat,lng);
+    fieldMap = new kakao.maps.Map(document.getElementById("map"), {center:loc, level:3});
+    new kakao.maps.Marker({position:loc, map:fieldMap});
+  });
 };
 
-/* 저장 + 공유 */
-recordForm.onsubmit=async e=>{
-e.preventDefault();
-const data={};
-new FormData(recordForm).forEach((v,k)=>data[k]=v);
-data.GCS=gcsResult.textContent;
+/* ---------------------- 저장 + 공유 ---------------------- */
+recordForm.onsubmit = async e => {
+  e.preventDefault();
+  const data = {};
+  new FormData(recordForm).forEach((v,k)=>data[k]=v);
+  data.GCS = gcsResult.textContent;
 
-if(data.사고좌표){const sp=data.사고좌표.split(",");data.latitude=sp[0];data.longitude=sp[1];}
+  if(data.사고좌표){ const sp = data.사고좌표.split(","); data.latitude = sp[0]; data.longitude = sp[1]; }
 
-/* Google Sheet 전송 */
-await fetch(SERVER_URL,{
-method:"POST",
-headers:{"Content-Type":"application/json"},
-body:JSON.stringify(data)
-});
+  // Google Sheet 전송
+  try{
+    const res = await fetch(SERVER_URL,{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body: JSON.stringify(data)
+    });
+    const result = await res.json();
+    if(result.status !== "success"){ alert("저장 실패: "+result.message); return; }
+  } catch(err){
+    alert("서버 전송 실패: "+err.message);
+    return;
+  }
 
-/* 공유 메시지 */
-const shareText=
-`🚑 무등산 산악사고 구급기록
+  // 공유 메시지
+  const shareText = `🚑 무등산 산악사고 구급기록
 출동대원: ${data.출동대원}
 환자: ${data.환자이름}
 GCS: ${data.GCS}
 증상: ${data.주증상}
 위치: ${data.latitude||"-"}, ${data.longitude||"-"}`;
 
-/* 모바일 공유 / PC 클립보드 복사 */
-if(navigator.share){
-try{await navigator.share({title:"산악사고 구급기록",text:shareText});}
-catch(err){}
-}else{
-await navigator.clipboard.writeText(shareText);
-alert("저장 완료\n공유 내용이 복사되었습니다.");
-return;
-}
+  if(navigator.share){
+    try{ await navigator.share({title:"산악사고 구급기록", text:shareText}); }catch(err){}
+  } else {
+    await navigator.clipboard.writeText(shareText);
+    alert("저장 완료\n공유 내용이 클립보드에 복사되었습니다.");
+    return;
+  }
 
-alert("저장 및 공유 완료");
+  alert("저장 및 공유 완료");
 };
 </script>
 
