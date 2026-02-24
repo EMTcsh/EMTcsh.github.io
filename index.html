@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>🚑 무등산 산악사고 기록</title>
+<title>🚑 무등산 산악사고 통합 기록</title>
 
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=ff9e145029506d6e4c72d1f2b01ea424&libraries=services"></script>
@@ -14,18 +14,12 @@ body{
   font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
   transition:background 0.3s;
 }
-
-/* 🚨 중증 점멸 */
 @keyframes criticalFlash{
   0%{background-color:#fee2e2;}
   50%{background-color:#dc2626;}
   100%{background-color:#fee2e2;}
 }
-.critical-mode{
-  animation:criticalFlash 0.8s infinite;
-}
-
-/* 카드 */
+.critical-mode{animation:criticalFlash 0.8s infinite;}
 .card{
   background:#fff;
   border-radius:14px;
@@ -34,77 +28,27 @@ body{
   box-shadow:0 2px 8px rgba(0,0,0,0.05);
   border-left:5px solid #2563eb;
 }
-
 .card h2{
-  font-weight:700;
-  font-size:15px;
-  margin-bottom:10px;
-  color:#1e3a8a;
+  font-weight:700;font-size:15px;margin-bottom:10px;color:#1e3a8a;
 }
-
 input,select,textarea{
-  width:100%;
-  border:1px solid #d1d5db;
-  border-radius:10px;
-  padding:12px;
-  margin-bottom:10px;
-  font-size:15px;
-  background:#f9fafb;
+  width:100%;border:1px solid #d1d5db;border-radius:10px;padding:12px;margin-bottom:10px;font-size:15px;background:#f9fafb;
 }
-
 input:focus,select:focus,textarea:focus{
-  outline:none;
-  border-color:#2563eb;
-  background:#fff;
-  box-shadow:0 0 0 2px rgba(37,99,235,0.15);
+  outline:none;border-color:#2563eb;background:#fff;box-shadow:0 0 0 2px rgba(37,99,235,0.15);
 }
-
 textarea{min-height:100px;}
-
-button{
-  width:100%;
-  padding:14px;
-  border-radius:12px;
-  font-size:16px;
-  font-weight:600;
-}
-
-.coordinate-box{
-  background:#e0e7ff;
-  padding:10px;
-  border-radius:8px;
-  font-size:13px;
-  margin-bottom:8px;
-}
-
-#map{
-  width:100%;
-  height:220px;
-  border-radius:12px;
-}
-
-.board-item{
-  white-space:pre-line;
-  font-size:13px;
-  background:#f3f4f6;
-  padding:12px;
-  border-radius:10px;
-  line-height:1.5;
-}
-
-.header{
-  text-align:center;
-  font-weight:800;
-  font-size:20px;
-  margin:18px 0;
-  color:#1d4ed8;
-}
+button{width:100%;padding:14px;border-radius:12px;font-size:16px;font-weight:600;}
+.coordinate-box{background:#e0e7ff;padding:10px;border-radius:8px;font-size:13px;margin-bottom:8px;}
+#map{width:100%;height:220px;border-radius:12px;}
+.board-item{white-space:pre-line;font-size:13px;background:#f3f4f6;padding:12px;border-radius:10px;line-height:1.5;}
+.header{text-align:center;font-weight:800;font-size:20px;margin:18px 0;color:#1d4ed8;}
 </style>
 </head>
 
 <body id="mainBody" class="px-4">
 
-<div class="header">🚑 무등산 산악사고 기록</div>
+<div class="header">🚑 무등산 산악사고 통합 기록</div>
 
 <form id="recordForm">
 
@@ -117,11 +61,7 @@ button{
 <input type="text" name="주증상" placeholder="환자 증상" required>
 
 <div id="locationDisplay" class="coordinate-box">위도: -, 경도: -</div>
-
-<button type="button" id="getLocation" class="bg-green-600 text-white mb-2">
-🌐 현장 좌표 가져오기
-</button>
-
+<button type="button" id="getLocation" class="bg-green-600 text-white mb-2">🌐 현장 좌표 가져오기</button>
 <input type="hidden" name="사고좌표" id="hiddenCoordinate">
 <div id="map"></div>
 </div>
@@ -129,37 +69,30 @@ button{
 <!-- GCS -->
 <div class="card">
 <h2>🧠 GCS</h2>
-
 <select id="eye">
 <option value="4">자발적으로 눈을 뜬다</option>
 <option value="3">말로 지시했을때 눈을 뜬다</option>
 <option value="2">통증 자극에 의해 눈을 뜬다</option>
 <option value="1">어떠한 자극에도 눈을 뜨지 못한다</option>
 </select>
-
 <select id="verbal">
-<option value="5">정확한 반응(6하원칙에 지남력 있는 상태)</option>
-<option value="4">대화 혼란(대화가능하나, 계속적 대화 교환 안됨)</option>
-<option value="3">언어혼란(동문서답, 혼란된 말을 함)</option>
-<option value="2">이해 할수 없는 소리(신음소리만)</option>
-<option value="1">반응이 없음(아무런 소리를 내지 않음)</option>
+<option value="5">정확한 반응(6하원칙)</option>
+<option value="4">대화 혼란</option>
+<option value="3">언어혼란</option>
+<option value="2">신음소리만</option>
+<option value="1">반응 없음</option>
 </select>
-
 <select id="motor">
-<option value="6">명령에 따름(간단한 명령에 따라 운동기능 수행)</option>
-<option value="5">통증 자극 국소화 반응(명령은 따지 않지만, 자극을 가하면 피하거나 치우려고 함) </option>
-<option value="4">통증 자극 움츠림(통증 자극을 피하려고 함, 치우려고 하지는 않음)</option>
-<option value="3">통증 자극 이상굴곡(통증 자극에 앞으로 구부리거나 몸쪽으로 접음)</option>
-<option value="2">통증 자극 이상신전(통증 자극에 뒤로 젖히거나 모에서 멀리 뻗음)(</option>
-<option value="1">전혀 움직이지 않음(무반응, 자가호흡 없음)</option>
+<option value="6">명령 수행</option>
+<option value="5">통증 자극 국소화</option>
+<option value="4">통증 자극 움츠림</option>
+<option value="3">통증 이상굴곡</option>
+<option value="2">통증 이상신전</option>
+<option value="1">무반응</option>
 </select>
 
-<div class="font-bold text-lg mt-2">
-GCS: <span id="gcsResult"></span>
-</div>
-
-<div id="gcsWarning"
-style="display:none; margin-top:10px; padding:10px; border-radius:10px; background:#fee2e2; color:#b91c1c; font-weight:600;">
+<div class="font-bold text-lg mt-2">GCS: <span id="gcsResult"></span></div>
+<div id="gcsWarning" style="display:none;margin-top:10px;padding:10px;border-radius:10px;background:#fee2e2;color:#b91c1c;font-weight:600;">
 🚨 중증 의식저하 — 즉시 기도/호흡/순환 확인 필요
 </div>
 </div>
@@ -179,10 +112,7 @@ style="display:none; margin-top:10px; padding:10px; border-radius:10px; backgrou
 <textarea name="응급처치" placeholder="처치 내용 입력"></textarea>
 </div>
 
-<button type="submit" class="bg-blue-600 text-white mb-4">
-기록 저장
-</button>
-
+<button type="submit" class="bg-blue-600 text-white mb-4">기록 저장</button>
 </form>
 
 <div class="card">
@@ -191,46 +121,31 @@ style="display:none; margin-top:10px; padding:10px; border-radius:10px; backgrou
 </div>
 
 <script>
-let voiceInterval = null;
+const SERVER_URL="https://script.google.com/macros/s/AKfycbzlomCAxIqxNLLLXeoI_7PZzP9WguNFk3OH84Nzgcxhncm1mLx6LuqNbcAgniODAFgDIQ/exec"; // Apps Script 웹앱 URL
+let voiceInterval=null;
+let patientID="PT-"+Date.now(); // 환자 고유ID
 
 /* 🔊 중증 음성 */
 function speakCritical(){
   if(!('speechSynthesis' in window)) return;
   speechSynthesis.cancel();
-  const msg = new SpeechSynthesisUtterance(
-    "중증 환자입니다. 즉시 기도와 호흡을 확인하십시오."
-  );
-  msg.lang = "ko-KR";
+  const msg=new SpeechSynthesisUtterance("중증 환자입니다. 즉시 기도와 호흡을 확인하십시오.");
+  msg.lang="ko-KR";
   speechSynthesis.speak(msg);
 }
 
-/* 🚨 반복 시작 */
+/* 🚨 반복 음성 */
 function startCriticalAlert(){
   if(voiceInterval) return;
   speakCritical();
-  voiceInterval = setInterval(()=>{
-    speakCritical();
-  }, 10000);
+  voiceInterval=setInterval(()=>{ speakCritical(); },10000);
 }
-
-/* 🛑 반복 중단 */
-function stopCriticalAlert(){
-  if(voiceInterval){
-    clearInterval(voiceInterval);
-    voiceInterval = null;
-  }
-  speechSynthesis.cancel();
-}
+function stopCriticalAlert(){ if(voiceInterval){ clearInterval(voiceInterval); voiceInterval=null;} speechSynthesis.cancel(); }
 
 /* 🧠 GCS 계산 */
 function calculateGCS(){
-  const total =
-    parseInt(eye.value) +
-    parseInt(verbal.value) +
-    parseInt(motor.value);
-
+  const total=parseInt(eye.value)+parseInt(verbal.value)+parseInt(motor.value);
   let state='',color='';
-
   if(total>=13){state='경도';color='#16a34a';}
   else if(total>=9){state='중등도';color='#f59e0b';}
   else if(total>=4){state='중증';color='#dc2626';}
@@ -241,23 +156,16 @@ function calculateGCS(){
 
   if(total<=8){
     gcsWarning.style.display="block";
-    document.getElementById("mainBody").classList.add("critical-mode");
-
-    if(navigator.vibrate){
-      navigator.vibrate([500,300,500]);
-    }
-
+    mainBody.classList.add("critical-mode");
+    if(navigator.vibrate) navigator.vibrate([500,300,500]);
     startCriticalAlert();
-  }else{
+  } else {
     gcsWarning.style.display="none";
-    document.getElementById("mainBody").classList.remove("critical-mode");
+    mainBody.classList.remove("critical-mode");
     stopCriticalAlert();
   }
 }
-
-["eye","verbal","motor"].forEach(id=>{
-  document.getElementById(id).addEventListener("change",calculateGCS);
-});
+["eye","verbal","motor"].forEach(id=>{ document.getElementById(id).addEventListener("change",calculateGCS); });
 calculateGCS();
 
 /* GPS */
@@ -265,28 +173,41 @@ getLocation.onclick=()=>{
 navigator.geolocation.getCurrentPosition(p=>{
   const lat=p.coords.latitude;
   const lng=p.coords.longitude;
-  const txt=`위도:${lat}, 경도:${lng}`;
-  locationDisplay.textContent=txt;
-  hiddenCoordinate.value=txt;
+  locationDisplay.textContent=`위도:${lat}, 경도:${lng}`;
+  hiddenCoordinate.value=`${lat},${lng}`;
 
   const loc=new kakao.maps.LatLng(lat,lng);
-  const mapObj=new kakao.maps.Map(
-    document.getElementById("map"),
-    {center:loc,level:3}
-  );
+  const mapObj=new kakao.maps.Map(document.getElementById("map"),{center:loc,level:3});
   new kakao.maps.Marker({position:loc,map:mapObj});
 });
 };
 
-/* 저장 */
+/* 저장 + 서버 전송 */
 recordForm.onsubmit=e=>{
-e.preventDefault();
-let text="";
-new FormData(recordForm).forEach((v,k)=>{
-text+=`${k}: ${v}\n`;
-});
-text+=`GCS: ${gcsResult.textContent}`;
-savedData.innerHTML=`<div class="board-item">${text}</div>`;
+  e.preventDefault();
+  let formData={};
+  new FormData(recordForm).forEach((v,k)=>{formData[k]=v;});
+  formData["GCS"]=gcsResult.textContent;
+  formData["patientID"]=patientID;
+
+  // 좌표 분리
+  if(formData["사고좌표"]){
+    const parts=formData["사고좌표"].split(",");
+    formData["latitude"]=parts[0];
+    formData["longitude"]=parts[1];
+  }
+
+  // 화면 기록
+  let text="";
+  for(let k in formData){ text+=`${k}: ${formData[k]}\n`; }
+  savedData.innerHTML=`<div class="board-item">${text}</div>`;
+
+  // 서버 전송
+  fetch(SERVER_URL,{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify(formData)
+  }).catch(()=>{console.warn("서버 전송 실패");});
 };
 </script>
 
