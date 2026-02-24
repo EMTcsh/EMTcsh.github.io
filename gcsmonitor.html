@@ -10,16 +10,43 @@
 
 <style>
 body{background:#eef2f7;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;}
-.card{background:#fff;border-radius:14px;padding:16px;margin-bottom:16px;
-box-shadow:0 2px 8px rgba(0,0,0,0.05);}
-.stat{font-size:22px;font-weight:700;}
+.card{
+background:#fff;
+border-radius:14px;
+padding:16px;
+margin-bottom:16px;
+box-shadow:0 2px 8px rgba(0,0,0,0.05);
+}
+.stat{font-size:24px;font-weight:800;}
 #map{width:100%;height:600px;border-radius:14px;}
+.critical-banner{
+display:none;
+background:#dc2626;
+color:#fff;
+padding:12px;
+border-radius:12px;
+font-weight:700;
+margin-bottom:16px;
+animation:blink 1s infinite;
+text-align:center;
+}
+@keyframes blink{
+0%{opacity:1;}
+50%{opacity:0.3;}
+100%{opacity:1;}
+}
 </style>
 </head>
 
 <body class="p-4">
 
-<h1 class="text-2xl font-bold text-blue-700 mb-4">🚑 무등산 상황실 대시보드</h1>
+<h1 class="text-2xl font-bold text-blue-700 mb-4">
+🚑 무등산 상황실 대시보드
+</h1>
+
+<div id="criticalBanner" class="critical-banner">
+🚨 현재 중증 환자 발생!
+</div>
 
 <div class="grid grid-cols-3 gap-4 mb-4">
   <div class="card text-center">
@@ -40,7 +67,7 @@ box-shadow:0 2px 8px rgba(0,0,0,0.05);}
 
 <script>
 
-const SERVER_URL="여기에_APPS_SCRIPT_URL";
+const SERVER_URL="https://script.google.com/macros/s/AKfycbzlomCAxIqxNLLLXeoI_7PZzP9WguNFk3OH84Nzgcxhncm1mLx6LuqNbcAgniODAFgDIQ/exec";
 
 let map;
 let markers=[];
@@ -55,11 +82,11 @@ function initMap(){
 }
 initMap();
 
-// 마커 이미지 생성
+// 마커 이미지
 function createMarkerImage(isCritical){
   const imageSrc = isCritical
-    ? "https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/markerStar.png"
-    : "https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/marker_red.png";
+    ? "https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/marker_red.png"
+    : "https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/markerStar.png";
 
   return new kakao.maps.MarkerImage(
     imageSrc,
@@ -73,7 +100,6 @@ async function updateDashboard(){
     const res=await fetch(SERVER_URL);
     const data=await res.json();
 
-    // 기존 마커 제거
     markers.forEach(m=>m.setMap(null));
     markers=[];
     infoWindows=[];
@@ -83,10 +109,12 @@ async function updateDashboard(){
 
     data.forEach(d=>{
       if(d.latitude && d.longitude){
+
         total++;
 
         const gcsScore=parseInt(d.GCS);
         const isCritical = gcsScore<=8;
+
         if(isCritical) critical++;
 
         const pos=new kakao.maps.LatLng(d.latitude,d.longitude);
@@ -98,13 +126,14 @@ async function updateDashboard(){
         });
 
         const infoContent=`
-          <div style="padding:10px;font-size:13px;line-height:1.5">
+          <div style="padding:10px;font-size:13px;line-height:1.6">
             <b>환자:</b> ${d.환자이름||"-"}<br>
             <b>출동대원:</b> ${d.출동대원||"-"}<br>
             <b>사고장소:</b> ${d.사고장소||"-"}<br>
             <b>주증상:</b> ${d.주증상||"-"}<br>
             <b>GCS:</b> ${d.GCS||"-"}<br>
-            <b>연락처:</b> ${d.연락처||"-"}
+            <b>연락처:</b> ${d.연락처||"-"}<br>
+            <b>도착시간:</b> ${d.도착시간||"-"}
           </div>
         `;
 
@@ -130,6 +159,13 @@ async function updateDashboard(){
       const latest=data[data.length-1];
       document.getElementById("latestDispatch").textContent=
         `${latest.출동대원||"-"} / ${latest.사고장소||"-"}`;
+    }
+
+    // 🔴 중증 배너
+    if(critical>0){
+      document.getElementById("criticalBanner").style.display="block";
+    }else{
+      document.getElementById("criticalBanner").style.display="none";
     }
 
   }catch(err){
