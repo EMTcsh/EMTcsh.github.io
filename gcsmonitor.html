@@ -1,71 +1,143 @@
 <!DOCTYPE html>
-<html>
+<html lang="ko">
 <head>
-  <meta charset="UTF-8">
-  <title>실시간 출동 모니터링</title>
-  <style>
-    body { font-family: Arial, sans-serif; margin: 20px; }
-    table { border-collapse: collapse; width: 100%; }
-    th, td { border: 1px solid #ccc; padding: 8px; text-align: center; }
-    th { background-color: #f4f4f4; }
-    .alert { background-color: #ff4c4c; color: white; font-weight: bold; animation: blink 1s infinite; }
-    @keyframes blink { 0%, 50%, 100% { opacity: 1; } 25%, 75% { opacity: 0; } }
-  </style>
+<meta charset="UTF-8">
+<title>🚨 무등산 특수구조팀 실시간 산악사고 신고공유</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+body{margin:0;font-family:Arial;background:#111;color:#fff;}
+header{background:#b71c1c;padding:15px;text-align:center;font-size:20px;}
+.container{padding:15px;}
+.card{background:#1e1e1e;padding:12px;margin-bottom:10px;border-radius:6px;}
+.card.done{background:#2b2b2b;opacity:0.6;}
+.time{color:#ffcc00;font-size:14px;}
+.coord{font-size:12px;color:#aaa;}
+.maplink{color:#4fc3f7;font-size:13px;text-decoration:none;}
+.maplink:hover{text-decoration:underline;}
+.complete-btn{
+  background:#2e7d32;
+  margin-top:8px;
+  color:#fff;
+  border:none;
+  padding:6px 10px;
+  border-radius:4px;
+  cursor:pointer;
+}
+.complete-btn:hover{opacity:0.8;}
+</style>
 </head>
 <body>
-  <h2>오늘 출동 데이터 모니터</h2>
-  <table id="dataTable">
-    <thead>
-      <tr id="tableHeader"></tr>
-    </thead>
-    <tbody id="tableBody"></tbody>
-  </table>
 
-  <script>
-    // 데이터 가져오기 및 테이블 갱신
-    async function fetchData() {
-      google.script.run.withSuccessHandler(renderTable).getTodayData();
-    }
+<header>🚨 무등산 특수구조팀 실시간 산악사고 신고공유</header>
 
-    function renderTable(data) {
-      const headerRow = document.getElementById("tableHeader");
-      const body = document.getElementById("tableBody");
+<div class="container" style="display: flex; justify-content: flex-end;">
+  <div>
+    <button onclick="window.open('https://mudeung.github.io/rescue/ems.html', '_blank', 'noopener')">
+      무등산 산악사고 기록지 바로가기
+    </button>
+  </div>
+</div> 
+  
+<div class="container">
+  <div id="listArea">로딩중...</div>
+</div> 
+  
+<script>
+const API_URL="https://script.google.com/macros/s/AKfycbxm_oLeGMIGh5PRokCURztVx6-1Ijug2KtuGbsFH-cZVOKE5LgaKDnLbTgFl2sWWDdkwA/exec";
+const listArea=document.getElementById("listArea");
 
-      // 헤더
-      headerRow.innerHTML = "";
-      if (!data || data.length === 0) {
-        body.innerHTML = "<tr><td colspan='10'>오늘 데이터가 없습니다.</td></tr>";
-        return;
+/******** 🚑 현장도착 ********/
+async function completeCase(id){
+  if(!confirm("구조대원이 현장에 도착했습니까?")) return;
+  try{
+    await fetch(API_URL,{
+      method:"POST",
+      headers:{ "Content-Type":"text/plain;charset=utf-8" },
+      body:JSON.stringify({
+        action:"complete",
+        id:id,
+        completeTime:new Date().toISOString()
+      })
+    });
+    loadData();
+  }catch(err){
+    alert("처리 실패");
+    console.error(err);
+  }
+}
+
+/******** ✅ 사고처리 완료 ********/
+async function finishCase(id){
+  if(!confirm("사고처리를 완료하시겠습니까?")) return;
+  try{
+    await fetch(API_URL,{
+      method:"POST",
+      headers:{ "Content-Type":"text/plain;charset=utf-8" },
+      body:JSON.stringify({
+        action:"finish",
+        id:id,
+        finishTime:new Date().toISOString()
+      })
+    });
+    loadData();
+  }catch(err){
+    alert("처리 실패");
+    console.error(err);
+  }
+}
+
+/******** 목록 불러오기 ********/
+async function loadData(){
+  const res=await fetch(API_URL);
+  const data=await res.json();
+  listArea.innerHTML="";
+  if(!data.length){
+    listArea.innerHTML="현재 접수된 신고가 없습니다.";
+    return;
+  }
+
+  data.sort((a,b)=>new Date(b.time)-new Date(a.time));
+
+  data.forEach(item=>{
+    const div=document.createElement("div");
+
+    // 사고처리 완료만 흐림 처리
+    div.className="card"+(item.status==="사고처리완료"?" done":"");
+
+    div.innerHTML=`
+      <div class="time">🕒 접수: ${new Date(item.time).toLocaleString()}</div>
+
+      ${item.status==="현장도착"?
+        `<div class="time">🚑 현장도착: ${item.completeTime ? new Date(item.completeTime).toLocaleString() : ""}</div>`
+        : ""}
+
+      ${item.status==="사고처리완료"?
+        `<div class="time">🚑 현장도착: ${item.completeTime ? new Date(item.completeTime).toLocaleString() : ""}</div>
+         <div class="time">✅ 사고처리 완료: ${item.finishTime ? new Date(item.finishTime).toLocaleString() : ""}</div>`
+        : ""}
+
+      🏠 ${item.address||"주소없음"}<br>
+      📞 ${item.phone||"번호없음"}<br>
+      📝 ${item.symptom||"내용없음"}<br>
+      <div class="coord">위도: ${item.lat} / 경도: ${item.lng}</div>
+      <a class="maplink" href="https://map.kakao.com/link/map/구조요청 위치,${item.lat},${item.lng}" target="_blank">📍 지도보기</a><br>
+
+      ${
+        item.status==="사고처리완료"
+        ? ""
+        : item.status==="현장도착"
+          ? `<button class="complete-btn" onclick="finishCase('${item.id}')">✅ 사고처리 완료</button>`
+          : `<button class="complete-btn" onclick="completeCase('${item.id}')">🚑 구조대원 현장도착</button>`
       }
+    `;
 
-      const headers = Object.keys(data[0]);
-      headers.forEach(h => {
-        const th = document.createElement("th");
-        th.textContent = h;
-        headerRow.appendChild(th);
-      });
+    listArea.appendChild(div);
+  });
+}
 
-      // 본문
-      body.innerHTML = "";
-      data.forEach(row => {
-        const tr = document.createElement("tr");
-        headers.forEach(h => {
-          const td = document.createElement("td");
-          td.textContent = row[h];
+loadData();
+setInterval(loadData,10000);
+</script>
 
-          // GCS 기준 경고 표시
-          if (h === "GCS" && parseInt(row[h], 10) <= 8) {
-            td.classList.add("alert");
-          }
-          tr.appendChild(td);
-        });
-        body.appendChild(tr);
-      });
-    }
-
-    // 5초마다 갱신
-    setInterval(fetchData, 5000);
-    fetchData();
-  </script>
 </body>
 </html>
