@@ -23,6 +23,7 @@ button{width:100%;padding:14px;border-radius:12px;font-size:16px;font-weight:600
 </style>
 </head>
 <body id="mainBody" class="px-4">
+
 <div class="header">🚑 무등산 산악사고 통합 기록</div>
 
 <form id="recordForm">
@@ -65,6 +66,7 @@ button{width:100%;padding:14px;border-radius:12px;font-size:16px;font-weight:600
 <option value="2">통증 이상신전</option>
 <option value="1">무반응</option>
 </select>
+
 <div class="font-bold text-lg mt-2">GCS: <span id="gcsResult"></span></div>
 <div id="gcsWarning" style="display:none;margin-top:10px;padding:10px;border-radius:10px;background:#fee2e2;color:#b91c1c;font-weight:600;">
 🚨 중증 의식저하 — 즉시 기도/호흡/순환 확인 필요
@@ -95,7 +97,7 @@ button{width:100%;padding:14px;border-radius:12px;font-size:16px;font-weight:600
 </div>
 
 <script>
-const SERVER_URL="https://script.google.com/macros/s/AKfycbzlomCAxIqxNLLLXeoI_7PZzP9WguNFk3OH84Nzgcxhncm1mLx6LuqNbcAgniODAFgDIQ/exec"; // 웹앱 URL
+const SERVER_URL="https://script.google.com/macros/s/AKfycbzlomCAxIqxNLLLXeoI_7PZzP9WguNFk3OH84Nzgcxhncm1mLx6LuqNbcAgniODAFgDIQ/exec";
 let voiceInterval=null;
 const mainBody=document.getElementById("mainBody");
 const eye=document.getElementById("eye");
@@ -103,6 +105,7 @@ const verbal=document.getElementById("verbal");
 const motor=document.getElementById("motor");
 let patientID="PT-"+Date.now();
 
+// 중증 음성 알림
 function speakCritical(){
   if(!('speechSynthesis' in window)) return;
   speechSynthesis.cancel();
@@ -110,9 +113,10 @@ function speakCritical(){
   msg.lang="ko-KR";
   speechSynthesis.speak(msg);
 }
-function startCriticalAlert(){if(voiceInterval)return; speakCritical(); voiceInterval=setInterval(speakCritical,10000);}
+function startCriticalAlert(){if(voiceInterval) return; speakCritical(); voiceInterval=setInterval(speakCritical,10000);}
 function stopCriticalAlert(){if(voiceInterval){clearInterval(voiceInterval);voiceInterval=null;} speechSynthesis.cancel();}
 
+// GCS 계산
 function calculateGCS(){
   const total=parseInt(eye.value)+parseInt(verbal.value)+parseInt(motor.value);
   let state='',color='';
@@ -122,6 +126,7 @@ function calculateGCS(){
   else{state='혼수';color='#000';}
   gcsResult.textContent=`${total}점 (${state})`;
   gcsResult.style.color=color;
+
   if(total<=8){
     gcsWarning.style.display="block";
     mainBody.classList.add("critical-mode");
@@ -136,6 +141,7 @@ function calculateGCS(){
 [eye,verbal,motor].forEach(el=>el.addEventListener("change",calculateGCS));
 calculateGCS();
 
+// GPS
 getLocation.onclick=()=>{navigator.geolocation.getCurrentPosition(p=>{
   const lat=p.coords.latitude;
   const lng=p.coords.longitude;
@@ -146,19 +152,40 @@ getLocation.onclick=()=>{navigator.geolocation.getCurrentPosition(p=>{
   new kakao.maps.Marker({position:loc,map:mapObj});
 });};
 
-recordForm.onsubmit=e=>{
+// 기록 저장 + fetch 전송
+recordForm.onsubmit=async e=>{
   e.preventDefault();
   let formData={};
-  new FormData(recordForm).forEach((v,k)=>{formData[k]=v;});
+  new FormData(recordForm).forEach((v,k)=>formData[k]=v);
   formData["GCS"]=gcsResult.textContent;
   formData["patientID"]=patientID;
-  if(formData["사고좌표"]){
+
+  // 좌표 안전 처리
+  if(formData["사고좌표"] && formData["사고좌표"].includes(",")){
     const parts=formData["사고좌표"].split(",");
-    if(parts.length===2){formData["latitude"]=parts[0].trim();formData["longitude"]=parts[1].trim();}
+    formData.latitude=parts[0].trim();
+    formData.longitude=parts[1].trim();
   }
-  let text="";for(let k in formData){text+=`${k}: ${formData[k]}\n`;}
+
+  // 화면 기록
+  let text="";
+  for(let k in formData){text+=`${k}: ${formData[k]}\n`;}
   savedData.innerHTML=`<div class="board-item">${text}</div>`;
-  fetch(SERVER_URL,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(formData)}).catch(()=>console.warn("서버 전송 실패"));
+
+  // 서버 전송
+  try{
+    const res=await fetch(SERVER_URL,{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify(formData)
+    });
+    const textRes=await res.text();
+    console.log("서버 응답:", textRes);
+    alert("서버 전송 완료");
+  }catch(err){
+    console.error("서버 전송 실패:", err);
+    alert("서버 전송 실패 - 콘솔 확인");
+  }
 };
 </script>
 </body>
