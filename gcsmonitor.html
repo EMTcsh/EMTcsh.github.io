@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>구조 상황실 모니터</title>
+<style>
+body{background:#111;color:white;font-family:Arial;}
+.card{background:#222;padding:15px;margin:10px;border-radius:10px;}
+.severe{background:red;}
+</style>
+</head>
+<body>
+
+<h2>🚨 구조 상황실</h2>
+<div id="list"></div>
+
+<script>
+const SERVER_URL="https://script.google.com/macros/s/AKfycbzlomCAxIqxNLLLXeoI_7PZzP9WguNFk3OH84Nzgcxhncm1mLx6LuqNbcAgniODAFgDIQ/exec";
+
+setInterval(()=>{
+fetch(SERVER_URL)
+.then(res=>res.json())
+.then(data=>{
+  const container=document.getElementById("list");
+  container.innerHTML="";
+  data.forEach(p=>{
+    const card=document.createElement("div");
+    card.className="card";
+    if(p.gcs<=8) card.classList.add("severe");
+    card.innerHTML=`
+      <h3>${p.patientID}</h3>
+      <p>GCS: ${p.gcs}</p>
+      <p>위치: ${p.latitude}, ${p.longitude}</p>
+      <p>시간: ${p.timestamp}</p>
+    `;
+    container.appendChild(card);
+  });
+});
+},5000);
+</script>
+
+</body>
+</html>
