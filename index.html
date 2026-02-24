@@ -99,7 +99,7 @@ button{width:100%;padding:14px;border-radius:12px;font-size:16px;font-weight:600
 </div>
 
 <script>
-const SERVER_URL="https://script.google.com/macros/s/AKfycbzlomCAxIqxNLLLXeoI_7PZzP9WguNFk3OH84Nzgcxhncm1mLx6LuqNbcAgniODAFgDIQ/exec"; // ← 배포 URL로 교체
+const SERVER_URL="https://script.google.com/macros/s/YOUR_DEPLOY_URL/exec"; // ← 배포 URL 교체
 
 let voiceInterval=null;
 const mainBody=document.getElementById("mainBody");
@@ -162,8 +162,11 @@ document.getElementById("recordForm").onsubmit=async e=>{
     formData.latitude=parts[0].trim();
     formData.longitude=parts[1].trim();
   }
+
+  // 기록 화면에 표시
   let text=""; for(let k in formData){text+=`${k}: ${formData[k]}\n`;}
   document.getElementById("savedData").innerHTML=`<div class="board-item">${text}</div>`;
+
   try{
     const res=await fetch(SERVER_URL,{
       method:"POST",
@@ -171,11 +174,11 @@ document.getElementById("recordForm").onsubmit=async e=>{
       body:JSON.stringify(formData),
       mode:"cors"
     });
-    const textRes=await res.text();
-    console.log("서버 응답:",textRes);
-    alert("서버 전송 완료");
+    const result=await res.json();
+    if(result.status==="success") alert("서버 전송 완료");
+    else alert("서버 전송 실패: "+result.message);
   }catch(err){
-    console.error("서버 전송 실패:",err);
+    console.error(err);
     alert("서버 전송 실패 - 콘솔 확인");
   }
 };
