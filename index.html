@@ -7,9 +7,9 @@
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=ff9e145029506d6e4c72d1f2b01ea424&libraries=services"></script>
 <style>
-body{background:#eef1f5;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;transition:background 0.3s;}
-@keyframes criticalFlash{0%{background-color:#fee2e2;}50%{background-color:#dc2626;}100%{background-color:#fee2e2;}}
+body{background:#eef1f5;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;}
 .critical-mode{animation:criticalFlash 0.8s infinite;}
+@keyframes criticalFlash{0%{background-color:#fee2e2;}50%{background-color:#dc2626;}100%{background-color:#fee2e2;}}
 .card{background:#fff;border-radius:14px;padding:16px;margin-bottom:16px;box-shadow:0 2px 8px rgba(0,0,0,0.05);border-left:5px solid #2563eb;}
 .card h2{font-weight:700;font-size:15px;margin-bottom:10px;color:#1e3a8a;}
 input,select,textarea{width:100%;border:1px solid #d1d5db;border-radius:10px;padding:12px;margin-bottom:10px;font-size:15px;background:#f9fafb;}
@@ -99,7 +99,7 @@ button{width:100%;padding:14px;border-radius:12px;font-size:16px;font-weight:600
 </div>
 
 <script>
-const SERVER_URL="https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec";
+const SERVER_URL="https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec"; // ← 배포 URL로 교체
 
 let voiceInterval=null;
 const mainBody=document.getElementById("mainBody");
@@ -110,13 +110,7 @@ let patientID="PT-"+Date.now();
 let monitorMap, monitorMarkers=[];
 
 // 🔊 중증 알림
-function speakCritical(){
-  if(!('speechSynthesis' in window)) return;
-  speechSynthesis.cancel();
-  const msg=new SpeechSynthesisUtterance("중증 환자입니다. 즉시 기도와 호흡을 확인하십시오.");
-  msg.lang="ko-KR";
-  speechSynthesis.speak(msg);
-}
+function speakCritical(){if(!('speechSynthesis' in window)) return; speechSynthesis.cancel(); const msg=new SpeechSynthesisUtterance("중증 환자입니다. 즉시 기도와 호흡을 확인하십시오."); msg.lang="ko-KR"; speechSynthesis.speak(msg);}
 function startCriticalAlert(){if(voiceInterval)return; speakCritical(); voiceInterval=setInterval(speakCritical,10000);}
 function stopCriticalAlert(){if(voiceInterval){clearInterval(voiceInterval);voiceInterval=null;} speechSynthesis.cancel();}
 
@@ -174,7 +168,8 @@ document.getElementById("recordForm").onsubmit=async e=>{
     const res=await fetch(SERVER_URL,{
       method:"POST",
       headers:{"Content-Type":"application/json"},
-      body:JSON.stringify(formData)
+      body:JSON.stringify(formData),
+      mode:"cors"
     });
     const textRes=await res.text();
     console.log("서버 응답:",textRes);
