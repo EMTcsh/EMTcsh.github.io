@@ -232,9 +232,9 @@ function calculateGCS(){
   const total=eye+verbal+motor;
 
   let state='', color='';
-  if(total>=13){ state='경도'; color='#16a34a'; }
-  else if(total>=9){ state='중등도'; color='#f59e0b'; }
-  else if(total>=4){ state='중증'; color='#dc2626'; }
+  if(total>=13){ state='경도-Mild'; color='#16a34a'; }
+  else if(total>=9){ state='중등도-Moderate'; color='#f59e0b'; }
+  else if(total>=4){ state='중증-Severe'; color='#dc2626'; }
   else{ state='혼수'; color='#000'; }
 
   const gcsResult=document.getElementById("gcsResult");
