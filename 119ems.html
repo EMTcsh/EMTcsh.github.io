@@ -180,8 +180,11 @@ async function loadData(){
   }
 }
 
-loadData();
-setInterval(loadData,10000);
+kakao.maps.load(function(){
+    initMap();
+    loadData();
+    setInterval(loadData,10000);
+});
 
 /* ===== 경과시간 갱신 ===== */
 setInterval(()=>{
