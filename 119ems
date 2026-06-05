@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>🆘 무등산특수구조팀 산악사고 공유</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<!-- 카카오맵 SDK -->
+<script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=ff9e145029506d6e4c72d1f2b01ea424&libraries=services"></script>
+
+<style>
+body{margin:0;font-family:Arial;background:#111;color:#fff;}
+header{background:#b71c1c;padding:15px;text-align:center;font-size:20px;}
+.container{padding:15px;}
+.card{background:#1e1e1e;padding:12px;margin-bottom:10px;border-radius:6px;}
+.card.done{background:#2b2b2b;opacity:0.6;}
+.time{color:#ffcc00;font-size:14px;}
+.coord{font-size:12px;color:#aaa;}
+.maplink{color:#4fc3f7;font-size:13px;text-decoration:none;}
+.maplink:hover{text-decoration:underline;}
+.complete-btn{background:#2e7d32;margin-top:8px;color:#fff;border:none;padding:6px 10px;border-radius:4px;cursor:pointer;}
+.complete-btn:hover{opacity:0.8;}
+#map{width:100%;height:320px;margin-bottom:15px;border-radius:6px;}
+
+/* 깜빡임 애니메이션 */
+@keyframes blinkEmergency{
+0%{box-shadow:0 0 5px #ff1744;}
+50%{box-shadow:0 0 20px #ff1744;}
+100%{box-shadow:0 0 5px #ff1744;}
+}
+.card.blink{animation:blinkEmergency 1s infinite;}
+</style>
+</head>
+
+<body>
+
+<header>🆘 무등산특수구조팀 산악사고 공유</header>
+
+<audio id="alertSound">
+  <source src="https://actions.google.com/sounds/v1/alarms/alarm_clock.ogg" type="audio/ogg">
+</audio>
+      
+<div class="container">
+  <div id="map"></div>
+</div>
+      
+<div class="container">
+  <div id="listArea">로딩중...</div>
+</div>
+
+<br>
+
+<script>
+
+/* ===== 지도 초기화 ===== */
+let map, markers = [];
+function initMap(){
+  map = new kakao.maps.Map(document.getElementById("map"),{
+    center: new kakao.maps.LatLng(35.1345,126.9902),
+    level:6
+  });
+}
+initMap();
+
+/* ===== 구글 시트 URL ===== */
+const API_URL = "https://script.google.com/macros/s/AKfycbwUbacHm34YkWh--zL_e590P6h4S5wQo3iF8tCVZu71ZaTunTwdZ1TMLVqkyuHu-izW/exec"; // 배포 URL로 변경
+const listArea = document.getElementById("listArea");
+let knownIds = new Set();
+let alertedOverdueIds = new Set();
+let firstLoad = true;
+
+/* ===== 경과시간 계산 ===== */
+function getElapsedTime(startTime,endTime=null){
+  const start = new Date(startTime);
+  const end = endTime ? new Date(endTime) : new Date();
+  const diff = Math.floor((end - start)/1000);
+  const m = Math.floor(diff/60);
+  const s = diff%60;
+  return `${m}분 ${s}초 경과`;
+}
+
+/* ===== 3분 초과 체크 및 알림 ===== */
+function checkOverdue(item, div){
+  if(item.type !== "응급환자") return;
+  if(!item.status || item.status === "사고처리완료") return;
+  const diffSeconds = Math.floor((new Date() - new Date(item.time))/1000);
+  if(diffSeconds >= 180){
+    div.classList.add("blink");
+    if(!alertedOverdueIds.has(item.id)){
+      alertedOverdueIds.add(item.id);
+      const interval = setInterval(()=>{
+        if(div.classList.contains("done")) { clearInterval(interval); alertedOverdueIds.delete(item.id); return;}
+        const alertSound = document.getElementById("alertSound");
+        alertSound.currentTime=0; alertSound.play();
+      },30000);
+      const alertSound = document.getElementById("alertSound");
+      alertSound.currentTime=0; alertSound.play();
+    }
+  }
+}
+
+/* ===== 현장도착/사고처리 완료 ===== */
+async function completeCase(id){
+  if(!confirm("구조대원이 현장에 도착했습니까?")) return;
+  await fetch(API_URL,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify({action:"complete",id:id,completeTime:new Date().toISOString()})});
+  loadData();
+}
+async function finishCase(id){
+  if(!confirm("사고처리를 완료하시겠습니까?")) return;
+  await fetch(API_URL,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify({action:"finish",id:id,finishTime:new Date().toISOString()})});
+  loadData();
+}
+
+/* ===== 목록 불러오기 ===== */
+async function loadData(){
+  try{
+    const res = await fetch(API_URL + "?action=list");
+    const data = await res.json();
+    listArea.innerHTML="";
+
+    // 마커 초기화
+    markers.forEach(m=>m.setMap(null));
+    markers = [];
+
+    if(!data.length){
+      listArea.innerHTML="현재 접수된 신고가 없습니다.";
+      return;
+    }
+
+    // 신규 알림
+    if(firstLoad){
+      data.forEach(item=>knownIds.add(item.id));
+      firstLoad=false;
+    } else {
+      data.forEach(item=>{
+        if(!knownIds.has(item.id)){
+          knownIds.add(item.id);
+          alert("🚨 새로운 신고 접수!");
+          const alertSound=document.getElementById("alertSound");
+          alertSound.currentTime=0; alertSound.play();
+        }
+      });
+    }
+
+    data.sort((a,b)=>new Date(b.time)-new Date(a.time));
+
+    data.forEach(item=>{
+      const div=document.createElement("div");
+      div.className="card"+(item.status==="사고처리완료"?" done":"");
+      div.setAttribute("data-time", item.time);
+      if(item.finishTime) div.setAttribute("data-finish-time", item.finishTime);
+
+      div.innerHTML=`
+        <div class="time">🕒 접수: ${new Date(item.time).toLocaleString()}</div>
+        <div class="time elapsed">⏱ ${getElapsedTime(item.time, item.finishTime)}</div>
+        ${item.status==="현장도착"? `<div class="time">🚑 현장도착: ${item.completeTime ? new Date(item.completeTime).toLocaleString() : ""}</div>` : ""}
+        ${item.status==="사고처리완료"? `<div class="time">✅ 사고처리 완료: ${item.finishTime ? new Date(item.finishTime).toLocaleString() : ""}</div>` : ""}
+        🏠 ${item.address||"주소없음"}<br>
+        📞 ${item.phone||"번호없음"}<br>
+        📝 ${item.symptom||"내용없음"}<br>
+        <div class="coord">위도: ${item.lat} / 경도: ${item.lng}</div>
+        <a class="maplink" href="https://map.kakao.com/link/map/구조요청 위치,${item.lat},${item.lng}" target="_blank">📍 지도보기</a><br>
+        ${item.status==="사고처리완료" ? "" : item.status==="현장도착" ? `<button class="complete-btn" onclick="finishCase('${item.id}')">✅ 사고처리 완료</button>` : `<button class="complete-btn" onclick="completeCase('${item.id}')">🚑 구조대원 현장도착</button>`}
+      `;
+      listArea.appendChild(div);
+
+      checkOverdue(item, div);
+
+      // 지도 마커 표시
+      if(item.lat && item.lng){
+        const position = new kakao.maps.LatLng(item.lat, item.lng);
+        const marker = new kakao.maps.Marker({map, position, title:item.symptom});
+        markers.push(marker);
+      }
+    });
+
+  } catch(err){
+    console.error(err);
+    listArea.innerHTML="구글시트 로딩 실패. 콘솔 확인";
+  }
+}
+
+loadData();
+setInterval(loadData,10000);
+
+/* ===== 경과시간 갱신 ===== */
+setInterval(()=>{
+  document.querySelectorAll(".card").forEach(card=>{
+    const elapsedEl = card.querySelector(".time.elapsed");
+    const timeAttr = card.getAttribute("data-time");
+    const finishTimeAttr = card.getAttribute("data-finish-time");
+    if(!elapsedEl || !timeAttr) return;
+    elapsedEl.innerText = "⏱ " + getElapsedTime(timeAttr, finishTimeAttr);
+  });
+},1000);
+
+</script>
+</body>
+</html>
