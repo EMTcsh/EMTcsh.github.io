@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+
+<meta name="viewport"
+content="width=device-width,
+initial-scale=1.0,
+maximum-scale=1.0,
+user-scalable=no">
+
+<title>무등산 위치 공유시스템</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+<link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:'Pretendard', sans-serif;
+    -webkit-tap-highlight-color:transparent;
+}
+
+html, body{
+    width:100%;
+    overflow-x:hidden;
+    background:#e9e9e9;
+}
+
+body{
+    max-width:430px;
+    margin:auto;
+    min-height:100vh;
+}
+
+/* ================= 상단 헤더 ================= */
+
+.header{
+
+    background:
+    linear-gradient(rgba(0,0,0,0.55), rgba(0,0,0,0.55)),
+    url('https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?q=80&w=1400&auto=format&fit=crop');
+
+    background-size:cover;
+    background-position:center;
+
+    height:210px;
+
+    color:white;
+
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+
+    border-bottom-left-radius:28px;
+    border-bottom-right-radius:28px;
+
+    box-shadow:0 4px 14px rgba(0,0,0,0.15);
+}
+
+/* ================= 로고 ================= */
+
+.logo{
+
+    width:72px;
+    height:72px;
+
+    border-radius:50%;
+
+    background:white;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    margin-bottom:14px;
+
+    animation:pulse 1.5s infinite;
+}
+
+.sos{
+
+    color:#e53935;
+
+    font-size:26px;
+    font-weight:900;
+
+    letter-spacing:2px;
+}
+
+@keyframes pulse{
+
+    0%{
+        transform:scale(1);
+        box-shadow:0 0 0 0 rgba(229,57,53,0.6);
+    }
+
+    70%{
+        transform:scale(1.05);
+        box-shadow:0 0 0 16px rgba(229,57,53,0);
+    }
+
+    100%{
+        transform:scale(1);
+        box-shadow:0 0 0 0 rgba(229,57,53,0);
+    }
+}
+
+/* ================= 제목 ================= */
+
+.title{
+
+    font-size:24px;
+    font-weight:700;
+
+    text-align:center;
+
+    line-height:1.3;
+}
+
+.subtitle{
+
+    margin-top:8px;
+
+    font-size:13px;
+
+    opacity:0.92;
+}
+
+/* ================= 전체 아이콘 메뉴 ================= */
+
+.icon-grid{
+
+    padding:20px 16px 40px;
+
+    display:grid;
+
+    grid-template-columns:1fr 1fr 1fr;
+
+    gap:14px;
+}
+
+/* ================= 아이콘 카드 ================= */
+
+.icon-card{
+
+    background:white;
+
+    border-radius:22px;
+
+    min-height:110px;
+
+    display:flex;
+    flex-direction:column;
+
+    align-items:center;
+    justify-content:center;
+
+    gap:10px;
+
+    text-align:center;
+
+    cursor:pointer;
+
+    box-shadow:0 4px 14px rgba(0,0,0,0.08);
+
+    transition:0.2s;
+}
+
+.icon-card:active{
+    transform:scale(0.95);
+}
+
+/* ================= 아이콘 ================= */
+
+.icon{
+
+    font-size:32px;
+}
+
+/* ================= 텍스트 ================= */
+
+.icon-text{
+
+    font-size:13px;
+    font-weight:700;
+
+    color:#222;
+
+    line-height:1.4;
+}
+
+/* ================= 강조 카드 ================= */
+
+.primary{
+    background:#1e88e5;
+    color:white;
+}
+
+.primary .icon-text{
+    color:white;
+}
+
+/* ================= 작은 화면 ================= */
+
+@media(max-width:360px){
+
+    .title{
+        font-size:21px;
+    }
+
+    .icon-text{
+        font-size:11px;
+    }
+
+    .icon{
+        font-size:28px;
+    }
+
+}
+
+</style>
+</head>
+
+<body>
+
+<!-- ================= 헤더 ================= -->
+
+<div class="header">
+
+    <div class="logo">
+        <span class="sos">SOS</span>
+    </div>
+
+    <div class="title">
+        무등산 위치 공유시스템
+    </div>
+
+    <div class="subtitle">
+        무등산특수산악구조팀
+    </div>
+
+</div>
+
+<!-- ================= 아이콘 메뉴 ================= -->
+
+<div class="icon-grid">
+
+    <!-- 구조대원 위치 -->
+    <div class="icon-card"
+    onclick="window.open('https://mudeung.github.io/rescue/gpsgps.html', '_blank')">
+
+        <div class="icon">👥</div>
+
+        <div class="icon-text">
+            구조대원 위치
+        </div>
+
+    </div>
+
+    <!-- 현위치 좌표 -->
+    <div class="icon-card"
+    onclick="window.open('https://mudeung.github.io/rescue/gpsxyz.html', '_blank')">
+
+        <div class="icon">📡</div>
+
+        <div class="icon-text">
+            현위치 좌표
+        </div>
+
+    </div>
+
+    <!-- 특수구조대 홈페이지 -->
+    <div class="icon-card"
+    onclick="window.open('https://mudeung.github.io/SMRT/', '_blank')">
+
+        <div class="icon">🧭</div>
+
+        <div class="icon-text">
+            일정공유
+        </div>
+
+    </div>
+
+    <!-- 산악구조 문자 -->
+    <div class="icon-card"
+    onclick="window.open('https://mudeung.github.io/rescue/gpscall.html', '_blank')">
+
+        <div class="icon">📞</div>
+
+        <div class="icon-text">
+           산악구조 문자
+        </div>
+
+    </div>
+
+    <!-- 산악구조 링크 -->
+    <div class="icon-card"
+    onclick="window.open('https://mudeung.github.io/rescue/gps.html', '_blank')">
+
+        <div class="icon">📍</div>
+
+        <div class="icon-text">
+            사고구조 링크
+        </div>
+
+    </div>
+ 
+    <!-- 산악사고 입력 -->
+    <div class="icon-card"
+    onclick="window.open('https://mudeung.github.io/rescue/callems.html', '_blank')">
+
+        <div class="icon">🚑</div>
+
+        <div class="icon-text">
+            산악사고 접수
+        </div>
+
+    </div>
+
+    <!-- 위치목록 -->
+    <div class="icon-card"
+    onclick="window.open('https://mudeung.github.io/rescue/emscall.html', '_blank')">
+
+        <div class="icon">🖥️</div>
+
+        <div class="icon-text">
+            사고위치 목록
+        </div>
+
+    </div>
+
+    <!-- 사고좌표 입력 -->
+    <div class="icon-card"
+    onclick="window.open('https://mudeung.github.io/rescue/rescuer.html', '_blank')">
+
+        <div class="icon">🌐</div>
+
+        <div class="icon-text">
+            사고좌표 입력
+        </div>
+
+    </div>
+    
+    <!-- 산악사고 기록 -->
+    <div class="icon-card"
+    onclick="window.open('https://mudeung.github.io/rescue/ems.html', '_blank')">
+
+        <div class="icon">📝</div>
+
+        <div class="icon-text">
+            산악사고 기록
+        </div>
+
+    </div>
+
+</div>
+
+</body>
+</html>
