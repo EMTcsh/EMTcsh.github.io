@@ -3,10 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>FlipBook PDF Viewer</title>
+<title>Stable PDF FlipBook</title>
 
-<!-- PDF.js CDN -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.4.168/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.6.82/pdf.min.js"></script>
 
 <style>
 body{
@@ -18,7 +17,7 @@ flex-direction:column;
 background:#2b2b2b;
 }
 
-/* TOP BAR */
+/* TOOLBAR */
 .toolbar{
 height:60px;
 background:#111;
@@ -41,7 +40,7 @@ display:flex;
 overflow:hidden;
 }
 
-/* THUMBS */
+/* THUMB PANEL */
 .sidebar{
 width:160px;
 background:#1e1e1e;
@@ -59,46 +58,33 @@ width:100%;
 border:1px solid #444;
 }
 
-/* BOOK AREA */
+/* VIEWER */
 .viewer{
 flex:1;
 display:flex;
 justify-content:center;
 align-items:center;
-perspective:2000px;
+position:relative;
 }
 
-/* PAGE FLIP STYLE */
+/* PAGE */
 .page{
-width:70%;
-max-width:700px;
-height:90%;
 background:white;
 box-shadow:0 20px 40px rgba(0,0,0,.4);
-transform-origin:left;
-transition:transform .7s ease;
-position:absolute;
-overflow:hidden;
+transition:transform .6s ease;
+transform-origin:center;
 }
 
-.page.flipped{
-transform:rotateY(-180deg);
-}
-
-/* CANVAS */
 canvas{
-width:100%;
-height:100%;
+display:block;
 }
 
-/* BOOK CONTAINER */
-.book{
-position:relative;
-width:100%;
-height:100%;
-display:flex;
-justify-content:center;
-align-items:center;
+/* loading */
+#loading{
+position:absolute;
+color:white;
+font-size:18px;
+display:none;
 }
 </style>
 </head>
@@ -125,8 +111,8 @@ align-items:center;
 
 <div class="viewer">
 
-<div class="book" id="book">
-</div>
+<div id="loading">Loading...</div>
+<div class="page" id="page"></div>
 
 </div>
 
@@ -135,15 +121,18 @@ align-items:center;
 <script>
 
 pdfjsLib.GlobalWorkerOptions.workerSrc =
-"https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.4.168/pdf.worker.min.js";
+"https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.6.82/pdf.worker.min.js";
 
 let pdfDoc = null;
 let currentPage = 1;
 let totalPages = 0;
 
-const book = document.getElementById("book");
+const pageDiv = document.getElementById("page");
+const loading = document.getElementById("loading");
 
-/* LOAD PDF */
+const pageCache = {}; // ⭐ 핵심 캐시
+
+/* PDF LOAD */
 document.getElementById("file")
 .addEventListener("change", async (e)=>{
 
@@ -152,24 +141,38 @@ if(!file) return;
 
 const data = await file.arrayBuffer();
 
-pdfDoc = await pdfjsLib.getDocument({data}).promise;
+loading.style.display = "block";
+
+const loadingTask = pdfjsLib.getDocument({data});
+
+pdfDoc = await loadingTask.promise;
 
 totalPages = pdfDoc.numPages;
 currentPage = 1;
+
+loading.style.display = "none";
 
 renderPage(currentPage);
 renderThumbs();
 
 });
 
-/* RENDER SINGLE PAGE */
+/* RENDER PAGE (OPTIMIZED) */
 async function renderPage(num){
 
-book.innerHTML = "";
+if(pageCache[num]){
+pageDiv.innerHTML = pageCache[num];
+document.getElementById("info").innerText =
+`${num} / ${totalPages}`;
+return;
+}
+
+loading.style.display = "block";
 
 const page = await pdfDoc.getPage(num);
 
-const viewport = page.getViewport({scale:1.5});
+/* 🔥 중요: scale 줄임 (100MB 대응) */
+const viewport = page.getViewport({scale:1.0});
 
 const canvas = document.createElement("canvas");
 const ctx = canvas.getContext("2d");
@@ -182,56 +185,55 @@ canvasContext:ctx,
 viewport
 }).promise;
 
-const pageDiv = document.createElement("div");
-pageDiv.className = "page";
+pageDiv.innerHTML = "";
 pageDiv.appendChild(canvas);
 
-book.appendChild(pageDiv);
+/* cache */
+pageCache[num] = pageDiv.innerHTML;
 
-document.getElementById("info")
-.innerText = `${num} / ${totalPages}`;
+document.getElementById("info").innerText =
+`${num} / ${totalPages}`;
+
+loading.style.display = "none";
 
 }
 
-/* NEXT / PREV */
+/* NEXT */
 function nextPage(){
 if(currentPage < totalPages){
 currentPage++;
-animateFlip("next");
+flipAnim();
 renderPage(currentPage);
 }
 }
 
+/* PREV */
 function prevPage(){
 if(currentPage > 1){
 currentPage--;
-animateFlip("prev");
+flipAnim();
 renderPage(currentPage);
 }
 }
 
 /* SIMPLE FLIP EFFECT */
-function animateFlip(dir){
-const page = document.querySelector(".page");
-if(!page) return;
-
-page.style.transform =
-dir === "next"
-? "rotateY(-180deg)"
-: "rotateY(180deg)";
-
+function flipAnim(){
+pageDiv.style.transform = "rotateY(-180deg)";
 setTimeout(()=>{
-page.style.transform = "rotateY(0deg)";
-},400);
+pageDiv.style.transform = "rotateY(0deg)";
+},300);
 }
 
-/* THUMBNAILS */
+/* THUMBNAILS (LIMITED - 중요) */
 async function renderThumbs(){
 
 const thumbs = document.getElementById("thumbs");
 thumbs.innerHTML = "";
 
-for(let i=1;i<=totalPages;i++){
+/* ⭐ 100MB 대응: 최대 50페이지 제한 */
+const limit = Math.min(totalPages, 50);
+
+for(let i=1;i<=limit;i++){
 
 const page = await pdfDoc.getPage(i);
 
@@ -258,6 +260,7 @@ renderPage(i);
 
 div.appendChild(canvas);
 thumbs.appendChild(div);
+
 }
 
 }
@@ -275,6 +278,12 @@ currentPage = Number(p);
 renderPage(currentPage);
 }
 }
+
+/* KEYBOARD */
+document.addEventListener("keydown",(e)=>{
+if(e.key==="ArrowRight") nextPage();
+if(e.key==="ArrowLeft") prevPage();
+});
 
 </script>
 
