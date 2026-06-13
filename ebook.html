@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>전자책 템플릿</title>
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+body{
+    font-family:
+        "Pretendard",
+        "Noto Sans KR",
+        sans-serif;
+    background:#e5e7eb;
+    height:100vh;
+    overflow:hidden;
+}
+
+#app{
+    display:flex;
+    height:100vh;
+}
+
+.sidebar{
+    width:280px;
+    background:#111827;
+    color:white;
+    overflow:auto;
+    transition:.3s;
+}
+
+.sidebar h2{
+    padding:20px;
+    border-bottom:1px solid #374151;
+}
+
+.toc-item{
+    padding:14px 20px;
+    cursor:pointer;
+    border-bottom:1px solid #1f2937;
+}
+
+.toc-item:hover{
+    background:#1f2937;
+}
+
+.main{
+    flex:1;
+    display:flex;
+    flex-direction:column;
+}
+
+.toolbar{
+    height:60px;
+    background:white;
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:0 15px;
+    border-bottom:1px solid #ddd;
+}
+
+.toolbar button{
+    border:none;
+    background:#2563eb;
+    color:white;
+    padding:10px 14px;
+    border-radius:8px;
+    cursor:pointer;
+}
+
+.toolbar button:hover{
+    background:#1d4ed8;
+}
+
+.progress{
+    flex:1;
+    height:8px;
+    background:#ddd;
+    border-radius:20px;
+    overflow:hidden;
+}
+
+.progress-bar{
+    height:100%;
+    width:0%;
+    background:#22c55e;
+    transition:.3s;
+}
+
+.book-area{
+    flex:1;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    padding:20px;
+}
+
+.book{
+    width:min(900px,95%);
+    height:min(700px,90%);
+    position:relative;
+    perspective:2000px;
+}
+
+.page{
+    position:absolute;
+    inset:0;
+    background:white;
+    border-radius:10px;
+    box-shadow:
+      0 10px 40px rgba(0,0,0,.15);
+    padding:50px;
+    overflow:auto;
+
+    opacity:0;
+    transform:
+      rotateY(-15deg)
+      translateX(80px);
+
+    transition:
+      transform .45s,
+      opacity .45s;
+}
+
+.page.active{
+    opacity:1;
+    transform:
+      rotateY(0)
+      translateX(0);
+    z-index:2;
+}
+
+.page h1{
+    margin-bottom:20px;
+    color:#111827;
+}
+
+.page h2{
+    margin-bottom:15px;
+}
+
+.page p{
+    line-height:1.8;
+    margin-bottom:12px;
+}
+
+.page-number{
+    position:absolute;
+    bottom:20px;
+    right:30px;
+    color:#666;
+}
+
+.cover{
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    text-align:center;
+    background:
+      linear-gradient(
+      135deg,
+      #2563eb,
+      #7c3aed);
+    color:white;
+}
+
+.cover h1{
+    color:white;
+    font-size:3rem;
+}
+
+.mobile-menu{
+    display:none;
+}
+
+@media(max-width:768px){
+
+.sidebar{
+    position:fixed;
+    left:-280px;
+    top:0;
+    bottom:0;
+    z-index:999;
+}
+
+.sidebar.open{
+    left:0;
+}
+
+.mobile-menu{
+    display:block;
+}
+
+.page{
+    padding:25px;
+}
+}
+</style>
+</head>
+<body>
+
+<div id="app">
+
+<div class="sidebar" id="sidebar">
+    <h2>📚 목차</h2>
+
+    <div class="toc-item" onclick="goToPage(0)">표지</div>
+    <div class="toc-item" onclick="goToPage(1)">소개</div>
+    <div class="toc-item" onclick="goToPage(2)">1장</div>
+    <div class="toc-item" onclick="goToPage(3)">2장</div>
+    <div class="toc-item" onclick="goToPage(4)">마무리</div>
+</div>
+
+<div class="main">
+
+<div class="toolbar">
+
+<button class="mobile-menu"
+onclick="toggleMenu()">☰</button>
+
+<button onclick="prevPage()">◀ 이전</button>
+
+<button onclick="nextPage()">다음 ▶</button>
+
+<button onclick="toggleFullScreen()">
+전체화면
+</button>
+
+<div class="progress">
+<div class="progress-bar"
+id="progressBar"></div>
+</div>
+
+<span id="pageInfo"></span>
+
+</div>
+
+<div class="book-area">
+
+<div class="book">
+
+<section class="page active cover">
+<div>
+<h1>나의 전자책</h1>
+<p>HTML E-Book Template</p>
+</div>
+<div class="page-number">1</div>
+</section>
+
+<section class="page">
+<h1>소개</h1>
+<p>
+이 전자책은 HTML 한 파일로 구성됩니다.
+</p>
+<p>
+모바일, 태블릿, PC에서 모두 읽을 수 있습니다.
+</p>
+<div class="page-number">2</div>
+</section>
+
+<section class="page">
+<h1>제1장</h1>
+<p>
+첫 번째 장의 내용입니다.
+</p>
+<p>
+원하는 텍스트를 자유롭게 작성하세요.
+</p>
+<p>
+이미지, 표, 동영상도 삽입 가능합니다.
+</p>
+<div class="page-number">3</div>
+</section>
+
+<section class="page">
+<h1>제2장</h1>
+<p>
+두 번째 장입니다.
+</p>
+<p>
+교육자료, 브로슈어,
+회사소개서, 매거진 등에 활용할 수 있습니다.
+</p>
+<div class="page-number">4</div>
+</section>
+
+<section class="page">
+<h1>감사합니다</h1>
+<p>
+전자책 읽어주셔서 감사합니다.
+</p>
+<div class="page-number">5</div>
+</section>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+<script>
+
+const pages =
+document.querySelectorAll(".page");
+
+let current = 0;
+
+function showPage(index){
+
+if(index < 0) return;
+if(index >= pages.length) return;
+
+pages.forEach(page=>{
+page.classList.remove("active");
+});
+
+pages[index].classList.add("active");
+
+current = index;
+
+updateProgress();
+
+}
+
+function nextPage(){
+showPage(current+1);
+}
+
+function prevPage(){
+showPage(current-1);
+}
+
+function goToPage(index){
+
+showPage(index);
+
+if(window.innerWidth < 768){
+sidebar.classList.remove("open");
+}
+}
+
+function updateProgress(){
+
+const percent =
+((current+1)/pages.length)*100;
+
+document
+.getElementById("progressBar")
+.style.width = percent + "%";
+
+document
+.getElementById("pageInfo")
+.textContent =
+`${current+1} / ${pages.length}`;
+
+}
+
+function toggleMenu(){
+
+document
+.getElementById("sidebar")
+.classList.toggle("open");
+
+}
+
+function toggleFullScreen(){
+
+if(!document.fullscreenElement){
+document.documentElement
+.requestFullscreen();
+}else{
+document.exitFullscreen();
+}
+
+}
+
+document.addEventListener(
+"keydown",
+e=>{
+
+if(e.key==="ArrowRight")
+nextPage();
+
+if(e.key==="ArrowLeft")
+prevPage();
+
+});
+
+let startX = 0;
+
+document.addEventListener(
+"touchstart",
+e=>{
+startX = e.touches[0].clientX;
+});
+
+document.addEventListener(
+"touchend",
+e=>{
+
+let endX =
+e.changedTouches[0].clientX;
+
+let diff =
+startX-endX;
+
+if(diff>50) nextPage();
+
+if(diff<-50) prevPage();
+
+});
+
+updateProgress();
+
+</script>
+
+</body>
+</html>
