@@ -3,304 +3,129 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>전자책 템플릿</title>
+<title>FlipBook PDF Viewer</title>
+
+<!-- PDF.js CDN -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.4.168/pdf.min.js"></script>
 
 <style>
-*{
-    margin:0;
-    padding:0;
-    box-sizing:border-box;
-}
-
 body{
-    font-family:
-        "Pretendard",
-        "Noto Sans KR",
-        sans-serif;
-    background:#e5e7eb;
-    height:100vh;
-    overflow:hidden;
+margin:0;
+font-family:sans-serif;
+height:100vh;
+display:flex;
+flex-direction:column;
+background:#2b2b2b;
 }
 
-#app{
-    display:flex;
-    height:100vh;
-}
-
-.sidebar{
-    width:280px;
-    background:#111827;
-    color:white;
-    overflow:auto;
-    transition:.3s;
-}
-
-.sidebar h2{
-    padding:20px;
-    border-bottom:1px solid #374151;
-}
-
-.toc-item{
-    padding:14px 20px;
-    cursor:pointer;
-    border-bottom:1px solid #1f2937;
-}
-
-.toc-item:hover{
-    background:#1f2937;
-}
-
-.main{
-    flex:1;
-    display:flex;
-    flex-direction:column;
-}
-
+/* TOP BAR */
 .toolbar{
-    height:60px;
-    background:white;
-    display:flex;
-    align-items:center;
-    gap:10px;
-    padding:0 15px;
-    border-bottom:1px solid #ddd;
+height:60px;
+background:#111;
+color:#fff;
+display:flex;
+align-items:center;
+gap:10px;
+padding:10px;
 }
 
-.toolbar button{
-    border:none;
-    background:#2563eb;
-    color:white;
-    padding:10px 14px;
-    border-radius:8px;
-    cursor:pointer;
+button{
+padding:6px 10px;
+cursor:pointer;
 }
 
-.toolbar button:hover{
-    background:#1d4ed8;
+/* MAIN */
+.main{
+flex:1;
+display:flex;
+overflow:hidden;
 }
 
-.progress{
-    flex:1;
-    height:8px;
-    background:#ddd;
-    border-radius:20px;
-    overflow:hidden;
-}
-
-.progress-bar{
-    height:100%;
-    width:0%;
-    background:#22c55e;
-    transition:.3s;
-}
-
-.book-area{
-    flex:1;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    padding:20px;
-}
-
-.book{
-    width:min(900px,95%);
-    height:min(700px,90%);
-    position:relative;
-    perspective:2000px;
-}
-
-.page{
-    position:absolute;
-    inset:0;
-    background:white;
-    border-radius:10px;
-    box-shadow:
-      0 10px 40px rgba(0,0,0,.15);
-    padding:50px;
-    overflow:auto;
-
-    opacity:0;
-    transform:
-      rotateY(-15deg)
-      translateX(80px);
-
-    transition:
-      transform .45s,
-      opacity .45s;
-}
-
-.page.active{
-    opacity:1;
-    transform:
-      rotateY(0)
-      translateX(0);
-    z-index:2;
-}
-
-.page h1{
-    margin-bottom:20px;
-    color:#111827;
-}
-
-.page h2{
-    margin-bottom:15px;
-}
-
-.page p{
-    line-height:1.8;
-    margin-bottom:12px;
-}
-
-.page-number{
-    position:absolute;
-    bottom:20px;
-    right:30px;
-    color:#666;
-}
-
-.cover{
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    text-align:center;
-    background:
-      linear-gradient(
-      135deg,
-      #2563eb,
-      #7c3aed);
-    color:white;
-}
-
-.cover h1{
-    color:white;
-    font-size:3rem;
-}
-
-.mobile-menu{
-    display:none;
-}
-
-@media(max-width:768px){
-
+/* THUMBS */
 .sidebar{
-    position:fixed;
-    left:-280px;
-    top:0;
-    bottom:0;
-    z-index:999;
+width:160px;
+background:#1e1e1e;
+overflow:auto;
+padding:5px;
 }
 
-.sidebar.open{
-    left:0;
+.thumb{
+margin-bottom:10px;
+cursor:pointer;
 }
 
-.mobile-menu{
-    display:block;
+.thumb canvas{
+width:100%;
+border:1px solid #444;
 }
 
+/* BOOK AREA */
+.viewer{
+flex:1;
+display:flex;
+justify-content:center;
+align-items:center;
+perspective:2000px;
+}
+
+/* PAGE FLIP STYLE */
 .page{
-    padding:25px;
+width:70%;
+max-width:700px;
+height:90%;
+background:white;
+box-shadow:0 20px 40px rgba(0,0,0,.4);
+transform-origin:left;
+transition:transform .7s ease;
+position:absolute;
+overflow:hidden;
 }
+
+.page.flipped{
+transform:rotateY(-180deg);
+}
+
+/* CANVAS */
+canvas{
+width:100%;
+height:100%;
+}
+
+/* BOOK CONTAINER */
+.book{
+position:relative;
+width:100%;
+height:100%;
+display:flex;
+justify-content:center;
+align-items:center;
 }
 </style>
 </head>
+
 <body>
 
-<div id="app">
+<div class="toolbar">
 
-<div class="sidebar" id="sidebar">
-    <h2>📚 목차</h2>
+<input type="file" id="file" accept="application/pdf">
 
-    <div class="toc-item" onclick="goToPage(0)">표지</div>
-    <div class="toc-item" onclick="goToPage(1)">소개</div>
-    <div class="toc-item" onclick="goToPage(2)">1장</div>
-    <div class="toc-item" onclick="goToPage(3)">2장</div>
-    <div class="toc-item" onclick="goToPage(4)">마무리</div>
+<button onclick="prevPage()">◀</button>
+<button onclick="nextPage()">▶</button>
+
+<span id="info">0 / 0</span>
+
+<button onclick="saveBookmark()">북마크</button>
+<button onclick="loadBookmark()">이동</button>
+
 </div>
 
 <div class="main">
 
-<div class="toolbar">
+<div class="sidebar" id="thumbs"></div>
 
-<button class="mobile-menu"
-onclick="toggleMenu()">☰</button>
+<div class="viewer">
 
-<button onclick="prevPage()">◀ 이전</button>
-
-<button onclick="nextPage()">다음 ▶</button>
-
-<button onclick="toggleFullScreen()">
-전체화면
-</button>
-
-<div class="progress">
-<div class="progress-bar"
-id="progressBar"></div>
-</div>
-
-<span id="pageInfo"></span>
-
-</div>
-
-<div class="book-area">
-
-<div class="book">
-
-<section class="page active cover">
-<div>
-<h1>나의 전자책</h1>
-<p>HTML E-Book Template</p>
-</div>
-<div class="page-number">1</div>
-</section>
-
-<section class="page">
-<h1>소개</h1>
-<p>
-이 전자책은 HTML 한 파일로 구성됩니다.
-</p>
-<p>
-모바일, 태블릿, PC에서 모두 읽을 수 있습니다.
-</p>
-<div class="page-number">2</div>
-</section>
-
-<section class="page">
-<h1>제1장</h1>
-<p>
-첫 번째 장의 내용입니다.
-</p>
-<p>
-원하는 텍스트를 자유롭게 작성하세요.
-</p>
-<p>
-이미지, 표, 동영상도 삽입 가능합니다.
-</p>
-<div class="page-number">3</div>
-</section>
-
-<section class="page">
-<h1>제2장</h1>
-<p>
-두 번째 장입니다.
-</p>
-<p>
-교육자료, 브로슈어,
-회사소개서, 매거진 등에 활용할 수 있습니다.
-</p>
-<div class="page-number">4</div>
-</section>
-
-<section class="page">
-<h1>감사합니다</h1>
-<p>
-전자책 읽어주셔서 감사합니다.
-</p>
-<div class="page-number">5</div>
-</section>
-
-</div>
-
+<div class="book" id="book">
 </div>
 
 </div>
@@ -309,117 +134,147 @@ id="progressBar"></div>
 
 <script>
 
-const pages =
-document.querySelectorAll(".page");
+pdfjsLib.GlobalWorkerOptions.workerSrc =
+"https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.4.168/pdf.worker.min.js";
 
-let current = 0;
+let pdfDoc = null;
+let currentPage = 1;
+let totalPages = 0;
 
-function showPage(index){
+const book = document.getElementById("book");
 
-if(index < 0) return;
-if(index >= pages.length) return;
+/* LOAD PDF */
+document.getElementById("file")
+.addEventListener("change", async (e)=>{
 
-pages.forEach(page=>{
-page.classList.remove("active");
+const file = e.target.files[0];
+if(!file) return;
+
+const data = await file.arrayBuffer();
+
+pdfDoc = await pdfjsLib.getDocument({data}).promise;
+
+totalPages = pdfDoc.numPages;
+currentPage = 1;
+
+renderPage(currentPage);
+renderThumbs();
+
 });
 
-pages[index].classList.add("active");
+/* RENDER SINGLE PAGE */
+async function renderPage(num){
 
-current = index;
+book.innerHTML = "";
 
-updateProgress();
+const page = await pdfDoc.getPage(num);
+
+const viewport = page.getViewport({scale:1.5});
+
+const canvas = document.createElement("canvas");
+const ctx = canvas.getContext("2d");
+
+canvas.width = viewport.width;
+canvas.height = viewport.height;
+
+await page.render({
+canvasContext:ctx,
+viewport
+}).promise;
+
+const pageDiv = document.createElement("div");
+pageDiv.className = "page";
+pageDiv.appendChild(canvas);
+
+book.appendChild(pageDiv);
+
+document.getElementById("info")
+.innerText = `${num} / ${totalPages}`;
 
 }
 
+/* NEXT / PREV */
 function nextPage(){
-showPage(current+1);
+if(currentPage < totalPages){
+currentPage++;
+animateFlip("next");
+renderPage(currentPage);
+}
 }
 
 function prevPage(){
-showPage(current-1);
-}
-
-function goToPage(index){
-
-showPage(index);
-
-if(window.innerWidth < 768){
-sidebar.classList.remove("open");
+if(currentPage > 1){
+currentPage--;
+animateFlip("prev");
+renderPage(currentPage);
 }
 }
 
-function updateProgress(){
+/* SIMPLE FLIP EFFECT */
+function animateFlip(dir){
+const page = document.querySelector(".page");
+if(!page) return;
 
-const percent =
-((current+1)/pages.length)*100;
+page.style.transform =
+dir === "next"
+? "rotateY(-180deg)"
+: "rotateY(180deg)";
 
-document
-.getElementById("progressBar")
-.style.width = percent + "%";
+setTimeout(()=>{
+page.style.transform = "rotateY(0deg)";
+},400);
+}
 
-document
-.getElementById("pageInfo")
-.textContent =
-`${current+1} / ${pages.length}`;
+/* THUMBNAILS */
+async function renderThumbs(){
+
+const thumbs = document.getElementById("thumbs");
+thumbs.innerHTML = "";
+
+for(let i=1;i<=totalPages;i++){
+
+const page = await pdfDoc.getPage(i);
+
+const viewport = page.getViewport({scale:0.2});
+
+const canvas = document.createElement("canvas");
+const ctx = canvas.getContext("2d");
+
+canvas.width = viewport.width;
+canvas.height = viewport.height;
+
+await page.render({
+canvasContext:ctx,
+viewport
+}).promise;
+
+const div = document.createElement("div");
+div.className = "thumb";
+
+div.onclick = ()=>{
+currentPage = i;
+renderPage(i);
+};
+
+div.appendChild(canvas);
+thumbs.appendChild(div);
+}
 
 }
 
-function toggleMenu(){
-
-document
-.getElementById("sidebar")
-.classList.toggle("open");
-
+/* BOOKMARK */
+function saveBookmark(){
+localStorage.setItem("bookmark", currentPage);
+alert("북마크 저장: " + currentPage);
 }
 
-function toggleFullScreen(){
-
-if(!document.fullscreenElement){
-document.documentElement
-.requestFullscreen();
-}else{
-document.exitFullscreen();
+function loadBookmark(){
+const p = localStorage.getItem("bookmark");
+if(p){
+currentPage = Number(p);
+renderPage(currentPage);
 }
-
 }
-
-document.addEventListener(
-"keydown",
-e=>{
-
-if(e.key==="ArrowRight")
-nextPage();
-
-if(e.key==="ArrowLeft")
-prevPage();
-
-});
-
-let startX = 0;
-
-document.addEventListener(
-"touchstart",
-e=>{
-startX = e.touches[0].clientX;
-});
-
-document.addEventListener(
-"touchend",
-e=>{
-
-let endX =
-e.changedTouches[0].clientX;
-
-let diff =
-startX-endX;
-
-if(diff>50) nextPage();
-
-if(diff<-50) prevPage();
-
-});
-
-updateProgress();
 
 </script>
 
