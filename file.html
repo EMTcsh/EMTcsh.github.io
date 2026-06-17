@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>게시판</title>
+
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" rel="stylesheet">
+
+<style>
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+}
+
+body{
+  font-family:"Pretendard",sans-serif;
+  background:#f5f7fb;
+  color:#333;
+  padding:30px 15px;
+}
+
+.container{
+  max-width:900px;
+  margin:auto;
+}
+
+.card{
+  background:#fff;
+  border-radius:18px;
+  padding:25px;
+  box-shadow:0 4px 20px rgba(0,0,0,.08);
+}
+
+h2{
+  font-size:28px;
+  margin-bottom:20px;
+  color:#111827;
+}
+
+input,
+textarea{
+  width:100%;
+  padding:14px;
+  border:1px solid #ddd;
+  border-radius:12px;
+  margin-bottom:12px;
+  font-size:15px;
+  transition:.2s;
+}
+
+input:focus,
+textarea:focus{
+  outline:none;
+  border-color:#4f46e5;
+  box-shadow:0 0 0 4px rgba(79,70,229,.1);
+}
+
+textarea{
+  min-height:130px;
+  resize:vertical;
+}
+
+input[type="file"]{
+  background:#fafafa;
+}
+
+button{
+  border:none;
+  cursor:pointer;
+  transition:.2s;
+}
+
+#createBtn{
+  width:100%;
+  background:#4f46e5;
+  color:white;
+  padding:14px;
+  border-radius:12px;
+  font-size:16px;
+  font-weight:600;
+}
+
+#createBtn:hover{
+  background:#4338ca;
+}
+
+.section-title{
+  margin:30px 0 15px;
+  font-size:22px;
+  font-weight:700;
+}
+
+.post{
+  background:white;
+  border-radius:16px;
+  padding:20px;
+  margin-bottom:15px;
+  box-shadow:0 4px 15px rgba(0,0,0,.06);
+  transition:.2s;
+}
+
+.post:hover{
+  transform:translateY(-2px);
+  box-shadow:0 8px 20px rgba(0,0,0,.08);
+}
+
+.post h4{
+  font-size:20px;
+  margin-bottom:6px;
+  color:#111827;
+}
+
+.post small{
+  display:block;
+  margin-bottom:10px;
+  color:#6b7280;
+  font-size:13px;
+}
+
+.post p{
+  color:#4b5563;
+  line-height:1.7;
+  margin-bottom:15px;
+  white-space:pre-wrap;
+}
+
+.file-link{
+  display:inline-block;
+  background:#eef2ff;
+  color:#4f46e5;
+  padding:8px 12px;
+  border-radius:8px;
+  text-decoration:none;
+  font-size:14px;
+  font-weight:600;
+  margin-bottom:15px;
+}
+
+.file-link:hover{
+  background:#dbeafe;
+}
+
+.actions{
+  display:flex;
+  gap:8px;
+}
+
+.edit-btn{
+  background:#10b981;
+  color:white;
+  padding:8px 14px;
+  border-radius:8px;
+}
+
+.edit-btn:hover{
+  background:#059669;
+}
+
+.delete-btn{
+  background:#ef4444;
+  color:white;
+  padding:8px 14px;
+  border-radius:8px;
+}
+
+.delete-btn:hover{
+  background:#dc2626;
+}
+
+.empty{
+  text-align:center;
+  color:#888;
+  padding:30px;
+}
+
+@media (max-width:600px){
+  h2{
+    font-size:24px;
+  }
+
+  .post h4{
+    font-size:18px;
+  }
+
+  .actions{
+    flex-direction:column;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+  <div class="card">
+    <h2>📝 무등산 특수산악구조팀 게시판</h2>
+
+    <input id="title" placeholder="제목을 입력하세요">
+    <textarea id="content" placeholder="내용을 입력하세요"></textarea>
+
+    <input type="file" id="file">
+
+    <button id="createBtn">게시글 등록</button>
+  </div>
+
+  <div class="section-title">게시글 목록</div>
+
+  <div id="posts"></div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script>
+const SUPABASE_URL =
+"https://laghjfjpqpitxqjhkdlh.supabase.co";
+
+const SUPABASE_ANON_KEY =
+"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxhZ2hqZmpwcXBpdHhxamhrZGxoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA1NTE4NzgsImV4cCI6MjA5NjEyNzg3OH0.WKC02BiwrGDv7Ttp8NAtf73t0kDSgISpTtiMhWyeKJg";
+
+const client = supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_ANON_KEY
+);
+
+/* =========================
+   CREATE
+========================= */
+document.getElementById("createBtn")
+.addEventListener("click", async () => {
+
+  const title =
+    document.getElementById("title").value.trim();
+
+  const content =
+    document.getElementById("content").value.trim();
+
+  const file =
+    document.getElementById("file").files[0];
+
+  if(!title || !content){
+    alert("제목과 내용을 입력하세요.");
+    return;
+  }
+
+  let fileUrl = null;
+
+  try {
+
+    if(file){
+
+      const fileName =
+        Date.now() + "_" + file.name;
+
+      const { error: uploadError } =
+      await client.storage
+        .from("uploads")
+        .upload(fileName, file);
+
+      if(uploadError){
+        alert(uploadError.message);
+        return;
+      }
+
+      const { data } =
+      client.storage
+        .from("uploads")
+        .getPublicUrl(fileName);
+
+      fileUrl = data.publicUrl;
+    }
+
+    const { error } =
+    await client
+      .from("posts")
+      .insert([
+        {
+          title,
+          content,
+          file_url:fileUrl
+        }
+      ]);
+
+    if(error){
+      alert(error.message);
+      return;
+    }
+
+    document.getElementById("title").value="";
+    document.getElementById("content").value="";
+    document.getElementById("file").value="";
+
+    loadPosts();
+
+  } catch(err){
+    console.error(err);
+    alert("에러가 발생했습니다.");
+  }
+});
+
+/* =========================
+   READ (시간 표시 포함)
+========================= */
+async function loadPosts(){
+
+  const { data, error } =
+  await client
+    .from("posts")
+    .select("*")
+    .order("created_at", {
+      ascending:false
+    });
+
+  if(error){
+    console.error(error);
+    return;
+  }
+
+  const container =
+    document.getElementById("posts");
+
+  container.innerHTML = "";
+
+  if(!data.length){
+    container.innerHTML =
+      '<div class="card empty">등록된 게시글이 없습니다.</div>';
+    return;
+  }
+
+  data.forEach(post => {
+
+    const div = document.createElement("div");
+    div.className = "post";
+
+    const date = new Date(post.created_at);
+
+    const formatted = date.toLocaleString("ko-KR", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit"
+    });
+
+    div.innerHTML = `
+      <h4>${post.title}</h4>
+      <small>🕒 ${formatted}</small>
+      <p>${post.content}</p>
+    `;
+
+    if(post.file_url){
+      const link = document.createElement("a");
+      link.href = post.file_url;
+      link.target = "_blank";
+      link.className = "file-link";
+      link.textContent = "📎 첨부파일 다운로드";
+      div.appendChild(link);
+    }
+
+    const actions = document.createElement("div");
+    actions.className = "actions";
+
+    const editBtn = document.createElement("button");
+    editBtn.className = "edit-btn";
+    editBtn.textContent = "수정";
+
+    editBtn.onclick = async () => {
+
+      const newTitle = prompt("제목 수정", post.title);
+      if(newTitle === null) return;
+
+      const newContent = prompt("내용 수정", post.content);
+      if(newContent === null) return;
+
+      await client
+        .from("posts")
+        .update({
+          title:newTitle,
+          content:newContent
+        })
+        .eq("id", post.id);
+
+      loadPosts();
+    };
+
+    const deleteBtn = document.createElement("button");
+    deleteBtn.className = "delete-btn";
+    deleteBtn.textContent = "삭제";
+
+    deleteBtn.onclick = async () => {
+
+      if(!confirm("삭제하시겠습니까?")) return;
+
+      await client
+        .from("posts")
+        .delete()
+        .eq("id", post.id);
+
+      loadPosts();
+    };
+
+    actions.appendChild(editBtn);
+    actions.appendChild(deleteBtn);
+
+    div.appendChild(actions);
+
+    container.appendChild(div);
+  });
+}
+
+loadPosts();
+</script>
+
+</body>
+</html>
