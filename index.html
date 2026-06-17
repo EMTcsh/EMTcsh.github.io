@@ -61,50 +61,25 @@ tr:hover { background-color: #f1f3f5; cursor: pointer; }
 <header>
     <div>
         <h1>🩺 국립공원 안전사고연구회</h1>
-        <p>국민의 생명과 안전을 지키는 산악전문 구조팀</p>
+        <p>국민의 생명과 안전을 지키는 산악전문 구조팀 연구회</p>
     </div>
 </header>
 
 <nav>
 <a href="#mainPage">Home</a>
-<a href="#rescue">사고현황</a> 
 <a href="#calendar">일정공유</a>
 <a href="#mission">게시판</a>
-<a href="#notice">업무공지</a>
-<a href="#contact">유관기관</a>
+<a href="#notice">공지사항</a>
 </nav>
 
 <div id="noticePreview" style="padding: 20px 10% 0 10%;"></div>  
 
 <div class="today-box" style="margin: 20px 10% 0 10%;">
-  <h3>📌 특수구조팀 오늘 일정</h3>
+  <h3>📌 안전사고 연구회 일정</h3>
   <div id="todaySchedule"></div>
 </div> 
 
-<br>
-    <br>
-        <br>
-           <br>
-    
-<section id="rescue">
-<h2 class="section-title">🚨 무등산 실시간 산악사고 현황</h2>
-  <div id="map"></div>
-  
-  <div id="listArea" style="display:none;"></div>
-  
-  <div class="table-responsive">
-    <table id="sheetTable">
-      <thead>
-        <tr>
-          <th>시간</th><th>구분</th><th>주소</th><th>연락처</th><th>증상</th><th>상태</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr><td colspan="6" style="padding:20px; color:#777;">데이터를 불러오는 중입니다...</td></tr>
-      </tbody>
-    </table>
-  </div>
-</section>
+   
 
 <audio id="alertSound">
   <source src="https://actions.google.com/sounds/v1/alarms/alarm_clock.ogg">
@@ -122,49 +97,21 @@ src="https://calendar.google.com/calendar/embed?src=35f4e5ad17b2ce6c5ae379ff9dda
 </section>
 
 <section id="mission">
-<h2 class="section-title">📚 특수산악구조팀 게시판</h2>
+<h2 class="section-title">📚 안전사고 연구회 게시판</h2>
 
-    <div class="card">
-    <h3>🚨 119 재난상황 정보</h3>
-    <p>국민안전24 재난상황 정보</p>
-    <button onclick="window.open('https://www.safekorea.go.kr/safekorea-kor/ctim/csim/fireInfo.do','_blank')">바로가기</button>
-</div>
    
- <div class="card">
-    <h3>🆘 무등산 산악사고 신고접수</h3>
-    <p>실시간 산악사고 신고접수</p>
-    <button onclick="window.open('https://mudeung.github.io/rescue/callems.html','_blank')">바로가기</button>
-</div>
-
     <div class="card">
-    <h3>📝 무등산 산악사고 기록지 게시판</h3>
-    <p>산악사고 원인/유형/응급처치 기록</p>
-    <button onclick="window.open('https://mudeung.github.io/SMRT/files.html','_blank')">파일 공유</button>
-</div>    
-
-    <div class="card">
-    <h3>📍 특수구조팀 실시간 위치공유</h3>
-    <p>구조대원 실시간 위치확인</p>
-    <button onclick="window.open('https://mudeung.github.io/rescue/gpsgps.html','_blank')">바로가기</button>
-</div>
-
-    <div class="card">
-    <h3>📂 특수산악구조팀 자료</h3>
+    <h3>📂 안전사고 연구회 자료</h3>
     <p>산악사고/구조출동/업무자료 공유</p>
     <button onclick="window.open('https://drive.google.com/drive/folders/1sie1wSv_dGcZhO7aEieDjNj-yH4fKj_L','_blank')">파일 공유</button>
 </div>
 
     <div class="card">
-    <h3>📖 특수산악구조팀 게시판</h3>
+    <h3>📖 안전사고 연구회 게시판</h3>
     <p>게시판 글 작성 및 점검일지 등 공유</p>
     <button onclick="window.open('https://mudeung.github.io/SMRT/file.html','_blank')">파일 공유</button>
 </div>
 
-     <div class="card">
-    <h3>🏷️ 재난안전상황실 일일점검표</h3>
-    <p>재난안전상황실 / CCTV / 문자전광판 / 구조·구급장비 / 차량관리 등</p>
-    <button onclick="window.open('https://emtcsh.github.io/check.html','_blank')">파일 공유</button>
-</div>
     
 </section>    
     
@@ -184,22 +131,10 @@ src="https://calendar.google.com/calendar/embed?src=35f4e5ad17b2ce6c5ae379ff9dda
 </section>
 
    
-<section id="contact">
-<h2 class="section-title">📞 유관기관 연락처</h2>
-
-<div class="card">
-    <p><strong>무등산 재난안전상황실: 062-230-2043 / FAX 062-230-2099 / 무등산 동부 재난안전상황실: 061-370-5733</strong></p>
-    <p><strong>무등산 사무소 업무폰: 010-3190-1187 / 무등산 원효분소 업무폰: 010-8860-1187</strong></p>
-</div>
-
-<div class="card">
-    <p><strong>119산악구조대 사무실: 062-606-4791 / 119산악구조대 업무폰: 010-8002-0860</strong></p>
-</div>
-</section>
 
 
 <footer>
-© 2026 무등산국립공원 특수산악구조대는 산악사고, 조난자 구조, 응급처치, 수색 활동을 수행하며 24시간 대응체계를 유지하고 있습니다.
+© 2026 국립공원 안전사고 연구회는 산악사고, 조난자 구조, 응급처치, 수색 활동을 수행하며 대응체계 마련에 관한 연구를하고 있습니다.
 </footer>
 
 </div>
