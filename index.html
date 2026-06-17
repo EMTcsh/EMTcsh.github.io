@@ -323,9 +323,10 @@ async function saveNotice() {
         const res = await fetch(NOTICE_API, {
             method: "POST",
             headers: {
-                "Content-Type": "text/plain"
+                "Content-Type": "application/json"   // 👈 이것도 수정 권장
             },
             body: JSON.stringify({
+                mode: "save",   // 🔥 핵심 추가
                 title: document.getElementById("noticeTitle").value,
                 content: document.getElementById("noticeContent").value,
                 writer: "연구회"
@@ -352,7 +353,6 @@ async function saveNotice() {
         alert("저장 실패");
     }
 }
-    
 
 /* ===== TODAY SCHEDULE (구글 캘린더 연동) ===== */
 async function loadTodaySchedule() {
