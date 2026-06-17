@@ -149,236 +149,101 @@ src="https://calendar.google.com/calendar/embed?src=49c8220f60521d9cdfbb45a5080f
 
 
 <script>
-/* ================= API 설정 ================= */
-const NOTICE_API = "https://script.google.com/macros/s/AKfycbxs1CjbhUO_qIs5IgxQ31snn9LqYXh47LLN8ZsH8ysBgcINBqPgnoI3azS7PaCDQMq9bg/exec";
 
+const API = "https://script.google.com/macros/s/AKfycbxs1CjbhUO_qIs5IgxQ31snn9LqYXh47LLN8ZsH8ysBgcINBqPgnoI3azS7PaCDQMq9bg/exec";
 
-/* ===== LOGIN 기능 ===== */
-async function login() {
+/* ================= LOGIN ================= */
+async function login(){
 
-    const id = document.getElementById("userid").value;
-    const pw = document.getElementById("password").value;
+  const res = await fetch(API,{
+    method:"POST",
+    headers:{ "Content-Type":"text/plain" },
+    body: JSON.stringify({
+      mode:"login",
+      id:userid.value,
+      pw:password.value
+    })
+  });
 
-    try {
+  const data = await res.json();
 
-        const res = await fetch(NOTICE_API, {
-            method: "POST",
-            headers: {
-                "Content-Type": "text/plain"
-            },
-            body: JSON.stringify({
-                mode: "login",
-                id: id,
-                pw: pw
-            })
-        });
-
-        const result = await res.json();
-
-        if (result.success) {
-
-            sessionStorage.setItem("login", "ok");
-
-            document.getElementById("loginPage").style.display = "none";
-            document.getElementById("mainPage").style.display = "block";
-
-            loadNotice();
-            loadTodaySchedule();
-            
-
-        } else {
-
-            document.getElementById("loginMsg").textContent =
-                "로그인 실패";
-
-        }
-
-    } catch (err) {
-
-        console.error(err);
-
-        document.getElementById("loginMsg").textContent =
-            "서버 연결 실패";
-
-    }
+  if(data.success){
+    loginBox.style.display="none";
+    main.style.display="block";
+    loadList();
+  }else{
+    alert("로그인 실패");
+  }
 }
 
-/* ===== NOTICE (공지사항) 기능 ===== */
-async function loadNotice() {
-    try {
-        const res = await fetch(NOTICE_API + "?t=" + Date.now());
-        const text = await res.text();
+/* ================= LIST ================= */
+async function loadList(){
 
-        let data;
-        try {
-            data = JSON.parse(text);
-        } catch (e) {
-            console.log("서버 응답(JSON 아님):", text);
-            return;
-        }
+  const res = await fetch(API+"?action=board");
+  const data = await res.json();
 
-        renderNotice(data);
+  let html="";
 
-    } catch (err) {
-        console.error("공지사항 로드 실패:", err);
-    }
+  for(let i=data.length-1;i>=1;i--){
+    html += `
+      <div class="card">
+        <h3>${data[i][1]}</h3>
+        <p>${data[i][2]}</p>
+        <small>${data[i][3]}</small>
+        <br><br>
+        <button onclick="deleteNotice('${data[i][0]}')">삭제</button>
+      </div>
+    `;
+  }
+
+  list.innerHTML = html;
 }
 
-function renderNotice(data) {
-    let html = "";
-    let previewHtml = "";
+/* ================= SAVE ================= */
+async function saveNotice(){
 
-    if (!data || data.length <= 1) {
-        document.getElementById("noticeList").innerHTML = "<div class='card'>등록된 업무공지가 없습니다.</div>";
-        document.getElementById("noticePreview").innerHTML = "";
-        return;
-    }
+  const res = await fetch(API,{
+    method:"POST",
+    headers:{ "Content-Type":"text/plain" },
+    body: JSON.stringify({
+      mode:"save",
+      title:title.value,
+      content:content.value
+    })
+  });
 
-    for (let i = data.length - 1; i >= 1; i--) {
-        if(!data[i][0]) continue;
-        
-        html += `
-            <div class="card">
-                <h3>${data[i][1] || "제목 없음"}</h3>
-                <p style="white-space:pre-line">${data[i][2] || ""}</p>
-                <small>${data[i][3] || ""}</small><br>
-                         <br><br>
-                <button onclick="deleteNotice('${data[i][0]}', this)" style="background:#c0392b;">
-                삭제
-                </button>
-            </div>
-        `;
+  const result = await res.text();
 
-        if (i >= data.length - 3) {
-            previewHtml += `
-                <div class="card" style="border-left: 5px solid #0b4f2f;">
-                    <small style="color:#0b4f2f; font-weight:bold;">📢 최근 공지사항</small>
-                    <h3>${data[i][1] || "제목 없음"}</h3>
-                    <p style="white-space:pre-line">${data[i][2] || ""}</p>
-                </div>
-            `;
-        }
-    }
-
-    document.getElementById("noticeList").innerHTML = html || "<div class='card'>등록된 업무공지가 없습니다.</div>";
-    document.getElementById("noticePreview").innerHTML = previewHtml;
-}
-    
-async function deleteNotice(id, btnElement) {
-
-    if (!confirm("삭제하시겠습니까?")) return;
-
-    try {
-
-        const res = await fetch(NOTICE_API, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"   // 👈 수정
-            },
-            body: JSON.stringify({
-                mode: "delete",
-                id: String(id)
-            })
-        });
-
-        const result = await res.text();
-
-        if (result.trim() === "ok") {
-
-            btnElement.closest(".card").remove();
-            loadNotice();
-
-            alert("공지 삭제 완료");
-
-        } else {
-            alert("삭제 실패 : " + result);
-        }
-
-    } catch (err) {
-        console.error(err);
-        alert("통신 오류");
-    }
-}
-    
-/* ===== 업무공지 작성 및 파일 업로드 기능 ===== */
-async function writeNotice() {
-
-    const title = document.getElementById("noticeTitle").value.trim();
-    const content = document.getElementById("noticeContent").value.trim();
-
-    if (!title || !content) {
-        alert("제목과 내용을 모두 입력해주세요.");
-        return;
-    }
-
-    await saveNotice();
-}
-    
-/* ===== 게시글 최종 스프레드시트 저장 기능 ===== */
-async function saveNotice() {
-    try {
-
-        const res = await fetch(NOTICE_API, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"   // 👈 이것도 수정 권장
-            },
-            body: JSON.stringify({
-                mode: "save",   // 🔥 핵심 추가
-                title: document.getElementById("noticeTitle").value,
-                content: document.getElementById("noticeContent").value,
-                writer: "연구회"
-            })
-        });
-
-        const result = await res.text();
-
-        if (result.trim() === "ok") {
-
-            document.getElementById("noticeTitle").value = "";
-            document.getElementById("noticeContent").value = "";
-
-            loadNotice();
-
-            alert("공지 등록 완료");
-
-        } else {
-            alert("저장 실패 : " + result);
-        }
-
-    } catch (err) {
-        console.error(err);
-        alert("저장 실패");
-    }
+  if(result.trim()=="ok"){
+    title.value="";
+    content.value="";
+    loadList();
+  }else{
+    alert(result);
+  }
 }
 
-/* ===== TODAY SCHEDULE (구글 캘린더 연동) ===== */
-async function loadTodaySchedule() {
-    try {
-        const todayStr = new Date().toLocaleDateString('ko-KR', { timeZone: 'Asia/Seoul' });
-        const res = await fetch(`${NOTICE_API}?action=today&date=${encodeURIComponent(todayStr)}&t=${Date.now()}`);
-        const data = await res.json();
+/* ================= DELETE ================= */
+async function deleteNotice(id){
 
-        let html = "";
-        if (!data || data.length === 0) {
-            html = "<div style='color:#777;'>📅 오늘 예정된 구글 캘린더 일정이 없습니다.</div>";
-        } else {
-            data.forEach(item => {
-                html += `<div style="margin-bottom: 5px;">⏰ <strong>${item.time || '종일'}</strong> - ${item.title || '제목 없음'}</div>`;
-            });
-        }
-        document.getElementById("todaySchedule").innerHTML = html;
-    } catch(err) {
-        console.error("구글 캘린더 연동 실패:", err);
-        document.getElementById("todaySchedule").innerHTML = "<div style='color:red;'>❌ 구글 캘린더 일정을 불러오지 못했습니다.</div>";
-    }
+  const res = await fetch(API,{
+    method:"POST",
+    headers:{ "Content-Type":"text/plain" },
+    body: JSON.stringify({
+      mode:"delete",
+      id:id
+    })
+  });
+
+  const result = await res.text();
+
+  if(result.trim()=="ok"){
+    loadList();
+  }else{
+    alert(result);
+  }
 }
 
-/* ===== 브라우저 로드 ===== */
-window.addEventListener("load", () => {
-    loadNotice();
-    loadTodaySchedule();
-});
 </script>
 </body>
 </html>
