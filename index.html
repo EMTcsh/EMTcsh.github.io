@@ -275,7 +275,7 @@ async function deleteNotice(id, btnElement) {
         const res = await fetch(NOTICE_API, {
             method: "POST",
             headers: {
-                "Content-Type": "text/plain"
+                "Content-Type": "application/json"   // 👈 수정
             },
             body: JSON.stringify({
                 mode: "delete",
@@ -328,7 +328,7 @@ async function saveNotice() {
             body: JSON.stringify({
                 title: document.getElementById("noticeTitle").value,
                 content: document.getElementById("noticeContent").value,
-                writer: "구조대"
+                writer: "연구회"
             })
         });
 
