@@ -78,15 +78,8 @@ tr:hover { background-color: #f1f3f5; cursor: pointer; }
   <h3>📌 안전사고 연구회 일정</h3>
   <div id="todaySchedule"></div>
 </div> 
-
    
-
-<audio id="alertSound">
-  <source src="https://actions.google.com/sounds/v1/alarms/alarm_clock.ogg">
-</audio>
-    
  
-<section id="rescue">
 <section id="calendar">
 <h2 class="section-title">📒 교육/훈련/행사/일정 공유</h2>
 <div class="calendar-wrap">
@@ -161,8 +154,6 @@ src="https://calendar.google.com/calendar/embed?src=49c8220f60521d9cdfbb45a5080f
 /* ================= API 설정 ================= */
 const NOTICE_API = "https://script.google.com/macros/s/AKfycbxs1CjbhUO_qIs5IgxQ31snn9LqYXh47LLN8ZsH8ysBgcINBqPgnoI3azS7PaCDQMq9bg/exec";
 
-/* ===== 전역 변수 ===== */
-let map, markers = [], allData = [];
 
 /* ===== LOGIN 기능 ===== */
 async function login() {
@@ -193,10 +184,9 @@ async function login() {
             document.getElementById("loginPage").style.display = "none";
             document.getElementById("mainPage").style.display = "block";
 
-            initMap();
             loadNotice();
             loadTodaySchedule();
-            loadData();
+            
 
         } else {
 
@@ -213,14 +203,6 @@ async function login() {
             "서버 연결 실패";
 
     }
-}
-/* ===== MAP 초기화 ===== */
-function initMap() {
-    if (map) return; 
-    map = new kakao.maps.Map(document.getElementById("map"), {
-        center: new kakao.maps.LatLng(35.1345, 126.9902),
-        level: 6
-    });
 }
 
 /* ===== NOTICE (공지사항) 기능 ===== */
@@ -371,109 +353,6 @@ async function saveNotice() {
     }
 }
     
-/* ===== RESCUE DATA (사고 현황) 기능 ===== */
-async function loadData() {
-    if (sessionStorage.getItem("login") !== "ok") return;
-
-    try {
-        const res = await fetch(RESCUE_API + "?t=" + Date.now());
-        let data = await res.json();
-        if (!Array.isArray(data)) data = [];
-        allData = data;
-        renderData(allData);
-    } catch (err) {
-        console.error("사고현황 로드 실패:", err);
-    }
-}
-
-function renderData(data) {
-    document.getElementById("listArea").innerHTML = "";
-    markers.forEach(m => m.setMap(null));
-    markers = [];
-
-    if(!data || data.length === 0) {
-        const tbody = document.querySelector("#sheetTable tbody");
-        if(tbody) tbody.innerHTML = "<tr><td colspan='6' style='padding:20px; color:#777;'>접수된 실시간 사고가 없습니다.</td></tr>";
-        return;
-    }
-
-    let bounds = new kakao.maps.LatLngBounds();
-    let hasValidMarker = false;
-
-    data.forEach(item => {
-        const lat = parseFloat(item.lat || item.latitude);
-        const lng = parseFloat(item.lng || item.longitude);
-
-        if (!isNaN(lat) && !isNaN(lng)) {
-            const marker = new kakao.maps.Marker({
-                map: map,
-                position: new kakao.maps.LatLng(lat, lng)
-            });
-            marker.item = item;
-            kakao.maps.event.addListener(marker, 'click', () => showModal(item));
-            markers.push(marker);
-            bounds.extend(marker.getPosition());
-            hasValidMarker = true;
-        }
-    });
-
-    if (hasValidMarker && map) map.setBounds(bounds);
-    renderTable(data);
-}
-
-function renderTable(data){
-    const tbody = document.querySelector("#sheetTable tbody");
-    if(!tbody) return; 
-    tbody.innerHTML = "";
-    
-    data.forEach(item => {
-        const tr = document.createElement("tr");
-        tr.onclick = () => showModal(item);
-        
-        tr.innerHTML = `
-            <td>${formatTime(parseKST(item.time))}</td>
-            <td><strong>${item.type || '일반'}</strong></td>
-            <td style="text-align:left;">${item.address || '위치 미정'}</td>
-            <td>${item.phone || '-'}</td>
-            <td style="text-align:left;">${item.symptom || '-'}</td>
-            <td><span style="background:#0b4f2f; color:#fff; padding:2px 6px; border-radius:4px; font-size:12px;">${item.status || '대기'}</span></td>
-        `;
-        tbody.appendChild(tr);
-    });
-}
-
-/* ===== 시간 및 유틸리티 함수 ===== */
-function parseKST(dateStr) {
-    if (!dateStr) return null;
-    const d = new Date(dateStr);
-    if (isNaN(d)) return null;
-    return d;
-}
-
-function formatTime(date) {
-    if (!date) return "시간 정보 없음";
-    return date.toLocaleString('ko-KR', { 
-        year: 'numeric', month: '2-digit', day: '2-digit', 
-        hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Seoul' 
-    });
-}
-
-function showModal(item) {
-    document.getElementById("modalOverlay").style.display = "flex";
-    document.getElementById("modalBody").innerHTML = `
-        <h3>🚨 상세 신고 내용</h3><hr style="margin:10px 0;">
-        🕒 <strong>시간:</strong> ${formatTime(parseKST(item.time))}<br>
-        🚨 <strong>구분:</strong> ${item.type || ''}<br>
-        🏠 <strong>주소:</strong> ${item.address || ''}<br>
-        📞 <strong>연락처:</strong> ${item.phone || ''}<br>
-        📝 <strong>증상/상황:</strong> ${item.symptom || ''}<br>
-        🟢 <strong>조치상태:</strong> ${item.status || ''}
-    `;
-}
-
-function closeModal() {
-    document.getElementById("modalOverlay").style.display = "none";
-}
 
 /* ===== TODAY SCHEDULE (구글 캘린더 연동) ===== */
 async function loadTodaySchedule() {
@@ -497,25 +376,11 @@ async function loadTodaySchedule() {
     }
 }
 
-/* ===== 초기 구동 브라우저 로드 이벤트 통합 ===== */
+/* ===== 브라우저 로드 ===== */
 window.addEventListener("load", () => {
-    kakao.maps.load(function () {
-        if (sessionStorage.getItem("login") === "ok") {
-            document.getElementById("loginPage").style.display = "none";
-            document.getElementById("mainPage").style.display = "block";
-
-            initMap();
-            loadNotice();
-            loadTodaySchedule();
-            loadData();
-        } else {
-            loadTodaySchedule();
-        }
-    });
+    loadNotice();
+    loadTodaySchedule();
 });
-
-/* ===== 실시간 데이터 갱신 (15초 주기) ===== */
-setInterval(loadData, 15000); 
 </script>
 </body>
 </html>
