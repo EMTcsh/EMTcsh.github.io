@@ -3,303 +3,587 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>🚑 산악사고 기록지</title>
-
-<!-- Tailwind CDN -->
-<script src="https://cdn.tailwindcss.com"></script>
-<!-- Kakao Map SDK -->
-<script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=ff9e145029506d6e4c72d1f2b01ea424&libraries=services"></script>
-
+<title>🩺 무등산국립공원 특수산악구조대</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0b4f2f">
+    
 <style>
-/* 전체 배경 */
-body{
-  background:#eef1f5;
-  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
-  transition:background 0.3s;
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Malgun Gothic', sans-serif;}
+body{background:#f4f6f8;color:#333;}
+header{
+    background:linear-gradient(rgba(0,0,0,0.5),rgba(0,0,0,0.5)),
+    url('https://mudeung.github.io/SMRT/무등산_서석대.jpg');
+    background-size:cover;
+    background-position:center;
+    height:30vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    text-align:center;
+    color:white;
 }
+nav{background:#0b4f2f;padding:15px;text-align:center;position:sticky;top:0;z-index:1000;}
+nav a{color:white;text-decoration:none;margin:0 20px;font-weight:bold;}
+section{padding:60px 10%;}
+.section-title{text-align:center;margin-bottom:30px;color:#0b4f2f;}
+.card{background:white;padding:25px;border-radius:10px;box-shadow:0 2px 10px rgba(0,0,0,0.1);margin-bottom:15px;}
+button{margin-top:10px;padding:10px 15px;border:none;background:#0b4f2f;color:white;border-radius:6px;cursor:pointer;}
+#map{width:100%;height:400px;border-radius:10px;margin-bottom:15px;}
+.calendar-wrap{width:100%;height:80vh;}
+.calendar-wrap iframe{width:100%;height:100%;border:0;border-radius:10px;}
+.today-box{background:#fff;padding:15px;border-radius:10px;margin-bottom:15px;box-shadow:0 2px 10px rgba(0,0,0,0.1);}
+footer{background:#0b4f2f;color:white;text-align:center;padding:20px;}
+#modalBody {max-height: 80vh; overflow-y: auto;}
 
-/* 🚨 중증 점멸 */
-@keyframes criticalFlash{
-  0%{background-color:#fee2e2;}
-  50%{background-color:#dc2626;}
-  100%{background-color:#fee2e2;}
-}
-.critical-mode{
-  animation:criticalFlash 0.8s infinite;
-}
-
-/* 카드 */
-.card{
-  background:#fff;
-  border-radius:14px;
-  padding:16px;
-  margin-bottom:16px;
-  box-shadow:0 2px 8px rgba(0,0,0,0.05);
-  border-left:5px solid #2563eb;
-}
-.card h2{
-  font-weight:700;
-  font-size:15px;
-  margin-bottom:10px;
-  color:#1e3a8a;
-}
-
-/* 입력폼 */
-input,select,textarea{
-  width:100%;
-  border:1px solid #d1d5db;
-  border-radius:10px;
-  padding:12px;
-  margin-bottom:10px;
-  font-size:15px;
-  background:#f9fafb;
-}
-input:focus,select:focus,textarea:focus{
-  outline:none;
-  border-color:#2563eb;
-  background:#fff;
-  box-shadow:0 0 0 2px rgba(37,99,235,0.15);
-}
-textarea{min-height:100px;}
-
-/* 버튼 */
-button{
-  width:100%;
-  padding:14px;
-  border-radius:12px;
-  font-size:16px;
-  font-weight:600;
-}
-
-/* 좌표 박스 */
-.coordinate-box{
-  background:#e0e7ff;
-  padding:10px;
-  border-radius:8px;
-  font-size:13px;
-  margin-bottom:8px;
-}
-
-/* 지도 */
-#map{
-  width:100%;
-  height:220px;
-  border-radius:12px;
-}
-
-/* 기록보드 */
-.board-item{
-  white-space:pre-line;
-  font-size:13px;
-  background:#f3f4f6;
-  padding:12px;
-  border-radius:10px;
-  line-height:1.5;
-}
-
-/* 헤더 */
-.header{
-  text-align:center;
-  font-weight:800;
-  font-size:20px;
-  margin:18px 0;
-  color:#1d4ed8;
-}
+/* 📊 테이블 스캔 시 시인성을 높이기 위한 구조대 스타일 적용 */
+.table-responsive { width: 100%; overflow-x: auto; margin-top: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+table { width: 100%; border-collapse: collapse; background: #fff; text-align: center; min-width: 650px; }
+th, td { padding: 12px 15px; border: 1px solid #e1e4e6; }
+th { background-color: #0b4f2f; color: white; font-weight: bold; }
+tr:nth-child(even) { background-color: #f8f9fa; }
+tr:hover { background-color: #f1f3f5; cursor: pointer; }
 </style>
 </head>
-<body id="mainBody">
+<body>
 
-<div class="container mx-auto max-w-2xl p-4">
-
-  <h1 class="header">🚑 산악사고 기록지</h1>
-
-  <form id="recordForm">
-
-    <!-- 현장정보 -->
-    <div class="card">
-      <h2>현장도착</h2>
-      <input type="datetime-local" name="도착시간" required>
-      <input type="text" name="사고장소" placeholder="사고장소" required>
-      <input type="text" name="주증상" placeholder="환자 증상" required>
-
-      <div id="locationDisplay" class="coordinate-box">위도: , 경도:</div>
-      <button type="button" id="getLocation" class="bg-green-600 text-white">🌐 현장도착 좌표</button>
-      <input type="hidden" name="사고좌표" id="hiddenCoordinate">
-      <div id="map"></div>
+<div id="loginPage" style="height:100vh;display:flex;justify-content:center;align-items:center;">
+    <div class="card" style="width:350px;">
+        <h2 style="text-align:center;">구조대 로그인</h2>
+        <input id="userid" placeholder="아이디" style="width:100%;padding:10px;margin-top:10px;">
+        <input id="password" type="password" placeholder="비밀번호" style="width:100%;padding:10px;margin-top:10px;">
+        <button onclick="login()" style="width:100%;">로그인</button>
+        <p id="loginMsg" style="color:red;text-align:center;margin-top:10px;"></p>
     </div>
+</div>
 
-    <!-- 의식평가 GCS -->
-    <div class="card">
-      <h2>의식평가(GCS)</h2>
+<div id="mainPage" style="display:none;">
 
-      <select id="eye">
-<option value="4">자발적으로 눈을 뜬다</option>
-<option value="3">말로 지시했을때 눈을 뜬다</option>
-<option value="2">통증 자극에 의해 눈을 뜬다</option>
-<option value="1">어떠한 자극에도 눈을 뜨지 못한다</option>
-      </select>
-
-      <select id="verbal">
-<option value="5">정확한 반응(6하원칙에 지남력 있는 상태)</option>
-<option value="4">대화 혼란(대화가능하나, 계속적 대화 교환 안됨)</option>
-<option value="3">언어혼란(동문서답, 혼란된 말을 함)</option>
-<option value="2">이해 할수 없는 소리(신음소리만)</option>
-<option value="1">반응이 없음(아무런 소리를 내지 않음)</option>
-      </select>
-
-      <select id="motor">
-<option value="6">명령에 따름(간단한 명령에 따라 운동기능 수행)</option>
-<option value="5">통증 자극 국소화 반응(명령은 따지 않지만, 자극을 가하면 피하거나 치우려고 함) </option>
-<option value="4">통증 자극 움츠림(통증 자극을 피하려고 함, 치우려고 하지는 않음)</option>
-<option value="3">통증 자극 이상굴곡(통증 자극에 앞으로 구부리거나 몸쪽으로 접음)</option>
-<option value="2">통증 자극 이상신전(통증 자극에 뒤로 젖히거나 모에서 멀리 뻗음)(</option>
-<option value="1">전혀 움직이지 않음(무반응, 자가호흡 없음)</option>
-      </select>
-
-      <div class="mt-2">
-        <strong>GCS 결과:</strong>
-        <span id="gcsResult"></span>
-      </div>
-      <div id="gcsWarning" style="display:none; color:#dc2626; font-weight:bold; margin-top:8px;">
-        ⚠️ 중증 환자! 즉시 기도와 호흡 확인!
-      </div>
+<header>
+    <div>
+        <h1>🩺 무등산국립공원 특수산악구조대</h1>
+        <p>국민의 생명과 안전을 지키는 산악전문 구조팀</p>
     </div>
+</header>
 
-    <!-- 환자정보 -->
-    <div class="card">
-      <h2>환자정보</h2>
-      <input type="text" name="환자이름" placeholder="이름" required>
-      <input type="date" name="생년월일" required>
-      <input type="text" name="거주지" placeholder="거주지" required>
-      <input type="tel" name="연락처" placeholder="연락처 (010-1234-5678)" required>
-    </div>
+<nav>
+<a href="#mainPage">Home</a>
+<a href="#rescue">사고현황</a> 
+<a href="#calendar">일정공유</a>
+<a href="#mission">게시판</a>
+<a href="#notice">업무공지</a>
+<a href="#contact">유관기관</a>
+</nav>
 
-    <!-- 응급처치 -->
-    <div class="card">
-      <h2>응급처치</h2>
-      <textarea name="응급처치" placeholder="처치 내용"></textarea>
-    </div>
+<div id="noticePreview" style="padding: 20px 10% 0 10%;"></div>  
 
-    <!-- 출동대원 정보 -->
-    <div class="card">
-      <h2>출동대원 정보</h2>
-      <input type="text" name="출동대원" placeholder="출동대원 이름" required>
-    </div>
+<div class="today-box" style="margin: 20px 10% 0 10%;">
+  <h3>📌 특수구조팀 오늘 일정</h3>
+  <div id="todaySchedule"></div>
+</div> 
+
+<br>
+    <br>
+        <br>
+           <br>
     
-    <button type="submit" class="bg-blue-600 text-white mt-2">기록 저장 및 공유</button>
-
-  </form>
-
-  <!-- 작성 기록 -->
-  <div class="card">
-    <h2>작성기록</h2>
-    <div id="savedData"></div>
+<section id="rescue">
+<h2 class="section-title">🚨 무등산 실시간 산악사고 현황</h2>
+  <div id="map"></div>
+  
+  <div id="listArea" style="display:none;"></div>
+  
+  <div class="table-responsive">
+    <table id="sheetTable">
+      <thead>
+        <tr>
+          <th>시간</th><th>구분</th><th>주소</th><th>연락처</th><th>증상</th><th>상태</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td colspan="6" style="padding:20px; color:#777;">데이터를 불러오는 중입니다...</td></tr>
+      </tbody>
+    </table>
   </div>
+</section>
+
+<audio id="alertSound">
+  <source src="https://actions.google.com/sounds/v1/alarms/alarm_clock.ogg">
+</audio>
+    
+ 
+<section id="rescue">
+<section id="calendar">
+<h2 class="section-title">📒 교육/훈련/행사/일정 공유</h2>
+<div class="calendar-wrap">
+<iframe
+src="https://calendar.google.com/calendar/embed?src=35f4e5ad17b2ce6c5ae379ff9dda889a46f1ee7928c82efdc9668a596da889fb%40group.calendar.google.com&ctz=Asia/Seoul&hl=ko">
+</iframe>
+</div>
+</section>
+
+<section id="mission">
+<h2 class="section-title">📚 특수산악구조팀 게시판</h2>
+
+    <div class="card">
+    <h3>🚨 119 재난상황 정보</h3>
+    <p>국민안전24 재난상황 정보</p>
+    <button onclick="window.open('https://www.safekorea.go.kr/safekorea-kor/ctim/csim/fireInfo.do','_blank')">바로가기</button>
+</div>
+   
+ <div class="card">
+    <h3>🆘 무등산 산악사고 신고접수</h3>
+    <p>실시간 산악사고 신고접수</p>
+    <button onclick="window.open('https://mudeung.github.io/rescue/callems.html','_blank')">바로가기</button>
+</div>
+
+    <div class="card">
+    <h3>📝 무등산 산악사고 기록지 게시판</h3>
+    <p>산악사고 원인/유형/응급처치 기록</p>
+    <button onclick="window.open('https://mudeung.github.io/SMRT/files.html','_blank')">파일 공유</button>
+</div>    
+
+    <div class="card">
+    <h3>📍 특수구조팀 실시간 위치공유</h3>
+    <p>구조대원 실시간 위치확인</p>
+    <button onclick="window.open('https://mudeung.github.io/rescue/gpsgps.html','_blank')">바로가기</button>
+</div>
+
+    <div class="card">
+    <h3>📂 특수산악구조팀 자료</h3>
+    <p>산악사고/구조출동/업무자료 공유</p>
+    <button onclick="window.open('https://drive.google.com/drive/folders/1sie1wSv_dGcZhO7aEieDjNj-yH4fKj_L','_blank')">파일 공유</button>
+</div>
+
+    <div class="card">
+    <h3>📖 특수산악구조팀 게시판</h3>
+    <p>게시판 글 작성 및 점검일지 등 공유</p>
+    <button onclick="window.open('https://mudeung.github.io/SMRT/file.html','_blank')">파일 공유</button>
+</div>
+
+     <div class="card">
+    <h3>🏷️ 재난안전상황실 일일점검표</h3>
+    <p>재난안전상황실 / CCTV / 문자전광판 / 구조·구급장비 / 차량관리 등</p>
+    <button onclick="window.open('https://emtcsh.github.io/check.html','_blank')">파일 공유</button>
+</div>
+    
+</section>    
+    
+   
+<section id="notice">
+<h2 class="section-title">🔖 중요업무 공지</h2>
+
+<div class="card">
+<input id="noticeTitle" placeholder="제목" style="width:100%;padding:10px;">
+<br><br>
+<textarea id="noticeContent" placeholder="내용" style="width:100%;height:120px;"></textarea>
+<br><br>
+<button onclick="writeNotice()">등록</button>
+</div>
+
+<div id="noticeList"></div>
+</section>
+
+   
+<section id="contact">
+<h2 class="section-title">📞 유관기관 연락처</h2>
+
+<div class="card">
+    <p><strong>무등산 재난안전상황실: 062-230-2043 / FAX 062-230-2099 / 무등산 동부 재난안전상황실: 061-370-5733</strong></p>
+    <p><strong>무등산 사무소 업무폰: 010-3190-1187 / 무등산 원효분소 업무폰: 010-8860-1187</strong></p>
+</div>
+
+<div class="card">
+    <p><strong>119산악구조대 사무실: 062-606-4791 / 119산악구조대 업무폰: 010-8002-0860</strong></p>
+</div>
+</section>
+
+
+<footer>
+© 2026 무등산국립공원 특수산악구조대는 산악사고, 조난자 구조, 응급처치, 수색 활동을 수행하며 24시간 대응체계를 유지하고 있습니다.
+</footer>
 
 </div>
 
+<div id="modalOverlay" style="
+  display:none;
+  position:fixed;
+  top:0;left:0;
+  width:100%;height:100%;
+  background:rgba(0,0,0,0.6);
+  justify-content:center;
+  align-items:center;
+  z-index:9999;
+">
+  <div style="background:#fff;padding:20px;border-radius:10px;max-width:400px; width:90%;">
+    <div id="modalBody"></div>
+    <button onclick="closeModal()" style="width:100%; margin-top:15px;">닫기</button>
+  </div>
+</div>
+
+
+<script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=ff9e145029506d6e4c72d1f2b01ea424&autoload=false"></script>
+
+
 <script>
-const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxm_oLeGMIGh5PRokCURztVx6-1Ijug2KtuGbsFH-cZVOKE5LgaKDnLbTgFl2sWWDdkwA/exec";
+/* ================= API 설정 ================= */
+const NOTICE_API = "https://script.google.com/macros/s/AKfycbxmWcN7CKCZqpTD27vrPFaqMCpkoR5tLCAFJPIaGghoXih1IDjI-lFSQvEEXdh3RIG3/exec";
+const RESCUE_API = "https://script.google.com/macros/s/AKfycbwUbacHm34YkWh--zL_e590P6h4S5wQo3iF8tCVZu71ZaTunTwdZ1TMLVqkyuHu-izW/exec";
 
-// 🔊 중증 음성
-let voiceInterval = null;
-function speakCritical(){
-  if(!('speechSynthesis' in window)) return;
-  speechSynthesis.cancel();
-  const msg = new SpeechSynthesisUtterance("중증 환자입니다. 즉시 기도와 호흡을 확인하십시오.");
-  msg.lang="ko-KR";
-  speechSynthesis.speak(msg);
+/* ===== 전역 변수 ===== */
+let map, markers = [], allData = [];
+
+/* ===== LOGIN 기능 ===== */
+async function login() {
+
+    const id = document.getElementById("userid").value;
+    const pw = document.getElementById("password").value;
+
+    try {
+
+        const res = await fetch(NOTICE_API, {
+            method: "POST",
+            headers: {
+                "Content-Type": "text/plain"
+            },
+            body: JSON.stringify({
+                mode: "login",
+                id: id,
+                pw: pw
+            })
+        });
+
+        const result = await res.json();
+
+        if (result.success) {
+
+            sessionStorage.setItem("login", "ok");
+
+            document.getElementById("loginPage").style.display = "none";
+            document.getElementById("mainPage").style.display = "block";
+
+            initMap();
+            loadNotice();
+            loadTodaySchedule();
+            loadData();
+
+        } else {
+
+            document.getElementById("loginMsg").textContent =
+                "로그인 실패";
+
+        }
+
+    } catch (err) {
+
+        console.error(err);
+
+        document.getElementById("loginMsg").textContent =
+            "서버 연결 실패";
+
+    }
+}
+/* ===== MAP 초기화 ===== */
+function initMap() {
+    if (map) return; 
+    map = new kakao.maps.Map(document.getElementById("map"), {
+        center: new kakao.maps.LatLng(35.1345, 126.9902),
+        level: 6
+    });
 }
 
-// 🚨 반복 시작
-function startCriticalAlert(){
-  if(voiceInterval) return;
-  speakCritical();
-  voiceInterval = setInterval(speakCritical, 10000);
+/* ===== NOTICE (공지사항) 기능 ===== */
+async function loadNotice() {
+    try {
+        const res = await fetch(NOTICE_API + "?t=" + Date.now());
+        const text = await res.text();
+
+        let data;
+        try {
+            data = JSON.parse(text);
+        } catch (e) {
+            console.log("서버 응답(JSON 아님):", text);
+            return;
+        }
+
+        renderNotice(data);
+
+    } catch (err) {
+        console.error("공지사항 로드 실패:", err);
+    }
 }
 
-// 🛑 반복 중단
-function stopCriticalAlert(){
-  if(voiceInterval){ clearInterval(voiceInterval); voiceInterval=null; }
-  speechSynthesis.cancel();
+function renderNotice(data) {
+    let html = "";
+    let previewHtml = "";
+
+    if (!data || data.length <= 1) {
+        document.getElementById("noticeList").innerHTML = "<div class='card'>등록된 업무공지가 없습니다.</div>";
+        document.getElementById("noticePreview").innerHTML = "";
+        return;
+    }
+
+    for (let i = data.length - 1; i >= 1; i--) {
+        if(!data[i][0]) continue;
+        
+        html += `
+            <div class="card">
+                <h3>${data[i][1] || "제목 없음"}</h3>
+                <p style="white-space:pre-line">${data[i][2] || ""}</p>
+                <small>${data[i][3] || ""}</small><br>
+                         <br><br>
+                <button onclick="deleteNotice('${data[i][0]}', this)" style="background:#c0392b;">
+                삭제
+                </button>
+            </div>
+        `;
+
+        if (i >= data.length - 3) {
+            previewHtml += `
+                <div class="card" style="border-left: 5px solid #0b4f2f;">
+                    <small style="color:#0b4f2f; font-weight:bold;">📢 최근 공지사항</small>
+                    <h3>${data[i][1] || "제목 없음"}</h3>
+                    <p style="white-space:pre-line">${data[i][2] || ""}</p>
+                </div>
+            `;
+        }
+    }
+
+    document.getElementById("noticeList").innerHTML = html || "<div class='card'>등록된 업무공지가 없습니다.</div>";
+    document.getElementById("noticePreview").innerHTML = previewHtml;
+}
+    
+async function deleteNotice(id, btnElement) {
+
+    if (!confirm("삭제하시겠습니까?")) return;
+
+    try {
+
+        const res = await fetch(NOTICE_API, {
+            method: "POST",
+            headers: {
+                "Content-Type": "text/plain"
+            },
+            body: JSON.stringify({
+                mode: "delete",
+                id: String(id)
+            })
+        });
+
+        const result = await res.text();
+
+        if (result.trim() === "ok") {
+
+            btnElement.closest(".card").remove();
+            loadNotice();
+
+            alert("공지 삭제 완료");
+
+        } else {
+            alert("삭제 실패 : " + result);
+        }
+
+    } catch (err) {
+        console.error(err);
+        alert("통신 오류");
+    }
+}
+    
+/* ===== 업무공지 작성 및 파일 업로드 기능 ===== */
+async function writeNotice() {
+
+    const title = document.getElementById("noticeTitle").value.trim();
+    const content = document.getElementById("noticeContent").value.trim();
+
+    if (!title || !content) {
+        alert("제목과 내용을 모두 입력해주세요.");
+        return;
+    }
+
+    await saveNotice();
+}
+    
+/* ===== 게시글 최종 스프레드시트 저장 기능 ===== */
+async function saveNotice() {
+    try {
+
+        const res = await fetch(NOTICE_API, {
+            method: "POST",
+            headers: {
+                "Content-Type": "text/plain"
+            },
+            body: JSON.stringify({
+                title: document.getElementById("noticeTitle").value,
+                content: document.getElementById("noticeContent").value,
+                writer: "구조대"
+            })
+        });
+
+        const result = await res.text();
+
+        if (result.trim() === "ok") {
+
+            document.getElementById("noticeTitle").value = "";
+            document.getElementById("noticeContent").value = "";
+
+            loadNotice();
+
+            alert("공지 등록 완료");
+
+        } else {
+            alert("저장 실패 : " + result);
+        }
+
+    } catch (err) {
+        console.error(err);
+        alert("저장 실패");
+    }
+}
+    
+/* ===== RESCUE DATA (사고 현황) 기능 ===== */
+async function loadData() {
+    if (sessionStorage.getItem("login") !== "ok") return;
+
+    try {
+        const res = await fetch(RESCUE_API + "?t=" + Date.now());
+        let data = await res.json();
+        if (!Array.isArray(data)) data = [];
+        allData = data;
+        renderData(allData);
+    } catch (err) {
+        console.error("사고현황 로드 실패:", err);
+    }
 }
 
-// 🧠 GCS 계산 및 경고
-function calculateGCS(){
-  const eye=parseInt(document.getElementById("eye").value);
-  const verbal=parseInt(document.getElementById("verbal").value);
-  const motor=parseInt(document.getElementById("motor").value);
-  const total=eye+verbal+motor;
+function renderData(data) {
+    document.getElementById("listArea").innerHTML = "";
+    markers.forEach(m => m.setMap(null));
+    markers = [];
 
-  let state='', color='';
-  if (total === 15) { state = '정상-Normal'; color = '#2563eb'; } 
-  else if(total>=13){ state='경도-Mild'; color='#16a34a'; }
-  else if(total>=9){ state='중등도-Moderate'; color='#f59e0b'; }
-  else if(total>=4){ state='중증-Severe'; color='#dc2626'; }
-  else{ state='혼수'; color='#000'; }
+    if(!data || data.length === 0) {
+        const tbody = document.querySelector("#sheetTable tbody");
+        if(tbody) tbody.innerHTML = "<tr><td colspan='6' style='padding:20px; color:#777;'>접수된 실시간 사고가 없습니다.</td></tr>";
+        return;
+    }
 
-  const gcsResult=document.getElementById("gcsResult");
-  gcsResult.textContent=`${total}점 (${state})`;
-  gcsResult.style.color=color;
+    let bounds = new kakao.maps.LatLngBounds();
+    let hasValidMarker = false;
 
-  const gcsWarning=document.getElementById("gcsWarning");
-  if(total<=8){
-    if(gcsWarning) gcsWarning.style.display="block";
-    document.body.classList.add("critical-mode");
-    if(navigator.vibrate){ navigator.vibrate([500,300,500]); }
-    startCriticalAlert();
-  }else{
-    if(gcsWarning) gcsWarning.style.display="none";
-    document.body.classList.remove("critical-mode");
-    stopCriticalAlert();
-  }
+    data.forEach(item => {
+        const lat = parseFloat(item.lat || item.latitude);
+        const lng = parseFloat(item.lng || item.longitude);
+
+        if (!isNaN(lat) && !isNaN(lng)) {
+            const marker = new kakao.maps.Marker({
+                map: map,
+                position: new kakao.maps.LatLng(lat, lng)
+            });
+            marker.item = item;
+            kakao.maps.event.addListener(marker, 'click', () => showModal(item));
+            markers.push(marker);
+            bounds.extend(marker.getPosition());
+            hasValidMarker = true;
+        }
+    });
+
+    if (hasValidMarker && map) map.setBounds(bounds);
+    renderTable(data);
 }
 
-["eye","verbal","motor"].forEach(id=>{
-  document.getElementById(id).addEventListener("change", calculateGCS);
+function renderTable(data){
+    const tbody = document.querySelector("#sheetTable tbody");
+    if(!tbody) return; 
+    tbody.innerHTML = "";
+    
+    data.forEach(item => {
+        const tr = document.createElement("tr");
+        tr.onclick = () => showModal(item);
+        
+        tr.innerHTML = `
+            <td>${formatTime(parseKST(item.time))}</td>
+            <td><strong>${item.type || '일반'}</strong></td>
+            <td style="text-align:left;">${item.address || '위치 미정'}</td>
+            <td>${item.phone || '-'}</td>
+            <td style="text-align:left;">${item.symptom || '-'}</td>
+            <td><span style="background:#0b4f2f; color:#fff; padding:2px 6px; border-radius:4px; font-size:12px;">${item.status || '대기'}</span></td>
+        `;
+        tbody.appendChild(tr);
+    });
+}
+
+/* ===== 시간 및 유틸리티 함수 ===== */
+function parseKST(dateStr) {
+    if (!dateStr) return null;
+    const d = new Date(dateStr);
+    if (isNaN(d)) return null;
+    return d;
+}
+
+function formatTime(date) {
+    if (!date) return "시간 정보 없음";
+    return date.toLocaleString('ko-KR', { 
+        year: 'numeric', month: '2-digit', day: '2-digit', 
+        hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Seoul' 
+    });
+}
+
+function showModal(item) {
+    document.getElementById("modalOverlay").style.display = "flex";
+    document.getElementById("modalBody").innerHTML = `
+        <h3>🚨 상세 신고 내용</h3><hr style="margin:10px 0;">
+        🕒 <strong>시간:</strong> ${formatTime(parseKST(item.time))}<br>
+        🚨 <strong>구분:</strong> ${item.type || ''}<br>
+        🏠 <strong>주소:</strong> ${item.address || ''}<br>
+        📞 <strong>연락처:</strong> ${item.phone || ''}<br>
+        📝 <strong>증상/상황:</strong> ${item.symptom || ''}<br>
+        🟢 <strong>조치상태:</strong> ${item.status || ''}
+    `;
+}
+
+function closeModal() {
+    document.getElementById("modalOverlay").style.display = "none";
+}
+
+/* ===== TODAY SCHEDULE (구글 캘린더 연동) ===== */
+async function loadTodaySchedule() {
+    try {
+        const todayStr = new Date().toLocaleDateString('ko-KR', { timeZone: 'Asia/Seoul' });
+        const res = await fetch(`${NOTICE_API}?action=today&date=${encodeURIComponent(todayStr)}&t=${Date.now()}`);
+        const data = await res.json();
+
+        let html = "";
+        if (!data || data.length === 0) {
+            html = "<div style='color:#777;'>📅 오늘 예정된 구글 캘린더 일정이 없습니다.</div>";
+        } else {
+            data.forEach(item => {
+                html += `<div style="margin-bottom: 5px;">⏰ <strong>${item.time || '종일'}</strong> - ${item.title || '제목 없음'}</div>`;
+            });
+        }
+        document.getElementById("todaySchedule").innerHTML = html;
+    } catch(err) {
+        console.error("구글 캘린더 연동 실패:", err);
+        document.getElementById("todaySchedule").innerHTML = "<div style='color:red;'>❌ 구글 캘린더 일정을 불러오지 못했습니다.</div>";
+    }
+}
+
+/* ===== 초기 구동 브라우저 로드 이벤트 통합 ===== */
+window.addEventListener("load", () => {
+    kakao.maps.load(function () {
+        if (sessionStorage.getItem("login") === "ok") {
+            document.getElementById("loginPage").style.display = "none";
+            document.getElementById("mainPage").style.display = "block";
+
+            initMap();
+            loadNotice();
+            loadTodaySchedule();
+            loadData();
+        } else {
+            loadTodaySchedule();
+        }
+    });
 });
-calculateGCS();
 
-// GPS
-document.getElementById("getLocation").onclick = ()=>{
-  navigator.geolocation.getCurrentPosition(p=>{
-    const lat=p.coords.latitude;
-    const lng=p.coords.longitude;
-    const txt=`위도:${lat}, 경도:${lng}`;
-    document.getElementById("locationDisplay").textContent=txt;
-    document.getElementById("hiddenCoordinate").value=txt;
-
-    const loc = new kakao.maps.LatLng(lat,lng);
-    const map = new kakao.maps.Map(document.getElementById("map"), {center:loc, level:3});
-    new kakao.maps.Marker({position:loc,map:map});
-  });
-};
-
-// 기록 저장 + 공유
-document.getElementById("recordForm").onsubmit = async e=>{
-  e.preventDefault();
-  let data={}, text="";
-  new FormData(e.target).forEach((v,k)=>{ data[k]=v; text+=`${k}: ${v}\n`; });
-  data["GCS"]=document.getElementById("gcsResult").textContent;
-  text+=`GCS: ${data["GCS"]}`;
-
-  document.getElementById("savedData").innerHTML=`<div class="board-item">${text}</div>`;
-
-  // 다운로드
-  const blob=new Blob([text],{type:"text/plain"});
-  const a=document.createElement("a");
-  a.href=URL.createObjectURL(blob);
-  a.download="무등산_환자기록.txt";
-  a.click();
-
-  // 구글 스프레드시트 전송
-  fetch(GOOGLE_SCRIPT_URL,{method:"POST",body:JSON.stringify(data)}).catch(()=>{});
-
-  // Web Share
-  if(navigator.share){
-    navigator.share({title:"무등산 산악사고 기록", text:text});
-  }
-};
+/* ===== 실시간 데이터 갱신 (15초 주기) ===== */
+setInterval(loadData, 15000); 
 </script>
 </body>
 </html>
