@@ -427,47 +427,60 @@ function renderNotice(data){
 ========================= */
 
 
-function saveNotice(title,content,writer){
+fasync function saveNotice(){
 
 
- if(!title || !content){
+const res =
+await fetch(API,{
 
-   return;
+method:"POST",
 
- }
-
-
- const sheet =
- SS.getSheetByName("공지");
-
-
- if(!sheet){
-
-   return;
-
- }
+headers:{
+"Content-Type":
+"text/plain;charset=utf-8"
+},
 
 
- const id =
- new Date().getTime();
+body:JSON.stringify({
+
+mode:"save",
+
+title:
+document.getElementById("noticeTitle").value,
+
+
+content:
+document.getElementById("noticeContent").value,
+
+
+writer:"연구회"
+
+})
+
+
+});
+
+
+const text =
+await res.text();
 
 
 
- sheet.appendRow([
+if(text.trim()=="ok"){
 
-  id,
+alert("등록 완료");
 
-  title,
+loadNotice();
 
-  content,
 
-  new Date()
+}else{
 
- ]);
-
+alert("저장 실패");
 
 }
 
+
+}
 
 
 /* ================= DELETE ================= */
