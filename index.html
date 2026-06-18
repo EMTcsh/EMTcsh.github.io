@@ -609,8 +609,25 @@ async function loadTodaySchedule() {
 
 /* ================= INIT ================= */
 window.addEventListener("load", () => {
+
+    if (
+        sessionStorage.getItem("login")
+        === "ok"
+    ) {
+
+        document.getElementById(
+            "loginPage"
+        ).style.display = "none";
+
+        document.getElementById(
+            "mainPage"
+        ).style.display = "block";
+
+    }
+
     loadNotice();
     loadTodaySchedule();
+
 });
 
 </script>
