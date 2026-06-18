@@ -380,62 +380,90 @@ async function saveComment(postId) {
     const writer =
         document.getElementById(
             `writer-${postId}`
-        ).value || "익명";
+        ).value.trim();
 
     const content =
         document.getElementById(
             `commentText-${postId}`
-        ).value;
+        ).value.trim();
 
-    if (!content.trim()) {
-        alert("댓글을 입력하세요.");
+
+    if (!writer) {
+
+        alert("작성자 이름을 입력하세요.");
         return;
+
     }
+
+
+    if (!content) {
+
+        alert("댓글 내용을 입력하세요.");
+        return;
+
+    }
+
 
     try {
 
         const res = await fetch(API, {
 
-            method: "POST",
+            method:"POST",
 
-            headers: {
+            headers:{
                 "Content-Type":
                 "text/plain;charset=utf-8"
             },
 
-            body: JSON.stringify({
 
-                mode: "saveComment",
+            body:JSON.stringify({
 
-                postId,
+                mode:"saveComment",
 
-                writer,
+                postId:postId,
 
-                content
+                writer:writer,
+
+                content:content
 
             })
 
         });
 
-        const text = await res.text();
 
-        if (text.trim() === "ok") {
+        const text =
+            await res.text();
+
+
+        if(text.trim()==="ok") {
+
 
             document.getElementById(
                 `commentText-${postId}`
-            ).value = "";
+            ).value="";
+
 
             loadComments(postId);
 
+
+        } else {
+
+            alert(
+                "댓글 저장 실패 : " + text
+            );
+
         }
 
-    } catch (err) {
+
+    } catch(err){
 
         console.error(err);
 
-    }
-}
+        alert("서버 오류");
 
+    }
+
+}
 async function loadComments(postId) {
 
     try {
