@@ -150,9 +150,13 @@ src="https://calendar.google.com/calendar/embed?src=49c8220f60521d9cdfbb45a5080f
 
 <script>
 
+<script>
+
 const API = "https://script.google.com/macros/s/AKfycbxs1CjbhUO_qIs5IgxQ31snn9LqYXh47LLN8ZsH8ysBgcINBqPgnoI3azS7PaCDQMq9bg/exec";
 
+
 /* ================= LOGIN ================= */
+
 async function login() {
 
     const id =
@@ -160,248 +164,6 @@ async function login() {
 
     const pw =
         document.getElementById("password").value;
-
-    try {
-
-        const res = await fetch(API, {
-
-            method: "POST",
-
-            headers: {
-                "Content-Type":
-                "text/plain;charset=utf-8"
-            },
-
-            body: JSON.stringify({
-
-                mode: "login",
-
-                id,
-
-                pw
-
-            })
-
-        });
-
-        const data = await res.json();
-
-        if (data.success) {
-
-            // 로그인 상태 저장
-            sessionStorage.setItem(
-                "login",
-                "ok"
-            );
-
-            // 로그인 사용자 저장
-            sessionStorage.setItem(
-                "user",
-                id
-            );
-
-            document.getElementById(
-                "loginPage"
-            ).style.display = "none";
-
-            document.getElementById(
-                "mainPage"
-            ).style.display = "block";
-
-            loadNotice();
-            loadTodaySchedule();
-
-        } else {
-
-            document.getElementById(
-                "loginMsg"
-            ).textContent = "로그인 실패";
-
-        }
-
-    } catch (err) {
-
-        console.error(err);
-
-        document.getElementById(
-            "loginMsg"
-        ).textContent = "서버 오류";
-
-    }
-}
-
-/* ================= NOTICE LOAD ================= */
-async function loadNotice() {
-    try {
-        const res = await fetch(API + "?action=board&t=" + Date.now());
-        const data = await res.json();
-
-        renderNotice(data);
-
-    } catch (err) {
-        console.error("공지 로드 실패", err);
-    }
-}
-
-/* ================= RENDER ================= */
-function renderNotice(data) {
-
-    const list = document.getElementById("noticeList");
-    const preview = document.getElementById("noticePreview");
-
-    if (!data || data.length <= 1) {
-        list.innerHTML = "<div class='card'>공지 없음</div>";
-        preview.innerHTML = "";
-        return;
-    }
-
-    let html = "";
-    let previewHtml = "";
-
-    for (let i = data.length - 1; i >= 1; i--) {
-
-        if (!data[i][0]) continue;
-
-        const postId = data[i][0];
-
-        html += `
-        <div class="card">
-
-            <h3>${data[i][1] || "제목 없음"}</h3>
-
-            <p style="white-space:pre-line">
-                ${data[i][2] || ""}
-            </p>
-
-            <small>${data[i][3] || ""}</small>
-
-            <hr style="margin:15px 0;">
-
-            <h4>💬 댓글</h4>
-
-            <div id="comment-${postId}">
-                불러오는 중...
-            </div>
-
-            <input
-                id="writer-${postId}"
-                placeholder="작성자"
-                style="
-                    width:100%;
-                    padding:8px;
-                    margin-top:10px;
-                "
-            >
-
-            <textarea
-                id="commentText-${postId}"
-                placeholder="댓글 입력"
-                style="
-                    width:100%;
-                    height:80px;
-                    margin-top:5px;
-                "
-            ></textarea>
-
-            <button onclick="saveComment('${postId}')">
-                댓글등록
-            </button>
-
-            <button onclick="deleteNotice('${postId}')">
-                내용삭제
-            </button>
-
-        </div>
-        `;
-
-        if (i >= data.length - 3) {
-
-            previewHtml += `
-            <div class="card">
-                <b>📢 최근 공지</b>
-                <h3>${data[i][1] || ""}</h3>
-                <p>${data[i][2] || ""}</p>
-            </div>
-            `;
-        }
-    }
-
-    list.innerHTML = html;
-    preview.innerHTML = previewHtml;
-
-    setTimeout(() => {
-
-        for (let i = data.length - 1; i >= 1; i--) {
-
-            if (data[i][0]) {
-
-                loadComments(data[i][0]);
-
-            }
-        }
-
-    }, 300);
-}
-
-/* ================= SAVE ================= */
-async function saveNotice() {
-    try {
-        const res = await fetch(API, {
-            method: "POST",
-            headers: {
-                "Content-Type": "text/plain;charset=utf-8"
-            },
-            body: JSON.stringify({
-                mode: "save",
-                title: document.getElementById("noticeTitle").value,
-                content: document.getElementById("noticeContent").value,
-                writer: "연구회"
-            })
-        });
-
-        const text = await res.text();
-
-        if (text.trim() === "ok") {
-            document.getElementById("noticeTitle").value = "";
-            document.getElementById("noticeContent").value = "";
-            loadNotice();
-            alert("등록 완료");
-        } else {
-            alert("저장 실패: " + text);
-        }
-
-    } catch (err) {
-        console.error(err);
-    }
-}
-
-async function saveComment(postId) {
-
-    const writer =
-        document.getElementById(
-            `writer-${postId}`
-        ).value.trim();
-
-    const content =
-        document.getElementById(
-            `commentText-${postId}`
-        ).value.trim();
-
-
-    if (!writer) {
-
-        alert("작성자 이름을 입력하세요.");
-        return;
-
-    }
-
-
-    if (!content) {
-
-        alert("댓글 내용을 입력하세요.");
-        return;
-
-    }
 
 
     try {
@@ -415,248 +177,544 @@ async function saveComment(postId) {
                 "text/plain;charset=utf-8"
             },
 
-
             body:JSON.stringify({
 
-                mode:"saveComment",
+                mode:"login",
 
-                postId:postId,
+                id,
 
-                writer:writer,
-
-                content:content
+                pw
 
             })
 
         });
 
 
-        const text =
-            await res.text();
+        const data =
+            await res.json();
 
 
-        if(text.trim()==="ok") {
+        if(data.success){
+
+
+            sessionStorage.setItem(
+                "login",
+                "ok"
+            );
+
+
+            sessionStorage.setItem(
+                "user",
+                id
+            );
 
 
             document.getElementById(
-                `commentText-${postId}`
+                "loginPage"
+            ).style.display="none";
+
+
+            document.getElementById(
+                "mainPage"
+            ).style.display="block";
+
+
+            loadNotice();
+
+            loadTodaySchedule();
+
+
+        }else{
+
+
+            document.getElementById(
+                "loginMsg"
+            ).textContent="로그인 실패";
+
+
+        }
+
+
+    }catch(err){
+
+
+        console.error(err);
+
+
+        document.getElementById(
+            "loginMsg"
+        ).textContent="서버 오류";
+
+
+    }
+
+}
+
+
+
+/* ================= NOTICE LOAD ================= */
+
+
+async function loadNotice(){
+
+    try{
+
+
+        const res = await fetch(
+            API+
+            "?action=board&t="+Date.now()
+        );
+
+
+        const data =
+            await res.json();
+
+
+        renderNotice(data);
+
+
+    }catch(err){
+
+        console.error(
+            "공지 로드 실패",
+            err
+        );
+
+    }
+
+}
+
+
+
+
+/* ================= RENDER ================= */
+
+
+function renderNotice(data){
+
+
+    const list =
+        document.getElementById(
+            "noticeList"
+        );
+
+
+    const preview =
+        document.getElementById(
+            "noticePreview"
+        );
+
+
+
+    if(!data || data.length<=1){
+
+
+        list.innerHTML =
+        "<div class='card'>공지 없음</div>";
+
+
+        preview.innerHTML="";
+
+
+        return;
+
+    }
+
+
+
+    let html="";
+
+    let previewHtml="";
+
+
+
+    for(let i=data.length-1;i>=1;i--){
+
+
+        if(!data[i][0]) continue;
+
+
+
+        const postId =
+            data[i][0];
+
+
+
+        html += `
+
+        <div class="card">
+
+
+            <h3>
+                ${data[i][1] || "제목 없음"}
+            </h3>
+
+
+            <p style="white-space:pre-line">
+                ${data[i][2] || ""}
+            </p>
+
+
+            <small>
+                ${data[i][3] || ""}
+            </small>
+
+
+            <br><br>
+
+
+            <button onclick="deleteNotice('${postId}')">
+
+                내용삭제
+
+            </button>
+
+
+        </div>
+
+        `;
+
+
+
+        if(i>=data.length-3){
+
+
+            previewHtml += `
+
+            <div class="card">
+
+
+                <b>📢 최근 공지</b>
+
+
+                <h3>
+                ${data[i][1] || ""}
+                </h3>
+
+
+                <p>
+                ${data[i][2] || ""}
+                </p>
+
+
+            </div>
+
+
+            `;
+
+        }
+
+    }
+
+
+
+    list.innerHTML = html;
+
+    preview.innerHTML = previewHtml;
+
+
+}
+
+
+
+
+
+
+/* ================= SAVE ================= */
+
+
+async function saveNotice(){
+
+
+    try{
+
+
+        const res =
+        await fetch(API,{
+
+
+            method:"POST",
+
+
+            headers:{
+
+                "Content-Type":
+                "text/plain;charset=utf-8"
+
+            },
+
+
+            body:JSON.stringify({
+
+
+                mode:"save",
+
+
+                title:
+                document.getElementById(
+                    "noticeTitle"
+                ).value,
+
+
+                content:
+                document.getElementById(
+                    "noticeContent"
+                ).value,
+
+
+                writer:"연구회"
+
+
+            })
+
+
+        });
+
+
+
+        const text =
+        await res.text();
+
+
+
+        if(text.trim()==="ok"){
+
+
+            document.getElementById(
+                "noticeTitle"
             ).value="";
 
 
-            loadComments(postId);
+            document.getElementById(
+                "noticeContent"
+            ).value="";
 
 
-        } else {
+            loadNotice();
+
+
+            alert("등록 완료");
+
+
+        }else{
+
 
             alert(
-                "댓글 저장 실패 : " + text
+                "저장 실패 : "+text
+            );
+
+
+        }
+
+
+
+    }catch(err){
+
+        console.error(err);
+
+    }
+
+}
+
+
+
+
+
+/* ================= DELETE ================= */
+
+
+async function deleteNotice(id){
+
+
+    if(!id) return;
+
+
+    if(!confirm("삭제?")) return;
+
+
+
+    try{
+
+
+        const res =
+        await fetch(API,{
+
+
+            method:"POST",
+
+
+            headers:{
+
+
+                "Content-Type":
+                "text/plain;charset=utf-8"
+
+
+            },
+
+
+            body:JSON.stringify({
+
+
+                mode:"delete",
+
+
+                id
+
+
+            })
+
+
+        });
+
+
+
+        const text =
+        await res.text();
+
+
+
+        if(text.trim()==="ok"){
+
+
+            loadNotice();
+
+
+        }else{
+
+
+            alert(
+                "삭제 실패 : "+text
             );
 
         }
 
 
-    } catch(err){
+
+    }catch(err){
+
 
         console.error(err);
 
-        alert("서버 오류");
 
     }
 
 }
-async function loadComments(postId) {
 
-    try {
 
-        const res = await fetch(
-            API +
-            "?action=comments&postId=" +
-            postId
+
+
+
+
+/* ================= TODAY CALENDAR ================= */
+
+
+async function loadTodaySchedule(){
+
+
+    try{
+
+
+        const res =
+        await fetch(
+            API+
+            "?action=today&t="+Date.now()
         );
 
-        const data = await res.json();
 
-        let html = "";
+        const data =
+        await res.json();
 
-        if (!data || data.length === 0) {
 
-            html =
-            "<small>등록된 댓글이 없습니다.</small>";
 
-        } else {
+        let html="";
 
-            data.forEach(c => {
 
-                html += `
 
-                <div style="
-                    border-bottom:1px solid #ddd;
-                    padding:8px;
-                    margin-bottom:5px;
-                ">
+        if(!data || data.length===0){
 
-                    <b>${c.writer}</b>
 
-                    <button
-                        style="
-                            float:right;
-                            background:#c0392b;
-                            padding:3px 8px;
-                            font-size:12px;
-                        "
-                        onclick="
-                        deleteComment(
-                        '${c.id}',
-                        '${postId}'
-                        )">
+            html="오늘 일정 없음";
 
-                        삭제
 
-                    </button>
+        }else{
 
-                    <br>
 
-                    ${c.content}
+            data.forEach(ev=>{
 
-                    <br>
 
-                    <small>${c.date}</small>
+                html +=
+                `⏰ ${ev.time} - ${ev.title}<br>`;
 
-                </div>
 
-                `;
             });
 
+
         }
+
+
 
         document.getElementById(
-            `comment-${postId}`
-        ).innerHTML = html;
+            "todaySchedule"
+        ).innerHTML=html;
 
-    } catch (err) {
+
+
+    }catch(err){
+
 
         console.error(err);
 
+
     }
-}
 
-    
-/* ================= DELETE ================= */
-async function deleteNotice(id) {
-    if (!id) return;
-    if (!confirm("삭제?")) return;
-
-    try {
-        const res = await fetch(API, {
-            method: "POST",
-            headers: {
-                "Content-Type": "text/plain;charset=utf-8"
-            },
-            body: JSON.stringify({
-                mode: "delete",
-                id
-            })
-        });
-
-        const text = await res.text();
-
-        if (text.trim() === "ok") {
-            loadNotice();
-        } else {
-            alert("삭제 실패: " + text);
-        }
-
-    } catch (err) {
-        console.error(err);
-    }
 }
 
 
-async function deleteComment(id, postId) {
 
-    if (!confirm("댓글 삭제?")) return;
 
-    try {
 
-        const res = await fetch(API, {
-
-            method: "POST",
-
-            headers: {
-                "Content-Type":
-                "text/plain;charset=utf-8"
-            },
-
-            body: JSON.stringify({
-
-                mode: "deleteComment",
-
-                id
-
-            })
-
-        });
-
-        const text = await res.text();
-
-        if (text.trim() === "ok") {
-
-            loadComments(postId);
-
-        }
-
-    } catch (err) {
-
-        console.error(err);
-
-    }
-}
-    
-/* ================= TODAY CALENDAR ================= */
-async function loadTodaySchedule() {
-    try {
-        const res = await fetch(API + "?action=today&t=" + Date.now());
-        const data = await res.json();
-
-        let html = "";
-
-        if (!data || data.length === 0) {
-            html = "오늘 일정 없음";
-        } else {
-            data.forEach(ev => {
-                html += `⏰ ${ev.time} - ${ev.title}<br>`;
-            });
-        }
-
-        document.getElementById("todaySchedule").innerHTML = html;
-
-    } catch (err) {
-        console.error(err);
-    }
-}
 
 /* ================= INIT ================= */
-window.addEventListener("load", () => {
 
-    if (
+
+window.addEventListener(
+"load",
+()=>{
+
+
+    if(
         sessionStorage.getItem("login")
-        === "ok"
-    ) {
+        ==="ok"
+    ){
+
 
         document.getElementById(
             "loginPage"
-        ).style.display = "none";
+        ).style.display="none";
+
 
         document.getElementById(
             "mainPage"
-        ).style.display = "block";
+        ).style.display="block";
+
 
     }
 
+
+
     loadNotice();
+
+
     loadTodaySchedule();
 
+
+
 });
+
+
+
+</script>
 
 </script>
 </body>
