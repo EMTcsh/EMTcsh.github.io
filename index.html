@@ -425,16 +425,25 @@ function renderNotice(data){
 ========================= */
 
 
-function saveNotice(
- title,
- content,
- writer
-){
+function saveNotice(title,content,writer){
+
+
+ if(!title || !content){
+
+   return;
+
+ }
 
 
  const sheet =
  SS.getSheetByName("공지");
 
+
+ if(!sheet){
+
+   return;
+
+ }
 
 
  const id =
@@ -453,7 +462,6 @@ function saveNotice(
   new Date()
 
  ]);
-
 
 
 }
