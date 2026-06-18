@@ -223,17 +223,60 @@ function renderNotice(data) {
 
         if (!data[i][0]) continue;
 
+        const postId = data[i][0];
+
         html += `
         <div class="card">
+
             <h3>${data[i][1] || "제목 없음"}</h3>
-            <p style="white-space:pre-line">${data[i][2] || ""}</p>
+
+            <p style="white-space:pre-line">
+                ${data[i][2] || ""}
+            </p>
+
             <small>${data[i][3] || ""}</small>
-            <br><br>
-            <button onclick="deleteNotice('${data[i][0]}')">내용삭제</button>
+
+            <hr style="margin:15px 0;">
+
+            <h4>💬 댓글</h4>
+
+            <div id="comment-${postId}">
+                불러오는 중...
+            </div>
+
+            <input
+                id="writer-${postId}"
+                placeholder="작성자"
+                style="
+                    width:100%;
+                    padding:8px;
+                    margin-top:10px;
+                "
+            >
+
+            <textarea
+                id="commentText-${postId}"
+                placeholder="댓글 입력"
+                style="
+                    width:100%;
+                    height:80px;
+                    margin-top:5px;
+                "
+            ></textarea>
+
+            <button onclick="saveComment('${postId}')">
+                댓글등록
+            </button>
+
+            <button onclick="deleteNotice('${postId}')">
+                내용삭제
+            </button>
+
         </div>
         `;
 
         if (i >= data.length - 3) {
+
             previewHtml += `
             <div class="card">
                 <b>📢 최근 공지</b>
@@ -246,6 +289,19 @@ function renderNotice(data) {
 
     list.innerHTML = html;
     preview.innerHTML = previewHtml;
+
+    setTimeout(() => {
+
+        for (let i = data.length - 1; i >= 1; i--) {
+
+            if (data[i][0]) {
+
+                loadComments(data[i][0]);
+
+            }
+        }
+
+    }, 300);
 }
 
 /* ================= SAVE ================= */
@@ -280,6 +336,144 @@ async function saveNotice() {
     }
 }
 
+async function saveComment(postId) {
+
+    const writer =
+        document.getElementById(
+            `writer-${postId}`
+        ).value || "익명";
+
+    const content =
+        document.getElementById(
+            `commentText-${postId}`
+        ).value;
+
+    if (!content.trim()) {
+        alert("댓글을 입력하세요.");
+        return;
+    }
+
+    try {
+
+        const res = await fetch(API, {
+
+            method: "POST",
+
+            headers: {
+                "Content-Type":
+                "text/plain;charset=utf-8"
+            },
+
+            body: JSON.stringify({
+
+                mode: "saveComment",
+
+                postId,
+
+                writer,
+
+                content
+
+            })
+
+        });
+
+        const text = await res.text();
+
+        if (text.trim() === "ok") {
+
+            document.getElementById(
+                `commentText-${postId}`
+            ).value = "";
+
+            loadComments(postId);
+
+        }
+
+    } catch (err) {
+
+        console.error(err);
+
+    }
+}
+
+async function loadComments(postId) {
+
+    try {
+
+        const res = await fetch(
+            API +
+            "?action=comments&postId=" +
+            postId
+        );
+
+        const data = await res.json();
+
+        let html = "";
+
+        if (!data || data.length === 0) {
+
+            html =
+            "<small>등록된 댓글이 없습니다.</small>";
+
+        } else {
+
+            data.forEach(c => {
+
+                html += `
+
+                <div style="
+                    border-bottom:1px solid #ddd;
+                    padding:8px;
+                    margin-bottom:5px;
+                ">
+
+                    <b>${c.writer}</b>
+
+                    <button
+                        style="
+                            float:right;
+                            background:#c0392b;
+                            padding:3px 8px;
+                            font-size:12px;
+                        "
+                        onclick="
+                        deleteComment(
+                        '${c.id}',
+                        '${postId}'
+                        )">
+
+                        삭제
+
+                    </button>
+
+                    <br>
+
+                    ${c.content}
+
+                    <br>
+
+                    <small>${c.date}</small>
+
+                </div>
+
+                `;
+            });
+
+        }
+
+        document.getElementById(
+            `comment-${postId}`
+        ).innerHTML = html;
+
+    } catch (err) {
+
+        console.error(err);
+
+    }
+}
+
+    
 /* ================= DELETE ================= */
 async function deleteNotice(id) {
     if (!id) return;
@@ -310,6 +504,47 @@ async function deleteNotice(id) {
     }
 }
 
+
+async function deleteComment(id, postId) {
+
+    if (!confirm("댓글 삭제?")) return;
+
+    try {
+
+        const res = await fetch(API, {
+
+            method: "POST",
+
+            headers: {
+                "Content-Type":
+                "text/plain;charset=utf-8"
+            },
+
+            body: JSON.stringify({
+
+                mode: "deleteComment",
+
+                id
+
+            })
+
+        });
+
+        const text = await res.text();
+
+        if (text.trim() === "ok") {
+
+            loadComments(postId);
+
+        }
+
+    } catch (err) {
+
+        console.error(err);
+
+    }
+}
+    
 /* ================= TODAY CALENDAR ================= */
 async function loadTodaySchedule() {
     try {
