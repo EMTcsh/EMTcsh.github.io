@@ -420,103 +420,43 @@ function renderNotice(data){
 
 
 
-/* ================= SAVE ================= */
+/* =========================
+   NOTICE SAVE
+========================= */
 
 
-async function saveNotice(){
+function saveNotice(
+ title,
+ content,
+ writer
+){
 
 
-    try{
-
-
-        const res =
-        await fetch(API,{
-
-
-            method:"POST",
-
-
-            headers:{
-
-                "Content-Type":
-                "text/plain;charset=utf-8"
-
-            },
-
-
-            body:JSON.stringify({
-
-
-                mode:"save",
-
-
-                title:
-                document.getElementById(
-                    "noticeTitle"
-                ).value,
-
-
-                content:
-                document.getElementById(
-                    "noticeContent"
-                ).value,
-
-
-                writer:"연구회"
-
-
-            })
-
-
-        });
+ const sheet =
+ SS.getSheetByName("공지");
 
 
 
-        const text =
-        await res.text();
+ const id =
+ new Date().getTime();
 
 
 
-        if(text.trim()==="ok"){
+ sheet.appendRow([
+
+  id,
+
+  title,
+
+  content,
+
+  new Date()
+
+ ]);
 
 
-            document.getElementById(
-                "noticeTitle"
-            ).value="";
-
-
-            document.getElementById(
-                "noticeContent"
-            ).value="";
-
-
-            loadNotice();
-
-
-            alert("등록 완료");
-
-
-        }else{
-
-
-            alert(
-                "저장 실패 : "+text
-            );
-
-
-        }
-
-
-
-    }catch(err){
-
-        console.error(err);
-
-    }
 
 }
-
-
 
 
 
