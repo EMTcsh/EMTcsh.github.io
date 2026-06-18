@@ -83,7 +83,7 @@ tr:hover { background-color: #f1f3f5; cursor: pointer; }
 <h2 class="section-title">📚 안전사고 연구회 게시판</h2>
 
    
- <div class="card">
+<div class="card" id="adminNoticeForm" style="display:none;">
     <h3>📢 공지사항 작성</h3>
 
     <input
@@ -195,50 +195,33 @@ async function login() {
         });
 
 
-        const data =
-            await res.json();
+       const data = await res.json();
 
+if (data.success) {
 
-        if(data.success){
+    sessionStorage.setItem("login", "ok");
+    sessionStorage.setItem("role", data.role);
 
+    // ✅ 관리자 여부 저장 (여기가 핵심)
+    sessionStorage.setItem(
+        "admin",
+        data.role === "ADMIN" ? "yes" : "no"
+    );
 
-            sessionStorage.setItem(
-                "login",
-                "ok"
-            );
+    sessionStorage.setItem("user", id);
 
+    document.getElementById("loginPage").style.display = "none";
+    document.getElementById("mainPage").style.display = "block";
 
-            sessionStorage.setItem(
-                "user",
-                id
-            );
+    checkAdmin();
+    loadNotice();
+    loadTodaySchedule();
 
+} else {
 
-            document.getElementById(
-                "loginPage"
-            ).style.display="none";
-
-
-            document.getElementById(
-                "mainPage"
-            ).style.display="block";
-
-
-            loadNotice();
-
-            loadTodaySchedule();
-
-
-        }else{
-
-
-            document.getElementById(
-                "loginMsg"
-            ).textContent="로그인 실패";
-
-
-        }
-
+    document.getElementById("loginMsg").textContent =
+        "로그인 실패";
+}
 
     }catch(err){
 
@@ -344,8 +327,7 @@ function renderNotice(data){
             data[i][0];
 
 
-
-  html += `
+html += `
 <div class="card">
 
     <h3>${data[i][1] || "제목 없음"}</h3>
@@ -362,9 +344,15 @@ function renderNotice(data){
 
     <br><br>
 
-    <button onclick="deleteNotice('${postId}')">
-        내용삭제
-    </button>
+${
+sessionStorage.getItem("admin")==="yes"
+?
+`<button onclick="deleteNotice('${postId}')">
+    내용삭제
+</button>`
+:
+''
+}
 
 </div>
 `;
@@ -441,12 +429,13 @@ mode:"save",
 title:
 document.getElementById("noticeTitle").value,
 
-
 content:
 document.getElementById("noticeContent").value,
 
+writer:"연구회",
 
-writer:"연구회"
+role:
+sessionStorage.getItem("role")
 
 })
 
@@ -511,16 +500,16 @@ async function deleteNotice(id){
             },
 
 
-            body:JSON.stringify({
+body:JSON.stringify({
 
+mode:"delete",
 
-                mode:"delete",
+id,
 
+role:
+sessionStorage.getItem("role")
 
-                id
-
-
-            })
+})
 
 
         });
@@ -635,38 +624,25 @@ async function loadTodaySchedule(){
 
 /* ================= INIT ================= */
 
-
-window.addEventListener(
-"load",
-()=>{
-
+window.addEventListener("load",()=>{
 
     if(
-        sessionStorage.getItem("login")
-        ==="ok"
+        sessionStorage.getItem("login")==="ok"
     ){
-
 
         document.getElementById(
             "loginPage"
         ).style.display="none";
 
-
         document.getElementById(
             "mainPage"
         ).style.display="block";
 
-
+        checkAdmin();
     }
 
-
-
     loadNotice();
-
-
     loadTodaySchedule();
-
-
 
 });
 
@@ -679,6 +655,23 @@ function closeModal(){
 
 }  
 
+  
+function checkAdmin(){
+
+    const isAdmin =
+        sessionStorage.getItem("admin")==="yes";
+
+    const form =
+        document.getElementById("adminNoticeForm");
+
+    if(form){
+        form.style.display =
+            isAdmin ? "block" : "none";
+    }
+}  
+  
+  
+  
 </script>
 </body>
 </html>
