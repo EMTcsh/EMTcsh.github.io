@@ -1,7 +1,7 @@
 {
   "name": "국립공원 안전사고 연구회",
   "short_name": "안전사고 연구회",
-  "start_url": "/SMRT/",
+  "start_url": "/",
   "display": "standalone",
   "background_color": "#0b4f2f",
   "theme_color": "#0b4f2f",
