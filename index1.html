@@ -3,338 +3,620 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>🚑특수산악구조팀 환자평가 기록</title>
-<script src="https://cdn.tailwindcss.com"></script>
-<script type="text/javascript" src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=ff9e145029506d6e4c72d1f2b01ea424&libraries=services"></script>
-
+<title>🩺 국립공원 안전사고 연구회</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0b4f2f">
+    
 <style>
-body { background-color: #f0f2f5; font-family: Arial, sans-serif; }
-.container { max-width: 900px; margin: 20px auto; padding: 20px; }
-.section { background-color: #fff; border-radius: 12px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-bottom: 20px; }
-.section h2 { font-size: 1.25rem; color: #1e3a8a; margin-bottom: 10px; }
-input, select, textarea { border: 1px solid #cbd5e1; border-radius: 8px; padding: 10px; width: 100%; margin-bottom: 10px; font-size: 1rem; }
-textarea { resize: vertical; min-height: 80px; }
-button { border-radius: 8px; font-weight: bold; }
-.board-item { white-space: pre-line; background-color: #f8fafc; padding: 12px; border-radius: 8px; margin-bottom: 10px; }
-.vitalsRow { border: 1px dashed #cbd5e1; border-radius: 8px; padding: 10px; margin-bottom: 10px; background-color: #fefefe; }
-.coordinate-box { background-color: #e2e8f0; border-radius: 8px; padding: 10px; margin-bottom: 10px; word-break: break-word; }
-#map { width: 100%; height: 300px; border-radius: 12px; margin-bottom: 10px; }
-.GPS-link a { display: block; text-align: center; padding: 10px; margin: 5px 0; background-color: #e0e7ff; border-radius: 8px; font-weight: bold; color: #1e40af; text-decoration: none; }
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Malgun Gothic', sans-serif;}
+body{background:#f4f6f8;color:#333;}
+header{
+    background:linear-gradient(rgba(0,0,0,0.5),rgba(0,0,0,0.5)),
+    url('https://mudeung.github.io/SMRT/무등산_서석대.jpg');
+    background-size:cover;
+    background-position:center;
+    height:30vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    text-align:center;
+    color:white;
+}
+nav{background:#0b4f2f;padding:15px;text-align:center;position:sticky;top:0;z-index:1000;}
+nav a{color:white;text-decoration:none;margin:0 20px;font-weight:bold;}
+section{padding:60px 10%;}
+.section-title{text-align:center;margin-bottom:30px;color:#0b4f2f;}
+.card{background:white;padding:25px;border-radius:10px;box-shadow:0 2px 10px rgba(0,0,0,0.1);margin-bottom:15px;}
+button{margin-top:10px;padding:10px 15px;border:none;background:#0b4f2f;color:white;border-radius:6px;cursor:pointer;}
+#map{width:100%;height:400px;border-radius:10px;margin-bottom:15px;}
+.calendar-wrap{width:100%;height:80vh;}
+.calendar-wrap iframe{width:100%;height:100%;border:0;border-radius:10px;}
+.today-box{background:#fff;padding:15px;border-radius:10px;margin-bottom:15px;box-shadow:0 2px 10px rgba(0,0,0,0.1);}
+footer{background:#0b4f2f;color:white;text-align:center;padding:20px;}
+#modalBody {max-height: 80vh; overflow-y: auto;}
+
+/* 📊 테이블 스캔 시 시인성을 높이기 위한 구조대 스타일 적용 */
+.table-responsive { width: 100%; overflow-x: auto; margin-top: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+table { width: 100%; border-collapse: collapse; background: #fff; text-align: center; min-width: 650px; }
+th, td { padding: 12px 15px; border: 1px solid #e1e4e6; }
+th { background-color: #0b4f2f; color: white; font-weight: bold; }
+tr:nth-child(even) { background-color: #f8f9fa; }
+tr:hover { background-color: #f1f3f5; cursor: pointer; }
 </style>
 </head>
-
 <body>
-<div class="container">
 
-<h1 class="text-2xl font-bold text-center text-blue-700 mb-4">특수산악구조팀 환자평가 기록</h1>
-
-<!-- 설명 -->
-<div class="section">
-    <p>현장대응력 향상을 위해 제작함. 특수산악구조팀-무등산</p>
-    <p class="mt-2 text-sm text-gray-500">© 2024 Web Applications | Korea National Park Service Rescue Paramedic Lab</p>
-</div>
-
-<!-- 폼 시작 -->
-<form id="recordForm">
-
-<!-- ===== 현장 정보 ===== -->
-<div class="section">
-    <h2 class="text-xl font-semibold mb-2">현장 정보</h2>
-
-    <label>도착시간:
-        <input type="datetime-local" name="발생시간" required>
-    </label>
-
-    <label>사고장소:
-        <input type="text" name="장소" placeholder="예: 무등산 OO일원" required>
-    </label>
-
-    <label>사고좌표:
-        <div class="coordinate-box" id="locationDisplay">위도: , 경도: </div>
-        <button id="getLocation" type="button" class="bg-green-600 text-white px-3 py-1 rounded">
-            🌐 현장도착 좌표
-        </button>
-        <input type="hidden" name="사고좌표" id="hiddenCoordinate">
-    </label>
-<br>
-    <br>
-    <label>환자증상:
-        <input type="text" name="주증상" placeholder="예: 호흡곤란, 가슴 통증" required>
-    </label>
-</div>
-
-<!-- ===== GCS ===== -->
-<div class="section">
-    <h2 class="text-xl font-semibold">의식수준 평가(GCS)</h2>
-
-    <label>눈 뜨기 반응 (E)</label>
-    <select id="eye">
-        <option value="4">자발적으로 눈을 뜬다</option>
-        <option value="3">말로 지시했을때 눈을 뜬다</option>
-        <option value="2">통증 자극에 의해 눈을 뜬다</option>
-        <option value="1">어떠한 자극에도 눈을 뜨지 못한다</option>
-    </select>
-
-    <label>언어 반응 (V)</label>
-    <select id="verbal">
-        <option value="5">정확한 반응(6하원칙에 지남력 있는 상태)</option>
-        <option value="4">대화 혼란(대화가능하나, 계속적 대화 교환 안됨)</option>
-        <option value="3">언어혼란(동문서답, 혼란된 말을 함)</option>
-        <option value="2">이해 할수 없는 소리(신음소리만)</option>
-        <option value="1">반응이 없음(아무런 소리를 내지 않음)</option>
-    </select>
-
-    <label>운동 반응 (M)</label>
-    <select id="motor">
-        <option value="6">명령에 따름(간단한 명령에 따라 운동기능 수행)</option>
-        <option value="5">통증 자극 국소화 반응(명령은 따지 않지만, 자극을 가하면 피하거나 치우려고 함) </option>
-        <option value="4">통증 자극 움츠림(통증 자극을 피하려고 함, 치우려고 하지는 않음)</option>
-        <option value="3">통증 자극 이상굴곡(통증 자극에 앞으로 구부리거나 몸쪽으로 접음)</option>
-        <option value="2">통증 자극 이상신전(통증 자극에 뒤로 젖히거나 모에서 멀리 뻗음)(</option>
-        <option value="1">전혀 움직이지 않음(무반응, 자가호흡 없음)</option>
-    </select>
-
-    <div id="gcsResultContainer" style="margin-top:10px; display:none;">
-        <strong>의식평가(GCS) 결과:</strong>
-        <span id="gcsResult"></span>
+<div id="loginPage" style="height:100vh;display:flex;justify-content:center;align-items:center;">
+    <div class="card" style="width:350px;">
+        <h3 style="text-align:center;">국립공원 안전사고 연구회 로그인</h3>
+        <input id="userid" placeholder="아이디" style="width:100%;padding:10px;margin-top:10px;">
+        <input id="password" type="password" placeholder="비밀번호" style="width:100%;padding:10px;margin-top:10px;">
+        <button onclick="login()" style="width:100%;">로그인</button>
+        <p id="loginMsg" style="color:red;text-align:center;margin-top:10px;"></p>
     </div>
 </div>
 
-<!-- ===== 환자 정보 ===== -->
-<div class="section">
-    <h2 class="text-xl font-semibold mb-2">환자 정보</h2>
+<div id="mainPage" style="display:none;">
 
-    <label>이름:
-        <input type="text" name="환자이름" required>
-    </label>
+<header>
+    <div>
+        <h2>🩺 국립공원 안전사고 연구회</h2>
+        <p>국민의 생명과 안전을 지키는 산악전문 응급구조팀</p>
+    </div>
+</header>
 
-    <label>생년월일:
-        <input type="date" name="생년월일" required>
-    </label>
+<nav>
+<a href="#mainPage">Home</a>
+<a href="#mission">게시판</a>
+<a href="#calendar">일정공유</a>
+</nav>
 
-    <label>거주지:
-        <input type="text" name="거주지" required>
-    </label>
-</div>
+<div id="noticePreview" style="padding: 20px 10% 0 10%;"></div>  
 
-<!-- ===== 응급처치 ===== -->
-<div class="section">
-    <h2 class="text-xl font-semibold mb-2">응급처치</h2>
-    <textarea name="응급처치" rows="4" placeholder="SAMPLE, 실시한 응급처치(부목고정, 활력징후, 상처치, 외상환자평가)  / 주소, 좌표 수동입력"></textarea>
-</div>
+<div class="today-box" style="margin: 20px 10% 0 10%;">
+  <h3>📌 안전사고 연구회 일정</h3>
+  <div id="todaySchedule"></div>
+</div> 
+   
+  
+<section id="mission">
+<h2 class="section-title">📚 안전사고 연구회 게시판</h2>
 
-<!-- ===== 활력징후 ===== -->
-<div class="section">
-    <h2 class="text-xl font-semibold mb-2">활력징후 (여러 회 측정 가능)</h2>
+   
+<div class="card" id="adminNoticeForm" style="display:none;">
+    <h3>📢 공지사항 작성</h3>
 
-    <div id="vitalSignsContainer"></div>
+    <input
+        type="text"
+        id="noticeTitle"
+        placeholder="제목 입력"
+        style="width:100%;padding:10px;margin-bottom:10px;">
 
-    <button type="button" onclick="addVitalSigns()" class="bg-green-600 text-white px-3 py-1 rounded">
-        + 활력징후 추가
+    <textarea
+        id="noticeContent"
+        placeholder="공지내용 입력"
+        style="width:100%;height:150px;padding:10px;"></textarea>
+
+    <button onclick="saveNotice()">
+        공지 등록
     </button>
-</div>
-
-<!-- 기록자 -->
-<div class="section">
-    <h2 class="text-xl font-semibold">기록자</h2>
-    <input type="text" name="기록자" placeholder="구조대원 성명" required>
-</div>
-
-<!-- 제출 버튼들 -->
-<button type="submit" class="w-full bg-blue-600 text-white py-3 px-4 rounded-lg">기록 저장하기</button>
-<button type="button" onclick="sendToGoogleForm()" class="w-full bg-yellow-500 text-white py-3 px-4 rounded-lg mt-2">
-    📤 상황판으로 제출하기
-</button>
-<button type="button" onclick="shareReport()" class="w-full bg-purple-500 text-white py-3 px-4 rounded-lg mt-2">
-    공유
-</button>
-
-<div id="resultMessage" class="mt-4 text-center"></div>
-</form>
-
-<!-- ===== 작성기록 ===== -->
-<div class="section">
-    <h2 class="text-xl font-semibold">작성기록</h2>
-    <div id="savedData" class="board"></div>
-</div>
-
-<!-- ===== GPS 좌표 ===== -->
-<div class="section">
-    <h2 class="text-xl font-semibold">GPS 좌표</h2>
-
-    <button id="getLocation2" class="bg-green-600 text-white px-3 py-1 rounded">🌐 내 위치 확인</button>
-    <button id="shareLocation" class="bg-blue-500 text-white px-3 py-1 rounded">📲 위치 공유</button>
-
-    <div class="coordinate-box" id="locationDisplay2">위도: , 경도: </div>
-    <div class="coordinate-box" id="dmsCoordinates">도분초: </div>
-
-    <div id="map"></div>
-</div>
-
-<!-- 외부 링크 -->
-<div class="GPS-link">
-  <a href="#" target="_blank">조난자 위치공유 whereUrl</a>
-</div>
-<div class="GPS-link">
-  <a href="https://discord.gg/ryaMRTAhwP" target="_blank">문의: 🐸 국립공원 안전사고 연구회</a>
 </div>  
+     
+ <div id="noticeList"></div> 
+  
+  
+    <div class="card">
+    <h3>📂 안전사고 연구회 공유폴더</h3>
+    <p>산악사고/구조출동/업무자료</p>
+    <button onclick="window.open('https://drive.google.com/drive/folders/1bCb5VoMcTVZjMZCk2lMyO8jrUVJUNfZa?usp=sharing')">파일공유</button>
+</div>
 
-</div><!-- container end -->
+    <div class="card">
+    <h3>📖 안전사고 연구회 게시판</h3>
+    <p>현장사례 연구 및 문의사항 작성</p>
+    <button onclick="window.open('https://emtcsh.github.io/file','_blank')">내용작성</button>
+</div>
+
+    
+</section>    
+
+
+<section id="calendar">
+<h2 class="section-title">📒 교육/훈련/행사/일정공유</h2>
+<div class="calendar-wrap">
+<iframe
+src="https://calendar.google.com/calendar/embed?src=49c8220f60521d9cdfbb45a5080f49ca6aebab241e1e9603ece151bb0c35ebb0%40group.calendar.google.com&ctz=Asia%2FSeoul">
+     
+</iframe>
+</div>
+</section>
+  
+    
+<footer>
+© 2026 국립공원 안전사고 연구회는 산악사고, 조난자 구조, 응급처치, 수색 활동을 수행하며 대응체계 마련에 관한 연구를하고 있습니다.
+</footer>
+
+</div>
+
+<div id="modalOverlay" style="
+  display:none;
+  position:fixed;
+  top:0;left:0;
+  width:100%;height:100%;
+  background:rgba(0,0,0,0.6);
+  justify-content:center;
+  align-items:center;
+  z-index:9999;
+">
+  <div style="background:#fff;padding:20px;border-radius:10px;max-width:400px; width:90%;">
+    <div id="modalBody"></div>
+    <button onclick="closeModal()" style="width:100%; margin-top:15px;">닫기</button>
+  </div>
+</div>
+
 
 <script>
 
-/* ===== 활력징후 추가 ===== */
-function addVitalSigns() {
-    const container = document.getElementById("vitalSignsContainer");
-    const index = container.children.length + 1;
+const API = "https://script.google.com/macros/s/AKfycbxs1CjbhUO_qIs5IgxQ31snn9LqYXh47LLN8ZsH8ysBgcINBqPgnoI3azS7PaCDQMq9bg/exec";
 
-    const div = document.createElement("div");
-    div.className = "vitalsRow";
 
-    div.innerHTML = `
-        <strong>${index}회차(V/S) 측정</strong><br>
-        혈압: <input type="text" name="혈압${index}" placeholder="120/80"><br>
-        맥박: <input type="number" name="맥박${index}" placeholder="회/분"><br>
-        호흡수: <input type="number" name="호흡수${index}" placeholder="회/분"><br>
-        체온: <input type="number" step="0.1" name="체온${index}" placeholder="℃"><br>
-        SpO₂: <input type="number" name="SpO2${index}" placeholder="%"><br>
-    `;
+/* ================= LOGIN ================= */
 
-    container.appendChild(div);
-}
-addVitalSigns();
+async function login() {
 
-/* ===== GCS 계산 ===== */
-function calculateGCS() {
-    const e = parseInt(document.getElementById("eye").value);
-    const v = parseInt(document.getElementById("verbal").value);
-    const m = parseInt(document.getElementById("motor").value);
+    const id =
+        document.getElementById("userid").value;
 
-    const total = e + v + m;
+    const pw =
+        document.getElementById("password").value;
 
-    let state = '';
-    if (total === 15) state = '정상-alert';
-    else if (total >= 13) state = '졸림-drowsy';
-    else if (total >= 9) state = '혼미-stupor';
-    else if (total >= 4) state = '반혼수-semicoma';
-    else state = '혼수-coma';
 
-    document.getElementById("gcsResult").innerText = `${total}점 (${state})`;
-    document.getElementById("gcsResultContainer").style.display = "block";
-}
-
-["eye","verbal","motor"].forEach(id => {
-    document.getElementById(id).addEventListener("change", calculateGCS);
-});
-calculateGCS();
-
-/* ===== 기록 저장 + 구글시트 저장 ===== */
-document.getElementById("recordForm").addEventListener("submit", async function(e){
-    e.preventDefault();
-
-    const form = new FormData(e.target);
-    const data = {};
-
-    data["GCS"] = document.getElementById("gcsResult").innerText;
-
-    form.forEach((v,k)=> data[k]=v);
-
-    /* TXT 파일 저장 */
-    let textContent = "";
-    for (let key in data){
-        textContent += `${key}: ${data[key]}\n`;
-    }
-
-    const today = new Date().toISOString().slice(0,10);
-    const blob = new Blob([textContent],{type:"text/plain"});
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-
-    a.href = url;
-    a.download = `특수산악구조팀_환자평가_${today}.txt`;
-    a.click();
-
-    URL.revokeObjectURL(url);
-
-    document.getElementById("savedData").innerHTML =
-        `<div class="board-item">${textContent}</div>`;
-    document.getElementById("resultMessage").innerText = "기록 저장 완료 ✅";
-
-    /* 구글시트 저장 */
     try {
-        const scriptURL = "https://script.google.com/macros/s/AKfycbxm_oLeGMIGh5PRokCURztVx6-1Ijug2KtuGbsFH-cZVOKE5LgaKDnLbTgFl2sWWDdkwA/exec";
 
-        await fetch(scriptURL, {
-            method: "POST",
-            body: JSON.stringify(data)
+        const res = await fetch(API, {
+
+            method:"POST",
+
+            headers:{
+                "Content-Type":
+                "text/plain;charset=utf-8"
+            },
+
+            body:JSON.stringify({
+
+                mode:"login",
+
+                id,
+
+                pw
+
+            })
+
         });
 
-    } catch(err){
-        console.log("구글시트 오류:", err);
+
+       const data = await res.json();
+
+if (data.success) {
+
+    sessionStorage.setItem("login", "ok");
+    sessionStorage.setItem("role", data.role);
+
+    // ✅ 관리자 여부 저장 (여기가 핵심)
+    sessionStorage.setItem(
+        "admin",
+        data.role === "ADMIN" ? "yes" : "no"
+    );
+
+    sessionStorage.setItem("user", id);
+
+    document.getElementById("loginPage").style.display = "none";
+    document.getElementById("mainPage").style.display = "block";
+
+    checkAdmin();
+    loadNotice();
+    loadTodaySchedule();
+
+} else {
+
+    document.getElementById("loginMsg").textContent =
+        "로그인 실패";
+}
+
+    }catch(err){
+
+
+        console.error(err);
+
+
+        document.getElementById(
+            "loginMsg"
+        ).textContent="서버 오류";
+
+
     }
-});
 
-/* ===== 구글 폼 제출 ===== */
-function sendToGoogleForm() {
-    alert("구글폼 기능이 연결되었습니다.");
 }
 
-/* ===== GPS 기능 ===== */
-let currentLat, currentLng;
 
-document.getElementById("getLocation").addEventListener("click", function(){
-    navigator.geolocation.getCurrentPosition(showPos, showErr);
-});
 
-document.getElementById("getLocation2").addEventListener("click", function(){
-    navigator.geolocation.getCurrentPosition(showPos, showErr);
-});
+/* ================= NOTICE LOAD ================= */
 
-function showPos(position){
-    currentLat = position.coords.latitude;
-    currentLng = position.coords.longitude;
 
-    const t = `위도: ${currentLat}, 경도: ${currentLng}`;
+async function loadNotice(){
 
-    document.getElementById("locationDisplay").textContent = t;
-    document.getElementById("locationDisplay2").textContent = t;
-    document.getElementById("hiddenCoordinate").value = t;
+    try{
 
-    initMap(currentLat, currentLng);
+
+        const res = await fetch(
+            API+
+            "?action=board&t="+Date.now()
+        );
+
+
+        const data =
+            await res.json();
+
+
+        renderNotice(data);
+
+
+    }catch(err){
+
+        console.error(
+            "공지 로드 실패",
+            err
+        );
+
+    }
+
 }
 
-function showErr(e){
-    alert("GPS 오류 발생");
+
+
+
+/* ================= RENDER ================= */
+
+
+function renderNotice(data){
+
+
+    const list =
+        document.getElementById(
+            "noticeList"
+        );
+
+
+    const preview =
+        document.getElementById(
+            "noticePreview"
+        );
+
+
+
+    if(!data || data.length<=1){
+
+
+        list.innerHTML =
+        "<div class='card'>공지 없음</div>";
+
+
+        preview.innerHTML="";
+
+
+        return;
+
+    }
+
+
+
+    let html="";
+
+    let previewHtml="";
+
+
+
+    for(let i=data.length-1;i>=1;i--){
+
+
+        if(!data[i][0]) continue;
+
+
+
+        const postId =
+            data[i][0];
+
+
+html += `
+<div class="card">
+
+    <h3>${data[i][1] || "제목 없음"}</h3>
+
+    <p style="white-space:pre-line">
+        ${data[i][2] || ""}
+    </p>
+
+    <small>
+        작성일 : ${data[i][3] || ""}
+        <br>
+        작성자 : ${data[i][4] || ""}
+    </small>
+
+    <br><br>
+
+${
+sessionStorage.getItem("admin")==="yes"
+?
+`<button onclick="deleteNotice('${postId}')">
+    내용삭제
+</button>`
+:
+''
 }
 
-function initMap(lat, lng){
-    const map = new kakao.maps.Map(document.getElementById("map"), {
-        center: new kakao.maps.LatLng(lat, lng),
-        level: 3
+</div>
+`;
+
+
+
+        if(i>=data.length-3){
+
+
+            previewHtml += `
+
+            <div class="card">
+
+
+                <b>📢 최근 공지</b>
+
+
+                <h3>
+                ${data[i][1] || ""}
+                </h3>
+
+
+                <p>
+                ${data[i][2] || ""}
+                </p>
+
+
+            </div>
+
+
+            `;
+
+        }
+
+    }
+
+
+
+    list.innerHTML = html;
+
+    preview.innerHTML = previewHtml;
+
+
+}
+
+
+
+
+
+
+/* =========================
+   NOTICE SAVE
+========================= */
+
+
+async function saveNotice(){
+
+
+const res =
+await fetch(API,{
+
+method:"POST",
+
+headers:{
+"Content-Type":
+"text/plain;charset=utf-8"
+},
+
+
+body:JSON.stringify({
+
+mode:"save",
+
+title:
+document.getElementById("noticeTitle").value,
+
+content:
+document.getElementById("noticeContent").value,
+
+writer:"연구회",
+
+role:
+sessionStorage.getItem("role")
+
+})
+
+
+});
+
+
+const text =
+await res.text();
+
+
+
+if(text.trim()=="ok"){
+
+    alert("등록 완료");
+
+    document.getElementById("noticeTitle").value="";
+    document.getElementById("noticeContent").value="";
+
+    loadNotice();
+
+}else{
+
+    alert("저장 실패");
+
+}
+
+
+}
+
+
+/* ================= DELETE ================= */
+async function deleteNotice(id){
+
+    console.log("삭제 요청 ID:", id);
+
+    const res = await fetch(API,{
+        method:"POST",
+        headers:{
+            "Content-Type":"text/plain;charset=utf-8"
+        },
+        body:JSON.stringify({
+            mode:"delete",
+            id,
+            role: sessionStorage.getItem("role")
+        })
     });
 
-    new kakao.maps.Marker({
-        position: new kakao.maps.LatLng(lat, lng),
-        map: map
-    });
-}
+    const text = await res.text();
 
-/* ===== 공유 ===== */
-function shareReport(){
-    const form = new FormData(document.getElementById("recordForm"));
-    let text = "";
+    console.log("서버 응답:", text);
 
-    form.forEach((v,k)=> text += `${k}: ${v}\n`);
-    text += "GCS: " + document.getElementById("gcsResult").innerText;
-
-    if (navigator.share){
-        navigator.share({title:"특수산악구조팀 환자평가", text});
-    } else {
-        alert("공유 기능 미지원");
+    if(text.trim()==="ok"){
+        loadNotice();
+    }else{
+        alert("삭제 실패 : " + text);
     }
 }
 
+
+
+
+/* ================= TODAY CALENDAR ================= */
+
+
+async function loadTodaySchedule(){
+
+
+    try{
+
+
+        const res =
+        await fetch(
+            API+
+            "?action=today&t="+Date.now()
+        );
+
+
+        const data =
+        await res.json();
+
+
+
+        let html="";
+
+
+
+        if(!data || data.length===0){
+
+
+            html="오늘 일정 없음";
+
+
+        }else{
+
+
+            data.forEach(ev=>{
+
+
+                html +=
+                `⏰ ${ev.time} - ${ev.title}<br>`;
+
+
+            });
+
+
+        }
+
+
+
+        document.getElementById(
+            "todaySchedule"
+        ).innerHTML=html;
+
+
+
+    }catch(err){
+
+
+        console.error(err);
+
+
+    }
+
+}
+
+
+
+
+
+
+/* ================= INIT ================= */
+
+window.addEventListener("load",()=>{
+
+    if(
+        sessionStorage.getItem("login")==="ok"
+    ){
+
+        document.getElementById(
+            "loginPage"
+        ).style.display="none";
+
+        document.getElementById(
+            "mainPage"
+        ).style.display="block";
+
+        checkAdmin();
+    }
+
+    loadNotice();
+    loadTodaySchedule();
+
+});
+
+
+function closeModal(){
+
+    document.getElementById(
+        "modalOverlay"
+    ).style.display = "none";
+
+}  
+
+  
+function checkAdmin(){
+
+    const isAdmin =
+        sessionStorage.getItem("admin")==="yes";
+
+    const form =
+        document.getElementById("adminNoticeForm");
+
+    if(form){
+        form.style.display =
+            isAdmin ? "block" : "none";
+    }
+}  
+  
+  
+  
 </script>
-
 </body>
 </html>
