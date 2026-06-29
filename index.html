@@ -99,7 +99,7 @@ tr:hover { background-color: #f1f3f5; cursor: pointer; }
         style="width:100%;height:150px;padding:10px;"></textarea>
 
     <button onclick="saveNotice()">
-        공지 등록
+        공지사항 등록
     </button>
 </div>  
      
@@ -110,7 +110,7 @@ tr:hover { background-color: #f1f3f5; cursor: pointer; }
     <div class="card">
     <h3>📂 안전사고 연구회 공유폴더</h3>
     <p>산악사고/구조출동/업무자료</p>
-    <button onclick="window.open('https://drive.google.com/drive/folders/1bCb5VoMcTVZjMZCk2lMyO8jrUVJUNfZa?usp=sharing')">파일공유</button>
+    <button onclick="window.open('https://drive.google.com/drive/folders/1bCb5VoMcTVZjMZCk2lMyO8jrUVJUNfZa?usp=sharing')">자료파일 공유</button>
 </div>
 
     
@@ -124,7 +124,7 @@ tr:hover { background-color: #f1f3f5; cursor: pointer; }
     </p>
 
     <button onclick="window.open('https://www.band.us/band/85598029/post','_blank')">
-        게시판
+       현장사례 공유
     </button>
 </div>
 
@@ -359,7 +359,7 @@ ${
 sessionStorage.getItem("admin")==="yes"
 ?
 `<button onclick="deleteNotice('${postId}')">
-    내용삭제
+    공지내용 삭제
 </button>`
 :
 ''
