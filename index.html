@@ -69,6 +69,7 @@ tr:hover { background-color: #f1f3f5; cursor: pointer; }
 <a href="#mainPage">Home</a>
 <a href="#mission">게시판</a>
 <a href="#calendar">일정공유</a>
+<a href="#drive">자료저장</a>    
 </nav>
 
 <div id="noticePreview" style="padding: 20px 10% 0 10%;"></div>  
@@ -80,7 +81,7 @@ tr:hover { background-color: #f1f3f5; cursor: pointer; }
    
   
 <section id="mission">
-<h2 class="section-title">📚 국립공원 안전사고 연구회 게시판</h2>
+<h2 class="section-title">📚 공지 게시판</h2>
 
 <!-- 관리자 로그인 게시판 -->    
 <div class="card" id="adminNoticeForm" style="display:none;">
@@ -104,14 +105,7 @@ tr:hover { background-color: #f1f3f5; cursor: pointer; }
      
  <div id="noticeList"></div> 
 
-<!-- 구글드라이브 공유폴더 -->    
-  
-    <div class="card">
-    <h3>📂 구글드라이브 저장소</h3>
-    <p>산악사고/구조출동/업무자료</p>
-    <button onclick="window.open('https://drive.google.com/drive/folders/1bCb5VoMcTVZjMZCk2lMyO8jrUVJUNfZa?usp=sharing')">자료파일 공유</button>
-</div>
-    
+
 <!-- 네이버 밴드 게시판 -->
 <div class="card">
     <h3>📝 현장사례·토론 게시판</h3>
@@ -126,11 +120,23 @@ tr:hover { background-color: #f1f3f5; cursor: pointer; }
     </button>
 </div>   
     
+    
+<h2 class="section-title">📚 자료 저장소</h2>    
+<!-- 구글드라이브 공유폴더 -->    
+  
+    <div class="card">
+    <h3>📂 구글드라이브 저장소</h3>
+    <p>산악사고/구조출동/업무자료</p>
+    <button onclick="window.open('https://drive.google.com/drive/folders/1bCb5VoMcTVZjMZCk2lMyO8jrUVJUNfZa?usp=sharing')">자료파일 공유</button>
+</div>
+    
+
+    
 </section>    
 
 
 <section id="calendar">
-<h2 class="section-title">📒 교육/훈련/행사/일정공유</h2>
+<h2 class="section-title">📒 일정공유</h2>
 <div class="calendar-wrap">
 <iframe
 src="https://calendar.google.com/calendar/embed?src=49c8220f60521d9cdfbb45a5080f49ca6aebab241e1e9603ece151bb0c35ebb0%40group.calendar.google.com&ctz=Asia%2FSeoul">
