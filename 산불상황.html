@@ -352,15 +352,14 @@ const satelliteLayer = L.tileLayer(
   'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
   {
     maxZoom: 19,
-    attribution: 'Tiles &copy; Esri'
+    attribution: '&copy; Esri'
   }
 );
 
+// 최초 일반지도 표시
 normalLayer.addTo(map);
 
 let isSatellite = false;
-let clickMode = false;
-let markers = [];
 
 // 지도 크기 초기화
 const mapContainer =
@@ -602,26 +601,33 @@ document.getElementById('addByAddressBtn')
 // ==========================================
 
 document.getElementById('toggleMapTypeBtn')
-  .addEventListener('click', () => {
+  .addEventListener('click', function() {
 
-    if (isSatellite) {
-      map.removeLayer(satelliteLayer);
-      map.addLayer(normalLayer);
+    if (!isSatellite) {
 
-      document.getElementById('toggleMapTypeBtn')
-        .textContent = '위성지도 전환';
+      map.removeLayer(normalLayer);
+      satelliteLayer.addTo(map);
+
+      this.textContent = '일반지도 전환';
+
+      isSatellite = true;
 
     } else {
-      map.removeLayer(normalLayer);
-      map.addLayer(satelliteLayer);
 
-      document.getElementById('toggleMapTypeBtn')
-        .textContent = '일반지도 전환';
+      map.removeLayer(satelliteLayer);
+      normalLayer.addTo(map);
+
+      this.textContent = '위성지도 전환';
+
+      isSatellite = false;
     }
 
-    isSatellite = !isSatellite;
-  });
+    setTimeout(() => {
+      map.invalidateSize(true);
+    }, 200);
 
+  });
+ 
 // ==========================================
 // 지도 확대 축소 컨트롤
 // ==========================================
