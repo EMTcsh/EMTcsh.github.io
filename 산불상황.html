@@ -1,6 +1,13 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
+
+ <link
+ rel="stylesheet"
+ href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+/>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script> 
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>무등산 산불관리 상황판</title>
@@ -70,15 +77,21 @@ main{
   font-size:14px;font-weight:700;
   display:flex;justify-content:space-between;align-items:center;
 }
-#map-container{
-  position:relative;min-width:0;height:calc(100vh - 300px);
-  min-height:530px;
+#map-container {
+  position: relative;
+  width: 100%;
+  height: 650px;
+  min-height: 530px;
+  display: block;
+  overflow: hidden;
 }
-#map{width:100%;height:100%;min-height:530px}
-.map-label{
-  background:#0b1929;color:var(--cyan);
-  border:1px solid #28516c;padding:7px 12px;
-  font-size:12px;border-radius:5px;
+
+#map {
+  width: 100%;
+  height: 100%;
+  min-height: 530px;
+  display: block;
+  background: #15283b;
 }
 .map-legend{
   position:absolute;bottom:18px;left:15px;z-index:10;
@@ -285,6 +298,276 @@ button:hover{filter:brightness(1.2)}
 <div class="footer">
  MUDEUNGSAN FOREST FIRE CONTROL CENTER · 산불 예방 및 안전관리
 </div>
+
+
+// ==========================================
+// 무등산 산불 GIS 지도 시스템
+// ==========================================
+
+// 무등산 중심 좌표
+const map = L.map('map').setView(
+  [35.1286, 126.9699], 13
+);
+
+// 일반지도
+const normalLayer = L.tileLayer(
+  'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+  {
+    maxZoom: 19,
+    attribution: '&copy; OpenStreetMap'
+  }
+);
+
+// 위성지도
+const satelliteLayer = L.tileLayer(
+  'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+  {
+    maxZoom: 19,
+    attribution: 'Tiles &copy; Esri'
+  }
+);
+
+normalLayer.addTo(map);
+
+let isSatellite = false;
+let clickMode = false;
+let markers = [];
+
+// 지도 크기 초기화
+setTimeout(() => map.invalidateSize(), 300);
+
+// ==========================================
+// 마커 생성
+// ==========================================
+
+function addFireMarker(lat, lng, type, title, description) {
+  const color = type === 'fire' ? '#fb5365' : '#38bdf8';
+
+  const marker = L.circleMarker([lat, lng], {
+    radius: 9,
+    color: '#ffffff',
+    weight: 2,
+    fillColor: color,
+    fillOpacity: 1
+  }).addTo(map);
+
+  const item = {
+    marker,
+    lat,
+    lng,
+    type,
+    title,
+    description
+  };
+
+  markers.push(item);
+
+  const popup = document.createElement('div');
+  const heading = document.createElement('strong');
+  const detail = document.createElement('p');
+  const removeButton = document.createElement('button');
+
+  heading.textContent = title;
+  detail.textContent = description;
+  removeButton.textContent = '이 지점 삭제';
+  removeButton.style.cssText =
+    'background:#991b1b;color:white;padding:7px;border:0;border-radius:5px;cursor:pointer;width:100%';
+
+  removeButton.addEventListener('click', () => {
+    map.removeLayer(marker);
+    markers = markers.filter(m => m !== item);
+    document.getElementById('infoPanel').textContent =
+      '선택한 지점을 삭제했습니다.';
+  });
+
+  popup.append(heading, detail, removeButton);
+  marker.bindPopup(popup);
+
+  marker.on('click', () => {
+    const panel = document.getElementById('infoPanel');
+    panel.replaceChildren();
+
+    const h = document.createElement('h3');
+    h.textContent = title;
+
+    const info = document.createElement('div');
+    info.textContent =
+      `위도: ${lat.toFixed(6)}\n` +
+      `경도: ${lng.toFixed(6)}\n` +
+      `구분: ${type === 'fire' ? '산불 발생 이력' : '위험·관리 지점'}\n` +
+      `상세정보: ${description}`;
+
+    info.style.whiteSpace = 'pre-line';
+    panel.append(h, info);
+  });
+
+  return marker;
+}
+
+// ==========================================
+// 좌표 입력으로 위험지역 등록
+// ==========================================
+
+document.getElementById('addByCoordBtn')
+  .addEventListener('click', () => {
+
+    const lat = Number(
+      document.getElementById('latInput').value
+    );
+
+    const lng = Number(
+      document.getElementById('lngInput').value
+    );
+
+    if (
+      !Number.isFinite(lat) ||
+      !Number.isFinite(lng) ||
+      lat < -90 || lat > 90 ||
+      lng < -180 || lng > 180
+    ) {
+      alert('올바른 위도와 경도를 입력하세요.');
+      return;
+    }
+
+    const marker = addFireMarker(
+      lat, lng, 'risk',
+      '위험지역',
+      '사용자가 좌표로 등록한 위험·관리 지점'
+    );
+
+    map.setView([lat, lng], 16);
+    marker.openPopup();
+  });
+
+// ==========================================
+// 지도 클릭으로 위험지역 등록
+// ==========================================
+
+document.getElementById('addPointBtn')
+  .addEventListener('click', () => {
+
+    clickMode = !clickMode;
+
+    const btn = document.getElementById('addPointBtn');
+
+    if (clickMode) {
+      btn.textContent = '지도에서 위치를 선택하세요';
+      btn.style.background = '#b45309';
+      map.getContainer().style.cursor = 'crosshair';
+    } else {
+      btn.textContent = '＋ 지도에서 클릭하여 표시';
+      btn.style.background = '';
+      map.getContainer().style.cursor = '';
+    }
+  });
+
+map.on('click', (e) => {
+
+  if (!clickMode) return;
+
+  const lat = e.latlng.lat;
+  const lng = e.latlng.lng;
+
+  const marker = addFireMarker(
+    lat, lng, 'risk',
+    '현장 위험지역',
+    '지도 클릭으로 등록한 위험·관리 지점'
+  );
+
+  marker.openPopup();
+
+  clickMode = false;
+
+  const btn = document.getElementById('addPointBtn');
+  btn.textContent = '＋ 지도에서 클릭하여 표시';
+  btn.style.background = '';
+  map.getContainer().style.cursor = '';
+});
+
+// ==========================================
+// 주소 검색
+// ==========================================
+
+document.getElementById('addByAddressBtn')
+  .addEventListener('click', async () => {
+
+    const address =
+      document.getElementById('addressInput').value.trim();
+
+    if (!address) {
+      alert('검색할 주소를 입력하세요.');
+      return;
+    }
+
+    try {
+      const url =
+        'https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&q='
+        + encodeURIComponent(address);
+
+      const response = await fetch(url);
+
+      if (!response.ok) {
+        throw new Error('주소 검색 서버 오류');
+      }
+
+      const results = await response.json();
+
+      if (!results.length) {
+        alert('검색 결과가 없습니다.');
+        return;
+      }
+
+      const lat = Number(results[0].lat);
+      const lng = Number(results[0].lon);
+
+      const marker = addFireMarker(
+        lat, lng, 'risk',
+        '주소 검색 위치',
+        address
+      );
+
+      map.setView([lat, lng], 16);
+      marker.openPopup();
+
+    } catch (error) {
+      alert('주소 검색에 실패했습니다. 잠시 후 다시 시도하세요.');
+      console.error(error);
+    }
+  });
+
+// ==========================================
+// 일반지도 / 위성지도 전환
+// ==========================================
+
+document.getElementById('toggleMapTypeBtn')
+  .addEventListener('click', () => {
+
+    if (isSatellite) {
+      map.removeLayer(satelliteLayer);
+      map.addLayer(normalLayer);
+
+      document.getElementById('toggleMapTypeBtn')
+        .textContent = '위성지도 전환';
+
+    } else {
+      map.removeLayer(normalLayer);
+      map.addLayer(satelliteLayer);
+
+      document.getElementById('toggleMapTypeBtn')
+        .textContent = '일반지도 전환';
+    }
+
+    isSatellite = !isSatellite;
+  });
+
+// ==========================================
+// 지도 확대 축소 컨트롤
+// ==========================================
+
+L.control.scale({
+  imperial: false,
+  metric: true
+}).addTo(map);
+
 </body>
 </html>
-
