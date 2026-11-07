@@ -1,22 +1,24 @@
+무등산 산불 통합관제센터 완성본
+
+아래 코드를 기존 HTML 전체와 교체해서 사용하세요.
+
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>무등산 산불관리 상황판</title>
+<title>무등산 산불 통합관제센터</title>
 
-<link
- rel="stylesheet"
- href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-/>  
+<link rel="stylesheet"
+ href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 <style>
 :root {
   --bg:#07111f;
   --panel:#101f31;
-  --panel2:#162a40;
   --line:#263c53;
   --text:#e5edf7;
   --muted:#91a6bd;
@@ -25,402 +27,716 @@
   --red:#fb5365;
   --yellow:#fbbf24;
 }
-*{box-sizing:border-box}
-body{
-  margin:0;background:var(--bg);color:var(--text);
+
+* { box-sizing:border-box; }
+
+body {
+  margin:0;
+  background:var(--bg);
+  color:var(--text);
   font-family:"Pretendard","Malgun Gothic",sans-serif;
 }
-header{
+
+header {
   background:#0b1929;
   border-bottom:1px solid var(--line);
   padding:18px 25px;
 }
-.header-inner{
-  display:flex;justify-content:space-between;
-  align-items:center;gap:15px;flex-wrap:wrap;
+
+.header-inner {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:15px;
+  flex-wrap:wrap;
 }
-h1{font-size:25px;margin:0;font-weight:800;letter-spacing:-1px}
-.subtitle{font-size:12px;color:var(--muted);margin-top:6px}
-.system-status{
-  color:var(--green);border:1px solid #226348;
-  background:#103527;padding:8px 13px;
-  border-radius:6px;font-size:12px;font-weight:bold;
+
+h1 {
+  font-size:25px;
+  margin:0;
+  font-weight:800;
 }
-main{
+
+.subtitle {
+  font-size:12px;
+  color:var(--muted);
+  margin-top:6px;
+}
+
+.system-status {
+  color:var(--green);
+  border:1px solid #226348;
+  background:#103527;
+  padding:8px 13px;
+  border-radius:6px;
+  font-size:12px;
+  font-weight:bold;
+}
+
+main {
   display:grid;
   grid-template-columns:minmax(0,1fr) 340px;
-  gap:14px;padding:15px;
+  gap:14px;
+  padding:15px;
   min-height:calc(100vh - 85px);
 }
-.left-area{min-width:0;display:flex;flex-direction:column;gap:12px}
-.stats{
-  display:grid;grid-template-columns:repeat(4,1fr);gap:10px;
+
+.left-area {
+  min-width:0;
+  display:flex;
+  flex-direction:column;
+  gap:12px;
 }
-.stat-card{
-  background:var(--panel);border:1px solid var(--line);
-  padding:15px;border-radius:9px;
-  position:relative;overflow:hidden;
+
+.stats {
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:10px;
 }
-.stat-label{font-size:12px;color:var(--muted)}
-.stat-value{font-size:25px;font-weight:800;margin-top:8px}
-.stat-value.cyan{color:var(--cyan)}
-.stat-value.green{color:var(--green)}
-.stat-value.red{color:var(--red)}
-.stat-value.yellow{color:var(--yellow)}
-.section{
-  background:var(--panel);border:1px solid var(--line);
-  border-radius:9px;overflow:hidden;
+
+.stat-card {
+  background:var(--panel);
+  border:1px solid var(--line);
+  padding:15px;
+  border-radius:9px;
 }
-.section-title{
-  padding:13px 15px;border-bottom:1px solid var(--line);
-  font-size:14px;font-weight:700;
-  display:flex;justify-content:space-between;align-items:center;
+
+.stat-label {
+  font-size:12px;
+  color:var(--muted);
 }
- 
+
+.stat-value {
+  font-size:25px;
+  font-weight:800;
+  margin-top:8px;
+}
+
+.cyan { color:var(--cyan); }
+.green { color:var(--green); }
+.red { color:var(--red); }
+.yellow { color:var(--yellow); }
+
+.section {
+  background:var(--panel);
+  border:1px solid var(--line);
+  border-radius:9px;
+  overflow:hidden;
+  min-width:0;
+}
+
+.section-title {
+  padding:13px 15px;
+  border-bottom:1px solid var(--line);
+  font-size:14px;
+  font-weight:700;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:10px;
+}
+
 #map-container {
-  position: relative;
-  width: 100%;
-  height: 65vh;
-  min-height: 420px;
-  max-height: 750px;
-  overflow: hidden;
+  position:relative;
+  width:100%;
+  height:65vh;
+  min-height:420px;
+  max-height:750px;
+  overflow:hidden;
+  background:#15283b;
 }
 
 #map {
-  width: 100%;
-  height: 100%;
-  min-height: 0;
-  display: block;
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  z-index:1;
 }
 
 .leaflet-container {
-  width: 100%;
-  height: 100%;
-  font-family: "Malgun Gothic", sans-serif;
+  width:100%;
+  height:100%;
+  background:#15283b;
+  font-family:"Malgun Gothic",sans-serif;
 }
 
-.leaflet-container {
-  font-family: "Malgun Gothic", sans-serif;
-  background: #15283b;
+.map-legend {
+  position:absolute;
+  bottom:20px;
+  left:12px;
+  z-index:500;
+  display:flex;
+  flex-wrap:wrap;
+  gap:12px;
+  background:rgba(7,17,31,.92);
+  padding:10px 13px;
+  border:1px solid #3b5067;
+  border-radius:7px;
+  font-size:11px;
+  pointer-events:none;
 }
- 
-.dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:5px}
-.dot.red{background:var(--red)}
-.dot.blue{background:#38bdf8}
-.right-area{display:flex;flex-direction:column;gap:12px;min-width:0}
-.panel-body{padding:14px}
-h2{font-size:15px;margin:0}
-h3{font-size:13px;margin:0 0 12px}
-input{
-  width:100%;background:#091727;color:white;
-  border:1px solid #30465d;border-radius:6px;
-  padding:11px;margin-bottom:7px;outline:none;
+
+.dot {
+  display:inline-block;
+  width:9px;
+  height:9px;
+  border-radius:50%;
+  margin-right:5px;
+}
+
+.dot.red { background:var(--red); }
+.dot.blue { background:#38bdf8; }
+
+.right-area {
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+  min-width:0;
+}
+
+.panel-body { padding:14px; }
+
+h3 {
+  font-size:13px;
+  margin:0 0 12px;
+}
+
+input {
+  width:100%;
+  background:#091727;
+  color:white;
+  border:1px solid #30465d;
+  border-radius:6px;
+  padding:11px;
+  margin-bottom:7px;
+  outline:none;
   font-size:14px;
 }
-input:focus{border-color:var(--cyan)}
-button{
-  width:100%;padding:11px;border:1px solid transparent;
-  border-radius:6px;font-size:13px;font-weight:700;
-  cursor:pointer;margin-bottom:7px;transition:.2s;
+
+input:focus { border-color:var(--cyan); }
+
+button {
+  width:100%;
+  padding:11px;
+  border:1px solid transparent;
+  border-radius:6px;
+  font-size:13px;
+  font-weight:700;
+  cursor:pointer;
+  margin-bottom:7px;
+  transition:.2s;
 }
-button:hover{filter:brightness(1.2)}
-.btn-blue{background:#075985;color:white}
-.btn-green{background:#166534;color:white}
-.btn-purple{background:#43318a;color:white}
-.btn-red{background:#991b1b;color:white}
-.btn-gray{background:#24364a;color:#dbeafe;border-color:#3a5068}
-.resource-item{
-  display:flex;justify-content:space-between;gap:8px;
-  padding:10px 0;border-bottom:1px solid var(--line);
+
+button:hover { filter:brightness(1.2); }
+
+.btn-blue { background:#075985;color:white; }
+.btn-green { background:#166534;color:white; }
+.btn-purple { background:#43318a;color:white; }
+.btn-red { background:#991b1b;color:white; }
+.btn-gray {
+  background:#24364a;
+  color:#dbeafe;
+  border-color:#3a5068;
+}
+
+.resource-item {
+  display:flex;
+  justify-content:space-between;
+  gap:8px;
+  padding:10px 0;
+  border-bottom:1px solid var(--line);
   font-size:12px;
 }
-.resource-item:last-child{border:0}
-.resource-item span:first-child{color:var(--muted)}
-.resource-item strong{color:#dceaf7;text-align:right}
-.info-panel{
-  max-height:190px;overflow:auto;
-  background:#091727;border:1px solid var(--line);
-  border-radius:6px;padding:12px;
-  font-size:12px;line-height:1.8;color:#cbd5e1;
-}
-.info-panel h3{color:var(--cyan)}
-.quick-links{display:grid;grid-template-columns:1fr 1fr;gap:6px}
-.quick-links button{font-size:11px;margin:0;padding:10px 5px}
-.footer{
-  color:#71869d;text-align:center;font-size:10px;
-  padding:12px;border-top:1px solid var(--line);
-}
-@media(max-width:1050px){
- main{grid-template-columns:1fr}
- #map-container{height:65vh}
- .right-area{display:grid;grid-template-columns:1fr 1fr}
-}
-@media(max-width:650px){
- header{padding:15px}
- h1{font-size:20px}
- main{padding:9px;gap:10px}
- .stats{grid-template-columns:repeat(2,1fr);gap:7px}
- .stat-card{padding:12px}
- .stat-value{font-size:22px}
 
- #map-container{
-   height:55vh;
-   min-height:380px;
-   max-height:600px;
- }
+.resource-item:last-child { border:0; }
 
- #map{
-   height:100%;
-   min-height:0;
- }
+.resource-item span:first-child { color:var(--muted); }
+.resource-item strong { color:#dceaf7;text-align:right; }
 
- .right-area{
-   display:flex;
- }
-
- .map-legend{
-   font-size:10px;
-   gap:8px;
- }
+.info-panel {
+  max-height:190px;
+  overflow:auto;
+  white-space:pre-line;
+  background:#091727;
+  border:1px solid var(--line);
+  border-radius:6px;
+  padding:12px;
+  font-size:12px;
+  line-height:1.8;
+  color:#cbd5e1;
 }
 
+.info-panel h3 { color:var(--cyan); }
+
+.quick-links {
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:6px;
+}
+
+.quick-links button {
+  font-size:11px;
+  margin:0;
+  padding:10px 5px;
+}
+
+.footer {
+  color:#71869d;
+  text-align:center;
+  font-size:10px;
+  padding:12px;
+  border-top:1px solid var(--line);
+}
+
+@media(max-width:1050px) {
+  main { grid-template-columns:1fr; }
+  #map-container { height:60vh; }
+  .right-area {
+    display:grid;
+    grid-template-columns:1fr 1fr;
+  }
+}
+
+@media(max-width:650px) {
+  header { padding:15px; }
+  h1 { font-size:20px; }
+  main { padding:9px;gap:10px; }
+
+  .stats {
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:7px;
+  }
+
+  .stat-card { padding:12px; }
+  .stat-value { font-size:22px; }
+
+  #map-container {
+    height:55vh;
+    min-height:380px;
+    max-height:600px;
+  }
+
+  .right-area { display:flex; }
+
+  .map-legend {
+    font-size:10px;
+    gap:8px;
+  }
+}
 </style>
 </head>
+
 <body>
+
 <header>
- <div class="header-inner">
-  <div>
-   <h1>🛡 무등산 산불 통합관제센터</h1>
-   <div class="subtitle">MUDEUNGSAN NATIONAL PARK · FOREST FIRE CONTROL SYSTEM</div>
+  <div class="header-inner">
+    <div>
+      <h1>🛡 무등산 산불 통합관제센터</h1>
+      <div class="subtitle">
+        MUDEUNGSAN NATIONAL PARK · FOREST FIRE CONTROL SYSTEM
+      </div>
+    </div>
+    <div class="system-status">● SYSTEM ONLINE</div>
   </div>
-  <div class="system-status">● SYSTEM ONLINE</div>
- </div>
 </header>
 
 <main>
- <div class="left-area">
+
+<div class="left-area">
 
   <div class="stats">
-   <div class="stat-card">
-    <div class="stat-label">산불 발생 이력</div>
-    <div class="stat-value red">04 <small style="font-size:12px">건</small></div>
-   </div>
-   <div class="stat-card">
-    <div class="stat-label">관리 지점</div>
-    <div class="stat-value cyan">11 <small style="font-size:12px">개소</small></div>
-   </div>
-   <div class="stat-card">
-    <div class="stat-label">진화 차량</div>
-    <div class="stat-value green">04 <small style="font-size:12px">대</small></div>
-   </div>
-   <div class="stat-card">
-    <div class="stat-label">통제 탐방로</div>
-    <div class="stat-value yellow">01 <small style="font-size:12px">구간</small></div>
-   </div>
+    <div class="stat-card">
+      <div class="stat-label">산불 발생 이력</div>
+      <div class="stat-value red">04 <small>건</small></div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-label">관리 지점</div>
+      <div class="stat-value cyan">11 <small>개소</small></div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-label">진화 차량</div>
+      <div class="stat-value green">04 <small>대</small></div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-label">통제 탐방로</div>
+      <div class="stat-value yellow">01 <small>구간</small></div>
+    </div>
   </div>
 
   <div class="section">
-   <div class="section-title">
-    <span>📡 무등산 산불 감시 GIS 지도</span>
-    <button id="toggleMapTypeBtn" class="btn-gray" style="width:auto;margin:0;padding:7px 13px">
-     위성지도 전환
-    </button>
-   </div>
-   <div id="map-container">
-    <div id="map"></div>
-    <div class="map-legend">
-     <span><i class="dot red"></i>산불 발생 이력</span>
-     <span><i class="dot blue"></i>위험·관리 지점</span>
+
+    <div class="section-title">
+      <span>📡 무등산 산불 감시 GIS 지도</span>
+
+      <button id="toggleMapTypeBtn"
+        class="btn-gray"
+        style="width:auto;margin:0;padding:8px 13px">
+        위성지도 전환
+      </button>
     </div>
-   </div>
+
+    <div id="map-container">
+      <div id="map"></div>
+
+      <div class="map-legend">
+        <span><i class="dot red"></i>산불 발생 이력</span>
+        <span><i class="dot blue"></i>위험·관리 지점</span>
+      </div>
+    </div>
+
   </div>
 
   <div class="stats">
-   <div class="stat-card">
-    <div class="stat-label">총 탐방로</div>
-    <div class="stat-value cyan">96.76<small style="font-size:12px"> km</small></div>
-   </div>
-   <div class="stat-card">
-    <div class="stat-label">개방 탐방로</div>
-    <div class="stat-value green">95.96<small style="font-size:12px"> km</small></div>
-   </div>
-   <div class="stat-card">
-    <div class="stat-label">감시 카메라</div>
-    <div class="stat-value cyan">03<small style="font-size:12px"> 대</small></div>
-   </div>
-   <div class="stat-card">
-    <div class="stat-label">통제소</div>
-    <div class="stat-value yellow">02<small style="font-size:12px"> 개소</small></div>
-   </div>
-  </div>
 
- </div>
-
- <aside class="right-area">
-
-  <div class="section">
-   <div class="section-title">
-    <span>🚨 산불관리 현황</span>
-    <span style="color:#4ade80;font-size:11px">관리정보</span>
-   </div>
-   <div class="panel-body">
-    <div class="resource-item"><span>진화차량</span><strong>벤츠 유니목 U5023</strong></div>
-    <div class="resource-item"><span>차량 중량</span><strong>8.5 ton</strong></div>
-    <div class="resource-item"><span>물탱크 용량</span><strong>4,000 L</strong></div>
-    <div class="resource-item"><span>방수량</span><strong>2,800 L/min</strong></div>
-    <div class="resource-item"><span>감시 카메라</span><strong>3 대</strong></div>
-    <div class="resource-item"><span>진화 차량</span><strong>4 대</strong></div>
-    <div class="resource-item"><span>통제소</span><strong>2 개소</strong></div>
-    <div class="resource-item"><span>인화물질 보관함</span><strong>4 개소</strong></div>
-   </div>
-  </div>
-
-  <div class="section">
-   <div class="section-title">📍 위험지역 위치 등록</div>
-   <div class="panel-body">
-    <h3>좌표 검색</h3>
-    <input id="latInput" placeholder="위도 (예: 35.1286)">
-    <input id="lngInput" placeholder="경도 (예: 126.9699)">
-    <button id="addByCoordBtn" class="btn-green">＋ 좌표로 위험지역 등록</button>
-
-    <hr style="border-color:#263c53;margin:12px 0">
-
-    <h3>주소 검색</h3>
-    <input id="addressInput" placeholder="주소 입력">
-    <button id="addByAddressBtn" class="btn-green">⌖ 주소로 위치 표시</button>
-
-    <button id="addPointBtn" class="btn-blue">＋ 지도에서 클릭하여 표시</button>
-   </div>
-  </div>
-
-  <div class="section">
-   <div class="section-title">🔗 산불 대응 시스템</div>
-   <div class="panel-body quick-links">
-    <button class="btn-purple" onclick="window.open('https://mudeungsan1.iptime.org:8080','_blank','noopener')">장불재 산불카메라</button>
-    <button class="btn-purple" onclick="window.open('https://fd.forest.go.kr','_blank','noopener')">실시간 산불정보</button>
-    <button class="btn-purple" onclick="window.open('https://sanbul.forest.go.kr','_blank','noopener')">산불상황관제</button>
-    <button class="btn-purple" onclick="window.open('http://forestfire.nifos.go.kr','_blank','noopener')">산불위험예보</button>
-    <button class="btn-purple" onclick="window.open('https://mudeung.github.io/rescue/searchems.html','_blank','noopener')">비상대응 상황판</button>
-    <button class="btn-purple" onclick="window.open('https://www.knps.or.kr/front/portal/safe/acsCtrList.do?menuNo=8000340','_blank','noopener')">탐방로 통제정보</button>
-   </div>
-  </div>
-
-  <div class="section">
-   <div class="section-title">📋 상세 상황 정보</div>
-   <div class="panel-body">
-    <div id="infoPanel" class="info-panel">
-     마커를 선택하면 산불 발생 이력 및 위치 상세정보가 표시됩니다.
+    <div class="stat-card">
+      <div class="stat-label">총 탐방로</div>
+      <div class="stat-value cyan">96.76<small> km</small></div>
     </div>
-   </div>
+
+    <div class="stat-card">
+      <div class="stat-label">개방 탐방로</div>
+      <div class="stat-value green">95.96<small> km</small></div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-label">감시 카메라</div>
+      <div class="stat-value cyan">03<small> 대</small></div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-label">통제소</div>
+      <div class="stat-value yellow">02<small> 개소</small></div>
+    </div>
+
   </div>
 
- </aside>
+</div>
+
+<aside class="right-area">
+
+  <div class="section">
+    <div class="section-title">
+      🚨 산불관리 현황
+      <span style="color:#4ade80;font-size:11px">관리정보</span>
+    </div>
+
+    <div class="panel-body">
+
+      <div class="resource-item">
+        <span>진화차량</span>
+        <strong>벤츠 유니목 U5023</strong>
+      </div>
+
+      <div class="resource-item">
+        <span>차량 중량</span>
+        <strong>8.5 ton</strong>
+      </div>
+
+      <div class="resource-item">
+        <span>물탱크 용량</span>
+        <strong>4,000 L</strong>
+      </div>
+
+      <div class="resource-item">
+        <span>방수량</span>
+        <strong>2,800 L/min</strong>
+      </div>
+
+      <div class="resource-item">
+        <span>감시 카메라</span>
+        <strong>3 대</strong>
+      </div>
+
+      <div class="resource-item">
+        <span>진화 차량</span>
+        <strong>4 대</strong>
+      </div>
+
+      <div class="resource-item">
+        <span>통제소</span>
+        <strong>2 개소</strong>
+      </div>
+
+      <div class="resource-item">
+        <span>인화물질 보관함</span>
+        <strong>4 개소</strong>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📍 위험지역 위치 등록</div>
+
+    <div class="panel-body">
+
+      <h3>좌표 검색</h3>
+
+      <input id="latInput" placeholder="위도 (예: 35.1286)">
+      <input id="lngInput" placeholder="경도 (예: 126.9699)">
+
+      <button id="addByCoordBtn" class="btn-green">
+        ＋ 좌표로 위험지역 등록
+      </button>
+
+      <hr style="border-color:#263c53;margin:12px 0">
+
+      <h3>주소 검색</h3>
+
+      <input id="addressInput" placeholder="주소 입력">
+
+      <button id="addByAddressBtn" class="btn-green">
+        ⌖ 주소로 위치 표시
+      </button>
+
+      <button id="addPointBtn" class="btn-blue">
+        ＋ 지도에서 클릭하여 표시
+      </button>
+
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🔗 산불 대응 시스템</div>
+
+    <div class="panel-body quick-links">
+
+      <button class="btn-purple"
+        onclick="window.open('https://mudeungsan1.iptime.org:8080','_blank','noopener')">
+        장불재 산불카메라
+      </button>
+
+      <button class="btn-purple"
+        onclick="window.open('https://fd.forest.go.kr','_blank','noopener')">
+        실시간 산불정보
+      </button>
+
+      <button class="btn-purple"
+        onclick="window.open('https://sanbul.forest.go.kr','_blank','noopener')">
+        산불상황관제
+      </button>
+
+      <button class="btn-purple"
+        onclick="window.open('http://forestfire.nifos.go.kr','_blank','noopener')">
+        산불위험예보
+      </button>
+
+      <button class="btn-purple"
+        onclick="window.open('https://mudeung.github.io/rescue/searchems.html','_blank','noopener')">
+        비상대응 상황판
+      </button>
+
+      <button class="btn-purple"
+        onclick="window.open('https://www.knps.or.kr/front/portal/safe/acsCtrList.do?menuNo=8000340','_blank','noopener')">
+        탐방로 통제정보
+      </button>
+
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📋 상세 상황 정보</div>
+
+    <div class="panel-body">
+      <div id="infoPanel" class="info-panel">
+        마커를 선택하면 산불 발생 이력 및 위치 상세정보가 표시됩니다.
+      </div>
+    </div>
+  </div>
+
+</aside>
 </main>
 
 <div class="footer">
- MUDEUNGSAN FOREST FIRE CONTROL CENTER · 산불 예방 및 안전관리
+  MUDEUNGSAN FOREST FIRE CONTROL CENTER · 산불 예방 및 안전관리
 </div>
 
 <script>
-// ==========================================
-// 무등산 산불 GIS 지도 시스템
-// ==========================================
 
-// 무등산 중심 좌표
+// ========================================
+// 1. 산불 및 관리 지점 데이터
+// ========================================
+
+const landslideData = [
+
+  {
+    lat:35.1286067,
+    lng:126.9699645,
+    type:"fire",
+    date:"2024-09-29",
+    description:"광주광역시 동구 운림동 56 증심사 공양간 화재"
+  },
+
+  {
+    lat:35.1615699,
+    lng:126.9861449,
+    type:"fire",
+    date:"2025-03-22",
+    description:"광주광역시 북구 금곡동 산166-2 담배불씨"
+  },
+
+  {
+    lat:35.152931,
+    lng:126.964767,
+    type:"fire",
+    date:"2025-03-22",
+    description:"광주광역시 북구 화암동 335-4 쓰레기소각"
+  },
+
+  {
+    lat:35.117806,
+    lng:126.944922,
+    type:"fire",
+    date:"2025-02-21",
+    description:"광주광역시 동구 소태동 산184 쓰레기소각"
+  },
+
+  {
+    lat:35.128633,
+    lng:126.969805,
+    type:"normal",
+    date:"2025-02-14",
+    description:"증심사 수관보관함 입구"
+  },
+
+  {
+    lat:35.128917,
+    lng:126.969963,
+    type:"normal",
+    date:"2025-02-14",
+    description:"증심사 수관보관함 대웅전 좌측"
+  },
+
+  {
+    lat:35.128760,
+    lng:126.970289,
+    type:"normal",
+    date:"2025-02-14",
+    description:"증심사 수관보관함 대웅전 우측"
+  },
+
+  {
+    lat:35.122244,
+    lng:126.972229,
+    type:"normal",
+    date:"2025-02-14",
+    description:"약사사 수관보관함 입구"
+  },
+
+  {
+    lat:35.133144,
+    lng:126.961055,
+    type:"normal",
+    date:"2025-02-14",
+    description:"문빈정사 수관보관함 입구"
+  },
+
+  {
+    lat:35.14833232,
+    lng:126.98574731,
+    type:"normal",
+    date:"2025-02-14",
+    description:"원효사 수관보관함 입구"
+  },
+
+  {
+    lat:35.14853961,
+    lng:126.98554150,
+    type:"normal",
+    date:"2025-02-14",
+    description:"원효사 수관보관함 대웅전 앞"
+  }
+
+];
+
+
+// ========================================
+// 2. 지도 및 변수 초기화
+// ========================================
+
 const map = L.map('map', {
-  zoomControl: true
-}).setView(
-  [35.134167, 126.988889],
-  14
-);
+  zoomControl:true
+}).setView([35.134167,126.988889],13);
 
-setTimeout(() => {
-  map.invalidateSize(true);
-}, 1000);
- 
-// 일반지도
-const normalLayer = L.tileLayer(
-  'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-  {
-    maxZoom: 19,
-    attribution: '&copy; OpenStreetMap'
-  }
-);
-
-// 위성지도
-const satelliteLayer = L.tileLayer(
-  'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
-  {
-    maxZoom: 19,
-    attribution: '&copy; Esri'
-  }
-);
-
-// 최초 일반지도 표시
-normalLayer.addTo(map);
-
-let isSatellite = false;
-
-
-// 지도 상태 변수
 let isSatellite = false;
 let clickMode = false;
 let markers = [];
 
-// 산불 및 관리 지점 데이터
-const landslideData = [
-  { lat: 35.1286067, lng: 126.9699645, type: "fire", date: "2024-09-29", description: "증심사 공양간 화재" },
-  { lat: 35.1615699, lng: 126.9861449, type: "fire", date: "2025-03-22", description: "금곡동 담배불씨" },
-  { lat: 35.152931, lng: 126.964767, type: "fire", date: "2025-03-22", description: "화암동 쓰레기소각" },
-  { lat: 35.117806, lng: 126.944922, type: "fire", date: "2025-02-21", description: "소태동 쓰레기소각" },
-  { lat: 35.128633, lng: 126.969805, type: "normal", date: "2025-02-14", description: "증심사 수관보관함 입구" },
-  { lat: 35.128917, lng: 126.969963, type: "normal", date: "2025-02-14", description: "증심사 대웅전 좌측" },
-  { lat: 35.128760, lng: 126.970289, type: "normal", date: "2025-02-14", description: "증심사 대웅전 우측" },
-  { lat: 35.122244, lng: 126.972229, type: "normal", date: "2025-02-14", description: "약사사 수관보관함 입구" },
-  { lat: 35.133144, lng: 126.961055, type: "normal", date: "2025-02-14", description: "문빈정사 수관보관함 입구" },
-  { lat: 35.14833232, lng: 126.98574731, type: "normal", date: "2025-02-14", description: "원효사 수관보관함 입구" },
-  { lat: 35.14853961, lng: 126.98554150, type: "normal", date: "2025-02-14", description: "원효사 대웅전 앞" }
-];
- 
-// 지도 크기 초기화
-const mapContainer =
-  document.getElementById('map-container');
 
-const resizeObserver = new ResizeObserver(() => {
-  map.invalidateSize(true);
-});
+// ========================================
+// 3. 일반지도
+// ========================================
 
-resizeObserver.observe(mapContainer);
+const normalLayer = L.tileLayer(
+  'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+  {
+    maxZoom:19,
+    attribution:'&copy; OpenStreetMap'
+  }
+);
 
-window.addEventListener('load', () => {
-  setTimeout(() => map.invalidateSize(true), 500);
-});
 
- 
-// 화면 크기 변경 시 지도 자동 조절
-window.addEventListener('load', () => {
+// ========================================
+// 4. 위성지도
+// ========================================
+
+const satelliteLayer = L.tileLayer(
+  'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+  {
+    maxZoom:19,
+    attribution:'Tiles &copy; Esri'
+  }
+);
+
+
+// 최초 일반지도 표시
+normalLayer.addTo(map);
+
+
+// ========================================
+// 5. 지도 크기 자동 조절
+// ========================================
+
+function resizeMap() {
   setTimeout(() => {
     map.invalidateSize(true);
-  }, 500);
-});
+  },200);
+}
 
-window.addEventListener('resize', () => {
-  map.invalidateSize();
-}); 
+window.addEventListener('load',resizeMap);
+window.addEventListener('resize',resizeMap);
 
-// ==========================================
-// 마커 생성
-// ==========================================
+if (window.ResizeObserver) {
+  const resizeObserver = new ResizeObserver(() => {
+    resizeMap();
+  });
 
-function addFireMarker(lat, lng, type, title, description) {
-  const color = type === 'fire' ? '#fb5365' : '#38bdf8';
+  resizeObserver.observe(
+    document.getElementById('map-container')
+  );
+}
 
-  const marker = L.circleMarker([lat, lng], {
-    radius: 9,
-    color: '#ffffff',
-    weight: 2,
-    fillColor: color,
-    fillOpacity: 1
+
+// ========================================
+// 6. 마커 생성 함수
+// ========================================
+
+function addFireMarker(lat,lng,type,title,description,date="") {
+
+  const color = type === "fire"
+    ? "#fb5365"
+    : "#38bdf8";
+
+  const marker = L.circleMarker([lat,lng], {
+    radius:type === "fire" ? 10 : 8,
+    color:"#ffffff",
+    weight:2,
+    fillColor:color,
+    fillOpacity:1
   }).addTo(map);
 
   const item = {
@@ -429,134 +745,173 @@ function addFireMarker(lat, lng, type, title, description) {
     lng,
     type,
     title,
-    description
+    description,
+    date
   };
 
   markers.push(item);
 
+  // 팝업 구성
   const popup = document.createElement('div');
+
   const heading = document.createElement('strong');
+  heading.textContent = title;
+
   const detail = document.createElement('p');
+  detail.textContent = description;
+
+  const coord = document.createElement('p');
+  coord.textContent =
+    `위도: ${lat.toFixed(6)} / 경도: ${lng.toFixed(6)}`;
+
   const removeButton = document.createElement('button');
 
-  heading.textContent = title;
-  detail.textContent = description;
   removeButton.textContent = '이 지점 삭제';
+
   removeButton.style.cssText =
     'background:#991b1b;color:white;padding:7px;border:0;border-radius:5px;cursor:pointer;width:100%';
 
-  removeButton.addEventListener('click', () => {
+  removeButton.addEventListener('click',() => {
+
     map.removeLayer(marker);
+
     markers = markers.filter(m => m !== item);
+
     document.getElementById('infoPanel').textContent =
       '선택한 지점을 삭제했습니다.';
+
   });
 
-  popup.append(heading, detail, removeButton);
+  popup.append(heading,detail,coord,removeButton);
+
   marker.bindPopup(popup);
 
-  marker.on('click', () => {
+  // 마커 선택 시 상세정보 표시
+  marker.on('click',() => {
+
     const panel = document.getElementById('infoPanel');
+
     panel.replaceChildren();
 
     const h = document.createElement('h3');
     h.textContent = title;
 
     const info = document.createElement('div');
+
     info.textContent =
       `위도: ${lat.toFixed(6)}\n` +
       `경도: ${lng.toFixed(6)}\n` +
-      `구분: ${type === 'fire' ? '산불 발생 이력' : '위험·관리 지점'}\n` +
+      `구분: ${type === "fire" ? "산불 발생 이력" : "위험·관리 지점"}\n` +
+      `발생·등록일: ${date || "사용자 등록"}\n` +
       `상세정보: ${description}`;
 
-    info.style.whiteSpace = 'pre-line';
-    panel.append(h, info);
+    panel.append(h,info);
+
   });
 
   return marker;
 }
- 
-// ==========================================
-// 산불 및 관리 지점 11개 자동 등록
-// ==========================================
 
-landslideData.forEach((item) => {
+
+// ========================================
+// 7. 산불 및 관리 지점 11개 자동 등록
+// ========================================
+
+landslideData.forEach(item => {
 
   addFireMarker(
     item.lat,
     item.lng,
     item.type === "fire" ? "fire" : "risk",
-    item.type === "fire" ? "산불 발생 이력" : "산불 관리 지점",
-    item.description + "\n등록일: " + item.date
+    item.type === "fire"
+      ? "산불 발생 이력"
+      : "산불 관리 지점",
+    item.description,
+    item.date
   );
 
 });
 
- 
-// ==========================================
-// 좌표 입력으로 위험지역 등록
-// ==========================================
+
+// ========================================
+// 8. 좌표로 위험지역 등록
+// ========================================
 
 document.getElementById('addByCoordBtn')
-  .addEventListener('click', () => {
+.addEventListener('click',() => {
 
-    const latText =
-      document.getElementById('latInput').value.trim();
+  const latText =
+    document.getElementById('latInput').value.trim();
 
-    const lngText =
-      document.getElementById('lngInput').value.trim();
+  const lngText =
+    document.getElementById('lngInput').value.trim();
 
-    if (!latText || !lngText) {
-      alert('위도와 경도를 입력하세요.');
-      return;
-    }
+  if (!latText || !lngText) {
+    alert('위도와 경도를 입력하세요.');
+    return;
+  }
 
-    const lat = Number(latText);
-    const lng = Number(lngText);
+  const lat = Number(latText);
+  const lng = Number(lngText);
 
-    if (
-      !Number.isFinite(lat) ||
-      !Number.isFinite(lng) ||
-      lat < -90 || lat > 90 ||
-      lng < -180 || lng > 180
-    ) {
-      alert('올바른 좌표를 입력하세요.');
-      return;
-    }
+  if (
+    !Number.isFinite(lat) ||
+    !Number.isFinite(lng) ||
+    lat < -90 || lat > 90 ||
+    lng < -180 || lng > 180
+  ) {
+    alert('올바른 좌표를 입력하세요.');
+    return;
+  }
 
-    const marker = addFireMarker(
-      lat, lng, 'risk',
-      '위험지역',
-      '사용자가 좌표로 등록한 위험·관리 지점'
-    );
+  const marker = addFireMarker(
+    lat,
+    lng,
+    'risk',
+    '위험지역',
+    '사용자가 좌표로 등록한 위험·관리 지점'
+  );
 
-    map.setView([lat, lng], 16);
-    marker.openPopup();
-  });
+  map.setView([lat,lng],16);
 
-// ==========================================
-// 지도 클릭으로 위험지역 등록
-// ==========================================
+  marker.openPopup();
+
+});
+
+
+// ========================================
+// 9. 지도 클릭으로 위험지역 등록
+// ========================================
 
 document.getElementById('addPointBtn')
-  .addEventListener('click', () => {
+.addEventListener('click',() => {
 
-    clickMode = !clickMode;
+  clickMode = !clickMode;
 
-    const btn = document.getElementById('addPointBtn');
+  const btn = document.getElementById('addPointBtn');
 
-    if (clickMode) {
-      btn.textContent = '지도에서 위치를 선택하세요';
-      btn.style.background = '#b45309';
-      map.getContainer().style.cursor = 'crosshair';
-    } else {
-      btn.textContent = '＋ 지도에서 클릭하여 표시';
-      btn.style.background = '';
-      map.getContainer().style.cursor = '';
-    }
-  });
+  if (clickMode) {
 
-map.on('click', (e) => {
+    btn.textContent = '지도에서 위치를 선택하세요';
+
+    btn.style.background = '#b45309';
+
+    map.getContainer().style.cursor = 'crosshair';
+
+  } else {
+
+    btn.textContent = '＋ 지도에서 클릭하여 표시';
+
+    btn.style.background = '';
+
+    map.getContainer().style.cursor = '';
+
+  }
+
+});
+
+
+map.on('click',e => {
 
   if (!clickMode) return;
 
@@ -564,7 +919,9 @@ map.on('click', (e) => {
   const lng = e.latlng.lng;
 
   const marker = addFireMarker(
-    lat, lng, 'risk',
+    lat,
+    lng,
+    'risk',
     '현장 위험지역',
     '지도 클릭으로 등록한 위험·관리 지점'
   );
@@ -574,103 +931,129 @@ map.on('click', (e) => {
   clickMode = false;
 
   const btn = document.getElementById('addPointBtn');
+
   btn.textContent = '＋ 지도에서 클릭하여 표시';
+
   btn.style.background = '';
+
   map.getContainer().style.cursor = '';
+
 });
 
-// ==========================================
-// 주소 검색
-// ==========================================
+
+// ========================================
+// 10. 주소 검색
+// ========================================
 
 document.getElementById('addByAddressBtn')
-  .addEventListener('click', async () => {
+.addEventListener('click',async () => {
 
-    const address =
-      document.getElementById('addressInput').value.trim();
+  const address =
+    document.getElementById('addressInput').value.trim();
 
-    if (!address) {
-      alert('검색할 주소를 입력하세요.');
+  if (!address) {
+    alert('검색할 주소를 입력하세요.');
+    return;
+  }
+
+  try {
+
+    const url =
+      'https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&q='
+      + encodeURIComponent(address);
+
+    const response = await fetch(url);
+
+    if (!response.ok) {
+      throw new Error('주소 검색 서버 오류');
+    }
+
+    const results = await response.json();
+
+    if (!results.length) {
+      alert('검색 결과가 없습니다.');
       return;
     }
 
-    try {
-      const url =
-        'https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&q='
-        + encodeURIComponent(address);
+    const lat = Number(results[0].lat);
+    const lng = Number(results[0].lon);
 
-      const response = await fetch(url);
+    const marker = addFireMarker(
+      lat,
+      lng,
+      'risk',
+      '주소 검색 위치',
+      address
+    );
 
-      if (!response.ok) {
-        throw new Error('주소 검색 서버 오류');
-      }
+    map.setView([lat,lng],16);
 
-      const results = await response.json();
+    marker.openPopup();
 
-      if (!results.length) {
-        alert('검색 결과가 없습니다.');
-        return;
-      }
+  } catch(error) {
 
-      const lat = Number(results[0].lat);
-      const lng = Number(results[0].lon);
+    console.error(error);
 
-      const marker = addFireMarker(
-        lat, lng, 'risk',
-        '주소 검색 위치',
-        address
-      );
+    alert('주소 검색에 실패했습니다. 잠시 후 다시 시도하세요.');
 
-      map.setView([lat, lng], 16);
-      marker.openPopup();
+  }
 
-    } catch (error) {
-      alert('주소 검색에 실패했습니다. 잠시 후 다시 시도하세요.');
-      console.error(error);
-    }
-  });
+});
 
-// ==========================================
-// 일반지도 / 위성지도 전환
-// ==========================================
+
+// ========================================
+// 11. 일반지도 / 위성지도 전환
+// ========================================
 
 document.getElementById('toggleMapTypeBtn')
-  .addEventListener('click', function() {
+.addEventListener('click',function() {
 
-    if (!isSatellite) {
+  if (!isSatellite) {
 
-      map.removeLayer(normalLayer);
-      satelliteLayer.addTo(map);
+    map.removeLayer(normalLayer);
 
-      this.textContent = '일반지도 전환';
+    satelliteLayer.addTo(map);
 
-      isSatellite = true;
+    this.textContent = '일반지도 전환';
 
-    } else {
+    isSatellite = true;
 
-      map.removeLayer(satelliteLayer);
-      normalLayer.addTo(map);
+  } else {
 
-      this.textContent = '위성지도 전환';
+    map.removeLayer(satelliteLayer);
 
-      isSatellite = false;
-    }
+    normalLayer.addTo(map);
 
-    setTimeout(() => {
-      map.invalidateSize(true);
-    }, 200);
+    this.textContent = '위성지도 전환';
 
-  });
- 
-// ==========================================
-// 지도 확대 축소 컨트롤
-// ==========================================
+    isSatellite = false;
+
+  }
+
+  resizeMap();
+
+});
+
+
+// ========================================
+// 12. 지도 축척 표시
+// ========================================
 
 L.control.scale({
-  imperial: false,
-  metric: true
+  imperial:false,
+  metric:true
 }).addTo(map);
 
+
+// ========================================
+// 13. 초기 지도 크기 재설정
+// ========================================
+
+setTimeout(() => {
+  map.invalidateSize(true);
+},500);
+
 </script>
+
 </body>
 </html>
