@@ -6,28 +6,107 @@
   <title>무등산 산불관리 상황판</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    html, body {
-      height: 100%;
-      margin: 0;
-      padding: 0;
-      display: flex;
-      flex-direction: column;
-      background-color: #f3f4f6;
-    }
-    #map-container {
-      flex: 1;
-      position: relative;
-    }
-    #map {
-      height: 100%;
-      width: 100%;
-      border-radius: 0.5rem;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    }
-    .info-panel {
-      max-height: 300px;
-      overflow-y: auto;
-    }
+
+html, body {
+  width: 100%;
+  min-height: 100%;
+  margin: 0;
+  padding: 0;
+  background: #f3f4f6;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+main {
+  display: flex;
+  flex-direction: row;
+  gap: 20px;
+  padding: 16px;
+  min-height: 75vh;
+}
+
+#map-container {
+  flex: 1;
+  min-width: 0;
+  min-height: 650px;
+  position: relative;
+}
+
+#map {
+  width: 100%;
+  height: 100%;
+  min-height: 650px;
+  border-radius: 10px;
+}
+
+.info-panel {
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+/* 태블릿 */
+@media (max-width: 1024px) {
+  main {
+    flex-direction: column;
+  }
+
+  #map-container {
+    min-height: 550px;
+  }
+
+  #map {
+    min-height: 550px;
+  }
+}
+
+/* 스마트폰 */
+@media (max-width: 600px) {
+  header h1 {
+    font-size: 1.6rem;
+  }
+
+  header p {
+    font-size: 0.9rem;
+  }
+
+  main {
+    padding: 10px;
+    gap: 12px;
+  }
+
+  #map-container {
+    min-height: 65vh;
+  }
+
+  #map {
+    min-height: 65vh;
+  }
+
+  #map-container > div.absolute {
+    position: relative;
+    top: auto;
+    right: auto;
+    width: 100%;
+    margin-top: 10px;
+  }
+
+  main > div:last-child {
+    width: 100%;
+  }
+
+  button {
+    min-height: 44px;
+    font-size: 14px;
+  }
+
+  input {
+    min-height: 42px;
+    font-size: 16px;
+  }
+}
+
   </style>
 </head>
 <body class="bg-gray-100">
