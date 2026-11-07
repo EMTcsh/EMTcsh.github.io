@@ -6,6 +6,10 @@
 
 <title>무등산 산불관리 상황판</title>
 
+<link
+ rel="stylesheet"
+ href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+/>  
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 <style>
@@ -158,17 +162,27 @@ button:hover{filter:brightness(1.2)}
  .stats{grid-template-columns:repeat(2,1fr);gap:7px}
  .stat-card{padding:12px}
  .stat-value{font-size:22px}
-#map-container {
-  height: 55vh;
-  min-height: 380px;
-  max-height: 600px;
-}
 
-#map {
-  height: 100%;
-  min-height: 0;
-}
+ #map-container{
+   height:55vh;
+   min-height:380px;
+   max-height:600px;
+ }
 
+ #map{
+   height:100%;
+   min-height:0;
+ }
+
+ .right-area{
+   display:flex;
+ }
+
+ .map-legend{
+   font-size:10px;
+   gap:8px;
+ }
+}
 
 </style>
 </head>
@@ -313,17 +327,12 @@ button:hover{filter:brightness(1.2)}
 // ==========================================
 
 // 무등산 중심 좌표
-const map = L.map('map').setView(
-  [35.134167, 126.988889], 14
+const map = L.map('map', {
+  zoomControl: true
+}).setView(
+  [35.134167, 126.988889],
+  14
 );
-
-L.tileLayer(
-  'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-  {
-    maxZoom: 19,
-    attribution: '&copy; OpenStreetMap'
-  }
-).addTo(map);
 
 setTimeout(() => {
   map.invalidateSize(true);
@@ -354,14 +363,18 @@ let clickMode = false;
 let markers = [];
 
 // 지도 크기 초기화
-function resizeMap() {
-  setTimeout(() => {
-    map.invalidateSize(true);
-  }, 300);
-}
+const mapContainer =
+  document.getElementById('map-container');
 
-window.addEventListener('load', resizeMap);
-window.addEventListener('resize', resizeMap);
+const resizeObserver = new ResizeObserver(() => {
+  map.invalidateSize(true);
+});
+
+resizeObserver.observe(mapContainer);
+
+window.addEventListener('load', () => {
+  setTimeout(() => map.invalidateSize(true), 500);
+});
 
 if (window.ResizeObserver) {
   const observer = new ResizeObserver(resizeMap);
