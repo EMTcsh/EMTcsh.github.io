@@ -1,17 +1,17 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 
- <link
+<title>무등산 산불관리 상황판</title>
+
+<script src="https://cdn.tailwindcss.com"></script>
+
+<link
  rel="stylesheet"
  href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
 />
-
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script> 
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>무등산 산불관리 상황판</title>
-  <script src="https://cdn.tailwindcss.com"></script>
 
 <style>
 :root {
@@ -162,6 +162,20 @@ button:hover{filter:brightness(1.2)}
  .right-area{display:flex}
  .map-legend{font-size:10px;gap:8px}
 }
+
+#map {
+  width: 100%;
+  height: 100%;
+  min-height: 530px;
+  display: block;
+  background: #15283b;
+  z-index: 1;
+}
+
+.leaflet-container {
+  font-family: "Malgun Gothic", sans-serif;
+  background: #15283b;
+} 
 </style>
 </head>
 <body>
@@ -299,7 +313,7 @@ button:hover{filter:brightness(1.2)}
  MUDEUNGSAN FOREST FIRE CONTROL CENTER · 산불 예방 및 안전관리
 </div>
 
-
+<script>
 // ==========================================
 // 무등산 산불 GIS 지도 시스템
 // ==========================================
@@ -569,5 +583,6 @@ L.control.scale({
   metric: true
 }).addTo(map);
 
+</script>
 </body>
 </html>
