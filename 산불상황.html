@@ -5,371 +5,286 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>무등산 산불관리 상황판</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <style>
 
-html, body {
-  width: 100%;
-  min-height: 100%;
-  margin: 0;
-  padding: 0;
-  background: #f3f4f6;
+<style>
+:root {
+  --bg:#07111f;
+  --panel:#101f31;
+  --panel2:#162a40;
+  --line:#263c53;
+  --text:#e5edf7;
+  --muted:#91a6bd;
+  --cyan:#22d3ee;
+  --green:#4ade80;
+  --red:#fb5365;
+  --yellow:#fbbf24;
 }
-
-* {
-  box-sizing: border-box;
+*{box-sizing:border-box}
+body{
+  margin:0;background:var(--bg);color:var(--text);
+  font-family:"Pretendard","Malgun Gothic",sans-serif;
 }
-
-main {
-  display: flex;
-  flex-direction: row;
-  gap: 20px;
-  padding: 16px;
-  min-height: 75vh;
+header{
+  background:#0b1929;
+  border-bottom:1px solid var(--line);
+  padding:18px 25px;
 }
-
-#map-container {
-  flex: 1;
-  min-width: 0;
-  min-height: 650px;
-  position: relative;
+.header-inner{
+  display:flex;justify-content:space-between;
+  align-items:center;gap:15px;flex-wrap:wrap;
 }
-
-#map {
-  width: 100%;
-  height: 100%;
-  min-height: 650px;
-  border-radius: 10px;
+h1{font-size:25px;margin:0;font-weight:800;letter-spacing:-1px}
+.subtitle{font-size:12px;color:var(--muted);margin-top:6px}
+.system-status{
+  color:var(--green);border:1px solid #226348;
+  background:#103527;padding:8px 13px;
+  border-radius:6px;font-size:12px;font-weight:bold;
 }
-
-.info-panel {
-  max-height: 300px;
-  overflow-y: auto;
+main{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) 340px;
+  gap:14px;padding:15px;
+  min-height:calc(100vh - 85px);
 }
-
-/* 태블릿 */
-@media (max-width: 1024px) {
-  main {
-    flex-direction: column;
-  }
-
-  #map-container {
-    min-height: 550px;
-  }
-
-  #map {
-    min-height: 550px;
-  }
+.left-area{min-width:0;display:flex;flex-direction:column;gap:12px}
+.stats{
+  display:grid;grid-template-columns:repeat(4,1fr);gap:10px;
 }
-
-/* 스마트폰 */
-@media (max-width: 600px) {
-  header h1 {
-    font-size: 1.6rem;
-  }
-
-  header p {
-    font-size: 0.9rem;
-  }
-
-  main {
-    padding: 10px;
-    gap: 12px;
-  }
-
-  #map-container {
-    min-height: 65vh;
-  }
-
-  #map {
-    min-height: 65vh;
-  }
-
-  #map-container > div.absolute {
-    position: relative;
-    top: auto;
-    right: auto;
-    width: 100%;
-    margin-top: 10px;
-  }
-
-  main > div:last-child {
-    width: 100%;
-  }
-
-  button {
-    min-height: 44px;
-    font-size: 14px;
-  }
-
-  input {
-    min-height: 42px;
-    font-size: 16px;
-  }
+.stat-card{
+  background:var(--panel);border:1px solid var(--line);
+  padding:15px;border-radius:9px;
+  position:relative;overflow:hidden;
 }
-
-  </style>
+.stat-label{font-size:12px;color:var(--muted)}
+.stat-value{font-size:25px;font-weight:800;margin-top:8px}
+.stat-value.cyan{color:var(--cyan)}
+.stat-value.green{color:var(--green)}
+.stat-value.red{color:var(--red)}
+.stat-value.yellow{color:var(--yellow)}
+.section{
+  background:var(--panel);border:1px solid var(--line);
+  border-radius:9px;overflow:hidden;
+}
+.section-title{
+  padding:13px 15px;border-bottom:1px solid var(--line);
+  font-size:14px;font-weight:700;
+  display:flex;justify-content:space-between;align-items:center;
+}
+#map-container{
+  position:relative;min-width:0;height:calc(100vh - 300px);
+  min-height:530px;
+}
+#map{width:100%;height:100%;min-height:530px}
+.map-label{
+  background:#0b1929;color:var(--cyan);
+  border:1px solid #28516c;padding:7px 12px;
+  font-size:12px;border-radius:5px;
+}
+.map-legend{
+  position:absolute;bottom:18px;left:15px;z-index:10;
+  background:#0b1929eF;border:1px solid var(--line);
+  border-radius:7px;padding:12px;font-size:12px;
+  display:flex;gap:15px;flex-wrap:wrap;
+}
+.dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:5px}
+.dot.red{background:var(--red)}
+.dot.blue{background:#38bdf8}
+.right-area{display:flex;flex-direction:column;gap:12px;min-width:0}
+.panel-body{padding:14px}
+h2{font-size:15px;margin:0}
+h3{font-size:13px;margin:0 0 12px}
+input{
+  width:100%;background:#091727;color:white;
+  border:1px solid #30465d;border-radius:6px;
+  padding:11px;margin-bottom:7px;outline:none;
+  font-size:14px;
+}
+input:focus{border-color:var(--cyan)}
+button{
+  width:100%;padding:11px;border:1px solid transparent;
+  border-radius:6px;font-size:13px;font-weight:700;
+  cursor:pointer;margin-bottom:7px;transition:.2s;
+}
+button:hover{filter:brightness(1.2)}
+.btn-blue{background:#075985;color:white}
+.btn-green{background:#166534;color:white}
+.btn-purple{background:#43318a;color:white}
+.btn-red{background:#991b1b;color:white}
+.btn-gray{background:#24364a;color:#dbeafe;border-color:#3a5068}
+.resource-item{
+  display:flex;justify-content:space-between;gap:8px;
+  padding:10px 0;border-bottom:1px solid var(--line);
+  font-size:12px;
+}
+.resource-item:last-child{border:0}
+.resource-item span:first-child{color:var(--muted)}
+.resource-item strong{color:#dceaf7;text-align:right}
+.info-panel{
+  max-height:190px;overflow:auto;
+  background:#091727;border:1px solid var(--line);
+  border-radius:6px;padding:12px;
+  font-size:12px;line-height:1.8;color:#cbd5e1;
+}
+.info-panel h3{color:var(--cyan)}
+.quick-links{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.quick-links button{font-size:11px;margin:0;padding:10px 5px}
+.footer{
+  color:#71869d;text-align:center;font-size:10px;
+  padding:12px;border-top:1px solid var(--line);
+}
+@media(max-width:1050px){
+ main{grid-template-columns:1fr}
+ #map-container{height:65vh}
+ .right-area{display:grid;grid-template-columns:1fr 1fr}
+}
+@media(max-width:650px){
+ header{padding:15px}
+ h1{font-size:20px}
+ main{padding:9px;gap:10px}
+ .stats{grid-template-columns:repeat(2,1fr);gap:7px}
+ .stat-card{padding:12px}
+ .stat-value{font-size:22px}
+ #map-container{height:60vh;min-height:420px}
+ #map{min-height:420px}
+ .right-area{display:flex}
+ .map-legend{font-size:10px;gap:8px}
+}
+</style>
 </head>
-<body class="bg-gray-100">
+<body>
+<header>
+ <div class="header-inner">
+  <div>
+   <h1>🛡 무등산 산불 통합관제센터</h1>
+   <div class="subtitle">MUDEUNGSAN NATIONAL PARK · FOREST FIRE CONTROL SYSTEM</div>
+  </div>
+  <div class="system-status">● SYSTEM ONLINE</div>
+ </div>
+</header>
 
-  <div class="p-4 sm:p-8">
-    <header class="text-center">
-      <h1 class="text-3xl sm:text-4xl font-extrabold text-gray-800 tracking-tight">무등산 산불관리 상황판</h1>
-      <p class="mt-2 text-lg text-gray-600">위성 지도를 통해 산불 위험 지역을 모니터링하고 관리합니다.</p>
-    </header>
+<main>
+ <div class="left-area">
+
+  <div class="stats">
+   <div class="stat-card">
+    <div class="stat-label">산불 발생 이력</div>
+    <div class="stat-value red">04 <small style="font-size:12px">건</small></div>
+   </div>
+   <div class="stat-card">
+    <div class="stat-label">관리 지점</div>
+    <div class="stat-value cyan">11 <small style="font-size:12px">개소</small></div>
+   </div>
+   <div class="stat-card">
+    <div class="stat-label">진화 차량</div>
+    <div class="stat-value green">04 <small style="font-size:12px">대</small></div>
+   </div>
+   <div class="stat-card">
+    <div class="stat-label">통제 탐방로</div>
+    <div class="stat-value yellow">01 <small style="font-size:12px">구간</small></div>
+   </div>
   </div>
 
-  <main class="flex flex-col lg:flex-row p-4 sm:p-8 pt-0 gap-8 overflow-hidden">
-    <!-- 지도 영역 -->
-    <div id="map-container" class="relative w-full h-screen">
-      <div id="map" class="w-full h-full"></div>
-
-      <div class="absolute top-4 right-4 w-72 bg-white p-6 rounded-xl shadow-lg space-y-6">
-        <h3>무등산국립공원 산불관리 현황</h3>
-        <P>진화자원: 고성능 산불진화차량(벤츠유니목-U5023 중량 8.5t, 물탱크 4,000L, 방수량 분당 2,800L)</P>
-        <p>장비현황: 감시카메라3대, 진화차량4대, 팀진화장비, 개인진화장비, 기타장비</p>
-        <p>총 탐방로: 37구간 96.76km / 개방 탐방로: 36구간 95.96km / 통제 탐방로: 1구간 0.8km</p>
-        <p>감시초소 0개, 통제소 2개, 인화물질보관함 4개</p>
-        <p>산불 집중관리 지구: 제1수원지 편백나무 숲, 주남마을, 덕산골, 소태골, 등촌마을, 요산요수, 풍암제, 화암마을, 배재마을, 평촌마을, 덕의마을, 금곡마을, 안양암</p>
-        <p>인근사찰: 증심사, 약사사, 문빈정사, 원효사, 관음암, 영광사, 안양암, 명지암, 광륵사</p>
-      </div>
+  <div class="section">
+   <div class="section-title">
+    <span>📡 무등산 산불 감시 GIS 지도</span>
+    <button id="toggleMapTypeBtn" class="btn-gray" style="width:auto;margin:0;padding:7px 13px">
+     위성지도 전환
+    </button>
+   </div>
+   <div id="map-container">
+    <div id="map"></div>
+    <div class="map-legend">
+     <span><i class="dot red"></i>산불 발생 이력</span>
+     <span><i class="dot blue"></i>위험·관리 지점</span>
     </div>
+   </div>
+  </div>
 
-    <!-- 제어판 -->
-    <div class="w-full lg:w-1/4 bg-white p-4 rounded-xl shadow-lg space-y-4">
-      <div class="space-y-3">
-        <h2 class="text-xl font-bold text-gray-800">좌표/주소 위치검색</h2>
-        <div>
-          <input type="text" id="latInput" placeholder="위도 (예: 35.1)" class="w-full px-2 py-1 border rounded-md"/>
-          <input type="text" id="lngInput" placeholder="경도 (예: 126.9)" class="w-full mt-1 px-2 py-1 border rounded-md"/>
-          <button id="addByCoordBtn" class="w-full mt-1 bg-green-600 hover:bg-green-700 text-white font-semibold py-1.5 px-3 rounded-lg shadow-md text-sm">
-            좌표로 위험 지역 표시
-          </button>
-        </div>
+  <div class="stats">
+   <div class="stat-card">
+    <div class="stat-label">총 탐방로</div>
+    <div class="stat-value cyan">96.76<small style="font-size:12px"> km</small></div>
+   </div>
+   <div class="stat-card">
+    <div class="stat-label">개방 탐방로</div>
+    <div class="stat-value green">95.96<small style="font-size:12px"> km</small></div>
+   </div>
+   <div class="stat-card">
+    <div class="stat-label">감시 카메라</div>
+    <div class="stat-value cyan">03<small style="font-size:12px"> 대</small></div>
+   </div>
+   <div class="stat-card">
+    <div class="stat-label">통제소</div>
+    <div class="stat-value yellow">02<small style="font-size:12px"> 개소</small></div>
+   </div>
+  </div>
 
-        <input type="text" id="addressInput"
-  placeholder="주소 입력 (예: 광주광역시 무등산 증심사)"
-  class="w-full mt-1 px-2 py-1 border rounded-md"/>
+ </div>
 
-<button id="addByAddressBtn"
-  class="w-full mt-1 bg-green-600 hover:bg-green-700 text-white font-semibold py-1.5 px-3 rounded-lg shadow-md text-sm">
-  주소로 위치 표시
-</button>
+ <aside class="right-area">
 
-        <hr class="border-gray-200"/>
-        <button id="addPointBtn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-1.5 px-3 rounded-lg shadow-md text-sm">
-          지도에서 클릭하여 표시 </button>
-        <button onclick="window.open('https://mudeungsan1.iptime.org:8080', '_blank', 'noopener')" class="w-full mt-1 bg-purple-600 hover:bg-purple-700 text-white font-semibold py-1.5 px-3 rounded-lg shadow-md text-sm"> 
-          장불재 산불카메라 </button> 
-        <button onclick="window.open('https://fd.forest.go.kr', '_blank', 'noopener')" class="w-full mt-1 bg-purple-600 hover:bg-purple-700 text-white font-semibold py-1.5 px-3 rounded-lg shadow-md text-sm"> 
-          실시간 산불정보 </button> 
-        <button onclick="window.open('https://sanbul.forest.go.kr', '_blank', 'noopener')" class="w-full mt-1 bg-purple-600 hover:bg-purple-700 text-white font-semibold py-1.5 px-3 rounded-lg shadow-md text-sm"> 
-          산불상황관제시스템 </button> 
-        <button onclick="window.open('http://forestfire.nifos.go.kr', '_blank', 'noopener')" class="w-full mt-1 bg-purple-600 hover:bg-purple-700 text-white font-semibold py-1.5 px-3 rounded-lg shadow-md text-sm"> 
-          산불위험예보시스템 </button> 
-        <button onclick="window.open('https://mudeung.github.io/rescue/searchems.html', '_blank', 'noopener')" class="w-full mt-1 bg-purple-600 hover:bg-purple-700 text-white font-semibold py-1.5 px-3 rounded-lg shadow-md text-sm"> 
-          비상대응 상황판 </button> 
-        <button onclick="window.open('https://www.knps.or.kr/front/portal/safe/acsCtrList.do?menuNo=8000340', '_blank', 'noopener')" class="w-full mt-1 bg-purple-600 hover:bg-purple-700 text-white font-semibold py-1.5 px-3 rounded-lg shadow-md text-sm"> 
-          탐방로 통제정보 </button>
+  <div class="section">
+   <div class="section-title">
+    <span>🚨 산불관리 현황</span>
+    <span style="color:#4ade80;font-size:11px">관리정보</span>
+   </div>
+   <div class="panel-body">
+    <div class="resource-item"><span>진화차량</span><strong>벤츠 유니목 U5023</strong></div>
+    <div class="resource-item"><span>차량 중량</span><strong>8.5 ton</strong></div>
+    <div class="resource-item"><span>물탱크 용량</span><strong>4,000 L</strong></div>
+    <div class="resource-item"><span>방수량</span><strong>2,800 L/min</strong></div>
+    <div class="resource-item"><span>감시 카메라</span><strong>3 대</strong></div>
+    <div class="resource-item"><span>진화 차량</span><strong>4 대</strong></div>
+    <div class="resource-item"><span>통제소</span><strong>2 개소</strong></div>
+    <div class="resource-item"><span>인화물질 보관함</span><strong>4 개소</strong></div>
+   </div>
+  </div>
 
-        <hr class="border-gray-200"/>
+  <div class="section">
+   <div class="section-title">📍 위험지역 위치 등록</div>
+   <div class="panel-body">
+    <h3>좌표 검색</h3>
+    <input id="latInput" placeholder="위도 (예: 35.1286)">
+    <input id="lngInput" placeholder="경도 (예: 126.9699)">
+    <button id="addByCoordBtn" class="btn-green">＋ 좌표로 위험지역 등록</button>
 
-        <div class="space-y-2">
-          <h3 class="text-xl font-bold text-gray-800">상세내용</h3>
-          <div id="infoPanel" class="info-panel bg-gray-50 p-3 rounded-lg border border-gray-200 text-gray-700 text-sm">
-            마커를 클릭하여 상세 정보를 확인하세요.
-          </div>
-        </div>
-      </div>
+    <hr style="border-color:#263c53;margin:12px 0">
+
+    <h3>주소 검색</h3>
+    <input id="addressInput" placeholder="주소 입력">
+    <button id="addByAddressBtn" class="btn-green">⌖ 주소로 위치 표시</button>
+
+    <button id="addPointBtn" class="btn-blue">＋ 지도에서 클릭하여 표시</button>
+   </div>
+  </div>
+
+  <div class="section">
+   <div class="section-title">🔗 산불 대응 시스템</div>
+   <div class="panel-body quick-links">
+    <button class="btn-purple" onclick="window.open('https://mudeungsan1.iptime.org:8080','_blank','noopener')">장불재 산불카메라</button>
+    <button class="btn-purple" onclick="window.open('https://fd.forest.go.kr','_blank','noopener')">실시간 산불정보</button>
+    <button class="btn-purple" onclick="window.open('https://sanbul.forest.go.kr','_blank','noopener')">산불상황관제</button>
+    <button class="btn-purple" onclick="window.open('http://forestfire.nifos.go.kr','_blank','noopener')">산불위험예보</button>
+    <button class="btn-purple" onclick="window.open('https://mudeung.github.io/rescue/searchems.html','_blank','noopener')">비상대응 상황판</button>
+    <button class="btn-purple" onclick="window.open('https://www.knps.or.kr/front/portal/safe/acsCtrList.do?menuNo=8000340','_blank','noopener')">탐방로 통제정보</button>
+   </div>
+  </div>
+
+  <div class="section">
+   <div class="section-title">📋 상세 상황 정보</div>
+   <div class="panel-body">
+    <div id="infoPanel" class="info-panel">
+     마커를 선택하면 산불 발생 이력 및 위치 상세정보가 표시됩니다.
     </div>
-  </main>
+   </div>
+  </div>
 
-  <!-- Naver Maps API -->
- <script src="https://oapi.map.naver.com/openapi/v3/maps.js?ncpClientId=g2u4orbiqf&submodules=geocoder"></script>
-  <script>
-    let map;
-    let markers = [];
-    let isSatellite = false;
-    let isAddingPoint = false;
+ </aside>
+</main>
 
-    const landslideData = [
-      { lat: 35.1286067, lng: 126.9699645, type: "fire", date: "2024-09-29", description: "증심사 공양간 화재" },
-      { lat: 35.1615699, lng: 126.9861449, type: "fire", date: "2025-03-22", description: "금곡동 산166-2 담배불씨" },
-      { lat: 35.152931, lng: 126.964767, type: "fire", date: "2025-03-22", description: "화암동 335-4 쓰레기소각" },
-      { lat: 35.117806, lng: 126.944922, type: "fire", date: "2025-02-21", description: "소태동 산184 쓰레기소각" },
-      { lat: 35.128633, lng: 126.969805,type: "normal", date: "2025-02-14", description: "증심사 수관보관함 입구" },
-      { lat: 35.128917, lng: 126.969963,type: "normal", date: "2025-02-14", description: "증심사 수관보관함 대웅전 좌측" },
-      { lat: 35.128760, lng: 126.970289,type: "normal", date: "2025-02-14", description: "증심사 수관보관함 대웅전 우측" },
-      { lat: 35.122244, lng: 126.972229,type: "normal", date: "2025-02-14", description: "약사사 수관보관함 입구" },
-      { lat: 35.133144, lng: 126.961055,type: "normal", date: "2025-02-14", description: "문빈정사 수관보관함 입구" },
-      { lat: 35.14861832, lng: 126.98427671,type: "normal", date: "2025-02-14", description: "원효사 수관보관함 입구" },
-      { lat: 35.14834566, lng: 126.98426579,type: "normal", date: "2025-02-14", description: "원효사 수관보관함 대웅전 앞" }
-    ];
-
-    function initMap() {
-      map = new naver.maps.Map('map', {
-        center: new naver.maps.LatLng(35.1346, 126.9880),
-        zoom: 13,
-        zoomControl: true,
-        mapTypeControl: true
-      });
-
-      renderMarkers();
-
-      naver.maps.Event.addListener(map, 'click', function(e) {
-        if (isAddingPoint) {
-          const newLat = e.coord.lat();
-          const newLng = e.coord.lng();
-          landslideData.push({
-            lat: newLat,
-            lng: newLng,
-            type: "normal",
-            date: new Date().toISOString().slice(0, 10),
-            description: "새롭게 추가된 위험 지역"
-          });
-          renderMarkers();
-          isAddingPoint = false;
-          document.getElementById("addPointBtn").textContent = "지도에서 클릭하여 표시";
-          document.getElementById("addPointBtn").classList.remove("bg-red-500", "hover:bg-red-600");
-          document.getElementById("addPointBtn").classList.add("bg-blue-600", "hover:bg-blue-700");
-          document.getElementById("infoPanel").innerHTML = "새로운 위험 지점이 추가되었습니다. 마커를 클릭하여 상세 정보를 확인하세요.";
-        }
-      });
-    }
-
-    // 빨간색 핀 아이콘으로 산불 표시
-    function getMarkerIcon(data) {
-  if (data.type === "fire") {
-    return {
-      url: "https://maps.gstatic.com/mapfiles/ms2/micons/red-dot.png",
-      size: new naver.maps.Size(32, 32),
-      anchor: new naver.maps.Point(16, 32)
-    };
-  } else {
-    return {
-      url: "https://ssl.pstatic.net/static/maps/m/poi_pin_blue.png",
-      size: new naver.maps.Size(32, 50),
-      anchor: new naver.maps.Point(16, 50)
-    };
-  }
-}
-
-    function renderMarkers() {
-      markers.forEach(marker => marker.setMap(null));
-      markers = [];
-
-      landslideData.forEach(data => {
-        const marker = new naver.maps.Marker({
-          position: new naver.maps.LatLng(data.lat, data.lng),
-          map: map,
-          title: data.description,
-          icon: getMarkerIcon(data)
-        });
-
-        naver.maps.Event.addListener(marker, 'click', () => {
-          const infoPanel = document.getElementById("infoPanel");
-          infoPanel.innerHTML = `
-            <h3 class="text-xl font-semibold">${data.date}</h3>
-            <p class="mt-2 text-base"><strong>타입:</strong> ${data.type === "fire" ? "산불발생" : "일반 위험"}</p>
-            <p class="mt-1 text-base"><strong>위치:</strong> ${data.lat}, ${data.lng}</p>
-            <p class="mt-1 text-base"><strong>설명:</strong> ${data.description}</p>
-          `;
-        });
-
-        markers.push(marker);
-      });
-    }
-
-    document.getElementById("addPointBtn").addEventListener("click", () => {
-      isAddingPoint = true;
-      document.getElementById("addPointBtn").textContent = "지도에서 위치를 클릭하세요...";
-      document.getElementById("addPointBtn").classList.remove("bg-blue-600", "hover:bg-blue-700");
-      document.getElementById("addPointBtn").classList.add("bg-red-500", "hover:bg-red-600");
-      document.getElementById("infoPanel").innerHTML = "<strong class='text-red-500'>지도 클릭 모드 활성화됨.</strong><br>지도에서 마커를 추가할 위치를 클릭하세요.";
-    });
-
-    document.getElementById("addByCoordBtn").addEventListener("click", () => {
-      const lat = parseFloat(document.getElementById("latInput").value);
-      const lng = parseFloat(document.getElementById("lngInput").value);
-
-      if (isNaN(lat) || isNaN(lng)) {
-        document.getElementById("infoPanel").innerHTML = "<strong class='text-red-500'>오류:</strong> 올바른 위도와 경도 값을 입력하세요.";
-        return;
-      }
-
-      landslideData.push({
-        lat: lat,
-        lng: lng,
-        type: "normal",
-        date: new Date().toISOString().slice(0, 10),
-        description: "좌표로 추가된 위험 지역"
-      });
-
-      renderMarkers();
-      document.getElementById("infoPanel").innerHTML = "새로운 위험 지점이 추가되었습니다. 마커를 클릭하여 상세 정보를 확인하세요.";
-      document.getElementById("latInput").value = "";
-      document.getElementById("lngInput").value = "";
-    });
-
-    document.getElementById("toggleMapTypeBtn").addEventListener("click", () => {
-      isSatellite = !isSatellite;
-      map.setMapTypeId(isSatellite ? naver.maps.MapTypeId.SATELLITE : naver.maps.MapTypeId.NORMAL);
-    });
-
-    window.addEventListener('DOMContentLoaded', initMap);
-// 주소 검색 → 위경도 변환 → 마커 추가
-document.getElementById("addByAddressBtn").addEventListener("click", () => {
-  const address = document.getElementById("addressInput").value;
-
-  if (!address) {
-    document.getElementById("infoPanel").innerHTML =
-      "<strong class='text-red-500'>오류:</strong> 주소를 입력하세요.";
-    return;
-  }
-
-  naver.maps.Service.geocode({
-    query: address
-  }, function(status, response) {
-
-    if (status !== naver.maps.Service.Status.OK) {
-      document.getElementById("infoPanel").innerHTML =
-        "<strong class='text-red-500'>주소 검색 실패</strong>";
-      return;
-    }
-
-   if (!response.v2.addresses || response.v2.addresses.length === 0) {
-  document.getElementById("infoPanel").innerHTML =
-    "<strong class='text-red-500'>검색 결과가 없습니다.</strong>";
-  return;
-}
-
-    const result = response.v2.addresses[0];
-    const lat = parseFloat(result.y);
-    const lng = parseFloat(result.x);
-
-    // 지도 이동
-    map.setCenter(new naver.maps.LatLng(lat, lng));
-    map.setZoom(15);
-
-    // 기존 데이터 배열에 추가
-    landslideData.push({
-      lat: lat,
-      lng: lng,
-      type: "normal",
-      date: new Date().toISOString().slice(0, 10),
-      description: "주소 입력 위치 (" + address + ")"
-    });
-
-    renderMarkers();
-
-    document.getElementById("infoPanel").innerHTML =
-      "주소 위치가 지도에 표시되었습니다.<br><strong>위도:</strong> " + lat +
-      "<br><strong>경도:</strong> " + lng;
-
-    document.getElementById("addressInput").value = "";
-  });
-});
-    
-  </script>
+<div class="footer">
+ MUDEUNGSAN FOREST FIRE CONTROL CENTER · 산불 예방 및 안전관리
+</div>
 </body>
 </html>
 
