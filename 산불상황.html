@@ -6,10 +6,7 @@
 
 <title>무등산 산불 통합관제센터</title>
 
-<link rel="stylesheet"
- href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+ <script src="https://oapi.map.naver.com/openapi/v3/maps.js?ncpClientId=g2u4orbiqf&submodules=geocoder"></script>
 
 <style>
 :root {
@@ -133,44 +130,34 @@ main {
 }
 
 #map-container {
-  position:relative;
-  width:100%;
-  height:65vh;
-  min-height:420px;
-  max-height:750px;
-  overflow:hidden;
-  background:#15283b;
+  position: relative;
+  width: 100%;
+  height: 65vh;
+  min-height: 420px;
+  max-height: 750px;
+  overflow: hidden;
 }
 
 #map {
-  position:absolute;
-  inset:0;
-  width:100%;
-  height:100%;
-  z-index:1;
-}
-
-.leaflet-container {
-  width:100%;
-  height:100%;
-  background:#15283b;
-  font-family:"Malgun Gothic",sans-serif;
+  width: 100%;
+  height: 100%;
+  min-height: 420px;
 }
 
 .map-legend {
-  position:absolute;
-  bottom:20px;
-  left:12px;
-  z-index:500;
-  display:flex;
-  flex-wrap:wrap;
-  gap:12px;
-  background:rgba(7,17,31,.92);
-  padding:10px 13px;
-  border:1px solid #3b5067;
-  border-radius:7px;
-  font-size:11px;
-  pointer-events:none;
+  position: absolute;
+  z-index: 10;
+  bottom: 15px;
+  left: 12px;
+  display: flex;
+  gap: 12px;
+  padding: 10px 13px;
+  background: rgba(7,17,31,.92);
+  border: 1px solid #263c53;
+  border-radius: 6px;
+  color: white;
+  font-size: 11px;
+  pointer-events: none;
 }
 
 .dot {
@@ -295,29 +282,13 @@ button:hover { filter:brightness(1.2); }
 }
 
 @media(max-width:650px) {
-  header { padding:15px; }
-  h1 { font-size:20px; }
-  main { padding:9px;gap:10px; }
-
-  .stats {
-    grid-template-columns:repeat(2,minmax(0,1fr));
-    gap:7px;
-  }
-
-  .stat-card { padding:12px; }
-  .stat-value { font-size:22px; }
-
   #map-container {
-    height:55vh;
-    min-height:380px;
-    max-height:600px;
+    height: 55vh;
+    min-height: 380px;
   }
 
-  .right-area { display:flex; }
-
-  .map-legend {
-    font-size:10px;
-    gap:8px;
+  #map {
+    min-height: 380px;
   }
 }
 </style>
@@ -553,190 +524,219 @@ button:hover { filter:brightness(1.2); }
 
 <script>
 
-// ========================================
-// 1. 산불 및 관리 지점 데이터
-// ========================================
+// ==========================================
+// 무등산 산불 통합관제센터
+// NAVER MAP API
+// ==========================================
 
-const landslideData = [
-
-  {
-    lat:35.1286067,
-    lng:126.9699645,
-    type:"fire",
-    date:"2024-09-29",
-    description:"광주광역시 동구 운림동 56 증심사 공양간 화재"
-  },
-
-  {
-    lat:35.1615699,
-    lng:126.9861449,
-    type:"fire",
-    date:"2025-03-22",
-    description:"광주광역시 북구 금곡동 산166-2 담배불씨"
-  },
-
-  {
-    lat:35.152931,
-    lng:126.964767,
-    type:"fire",
-    date:"2025-03-22",
-    description:"광주광역시 북구 화암동 335-4 쓰레기소각"
-  },
-
-  {
-    lat:35.117806,
-    lng:126.944922,
-    type:"fire",
-    date:"2025-02-21",
-    description:"광주광역시 동구 소태동 산184 쓰레기소각"
-  },
-
-  {
-    lat:35.128633,
-    lng:126.969805,
-    type:"normal",
-    date:"2025-02-14",
-    description:"증심사 수관보관함 입구"
-  },
-
-  {
-    lat:35.128917,
-    lng:126.969963,
-    type:"normal",
-    date:"2025-02-14",
-    description:"증심사 수관보관함 대웅전 좌측"
-  },
-
-  {
-    lat:35.128760,
-    lng:126.970289,
-    type:"normal",
-    date:"2025-02-14",
-    description:"증심사 수관보관함 대웅전 우측"
-  },
-
-  {
-    lat:35.122244,
-    lng:126.972229,
-    type:"normal",
-    date:"2025-02-14",
-    description:"약사사 수관보관함 입구"
-  },
-
-  {
-    lat:35.133144,
-    lng:126.961055,
-    type:"normal",
-    date:"2025-02-14",
-    description:"문빈정사 수관보관함 입구"
-  },
-
-  {
-    lat:35.14833232,
-    lng:126.98574731,
-    type:"normal",
-    date:"2025-02-14",
-    description:"원효사 수관보관함 입구"
-  },
-
-  {
-    lat:35.14853961,
-    lng:126.98554150,
-    type:"normal",
-    date:"2025-02-14",
-    description:"원효사 수관보관함 대웅전 앞"
-  }
-
-];
-
-
-// ========================================
-// 2. 지도 및 변수 초기화
-// ========================================
-
-const map = L.map('map', {
-  zoomControl:true
-}).setView([35.134167,126.988889],13);
-
+// 지도 상태
+let map;
 let isSatellite = false;
 let clickMode = false;
 let markers = [];
 
+// ==========================================
+// 산불 및 관리 지점 11개
+// ==========================================
 
-// ========================================
-// 3. 일반지도
-// ========================================
-
-const normalLayer = L.tileLayer(
-  'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+const landslideData = [
   {
-    maxZoom:19,
-    attribution:'&copy; OpenStreetMap'
-  }
-);
-
-
-// ========================================
-// 4. 위성지도
-// ========================================
-
-const satelliteLayer = L.tileLayer(
-  'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+    lat: 35.1286067,
+    lng: 126.9699645,
+    type: "fire",
+    date: "2024-09-29",
+    description: "광주광역시 동구 운림동 56 증심사 공양간 화재"
+  },
   {
-    maxZoom:19,
-    attribution:'Tiles &copy; Esri'
+    lat: 35.1615699,
+    lng: 126.9861449,
+    type: "fire",
+    date: "2025-03-22",
+    description: "광주광역시 북구 금곡동 산166-2 담배불씨"
+  },
+  {
+    lat: 35.152931,
+    lng: 126.964767,
+    type: "fire",
+    date: "2025-03-22",
+    description: "광주광역시 북구 화암동 335-4 쓰레기소각"
+  },
+  {
+    lat: 35.117806,
+    lng: 126.944922,
+    type: "fire",
+    date: "2025-02-21",
+    description: "광주광역시 동구 소태동 산184 쓰레기소각"
+  },
+  {
+    lat: 35.128633,
+    lng: 126.969805,
+    type: "normal",
+    date: "2025-02-14",
+    description: "증심사 수관보관함 입구"
+  },
+  {
+    lat: 35.128917,
+    lng: 126.969963,
+    type: "normal",
+    date: "2025-02-14",
+    description: "증심사 수관보관함 대웅전 좌측"
+  },
+  {
+    lat: 35.128760,
+    lng: 126.970289,
+    type: "normal",
+    date: "2025-02-14",
+    description: "증심사 수관보관함 대웅전 우측"
+  },
+  {
+    lat: 35.122244,
+    lng: 126.972229,
+    type: "normal",
+    date: "2025-02-14",
+    description: "약사사 수관보관함 입구"
+  },
+  {
+    lat: 35.133144,
+    lng: 126.961055,
+    type: "normal",
+    date: "2025-02-14",
+    description: "문빈정사 수관보관함 입구"
+  },
+  {
+    lat: 35.14833232,
+    lng: 126.98574731,
+    type: "normal",
+    date: "2025-02-14",
+    description: "원효사 수관보관함 입구"
+  },
+  {
+    lat: 35.14853961,
+    lng: 126.98554150,
+    type: "normal",
+    date: "2025-02-14",
+    description: "원효사 수관보관함 대웅전 앞"
   }
-);
+];
 
+// ==========================================
+// 지도 초기화
+// ==========================================
 
-// 최초 일반지도 표시
-normalLayer.addTo(map);
+function initMap() {
 
+  if (!window.naver || !naver.maps) {
+    alert("네이버 지도 API를 불러오지 못했습니다. Client ID와 서비스 URL을 확인하세요.");
+    return;
+  }
 
-// ========================================
-// 5. 지도 크기 자동 조절
-// ========================================
-
-function resizeMap() {
-  setTimeout(() => {
-    map.invalidateSize(true);
-  },200);
-}
-
-window.addEventListener('load',resizeMap);
-window.addEventListener('resize',resizeMap);
-
-if (window.ResizeObserver) {
-  const resizeObserver = new ResizeObserver(() => {
-    resizeMap();
+  map = new naver.maps.Map("map", {
+    center: new naver.maps.LatLng(
+      35.134167,
+      126.988889
+    ),
+    zoom: 14,
+    minZoom: 8,
+    maxZoom: 20,
+    mapTypeId: naver.maps.MapTypeId.NORMAL,
+    zoomControl: true,
+    zoomControlOptions: {
+      position: naver.maps.Position.RIGHT_CENTER
+    },
+    scaleControl: true
   });
 
-  resizeObserver.observe(
-    document.getElementById('map-container')
-  );
+  // 지도 크기 조절
+  function resizeMap() {
+    const container = document.getElementById("map");
+    if (!container || !map) return;
+
+    map.setSize(new naver.maps.Size(
+      container.clientWidth,
+      container.clientHeight
+    ));
+  }
+
+  window.addEventListener("resize", resizeMap);
+
+  if (window.ResizeObserver) {
+    const observer = new ResizeObserver(resizeMap);
+    observer.observe(document.getElementById("map-container"));
+  }
+
+  setTimeout(resizeMap, 500);
+  setTimeout(resizeMap, 1500);
+
+  // 관리 지점 자동 표시
+  landslideData.forEach(item => {
+    addFireMarker(
+      item.lat,
+      item.lng,
+      item.type,
+      item.type === "fire"
+        ? "산불 발생 이력"
+        : "산불 관리 지점",
+      item.description,
+      item.date
+    );
+  });
+
+  // 지도 클릭 이벤트
+  naver.maps.Event.addListener(map, "click", function(e) {
+
+    if (!clickMode) return;
+
+    const lat = e.coord.lat();
+    const lng = e.coord.lng();
+
+    addFireMarker(
+      lat,
+      lng,
+      "risk",
+      "현장 위험지역",
+      "지도 클릭으로 등록한 위험·관리 지점",
+      new Date().toISOString().slice(0, 10)
+    );
+
+    clickMode = false;
+
+    const btn = document.getElementById("addPointBtn");
+    btn.textContent = "＋ 지도에서 클릭하여 표시";
+    btn.style.background = "";
+
+    map.setCursor("auto");
+  });
+
+  console.log("무등산 네이버 지도 초기화 완료");
 }
 
+// ==========================================
+// 마커 등록
+// ==========================================
 
-// ========================================
-// 6. 마커 생성 함수
-// ========================================
+function addFireMarker(lat, lng, type, title, description, date = "") {
 
-function addFireMarker(lat,lng,type,title,description,date="") {
+  if (!map) return;
 
-  const color = type === "fire"
-    ? "#fb5365"
-    : "#38bdf8";
+  const position = new naver.maps.LatLng(lat, lng);
 
-  const marker = L.circleMarker([lat,lng], {
-    radius:type === "fire" ? 10 : 8,
-    color:"#ffffff",
-    weight:2,
-    fillColor:color,
-    fillOpacity:1
-  }).addTo(map);
+  const color =
+    type === "fire" ? "#fb5365" : "#38bdf8";
+
+  const circle = new naver.maps.Circle({
+    map: map,
+    center: position,
+    radius: 35,
+    fillColor: color,
+    fillOpacity: 0.9,
+    strokeColor: "#ffffff",
+    strokeOpacity: 1,
+    strokeWeight: 2,
+    clickable: true
+  });
 
   const item = {
-    marker,
+    overlay: circle,
     lat,
     lng,
     type,
@@ -747,108 +747,79 @@ function addFireMarker(lat,lng,type,title,description,date="") {
 
   markers.push(item);
 
-  // 팝업 구성
-  const popup = document.createElement('div');
-
-  const heading = document.createElement('strong');
-  heading.textContent = title;
-
-  const detail = document.createElement('p');
-  detail.textContent = description;
-
-  const coord = document.createElement('p');
-  coord.textContent =
-    `위도: ${lat.toFixed(6)} / 경도: ${lng.toFixed(6)}`;
-
-  const removeButton = document.createElement('button');
-
-  removeButton.textContent = '이 지점 삭제';
-
-  removeButton.style.cssText =
-    'background:#991b1b;color:white;padding:7px;border:0;border-radius:5px;cursor:pointer;width:100%';
-
-  removeButton.addEventListener('click',() => {
-
-    map.removeLayer(marker);
-
-    markers = markers.filter(m => m !== item);
-
-    document.getElementById('infoPanel').textContent =
-      '선택한 지점을 삭제했습니다.';
-
+  naver.maps.Event.addListener(circle, "click", function() {
+    showMarkerInfo(item);
   });
 
-  popup.append(heading,detail,coord,removeButton);
-
-  marker.bindPopup(popup);
-
-  // 마커 선택 시 상세정보 표시
-  marker.on('click',() => {
-
-    const panel = document.getElementById('infoPanel');
-
-    panel.replaceChildren();
-
-    const h = document.createElement('h3');
-    h.textContent = title;
-
-    const info = document.createElement('div');
-
-    info.textContent =
-      `위도: ${lat.toFixed(6)}\n` +
-      `경도: ${lng.toFixed(6)}\n` +
-      `구분: ${type === "fire" ? "산불 발생 이력" : "위험·관리 지점"}\n` +
-      `발생·등록일: ${date || "사용자 등록"}\n` +
-      `상세정보: ${description}`;
-
-    panel.append(h,info);
-
-  });
-
-  return marker;
+  return item;
 }
 
+// ==========================================
+// 상세정보 표시
+// ==========================================
 
-// ========================================
-// 7. 산불 및 관리 지점 11개 자동 등록
-// ========================================
+function showMarkerInfo(item) {
 
-landslideData.forEach(item => {
+  const panel = document.getElementById("infoPanel");
 
-  addFireMarker(
-    item.lat,
-    item.lng,
-    item.type === "fire" ? "fire" : "risk",
-    item.type === "fire"
-      ? "산불 발생 이력"
-      : "산불 관리 지점",
-    item.description,
-    item.date
+  panel.replaceChildren();
+
+  const heading = document.createElement("h3");
+  heading.textContent = item.title;
+  panel.appendChild(heading);
+
+  const details = [
+    "위도: " + item.lat.toFixed(6),
+    "경도: " + item.lng.toFixed(6),
+    "구분: " + (
+      item.type === "fire"
+        ? "산불 발생 이력"
+        : "위험·관리 지점"
+    ),
+    "등록일: " + (item.date || "-"),
+    "상세정보: " + item.description
+  ];
+
+  const content = document.createElement("div");
+  content.textContent = details.join("\n");
+  content.style.whiteSpace = "pre-line";
+
+  panel.appendChild(content);
+
+  const removeButton = document.createElement("button");
+  removeButton.textContent = "이 지점 삭제";
+  removeButton.className = "btn-red";
+  removeButton.style.marginTop = "12px";
+
+  removeButton.addEventListener("click", function() {
+
+    item.overlay.setMap(null);
+
+    markers = markers.filter(
+      marker => marker !== item
+    );
+
+    panel.textContent = "선택한 지점을 삭제했습니다.";
+
+  });
+
+  panel.appendChild(removeButton);
+}
+
+// ==========================================
+// 좌표로 위험지역 등록
+// ==========================================
+
+document.getElementById("addByCoordBtn")
+.addEventListener("click", function() {
+
+  const lat = Number(
+    document.getElementById("latInput").value.trim()
   );
 
-});
-
-
-// ========================================
-// 8. 좌표로 위험지역 등록
-// ========================================
-
-document.getElementById('addByCoordBtn')
-.addEventListener('click',() => {
-
-  const latText =
-    document.getElementById('latInput').value.trim();
-
-  const lngText =
-    document.getElementById('lngInput').value.trim();
-
-  if (!latText || !lngText) {
-    alert('위도와 경도를 입력하세요.');
-    return;
-  }
-
-  const lat = Number(latText);
-  const lng = Number(lngText);
+  const lng = Number(
+    document.getElementById("lngInput").value.trim()
+  );
 
   if (
     !Number.isFinite(lat) ||
@@ -856,198 +827,142 @@ document.getElementById('addByCoordBtn')
     lat < -90 || lat > 90 ||
     lng < -180 || lng > 180
   ) {
-    alert('올바른 좌표를 입력하세요.');
+    alert("올바른 위도와 경도를 입력하세요.");
     return;
   }
 
-  const marker = addFireMarker(
+  const item = addFireMarker(
     lat,
     lng,
-    'risk',
-    '위험지역',
-    '사용자가 좌표로 등록한 위험·관리 지점'
+    "risk",
+    "좌표 등록 위험지역",
+    "사용자가 좌표로 등록한 위험·관리 지점",
+    new Date().toISOString().slice(0, 10)
   );
 
-  map.setView([lat,lng],16);
+  map.setCenter(new naver.maps.LatLng(lat, lng));
+  map.setZoom(16);
 
-  marker.openPopup();
-
+  showMarkerInfo(item);
 });
 
+// ==========================================
+// 지도 클릭 등록 모드
+// ==========================================
 
-// ========================================
-// 9. 지도 클릭으로 위험지역 등록
-// ========================================
-
-document.getElementById('addPointBtn')
-.addEventListener('click',() => {
+document.getElementById("addPointBtn")
+.addEventListener("click", function() {
 
   clickMode = !clickMode;
 
-  const btn = document.getElementById('addPointBtn');
-
   if (clickMode) {
-
-    btn.textContent = '지도에서 위치를 선택하세요';
-
-    btn.style.background = '#b45309';
-
-    map.getContainer().style.cursor = 'crosshair';
-
+    this.textContent = "지도에서 위치를 선택하세요";
+    this.style.background = "#b45309";
+    map.setCursor("crosshair");
   } else {
-
-    btn.textContent = '＋ 지도에서 클릭하여 표시';
-
-    btn.style.background = '';
-
-    map.getContainer().style.cursor = '';
-
+    this.textContent = "＋ 지도에서 클릭하여 표시";
+    this.style.background = "";
+    map.setCursor("auto");
   }
 
 });
 
+// ==========================================
+// 주소 검색
+// ==========================================
 
-map.on('click',e => {
-
-  if (!clickMode) return;
-
-  const lat = e.latlng.lat;
-  const lng = e.latlng.lng;
-
-  const marker = addFireMarker(
-    lat,
-    lng,
-    'risk',
-    '현장 위험지역',
-    '지도 클릭으로 등록한 위험·관리 지점'
-  );
-
-  marker.openPopup();
-
-  clickMode = false;
-
-  const btn = document.getElementById('addPointBtn');
-
-  btn.textContent = '＋ 지도에서 클릭하여 표시';
-
-  btn.style.background = '';
-
-  map.getContainer().style.cursor = '';
-
-});
-
-
-// ========================================
-// 10. 주소 검색
-// ========================================
-
-document.getElementById('addByAddressBtn')
-.addEventListener('click',async () => {
+document.getElementById("addByAddressBtn")
+.addEventListener("click", async function() {
 
   const address =
-    document.getElementById('addressInput').value.trim();
+    document.getElementById("addressInput").value.trim();
 
   if (!address) {
-    alert('검색할 주소를 입력하세요.');
+    alert("주소를 입력하세요.");
     return;
   }
 
   try {
 
     const url =
-      'https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&q='
+      "https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&q="
       + encodeURIComponent(address);
 
     const response = await fetch(url);
 
     if (!response.ok) {
-      throw new Error('주소 검색 서버 오류');
+      throw new Error("주소 검색 서버 오류");
     }
 
     const results = await response.json();
 
     if (!results.length) {
-      alert('검색 결과가 없습니다.');
+      alert("검색 결과가 없습니다.");
       return;
     }
 
     const lat = Number(results[0].lat);
     const lng = Number(results[0].lon);
 
-    const marker = addFireMarker(
+    const item = addFireMarker(
       lat,
       lng,
-      'risk',
-      '주소 검색 위치',
-      address
+      "risk",
+      "주소 검색 위치",
+      address,
+      new Date().toISOString().slice(0, 10)
     );
 
-    map.setView([lat,lng],16);
+    map.setCenter(new naver.maps.LatLng(lat, lng));
+    map.setZoom(16);
 
-    marker.openPopup();
+    showMarkerInfo(item);
 
-  } catch(error) {
+  } catch (error) {
 
     console.error(error);
-
-    alert('주소 검색에 실패했습니다. 잠시 후 다시 시도하세요.');
+    alert("주소 검색에 실패했습니다. 잠시 후 다시 시도하세요.");
 
   }
 
 });
 
+// ==========================================
+// 일반지도 / 위성지도 전환
+// ==========================================
 
-// ========================================
-// 11. 일반지도 / 위성지도 전환
-// ========================================
-
-document.getElementById('toggleMapTypeBtn')
-.addEventListener('click',function() {
+document.getElementById("toggleMapTypeBtn")
+.addEventListener("click", function() {
 
   if (!isSatellite) {
 
-    map.removeLayer(normalLayer);
+    map.setMapTypeId(naver.maps.MapTypeId.SATELLITE);
 
-    satelliteLayer.addTo(map);
-
-    this.textContent = '일반지도 전환';
+    this.textContent = "일반지도 전환";
 
     isSatellite = true;
 
   } else {
 
-    map.removeLayer(satelliteLayer);
+    map.setMapTypeId(naver.maps.MapTypeId.NORMAL);
 
-    normalLayer.addTo(map);
-
-    this.textContent = '위성지도 전환';
+    this.textContent = "위성지도 전환";
 
     isSatellite = false;
-
   }
-
-  resizeMap();
 
 });
 
+// ==========================================
+// 초기 실행
+// ==========================================
 
-// ========================================
-// 12. 지도 축척 표시
-// ========================================
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", initMap);
+} else {
+  initMap();
+}
 
-L.control.scale({
-  imperial:false,
-  metric:true
-}).addTo(map);
-
-
-// ========================================
-// 13. 초기 지도 크기 재설정
-// ========================================
-
-setTimeout(() => {
-  map.invalidateSize(true);
-},500);
 
 </script>
 
