@@ -158,10 +158,15 @@ button:hover{filter:brightness(1.2)}
  .stats{grid-template-columns:repeat(2,1fr);gap:7px}
  .stat-card{padding:12px}
  .stat-value{font-size:22px}
- #map-container{height:60vh;min-height:420px}
- #map{min-height:420px}
- .right-area{display:flex}
- .map-legend{font-size:10px;gap:8px}
+#map-container {
+  height: 55vh;
+  min-height: 380px;
+  max-height: 600px;
+}
+
+#map {
+  height: 100%;
+  min-height: 0;
 }
 
 
@@ -349,7 +354,19 @@ let clickMode = false;
 let markers = [];
 
 // 지도 크기 초기화
-setTimeout(() => map.invalidateSize(), 300);
+function resizeMap() {
+  setTimeout(() => {
+    map.invalidateSize(true);
+  }, 300);
+}
+
+window.addEventListener('load', resizeMap);
+window.addEventListener('resize', resizeMap);
+
+if (window.ResizeObserver) {
+  const observer = new ResizeObserver(resizeMap);
+  observer.observe(document.getElementById('map-container'));
+}
  
 // 화면 크기 변경 시 지도 자동 조절
 window.addEventListener('load', () => {
