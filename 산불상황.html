@@ -676,6 +676,125 @@ let vehicles = [];
 
 let currentPopup = null;
 
+
+// ==========================================
+// GitHub Pages ↔ Google Apps Script 연결
+// ==========================================
+
+const GAS_URL = "https://script.google.com/macros/s/AKfycbx6faHdrV559uZRbGV8ohTiDnfDVteAmaOzb4ZzDPz7Q6UtzfHMb216fMkwtL8t6frk/exec";
+
+// GitHub Pages에서도 기존 google.script.run
+// 호출 코드를 그대로 사용할 수 있게 호환 처리
+if (!window.google || !window.google.script) {
+
+  window.google = window.google || {};
+  window.google.script = {};
+
+  let successHandler = null;
+  let failureHandler = null;
+
+  window.google.script.run = new Proxy({}, {
+
+    get(target, method) {
+
+      if (method === "withSuccessHandler") {
+        return function(fn) {
+          successHandler = fn;
+          return window.google.script.run;
+        };
+      }
+
+      if (method === "withFailureHandler") {
+        return function(fn) {
+          failureHandler = fn;
+          return window.google.script.run;
+        };
+      }
+
+      return function(data) {
+
+        const action = String(method);
+
+        const payload = data || {};
+
+        const callbackName =
+          "__gasCallback_" + Date.now() +
+          "_" + Math.random().toString(36).slice(2);
+
+        const script = document.createElement("script");
+
+        const params = new URLSearchParams({
+          action: action,
+          data: JSON.stringify(payload),
+          callback: callbackName
+        });
+
+        const timeout = setTimeout(() => {
+          cleanup();
+          if (failureHandler) {
+            failureHandler(new Error("서버 응답 시간 초과"));
+          }
+        }, 20000);
+
+        function cleanup() {
+          clearTimeout(timeout);
+          delete window[callbackName];
+          script.remove();
+        }
+
+        window[callbackName] = function(response) {
+
+          cleanup();
+
+          if (response.success) {
+            if (successHandler) {
+              successHandler(response.data);
+            }
+          } else {
+            if (failureHandler) {
+              failureHandler(
+                new Error(response.error || "서버 오류")
+              );
+            }
+          }
+
+          successHandler = null;
+          failureHandler = null;
+        };
+
+        script.onerror = function() {
+          cleanup();
+
+          if (failureHandler) {
+            failureHandler(new Error("Google 서버 연결 실패"));
+          }
+
+          successHandler = null;
+          failureHandler = null;
+        };
+
+        script.src = GAS_URL + "?" + params.toString();
+
+        document.head.appendChild(script);
+
+      };
+    }
+
+  });
+
+}
+
+
+// Google Apps Script 연결 여부
+function isGasAvailable() {
+  return !!(
+    window.google &&
+    window.google.script &&
+    window.google.script.run
+  );
+}
+
+ 
 // ==========================================
 // Google Apps Script 연동 함수
 // ==========================================
