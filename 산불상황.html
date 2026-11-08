@@ -676,6 +676,24 @@ let vehicles = [];
 
 let currentPopup = null;
 
+// ==========================================
+// Google Apps Script 연동 함수
+// ==========================================
+
+function isGasAvailable() {
+  return typeof google !== "undefined" &&
+         google.script &&
+         google.script.run;
+}
+
+function gasError(error) {
+  console.error("Google Apps Script 오류:", error);
+
+  alert(
+    "서버 연동 오류: " +
+    (error.message || error)
+  );
+} 
 
 // 날짜
 function getToday() {
@@ -912,27 +930,29 @@ function initMap() {
 
 
   // 기존 산불 및 관리 지점 표시
-  landslideData.forEach(item => {
+landslideData.forEach(item => {
 
-    addFireMarker(
+  addFireMarker(
 
-      item.lat,
+    item.lat,
 
-      item.lng,
+    item.lng,
 
-      item.type,
+    item.type,
 
-      item.type === "fire"
-        ? "산불 발생 이력"
-        : "산불 관리 지점",
+    item.type === "fire"
+      ? "산불 발생 이력"
+      : "산불 관리 지점",
 
-      item.description,
+    item.description,
 
-      item.date
+    item.date,
 
-    );
+    false
 
-  });
+  );
+
+});
 
 
   // 지도 클릭 등록
@@ -1010,13 +1030,16 @@ function initMap() {
 // ⑤ 산불 및 위험지역 마커 등록
 // ==========================================
 
+
 function addFireMarker(
   lat,
   lng,
   type,
   title,
   description,
-  date = ""
+  date = "",
+  saveToServer = true,
+  existingId = null
 ) {
 
   if (!map || !validateCoordinates(lat, lng)) {
@@ -1039,28 +1062,43 @@ function addFireMarker(
   ).addTo(map);
 
   const item = {
-
+    id: existingId,
     overlay: circle,
-
     lat,
     lng,
     type,
     title,
     description,
     date
-
   };
 
   markers.push(item);
 
   circle.on("click", function() {
-
     showMarkerInfo(item);
-
   });
 
-  return item;
+  if (saveToServer && isGasAvailable()) {
 
+    google.script.run
+      .withSuccessHandler(function(result) {
+        item.id = result.id;
+        console.log("위험지역 저장 완료");
+      })
+      .withFailureHandler(gasError)
+      .saveRisk({
+        id: item.id,
+        lat,
+        lng,
+        type,
+        title,
+        description,
+        date
+      });
+
+  }
+
+  return item;
 }
 
 
@@ -1189,7 +1227,9 @@ function showMarkerInfo(item) {
 
   removeButton.style.marginTop = "12px";
 
-  removeButton.onclick = function() {
+ removeButton.onclick = function() {
+
+  function removeFromMap() {
 
     map.removeLayer(item.overlay);
 
@@ -1204,7 +1244,24 @@ function showMarkerInfo(item) {
     panel.textContent =
       "선택한 지점을 삭제했습니다.";
 
-  };
+  }
+
+  if (item.id && isGasAvailable()) {
+
+    google.script.run
+      .withSuccessHandler(function() {
+        removeFromMap();
+      })
+      .withFailureHandler(gasError)
+      .deleteRisk(item.id);
+
+  } else {
+
+    removeFromMap();
+
+  }
+
+};
 
   panel.appendChild(removeButton);
 
@@ -1478,7 +1535,14 @@ $("toggleMapTypeBtn").addEventListener(
 // ⑪ 진화 차량 위치 등록
 // ==========================================
 
-function addVehicle(name, lat, lng) {
+
+function addVehicle(
+  name,
+  lat,
+  lng,
+  saveToServer = true,
+  existingId = null
+) {
 
   if (!map) return null;
 
@@ -1490,7 +1554,6 @@ function addVehicle(name, lat, lng) {
 
   }
 
-  // 중복 차량 확인
   const existing = vehicles.find(
     item => item.name === name
   );
@@ -1503,7 +1566,6 @@ function addVehicle(name, lat, lng) {
 
   }
 
-  // 차량 아이콘
   const vehicleIcon = L.divIcon({
 
     html: `
@@ -1521,19 +1583,21 @@ function addVehicle(name, lat, lng) {
 
   });
 
-  // 지도에 차량 표시
   const marker = L.marker(
     [lat, lng],
-    {
-      icon: vehicleIcon
-    }
+    { icon: vehicleIcon }
   ).addTo(map);
 
   const vehicle = {
 
+    id: existingId,
+
     name,
+
     lat,
+
     lng,
+
     marker
 
   };
@@ -1552,9 +1616,35 @@ function addVehicle(name, lat, lng) {
 
   updateVehicleInfo();
 
+  if (saveToServer && isGasAvailable()) {
+
+    google.script.run
+      .withSuccessHandler(function(result) {
+
+        vehicle.id = result.id;
+
+        console.log("차량 저장 완료");
+
+      })
+      .withFailureHandler(gasError)
+      .saveVehicle({
+
+        id: vehicle.id,
+
+        name,
+
+        lat,
+
+        lng
+
+      });
+
+  }
+
   return vehicle;
 
 }
+
 
 
 // ==========================================
@@ -1599,6 +1689,34 @@ function updateVehicle(name, lat, lng) {
 
   `);
 
+ if (isGasAvailable()) {
+
+  google.script.run
+
+    .withSuccessHandler(function(result) {
+
+      vehicle.id = result.id;
+
+      console.log("차량 위치 갱신 완료");
+
+    })
+
+    .withFailureHandler(gasError)
+
+    .saveVehicle({
+
+      id: vehicle.id,
+
+      name: vehicle.name,
+
+      lat: vehicle.lat,
+
+      lng: vehicle.lng
+
+    });
+
+}
+ 
   updateVehicleInfo();
 
 }
@@ -1818,6 +1936,80 @@ if (vehicleLocationBtn) {
 }
 
 
+
+function loadGasData() {
+
+  if (!isGasAvailable()) {
+
+    console.warn(
+      "Google Apps Script 환경이 아닙니다."
+    );
+
+    return;
+
+  }
+
+  google.script.run
+
+    .withSuccessHandler(function(data) {
+
+      // 위험지역 불러오기
+      (data.risks || []).forEach(item => {
+
+        const marker = addFireMarker(
+
+          item.lat,
+
+          item.lng,
+
+          item.type,
+
+          item.name,
+
+          item.description,
+
+          item.date,
+
+          false,
+
+          item.id
+
+        );
+
+      });
+
+      // 진화 차량 불러오기
+      (data.vehicles || []).forEach(item => {
+
+        addVehicle(
+
+          item.name,
+
+          item.lat,
+
+          item.lng,
+
+          false,
+
+          item.id
+
+        );
+
+      });
+
+      console.log(
+        "Google Sheets 데이터 복원 완료"
+      );
+
+    })
+
+    .withFailureHandler(gasError)
+
+    .getDashboardData();
+
+}
+ 
+
 // ==========================================
 // ⑯ 지도 실행
 // ==========================================
@@ -1838,6 +2030,9 @@ function startMap() {
   if (map) return;
 
   initMap();
+
+  // Google Sheets 데이터 자동 불러오기
+  loadGasData();
 
 }
 
