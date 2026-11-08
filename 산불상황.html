@@ -6,7 +6,7 @@
 
 <title>무등산 산불 통합관제센터</title>
 
- <script src="https://oapi.map.naver.com/openapi/v3/maps.js?ncpClientId=g2u4orbiqf&submodules=geocoder"></script>
+<script src="https://oapi.map.naver.com/openapi/v3/maps.js?ncpKeyId=g2u4orbiqf&submodules=geocoder"></script>
 
 <style>
 :root {
@@ -523,11 +523,18 @@ button:hover { filter:brightness(1.2); }
 </div>
 
 <script>
-
 // ==========================================
 // 무등산 산불 통합관제센터
-// NAVER MAP API
+// NAVER MAP API - 오류 수정 버전
 // ==========================================
+
+// 공통 DOM 선택 함수
+const $ = (id) => document.getElementById(id);
+
+// 오늘 날짜
+function getToday() {
+  return new Date().toISOString().slice(0, 10);
+}
 
 // 지도 상태
 let map;
@@ -631,10 +638,7 @@ function initMap() {
   }
 
   map = new naver.maps.Map("map", {
-    center: new naver.maps.LatLng(
-      35.134167,
-      126.988889
-    ),
+    center: new naver.maps.LatLng(35.134167, 126.988889),
     zoom: 14,
     minZoom: 8,
     maxZoom: 20,
@@ -648,37 +652,40 @@ function initMap() {
 
   // 지도 크기 조절
   function resizeMap() {
-    const container = document.getElementById("map");
+    const container = $("map");
+
     if (!container || !map) return;
 
-    map.setSize(new naver.maps.Size(
-      container.clientWidth,
-      container.clientHeight
-    ));
+    map.setSize(
+      new naver.maps.Size(
+        container.clientWidth,
+        container.clientHeight
+      )
+    );
   }
 
   window.addEventListener("resize", resizeMap);
 
   if (window.ResizeObserver) {
     const observer = new ResizeObserver(resizeMap);
-    observer.observe(document.getElementById("map-container"));
+    observer.observe($("map-container"));
   }
 
   setTimeout(resizeMap, 500);
   setTimeout(resizeMap, 1500);
 
-  // 관리 지점 자동 표시
+  // 기존 관리 지점 표시
   landslideData.forEach(item => {
+
     addFireMarker(
       item.lat,
       item.lng,
       item.type,
-      item.type === "fire"
-        ? "산불 발생 이력"
-        : "산불 관리 지점",
+      item.type === "fire" ? "산불 발생 이력" : "산불 관리 지점",
       item.description,
       item.date
     );
+
   });
 
   // 지도 클릭 이벤트
@@ -689,22 +696,28 @@ function initMap() {
     const lat = e.coord.lat();
     const lng = e.coord.lng();
 
-    addFireMarker(
+    const item = addFireMarker(
       lat,
       lng,
       "risk",
       "현장 위험지역",
       "지도 클릭으로 등록한 위험·관리 지점",
-      new Date().toISOString().slice(0, 10)
+      getToday()
     );
+
+    if (item) {
+      showMarkerInfo(item);
+    }
 
     clickMode = false;
 
-    const btn = document.getElementById("addPointBtn");
+    const btn = $("addPointBtn");
+
     btn.textContent = "＋ 지도에서 클릭하여 표시";
     btn.style.background = "";
 
     map.setCursor("auto");
+
   });
 
   console.log("무등산 네이버 지도 초기화 완료");
@@ -714,14 +727,22 @@ function initMap() {
 // 마커 등록
 // ==========================================
 
-function addFireMarker(lat, lng, type, title, description, date = "") {
+function addFireMarker(
+  lat,
+  lng,
+  type,
+  title,
+  description,
+  date = ""
+) {
 
-  if (!map) return;
+  if (!map || !window.naver) return null;
 
   const position = new naver.maps.LatLng(lat, lng);
 
-  const color =
-    type === "fire" ? "#fb5365" : "#38bdf8";
+  const color = type === "fire"
+    ? "#fb5365"
+    : "#38bdf8";
 
   const circle = new naver.maps.Circle({
     map: map,
@@ -760,12 +781,13 @@ function addFireMarker(lat, lng, type, title, description, date = "") {
 
 function showMarkerInfo(item) {
 
-  const panel = document.getElementById("infoPanel");
+  const panel = $("infoPanel");
 
   panel.replaceChildren();
 
   const heading = document.createElement("h3");
   heading.textContent = item.title;
+
   panel.appendChild(heading);
 
   const details = [
@@ -781,12 +803,15 @@ function showMarkerInfo(item) {
   ];
 
   const content = document.createElement("div");
+
   content.textContent = details.join("\n");
   content.style.whiteSpace = "pre-line";
 
   panel.appendChild(content);
 
+  // 삭제 버튼
   const removeButton = document.createElement("button");
+
   removeButton.textContent = "이 지점 삭제";
   removeButton.className = "btn-red";
   removeButton.style.marginTop = "12px";
@@ -807,27 +832,46 @@ function showMarkerInfo(item) {
 }
 
 // ==========================================
+// 좌표 유효성 검사
+// ==========================================
+
+function validateCoordinates(lat, lng) {
+
+  return (
+    Number.isFinite(lat) &&
+    Number.isFinite(lng) &&
+    lat >= -90 &&
+    lat <= 90 &&
+    lng >= -180 &&
+    lng <= 180
+  );
+
+}
+
+// ==========================================
 // 좌표로 위험지역 등록
 // ==========================================
 
-document.getElementById("addByCoordBtn")
-.addEventListener("click", function() {
+$("addByCoordBtn").addEventListener("click", function() {
 
-  const lat = Number(
-    document.getElementById("latInput").value.trim()
-  );
+  const latText = $("latInput").value.trim();
+  const lngText = $("lngInput").value.trim();
 
-  const lng = Number(
-    document.getElementById("lngInput").value.trim()
-  );
+  if (!latText || !lngText) {
+    alert("위도와 경도를 모두 입력하세요.");
+    return;
+  }
 
-  if (
-    !Number.isFinite(lat) ||
-    !Number.isFinite(lng) ||
-    lat < -90 || lat > 90 ||
-    lng < -180 || lng > 180
-  ) {
-    alert("올바른 위도와 경도를 입력하세요.");
+  const lat = Number(latText);
+  const lng = Number(lngText);
+
+  if (!validateCoordinates(lat, lng)) {
+    alert("좌표 형식이 올바르지 않습니다.");
+    return;
+  }
+
+  if (!map || !window.naver) {
+    alert("네이버 지도가 아직 준비되지 않았습니다.");
     return;
   }
 
@@ -837,32 +881,53 @@ document.getElementById("addByCoordBtn")
     "risk",
     "좌표 등록 위험지역",
     "사용자가 좌표로 등록한 위험·관리 지점",
-    new Date().toISOString().slice(0, 10)
+    getToday()
   );
 
-  map.setCenter(new naver.maps.LatLng(lat, lng));
+  if (!item) {
+    alert("마커 등록에 실패했습니다.");
+    return;
+  }
+
+  const position = new naver.maps.LatLng(lat, lng);
+
+  map.setCenter(position);
   map.setZoom(16);
 
   showMarkerInfo(item);
+
+  $("latInput").value = "";
+  $("lngInput").value = "";
+
 });
 
 // ==========================================
 // 지도 클릭 등록 모드
 // ==========================================
 
-document.getElementById("addPointBtn")
-.addEventListener("click", function() {
+$("addPointBtn").addEventListener("click", function() {
+
+  if (!map) {
+    alert("지도가 아직 준비되지 않았습니다.");
+    return;
+  }
 
   clickMode = !clickMode;
 
   if (clickMode) {
+
     this.textContent = "지도에서 위치를 선택하세요";
     this.style.background = "#b45309";
+
     map.setCursor("crosshair");
+
   } else {
+
     this.textContent = "＋ 지도에서 클릭하여 표시";
     this.style.background = "";
+
     map.setCursor("auto");
+
   }
 
 });
@@ -871,59 +936,114 @@ document.getElementById("addPointBtn")
 // 주소 검색
 // ==========================================
 
-document.getElementById("addByAddressBtn")
-.addEventListener("click", async function() {
+$("addByAddressBtn").addEventListener("click", function() {
 
-  const address =
-    document.getElementById("addressInput").value.trim();
+  const address = $("addressInput").value.trim();
 
   if (!address) {
     alert("주소를 입력하세요.");
     return;
   }
 
-  try {
+  if (!map || !window.naver ||
+      !naver.maps.Service) {
 
-    const url =
-      "https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&q="
-      + encodeURIComponent(address);
-
-    const response = await fetch(url);
-
-    if (!response.ok) {
-      throw new Error("주소 검색 서버 오류");
-    }
-
-    const results = await response.json();
-
-    if (!results.length) {
-      alert("검색 결과가 없습니다.");
-      return;
-    }
-
-    const lat = Number(results[0].lat);
-    const lng = Number(results[0].lon);
-
-    const item = addFireMarker(
-      lat,
-      lng,
-      "risk",
-      "주소 검색 위치",
-      address,
-      new Date().toISOString().slice(0, 10)
-    );
-
-    map.setCenter(new naver.maps.LatLng(lat, lng));
-    map.setZoom(16);
-
-    showMarkerInfo(item);
-
-  } catch (error) {
-
-    console.error(error);
-    alert("주소 검색에 실패했습니다. 잠시 후 다시 시도하세요.");
-
+    alert("네이버 Geocoder가 로드되지 않았습니다.");
+    return;
   }
+
+  const btn = this;
+
+  btn.disabled = true;
+  btn.textContent = "주소 검색 중...";
+
+  naver.maps.Service.geocode(
+    {
+      query: address
+    },
+    function(status, response) {
+
+      btn.disabled = false;
+      btn.textContent = "⌖ 주소로 위치 표시";
+
+      if (
+        status !== naver.maps.Service.Status.OK ||
+        !response
+      ) {
+
+        alert(
+          "주소 검색에 실패했습니다.\n" +
+          "Geocoding API 사용 설정과 서비스 URL을 확인하세요."
+        );
+
+        return;
+      }
+
+      // 최신 및 구버전 응답 형식 지원
+      const items = response.v2
+        ? response.v2.addresses
+        : response.result?.items;
+
+      if (!items || items.length === 0) {
+        alert("검색된 주소가 없습니다.");
+        return;
+      }
+
+      let lat;
+      let lng;
+
+      if (
+        response.v2 &&
+        items[0].y !== undefined &&
+        items[0].x !== undefined
+      ) {
+
+        lat = Number(items[0].y);
+        lng = Number(items[0].x);
+
+      } else if (items[0].point) {
+
+        lat = Number(items[0].point.y);
+        lng = Number(items[0].point.x);
+
+      } else {
+
+        alert("주소의 좌표를 확인할 수 없습니다.");
+        return;
+
+      }
+
+      if (!validateCoordinates(lat, lng)) {
+        alert("주소의 좌표가 올바르지 않습니다.");
+        return;
+      }
+
+      const item = addFireMarker(
+        lat,
+        lng,
+        "risk",
+        "주소 검색 위치",
+        address,
+        getToday()
+      );
+
+      if (!item) {
+        alert("지도 마커 등록에 실패했습니다.");
+        return;
+      }
+
+      map.setCenter(
+        new naver.maps.LatLng(lat, lng)
+      );
+
+      map.setZoom(17);
+
+      showMarkerInfo(item);
+
+      $("addressInput").value = "";
+
+    }
+  );
 
 });
 
@@ -931,8 +1051,12 @@ document.getElementById("addByAddressBtn")
 // 일반지도 / 위성지도 전환
 // ==========================================
 
-document.getElementById("toggleMapTypeBtn")
-.addEventListener("click", function() {
+$("toggleMapTypeBtn").addEventListener("click", function() {
+
+  if (!map) {
+    alert("지도가 아직 준비되지 않았습니다.");
+    return;
+  }
 
   if (!isSatellite) {
 
@@ -949,6 +1073,7 @@ document.getElementById("toggleMapTypeBtn")
     this.textContent = "위성지도 전환";
 
     isSatellite = false;
+
   }
 
 });
@@ -958,11 +1083,17 @@ document.getElementById("toggleMapTypeBtn")
 // ==========================================
 
 if (document.readyState === "loading") {
-  document.addEventListener("DOMContentLoaded", initMap);
-} else {
-  initMap();
-}
 
+  document.addEventListener(
+    "DOMContentLoaded",
+    initMap
+  );
+
+} else {
+
+  initMap();
+
+}
 
 </script>
 
