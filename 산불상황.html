@@ -727,6 +727,7 @@ function initMap() {
 // 마커 등록
 // ==========================================
 
+
 function addFireMarker(
   lat,
   lng,
@@ -768,6 +769,7 @@ function addFireMarker(
 
   markers.push(item);
 
+  // 마커 클릭 시 팝업 표시
   naver.maps.Event.addListener(circle, "click", function() {
     showMarkerInfo(item);
   });
@@ -779,35 +781,141 @@ function addFireMarker(
 // 상세정보 표시
 // ==========================================
 
+
 function showMarkerInfo(item) {
 
   const panel = $("infoPanel");
 
+  // 기존 팝업 제거
+  if (window.currentInfoWindow) {
+    window.currentInfoWindow.close();
+  }
+
+  // HTML 보안 처리
+  function escapeHTML(value) {
+    return String(value).replace(/[&<>"']/g, function(char) {
+      return {
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#039;"
+      }[char];
+    });
+  }
+
+  const typeName = item.type === "fire"
+    ? "산불 발생 이력"
+    : "위험·관리 지점";
+
+  const color = item.type === "fire"
+    ? "#fb5365"
+    : "#38bdf8";
+
+  const content = `
+    <div style="
+      width:260px;
+      padding:14px;
+      background:#101f31;
+      color:#e5edf7;
+      border:1px solid #22d3ee;
+      border-radius:9px;
+      font-family:Arial,sans-serif;
+      line-height:1.7;
+      box-shadow:0 5px 20px rgba(0,0,0,.4);
+    ">
+
+      <div style="
+        font-size:14px;
+        font-weight:bold;
+        color:${color};
+        border-bottom:1px solid #263c53;
+        padding-bottom:8px;
+        margin-bottom:9px;
+      ">
+        ● ${escapeHTML(item.title)}
+      </div>
+
+      <div style="font-size:12px;">
+        <div>구분 : ${escapeHTML(typeName)}</div>
+        <div>등록일 : ${escapeHTML(item.date || "-")}</div>
+        <div>위도 : ${item.lat.toFixed(6)}</div>
+        <div>경도 : ${item.lng.toFixed(6)}</div>
+
+        <div style="
+          margin-top:9px;
+          padding:9px;
+          background:#091727;
+          border-radius:5px;
+          white-space:normal;
+          word-break:break-all;
+        ">
+          ${escapeHTML(item.description)}
+        </div>
+      </div>
+
+      <button id="popupCloseBtn" style="
+        margin-top:10px;
+        margin-bottom:0;
+        padding:8px;
+        background:#24364a;
+        color:white;
+        border:1px solid #3a5068;
+        border-radius:5px;
+        cursor:pointer;
+      ">
+        팝업 닫기
+      </button>
+
+    </div>
+  `;
+
+  // 네이버 지도 팝업 생성
+  const infoWindow = new naver.maps.InfoWindow({
+    content: content,
+    position: new naver.maps.LatLng(item.lat, item.lng),
+    borderWidth: 0,
+    backgroundColor: "transparent",
+    disableAnchor: true,
+    pixelOffset: new naver.maps.Point(0, -15),
+    maxWidth: 300
+  });
+
+  infoWindow.open(map);
+
+  window.currentInfoWindow = infoWindow;
+
+  // 팝업 닫기 버튼
+  naver.maps.Event.addListener(infoWindow, "domready", function() {
+
+    const closeBtn = document.getElementById("popupCloseBtn");
+
+    if (closeBtn) {
+      closeBtn.onclick = function() {
+        infoWindow.close();
+      };
+    }
+
+  });
+
+  // 오른쪽 상세정보 패널도 함께 갱신
   panel.replaceChildren();
 
   const heading = document.createElement("h3");
   heading.textContent = item.title;
-
   panel.appendChild(heading);
 
-  const details = [
+  const details = document.createElement("div");
+
+  details.textContent = [
     "위도: " + item.lat.toFixed(6),
     "경도: " + item.lng.toFixed(6),
-    "구분: " + (
-      item.type === "fire"
-        ? "산불 발생 이력"
-        : "위험·관리 지점"
-    ),
+    "구분: " + typeName,
     "등록일: " + (item.date || "-"),
     "상세정보: " + item.description
-  ];
+  ].join("\n");
 
-  const content = document.createElement("div");
-
-  content.textContent = details.join("\n");
-  content.style.whiteSpace = "pre-line";
-
-  panel.appendChild(content);
+  panel.appendChild(details);
 
   // 삭제 버튼
   const removeButton = document.createElement("button");
@@ -816,7 +924,7 @@ function showMarkerInfo(item) {
   removeButton.className = "btn-red";
   removeButton.style.marginTop = "12px";
 
-  removeButton.addEventListener("click", function() {
+  removeButton.onclick = function() {
 
     item.overlay.setMap(null);
 
@@ -824,11 +932,16 @@ function showMarkerInfo(item) {
       marker => marker !== item
     );
 
+    infoWindow.close();
+
+    window.currentInfoWindow = null;
+
     panel.textContent = "선택한 지점을 삭제했습니다.";
 
-  });
+  };
 
   panel.appendChild(removeButton);
+
 }
 
 // ==========================================
