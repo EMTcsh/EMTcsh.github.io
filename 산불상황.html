@@ -678,51 +678,48 @@ function initMap() {
 
   console.log("네이버 지도 생성 성공");
 
-  // 지도 크기 조절
-  function resizeMap() {
+// ==========================================
+// 지도 크기 조절
+// ==========================================
 
-    const container = document.getElementById("map");
+function resizeMap() {
 
-    if (!container || !map) return;
+  if (!map || !window.naver?.maps) return;
 
-    if (
-      !window.naver ||
-      !window.naver.maps ||
-      !window.naver.maps.Size
-    ) {
-      console.error("네이버 지도 Size 객체 로딩 실패");
-      return;
-    }
+  const container = document.getElementById("map");
 
-    map.setSize(
-      new window.naver.maps.Size(
-        container.clientWidth,
-        container.clientHeight
-      )
-    );
+  if (!container) return;
 
-    map.refresh();
-  }
+  const width = container.clientWidth;
+  const height = container.clientHeight;
 
-  // 화면 크기 변경 대응
-  window.addEventListener("resize", resizeMap);
+  if (width <= 0 || height <= 0) return;
 
-  // 컨테이너 크기 변경 대응
-  if (window.ResizeObserver) {
+  map.setSize(
+    new naver.maps.Size(width, height)
+  );
 
-    const observer = new ResizeObserver(function() {
-      resizeMap();
-    });
+  map.refresh();
+}
 
-    observer.observe(
-      document.getElementById("map-container")
-    );
+window.addEventListener("resize", resizeMap);
 
-  }
+if (window.ResizeObserver) {
 
-  setTimeout(resizeMap, 500);
-  setTimeout(resizeMap, 1500);
-  setTimeout(resizeMap, 2500);
+  const observer = new ResizeObserver(() => {
+    resizeMap();
+  });
+
+  observer.observe(
+    document.getElementById("map-container")
+  );
+
+}
+
+requestAnimationFrame(resizeMap);
+
+setTimeout(resizeMap, 500);
+setTimeout(resizeMap, 1500);
 
   // 기존 산불 및 관리 지점 표시
   landslideData.forEach(item => {
@@ -1249,19 +1246,42 @@ $("toggleMapTypeBtn").addEventListener("click", function() {
 });
 
 // ==========================================
-// 초기 실행
+// 네이버 지도 API 로딩 완료 후 초기화
 // ==========================================
 
-if (document.readyState === "loading") {
+function startMap() {
 
-  document.addEventListener(
-    "DOMContentLoaded",
-    initMap
-  );
+  if (
+    !window.naver ||
+    !window.naver.maps ||
+    !window.naver.maps.Map ||
+    !window.naver.maps.Size
+  ) {
+
+    console.error("네이버 지도 API 로딩 확인 필요");
+
+    document.getElementById("map").innerHTML =
+      '<div style="padding:20px;color:#fb5365;">' +
+      '네이버 지도 API를 불러오지 못했습니다.<br>' +
+      'Client ID 및 웹 서비스 URL을 확인하세요.' +
+      '</div>';
+
+    return;
+  }
+
+  initMap();
+
+}
+
+if (window.naver && window.naver.maps) {
+
+  startMap();
 
 } else {
 
-  initMap();
+  window.addEventListener("load", startMap, {
+    once: true
+  });
 
 }
 
