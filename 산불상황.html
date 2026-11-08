@@ -683,21 +683,8 @@ function initMap() {
   console.log("네이버 지도 생성 성공");
 
 // ==========================================
-// 지도 크기 조절
+// 지도 크기 조절 - 중복 선언 제거 버전
 // ==========================================
-
-function resizeMap() {
-
-  if (!map || !window.naver?.maps) return;
-
-  const container = document.getElementById("map");
-
-  if (!container) return;
-
-  const width = container.clientWidth;
-  const height = container.clientHeight;
-
-  if (width <= 0 || height <= 0) return;
 
 function resizeMap() {
 
@@ -707,7 +694,7 @@ function resizeMap() {
     !window.naver.maps ||
     typeof window.naver.maps.Size !== "function"
   ) {
-    console.warn("지도 크기 변경 대기 중");
+    console.error("네이버 지도 Size 객체를 사용할 수 없습니다.");
     return;
   }
 
@@ -718,24 +705,23 @@ function resizeMap() {
   const width = container.clientWidth;
   const height = container.clientHeight;
 
-  if (!width || !height) return;
+  if (width <= 0 || height <= 0) return;
 
   const size = new window.naver.maps.Size(width, height);
 
   map.setSize(size);
   map.refresh();
 
-  console.log("지도 크기 변경 완료", width, height);
+  console.log("지도 크기 변경 성공:", width, height);
 }
 
-  map.refresh();
-}
-
+// 브라우저 크기 변경
 window.addEventListener("resize", resizeMap);
 
+// 지도 영역 크기 변경 감지
 if (window.ResizeObserver) {
 
-  const observer = new ResizeObserver(() => {
+  const observer = new ResizeObserver(function() {
     resizeMap();
   });
 
@@ -745,6 +731,7 @@ if (window.ResizeObserver) {
 
 }
 
+// 지도 초기 크기 설정
 requestAnimationFrame(resizeMap);
 
 setTimeout(resizeMap, 500);
