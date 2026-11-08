@@ -8,7 +8,8 @@
 
 <script
 src="https://oapi.map.naver.com/openapi/v3/maps.js?ncpKeyId=g2u4orbiqf&submodules=geocoder"
-defer>
+onload="console.log('네이버 지도 API 로딩 완료')"
+onerror="console.error('네이버 지도 API 로딩 실패')">
 </script>
 
 <style>
@@ -698,9 +699,34 @@ function resizeMap() {
 
   if (width <= 0 || height <= 0) return;
 
-  map.setSize(
-    new naver.maps.Size(width, height)
-  );
+function resizeMap() {
+
+  if (
+    !map ||
+    !window.naver ||
+    !window.naver.maps ||
+    typeof window.naver.maps.Size !== "function"
+  ) {
+    console.warn("지도 크기 변경 대기 중");
+    return;
+  }
+
+  const container = document.getElementById("map");
+
+  if (!container) return;
+
+  const width = container.clientWidth;
+  const height = container.clientHeight;
+
+  if (!width || !height) return;
+
+  const size = new window.naver.maps.Size(width, height);
+
+  map.setSize(size);
+  map.refresh();
+
+  console.log("지도 크기 변경 완료", width, height);
+}
 
   map.refresh();
 }
@@ -1249,7 +1275,7 @@ $("toggleMapTypeBtn").addEventListener("click", function() {
 });
 
 // ==========================================
-// 네이버 지도 API 로딩 완료 후 초기화
+// 네이버 지도 API 로딩 후 초기화
 // ==========================================
 
 function startMap() {
@@ -1257,36 +1283,37 @@ function startMap() {
   if (
     !window.naver ||
     !window.naver.maps ||
-    !window.naver.maps.Map ||
-    !window.naver.maps.Size
+    typeof window.naver.maps.Map !== "function"
   ) {
 
-    console.error("네이버 지도 API 로딩 확인 필요");
+    console.error("네이버 지도 API를 사용할 수 없습니다.");
 
-    document.getElementById("map").innerHTML =
+    $("map").innerHTML =
       '<div style="padding:20px;color:#fb5365;">' +
-      '네이버 지도 API를 불러오지 못했습니다.<br>' +
-      'Client ID 및 웹 서비스 URL을 확인하세요.' +
+      '네이버 지도 API 로딩 실패<br>' +
+      'Client ID와 서비스 URL을 확인하세요.' +
       '</div>';
 
     return;
   }
 
+  if (map) return;
+
+  console.log("지도 초기화 시작");
+
   initMap();
 
 }
 
-if (window.naver && window.naver.maps) {
+window.addEventListener("load", function() {
 
-  startMap();
+  if (window.naver && window.naver.maps) {
+    startMap();
+  } else {
+    console.error("네이버 지도 API가 로딩되지 않았습니다.");
+  }
 
-} else {
-
-  window.addEventListener("load", startMap, {
-    once: true
-  });
-
-}
+});
 
 </script>
 
