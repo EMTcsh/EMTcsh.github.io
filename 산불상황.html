@@ -1323,90 +1323,66 @@ $("toggleMapTypeBtn").addEventListener(
   }
 );
 
+
 // ==========================================
-// ⑪ 진화 차량 위치 등록
+// ⑪ 진화 차량 위치 등록 및 관리
 // ==========================================
 
 function addVehicle(name, lat, lng) {
 
   if (!map) return null;
 
-  if (!validateCoordinates(lat, lng)) {
-
-    alert("차량 좌표가 올바르지 않습니다.");
-
+  if (!name || !validateCoordinates(lat, lng)) {
+    alert("차량명 또는 좌표를 확인하세요.");
     return null;
-
   }
 
-  // 동일 차량명 확인
   const existing = vehicles.find(
     item => item.name === name
   );
 
   if (existing) {
-
     alert("이미 등록된 차량명입니다.");
-
     return null;
-
   }
 
   const vehicleIcon = L.divIcon({
-
-    html: `
-      <div style="
-        font-size:27px;
-        text-align:center;
-      ">🚒</div>
-    `,
-
+    html: `<div style="font-size:27px;text-align:center;">🚒</div>`,
     className: "vehicle-marker",
-
     iconSize: [35, 35],
-
     iconAnchor: [17, 17]
-
   });
 
   const marker = L.marker(
     [lat, lng],
-    {
-      icon: vehicleIcon
-    }
+    { icon: vehicleIcon }
   ).addTo(map);
 
   const vehicle = {
-
     name,
-
     lat,
-
     lng,
-
     marker
-
   };
 
   vehicles.push(vehicle);
 
   marker.bindPopup(`
-
     <b>🚒 ${escapeHTML(name)}</b><br>
-
     위도: ${lat.toFixed(6)}<br>
-
     경도: ${lng.toFixed(6)}
-
   `);
 
   updateVehicleInfo();
 
   return vehicle;
-
 }
 
+
+// ==========================================
 // 차량 위치 갱신
+// ==========================================
+
 function updateVehicle(name, lat, lng) {
 
   const vehicle = vehicles.find(
@@ -1414,65 +1390,56 @@ function updateVehicle(name, lat, lng) {
   );
 
   if (!vehicle) {
-
     alert("등록된 차량이 없습니다.");
-
     return;
-
   }
 
   if (!validateCoordinates(lat, lng)) {
-
     alert("좌표가 올바르지 않습니다.");
-
     return;
-
   }
 
   vehicle.lat = lat;
-
   vehicle.lng = lng;
 
   vehicle.marker.setLatLng([lat, lng]);
 
   vehicle.marker.setPopupContent(`
-
     <b>🚒 ${escapeHTML(name)}</b><br>
-
     위도: ${lat.toFixed(6)}<br>
-
     경도: ${lng.toFixed(6)}
-
   `);
 
   updateVehicleInfo();
-
 }
 
-// 차량 정보 출력
+
+// ==========================================
+// 차량 정보 표시
+// ==========================================
+
 function updateVehicleInfo() {
 
   const panel = $("vehicleInfo");
 
+  if (!panel) {
+    console.warn("vehicleInfo HTML 요소가 없습니다.");
+    return;
+  }
+
   panel.replaceChildren();
 
   if (vehicles.length === 0) {
-
-    panel.textContent =
-      "등록된 진화 차량이 없습니다.";
-
+    panel.textContent = "등록된 진화 차량이 없습니다.";
     return;
-
   }
 
   vehicles.forEach(vehicle => {
 
     const div = document.createElement("div");
-
     div.className = "resource-item";
 
     const name = document.createElement("strong");
-
     name.textContent = "🚒 " + vehicle.name;
 
     const position = document.createElement("span");
@@ -1482,103 +1449,85 @@ function updateVehicleInfo() {
       ", " +
       vehicle.lng.toFixed(6);
 
-    div.appendChild(name);
-
-    div.appendChild(position);
-
+    div.append(name, position);
     panel.appendChild(div);
 
   });
-
 }
+
 
 // ==========================================
 // ⑫ 진화 차량 등록 이벤트
 // ==========================================
 
-$("addVehicleBtn").addEventListener(
-  "click",
-  function() {
+const addVehicleBtn = $("addVehicleBtn");
 
-    const name =
-      $("vehicleName").value.trim();
+if (addVehicleBtn) {
 
-    const lat =
-      Number($("vehicleLat").value);
+  addVehicleBtn.addEventListener("click", function() {
 
-    const lng =
-      Number($("vehicleLng").value);
+    const name = $("vehicleName")?.value.trim();
+
+    const lat = Number($("vehicleLat")?.value);
+
+    const lng = Number($("vehicleLng")?.value);
 
     if (!name) {
-
       alert("차량명을 입력하세요.");
-
       return;
-
     }
 
     if (!validateCoordinates(lat, lng)) {
-
       alert("올바른 차량 좌표를 입력하세요.");
-
       return;
-
     }
 
-    const vehicle = addVehicle(
-      name,
-      lat,
-      lng
-    );
+    const vehicle = addVehicle(name, lat, lng);
 
     if (!vehicle) return;
 
     map.setView([lat, lng], 16);
 
     $("vehicleName").value = "";
-
     $("vehicleLat").value = "";
-
     $("vehicleLng").value = "";
 
-  }
-);
+  });
+
+} else {
+
+  console.warn("addVehicleBtn 버튼이 HTML에 없습니다.");
+
+}
+
 
 // ==========================================
 // ⑬ GPS 현재 위치 등록
 // ==========================================
 
-$("vehicleLocationBtn").addEventListener(
-  "click",
-  function() {
+const vehicleLocationBtn = $("vehicleLocationBtn");
+
+if (vehicleLocationBtn) {
+
+  vehicleLocationBtn.addEventListener("click", function() {
 
     if (!navigator.geolocation) {
-
       alert("GPS 기능을 지원하지 않습니다.");
-
       return;
-
     }
 
     navigator.geolocation.getCurrentPosition(
 
       function(position) {
 
-        const lat =
-          position.coords.latitude;
-
-        const lng =
-          position.coords.longitude;
+        const lat = position.coords.latitude;
+        const lng = position.coords.longitude;
 
         const name =
-          $("vehicleName").value.trim() ||
+          $("vehicleName")?.value.trim() ||
           "진화 차량 GPS";
 
-        const vehicle = addVehicle(
-          name,
-          lat,
-          lng
-        );
+        const vehicle = addVehicle(name, lat, lng);
 
         if (!vehicle) return;
 
@@ -1588,26 +1537,29 @@ $("vehicleLocationBtn").addEventListener(
 
       function(error) {
 
-        console.error(error);
+        console.error("GPS 오류:", error);
 
         alert(
-          "GPS 위치를 가져오지 못했습니다. 위치 권한과 HTTPS 연결을 확인하세요."
+          "GPS 위치를 가져오지 못했습니다. HTTPS 연결과 위치 권한을 확인하세요."
         );
 
       },
 
       {
-
         enableHighAccuracy: true,
-
-        timeout: 10000
-
+        timeout: 10000,
+        maximumAge: 0
       }
 
     );
 
-  }
-);
+  });
+
+} else {
+
+  console.warn("vehicleLocationBtn 버튼이 HTML에 없습니다.");
+
+}
 
 // ==========================================
 // ⑭ 지도 API 실행 및 초기화
