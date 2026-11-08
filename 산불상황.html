@@ -686,30 +686,33 @@ const GAS_URL =
 "https://script.google.com/macros/s/AKfycbx-dPxhS-tyk6BBBLKHFBSiAGWqX0xqrzcfDd9ux4aibM6A-Be4J94oLWyg8JTyCxer/exec";
 
 
+
 let gasSuccessHandler = null;
 let gasFailureHandler = null;
 
-
-// GitHub Pages용 google.script.run 호환 처리
 window.google = window.google || {};
 window.google.script = window.google.script || {};
 
-window.google.script.run = new Proxy({}, {
+const gasRunner = new Proxy({}, {
 
   get(target, method) {
 
     if (method === "withSuccessHandler") {
+
       return function(fn) {
         gasSuccessHandler = fn;
-        return window.google.script.run;
+        return gasRunner;
       };
+
     }
 
     if (method === "withFailureHandler") {
+
       return function(fn) {
         gasFailureHandler = fn;
-        return window.google.script.run;
+        return gasRunner;
       };
+
     }
 
     return function(data) {
@@ -717,9 +720,18 @@ window.google.script.run = new Proxy({}, {
       const action = String(method);
       const payload = data || {};
 
+      // 요청별 콜백을 즉시 분리
+      const success = gasSuccessHandler;
+      const failure = gasFailureHandler;
+
+      gasSuccessHandler = null;
+      gasFailureHandler = null;
+
       const callbackName =
-        "__gasCallback_" + Date.now() +
-        "_" + Math.random().toString(36).slice(2);
+        "__gasCallback_" +
+        Date.now() +
+        "_" +
+        Math.random().toString(36).slice(2);
 
       const script = document.createElement("script");
 
@@ -731,54 +743,78 @@ window.google.script.run = new Proxy({}, {
 
       let finished = false;
 
+      let timeout;
+
       function cleanup() {
+
         if (finished) return;
+
         finished = true;
 
         clearTimeout(timeout);
+
         delete window[callbackName];
+
         script.remove();
+
       }
 
       function fail(error) {
+
+        if (finished) return;
+
         cleanup();
 
-        const handler = gasFailureHandler;
-        gasSuccessHandler = null;
-        gasFailureHandler = null;
+        if (failure) {
+          failure(error);
+        } else {
+          console.error("GAS 오류:", error);
+        }
 
-        if (handler) handler(error);
       }
 
-      const timeout = setTimeout(() => {
+      timeout = setTimeout(function() {
+
         fail(new Error("서버 응답 시간 초과"));
+
       }, 20000);
 
       window[callbackName] = function(response) {
 
+        if (finished) return;
+
         cleanup();
 
-        const success = gasSuccessHandler;
-        const failure = gasFailureHandler;
+        if (response && response.success) {
 
-        gasSuccessHandler = null;
-        gasFailureHandler = null;
-
-        if (response.success) {
-          if (success) success(response.data);
-        } else {
-          if (failure) {
-            failure(new Error(response.error || "서버 오류"));
+          if (success) {
+            success(response.data);
           }
+
+        } else {
+
+          const error = new Error(
+            response?.error || "서버 오류"
+          );
+
+          if (failure) {
+            failure(error);
+          } else {
+            console.error(error);
+          }
+
         }
 
       };
 
       script.onerror = function() {
+
         fail(new Error("Google 서버 연결 실패"));
+
       };
 
-      script.src = GAS_URL + "?" + params.toString();
+      script.src =
+        GAS_URL + "?" + params.toString();
 
       document.head.appendChild(script);
 
@@ -787,6 +823,9 @@ window.google.script.run = new Proxy({}, {
   }
 
 });
+
+window.google.script.run = gasRunner;
+
 
 
 // ==========================================
@@ -1373,7 +1412,9 @@ function showMarkerInfo(item) {
         removeFromMap();
       })
       .withFailureHandler(gasError)
-      .deleteRisk(item.id);
+      .deleteRisk({
+  id: item.id
+});
 
   } else {
 
@@ -2074,29 +2115,46 @@ function loadGasData() {
     .withSuccessHandler(function(data) {
 
       // 위험지역 불러오기
-      (data.risks || []).forEach(item => {
+(data.risks || []).forEach(item => {
 
-        const marker = addFireMarker(
+  const lat = Number(item.lat);
+  const lng = Number(item.lng);
 
-          item.lat,
+  // 기존 정적 마커와 동일한 데이터 중복 방지
+  const duplicate = markers.some(marker =>
 
-          item.lng,
+    marker.type === item.type &&
 
-          item.type,
+    Math.abs(marker.lat - lat) < 0.000001 &&
 
-          item.name,
+    Math.abs(marker.lng - lng) < 0.000001 &&
 
-          item.description,
+    marker.description === item.description
 
-          item.date,
+  );
 
-          false,
+  if (duplicate) return;
 
-          item.id
+  addFireMarker(
 
-        );
+    lat,
+    lng,
 
-      });
+    item.type,
+
+    item.name,
+
+    item.description,
+
+    item.date,
+
+    false,
+
+    item.id
+
+  );
+
+});
 
       // 진화 차량 불러오기
       (data.vehicles || []).forEach(item => {
