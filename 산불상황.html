@@ -8,7 +8,6 @@
 
 <script
 src="https://oapi.map.naver.com/openapi/v3/maps.js?ncpKeyId=g2u4orbiqf&submodules=geocoder"
-onload="console.log('네이버 지도 API 로딩 완료')"
 onerror="console.error('네이버 지도 API 로딩 실패')">
 </script>
 
@@ -525,27 +524,33 @@ button:hover { filter:brightness(1.2); }
 </div>
 
 <script>
+
 // ==========================================
-// 무등산 산불 통합관제센터
-// NAVER MAP API - 오류 수정 버전
+// 1. 공통 변수 및 초기 설정
 // ==========================================
 
-// 공통 DOM 선택 함수
 const $ = (id) => document.getElementById(id);
 
-// 오늘 날짜
-function getToday() {
-  return new Date().toISOString().slice(0, 10);
-}
-
-// 지도 상태
-let map;
+let map = null;
 let isSatellite = false;
 let clickMode = false;
 let markers = [];
+let currentInfoWindow = null;
+let resizeObserver = null;
+
+// 오늘 날짜
+function getToday() {
+  const now = new Date();
+
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, "0");
+  const day = String(now.getDate()).padStart(2, "0");
+
+  return `${year}-${month}-${day}`;
+}
 
 // ==========================================
-// 산불 및 관리 지점 11개
+// 2. 산불 및 관리 지점 11개
 // ==========================================
 
 const landslideData = [
@@ -629,76 +634,22 @@ const landslideData = [
 ];
 
 // ==========================================
-// 지도 초기화
+// 3. 네이버 지도 API 확인 및 크기 조정
 // ==========================================
 
-
-function initMap() {
-
-  const mapElement = document.getElementById("map");
-
-  if (!mapElement) {
-    console.error("지도 영역을 찾을 수 없습니다.");
-    return;
-  }
-
-  // 네이버 지도 API 확인
-  if (
-    !window.naver ||
-    !window.naver.maps ||
-    !window.naver.maps.Map
-  ) {
-    console.error("네이버 지도 API 로딩 실패");
-
-    mapElement.innerHTML =
-      '<div style="color:red;padding:20px;">네이버 지도 API 로딩 실패. Client ID와 서비스 URL을 확인하세요.</div>';
-
-    return;
-  }
-
-  // 지도 생성
-  map = new window.naver.maps.Map("map", {
-
-    center: new window.naver.maps.LatLng(
-      35.134167,
-      126.988889
-    ),
-
-    zoom: 14,
-    minZoom: 8,
-    maxZoom: 20,
-
-    mapTypeId: window.naver.maps.MapTypeId.NORMAL,
-
-    zoomControl: true,
-
-    zoomControlOptions: {
-      position: window.naver.maps.Position.RIGHT_CENTER
-    },
-
-    scaleControl: true
-
-  });
-
-  console.log("네이버 지도 생성 성공");
-
-// ==========================================
-// 지도 크기 조절 - 중복 선언 제거 버전
-// ==========================================
+function isNaverReady() {
+  return !!(
+    window.naver &&
+    window.naver.maps &&
+    typeof window.naver.maps.Map === "function"
+  );
+}
 
 function resizeMap() {
 
-  if (
-    !map ||
-    !window.naver ||
-    !window.naver.maps ||
-    typeof window.naver.maps.Size !== "function"
-  ) {
-    console.warn("네이버 지도 Size 객체 로딩 대기");
-    return;
-  }
+  if (!map || !isNaverReady()) return;
 
-  const container = document.getElementById("map");
+  const container = $("map");
 
   if (!container) return;
 
@@ -707,88 +658,147 @@ function resizeMap() {
 
   if (width <= 0 || height <= 0) return;
 
-  const size = new window.naver.maps.Size(
-    width,
-    height
-  );
-
-  map.setSize(size);
-
-  map.refresh();
-
-  console.log(
-    "지도 크기 변경 성공:",
-    width,
-    height
+  map.setSize(
+    new naver.maps.Size(width, height)
   );
 }
-  
-// 지도 초기 크기 설정
-requestAnimationFrame(resizeMap);
 
-setTimeout(resizeMap, 500);
-setTimeout(resizeMap, 1500);
+function showMapError(message) {
 
-  // 기존 산불 및 관리 지점 표시
-  landslideData.forEach(item => {
+  const element = $("map");
 
-    addFireMarker(
-      item.lat,
-      item.lng,
-      item.type,
-      item.type === "fire"
-        ? "산불 발생 이력"
-        : "산불 관리 지점",
-      item.description,
-      item.date
-    );
+  if (!element) return;
 
-  });
+  element.innerHTML = `
+    <div style="padding:20px;color:#fb5365;">
+      ${message}<br>
+      네이버 지도 Client ID와 서비스 URL을 확인하세요.
+    </div>
+  `;
+}
 
-  // 지도 클릭 등록 기능
-  window.naver.maps.Event.addListener(
-    map,
-    "click",
-    function(e) {
+// ==========================================
+// 4. 지도 초기화
+// ==========================================
 
-      if (!clickMode) return;
+function initMap() {
 
-      const lat = e.coord.lat();
-      const lng = e.coord.lng();
+  if (map) return;
 
-      const item = addFireMarker(
-        lat,
-        lng,
-        "risk",
-        "현장 위험지역",
-        "지도 클릭으로 등록한 위험·관리 지점",
-        getToday()
-      );
+  if (!isNaverReady()) {
+    showMapError("네이버 지도 API 로딩 실패");
+    return;
+  }
 
-      if (item) {
-        showMarkerInfo(item);
-      }
+  try {
 
-      clickMode = false;
+    map = new naver.maps.Map("map", {
 
-      const btn = document.getElementById("addPointBtn");
+      center: new naver.maps.LatLng(
+        35.134167,
+        126.988889
+      ),
 
-      btn.textContent = "＋ 지도에서 클릭하여 표시";
-      btn.style.background = "";
+      zoom: 14,
+      minZoom: 8,
+      maxZoom: 20,
 
-      map.setCursor("auto");
+      mapTypeId: naver.maps.MapTypeId.NORMAL,
+
+      zoomControl: true,
+
+      zoomControlOptions: {
+        position: naver.maps.Position.RIGHT_CENTER
+      },
+
+      scaleControl: true
+
+    });
+
+    console.log("네이버 지도 생성 성공");
+
+    // 창 크기 변경
+    window.addEventListener("resize", resizeMap);
+
+    // 지도 영역 크기 감시
+    if (window.ResizeObserver) {
+
+      resizeObserver = new ResizeObserver(resizeMap);
+
+      resizeObserver.observe($("map-container"));
 
     }
-  );
 
-  console.log("무등산 산불 통합관제센터 지도 초기화 완료");
+    requestAnimationFrame(resizeMap);
 
+    setTimeout(resizeMap, 500);
+    setTimeout(resizeMap, 1500);
+
+    // 기존 지점 표시
+    landslideData.forEach(item => {
+
+      addFireMarker(
+        item.lat,
+        item.lng,
+        item.type,
+        item.type === "fire"
+          ? "산불 발생 이력"
+          : "산불 관리 지점",
+        item.description,
+        item.date
+      );
+
+    });
+
+    // 지도 클릭 이벤트
+    naver.maps.Event.addListener(
+      map,
+      "click",
+      function(e) {
+
+        if (!clickMode) return;
+
+        const item = addFireMarker(
+          e.coord.lat(),
+          e.coord.lng(),
+          "risk",
+          "현장 위험지역",
+          "지도 클릭으로 등록한 위험·관리 지점",
+          getToday()
+        );
+
+        if (item) {
+          showMarkerInfo(item);
+        }
+
+        clickMode = false;
+
+        const btn = $("addPointBtn");
+
+        btn.textContent = "＋ 지도에서 클릭하여 표시";
+        btn.style.background = "";
+
+        map.setCursor("auto");
+
+      }
+    );
+
+    console.log("무등산 지도 초기화 완료");
+
+  } catch (error) {
+
+    console.error("지도 초기화 오류:", error);
+
+    map = null;
+
+    showMapError("지도 초기화 중 오류가 발생했습니다.");
+
+  }
 }
 
 // ==========================================
-// 마커 등록
+// 5. 마커 등록
 // ==========================================
-
 
 function addFireMarker(
   lat,
@@ -799,7 +809,9 @@ function addFireMarker(
   date = ""
 ) {
 
-  if (!map || !window.naver) return null;
+  if (!map || !isNaverReady()) return null;
+
+  if (!validateCoordinates(lat, lng)) return null;
 
   const position = new naver.maps.LatLng(lat, lng);
 
@@ -808,15 +820,20 @@ function addFireMarker(
     : "#38bdf8";
 
   const circle = new naver.maps.Circle({
+
     map: map,
     center: position,
     radius: 35,
+
     fillColor: color,
     fillOpacity: 0.9,
+
     strokeColor: "#ffffff",
     strokeOpacity: 1,
     strokeWeight: 2,
+
     clickable: true
+
   });
 
   const item = {
@@ -831,39 +848,30 @@ function addFireMarker(
 
   markers.push(item);
 
-  // 마커 클릭 시 팝업 표시
-  naver.maps.Event.addListener(circle, "click", function() {
-    showMarkerInfo(item);
-  });
+  naver.maps.Event.addListener(
+    circle,
+    "click",
+    function() {
+      showMarkerInfo(item);
+    }
+  );
 
   return item;
 }
 
 // ==========================================
-// 상세정보 표시
+// 6. 마커 상세정보 표시 및 삭제
 // ==========================================
-
 
 function showMarkerInfo(item) {
 
+  if (!item || !markers.includes(item)) return;
+
   const panel = $("infoPanel");
 
-  // 기존 팝업 제거
-  if (window.currentInfoWindow) {
-    window.currentInfoWindow.close();
-  }
-
-  // HTML 보안 처리
-  function escapeHTML(value) {
-    return String(value).replace(/[&<>"']/g, function(char) {
-      return {
-        "&": "&amp;",
-        "<": "&lt;",
-        ">": "&gt;",
-        '"': "&quot;",
-        "'": "&#039;"
-      }[char];
-    });
+  if (currentInfoWindow) {
+    currentInfoWindow.close();
+    currentInfoWindow = null;
   }
 
   const typeName = item.type === "fire"
@@ -873,6 +881,18 @@ function showMarkerInfo(item) {
   const color = item.type === "fire"
     ? "#fb5365"
     : "#38bdf8";
+
+  function escapeHTML(value) {
+
+    return String(value).replace(/[&<>"']/g, char => ({
+      "&": "&amp;",
+      "<": "&lt;",
+      ">": "&gt;",
+      '"': "&quot;",
+      "'": "&#039;"
+    })[char]);
+
+  }
 
   const content = `
     <div style="
@@ -899,6 +919,7 @@ function showMarkerInfo(item) {
       </div>
 
       <div style="font-size:12px;">
+
         <div>구분 : ${escapeHTML(typeName)}</div>
         <div>등록일 : ${escapeHTML(item.date || "-")}</div>
         <div>위도 : ${item.lat.toFixed(6)}</div>
@@ -909,22 +930,20 @@ function showMarkerInfo(item) {
           padding:9px;
           background:#091727;
           border-radius:5px;
-          white-space:normal;
           word-break:break-all;
         ">
           ${escapeHTML(item.description)}
         </div>
+
       </div>
 
       <button id="popupCloseBtn" style="
         margin-top:10px;
-        margin-bottom:0;
         padding:8px;
         background:#24364a;
         color:white;
         border:1px solid #3a5068;
         border-radius:5px;
-        cursor:pointer;
       ">
         팝업 닫기
       </button>
@@ -932,42 +951,63 @@ function showMarkerInfo(item) {
     </div>
   `;
 
-  // 네이버 지도 팝업 생성
   const infoWindow = new naver.maps.InfoWindow({
+
     content: content,
-    position: new naver.maps.LatLng(item.lat, item.lng),
+
+    position: new naver.maps.LatLng(
+      item.lat,
+      item.lng
+    ),
+
     borderWidth: 0,
     backgroundColor: "transparent",
     disableAnchor: true,
     pixelOffset: new naver.maps.Point(0, -15),
     maxWidth: 300
+
   });
 
   infoWindow.open(map);
 
-  window.currentInfoWindow = infoWindow;
+  currentInfoWindow = infoWindow;
 
-  // 팝업 닫기 버튼
-  naver.maps.Event.addListener(infoWindow, "domready", function() {
+  naver.maps.Event.addListener(
+    infoWindow,
+    "domready",
+    function() {
 
-    const closeBtn = document.getElementById("popupCloseBtn");
+      const closeBtn = $("popupCloseBtn");
 
-    if (closeBtn) {
-      closeBtn.onclick = function() {
-        infoWindow.close();
-      };
+      if (closeBtn) {
+
+        closeBtn.onclick = function() {
+
+          infoWindow.close();
+
+          if (currentInfoWindow === infoWindow) {
+            currentInfoWindow = null;
+          }
+
+        };
+
+      }
+
     }
+  );
 
-  });
-
-  // 오른쪽 상세정보 패널도 함께 갱신
+  // 오른쪽 정보 패널
   panel.replaceChildren();
 
   const heading = document.createElement("h3");
+
   heading.textContent = item.title;
+
   panel.appendChild(heading);
 
   const details = document.createElement("div");
+
+  details.style.whiteSpace = "pre-line";
 
   details.textContent = [
     "위도: " + item.lat.toFixed(6),
@@ -996,7 +1036,9 @@ function showMarkerInfo(item) {
 
     infoWindow.close();
 
-    window.currentInfoWindow = null;
+    if (currentInfoWindow === infoWindow) {
+      currentInfoWindow = null;
+    }
 
     panel.textContent = "선택한 지점을 삭제했습니다.";
 
@@ -1007,7 +1049,7 @@ function showMarkerInfo(item) {
 }
 
 // ==========================================
-// 좌표 유효성 검사
+// 7. 좌표 유효성 검사 및 등록
 // ==========================================
 
 function validateCoordinates(lat, lng) {
@@ -1023,289 +1065,283 @@ function validateCoordinates(lat, lng) {
 
 }
 
-// ==========================================
-// 좌표로 위험지역 등록
-// ==========================================
+$("addByCoordBtn").addEventListener(
+  "click",
+  function() {
 
-$("addByCoordBtn").addEventListener("click", function() {
+    const latText = $("latInput").value.trim();
+    const lngText = $("lngInput").value.trim();
 
-  const latText = $("latInput").value.trim();
-  const lngText = $("lngInput").value.trim();
+    if (!latText || !lngText) {
+      alert("위도와 경도를 모두 입력하세요.");
+      return;
+    }
 
-  if (!latText || !lngText) {
-    alert("위도와 경도를 모두 입력하세요.");
-    return;
-  }
+    const lat = Number(latText);
+    const lng = Number(lngText);
 
-  const lat = Number(latText);
-  const lng = Number(lngText);
+    if (!validateCoordinates(lat, lng)) {
+      alert("좌표 형식이 올바르지 않습니다.");
+      return;
+    }
 
-  if (!validateCoordinates(lat, lng)) {
-    alert("좌표 형식이 올바르지 않습니다.");
-    return;
-  }
+    if (!map) {
+      alert("네이버 지도가 아직 준비되지 않았습니다.");
+      return;
+    }
 
-  if (!map || !window.naver) {
-    alert("네이버 지도가 아직 준비되지 않았습니다.");
-    return;
-  }
+    const item = addFireMarker(
+      lat,
+      lng,
+      "risk",
+      "좌표 등록 위험지역",
+      "사용자가 좌표로 등록한 위험·관리 지점",
+      getToday()
+    );
 
-  const item = addFireMarker(
-    lat,
-    lng,
-    "risk",
-    "좌표 등록 위험지역",
-    "사용자가 좌표로 등록한 위험·관리 지점",
-    getToday()
-  );
+    if (!item) {
+      alert("마커 등록에 실패했습니다.");
+      return;
+    }
 
-  if (!item) {
-    alert("마커 등록에 실패했습니다.");
-    return;
-  }
+    map.setCenter(
+      new naver.maps.LatLng(lat, lng)
+    );
 
-  const position = new naver.maps.LatLng(lat, lng);
+    map.setZoom(16);
 
-  map.setCenter(position);
-  map.setZoom(16);
+    showMarkerInfo(item);
 
-  showMarkerInfo(item);
-
-  $("latInput").value = "";
-  $("lngInput").value = "";
-
-});
-
-// ==========================================
-// 지도 클릭 등록 모드
-// ==========================================
-
-$("addPointBtn").addEventListener("click", function() {
-
-  if (!map) {
-    alert("지도가 아직 준비되지 않았습니다.");
-    return;
-  }
-
-  clickMode = !clickMode;
-
-  if (clickMode) {
-
-    this.textContent = "지도에서 위치를 선택하세요";
-    this.style.background = "#b45309";
-
-    map.setCursor("crosshair");
-
-  } else {
-
-    this.textContent = "＋ 지도에서 클릭하여 표시";
-    this.style.background = "";
-
-    map.setCursor("auto");
+    $("latInput").value = "";
+    $("lngInput").value = "";
 
   }
-
-});
+);
 
 // ==========================================
-// 주소 검색
+// 8. 지도 클릭 등록 모드
 // ==========================================
 
-$("addByAddressBtn").addEventListener("click", function() {
+$("addPointBtn").addEventListener(
+  "click",
+  function() {
 
-  const address = $("addressInput").value.trim();
+    if (!map) {
+      alert("지도가 아직 준비되지 않았습니다.");
+      return;
+    }
 
-  if (!address) {
-    alert("주소를 입력하세요.");
-    return;
-  }
+    clickMode = !clickMode;
 
-  if (!map || !window.naver ||
-      !naver.maps.Service) {
+    if (clickMode) {
 
-    alert("네이버 Geocoder가 로드되지 않았습니다.");
-    return;
-  }
+      this.textContent = "지도에서 위치를 선택하세요";
+      this.style.background = "#b45309";
 
-  const btn = this;
+      map.setCursor("crosshair");
 
-  btn.disabled = true;
-  btn.textContent = "주소 검색 중...";
+    } else {
 
-  naver.maps.Service.geocode(
-    {
-      query: address
-    },
-    function(status, response) {
+      this.textContent = "＋ 지도에서 클릭하여 표시";
+      this.style.background = "";
 
-      btn.disabled = false;
-      btn.textContent = "⌖ 주소로 위치 표시";
-
-      if (
-        status !== naver.maps.Service.Status.OK ||
-        !response
-      ) {
-
-        alert(
-          "주소 검색에 실패했습니다.\n" +
-          "Geocoding API 사용 설정과 서비스 URL을 확인하세요."
-        );
-
-        return;
-      }
-
-      // 최신 및 구버전 응답 형식 지원
-      const items = response.v2
-        ? response.v2.addresses
-        : response.result?.items;
-
-      if (!items || items.length === 0) {
-        alert("검색된 주소가 없습니다.");
-        return;
-      }
-
-      let lat;
-      let lng;
-
-      if (
-        response.v2 &&
-        items[0].y !== undefined &&
-        items[0].x !== undefined
-      ) {
-
-        lat = Number(items[0].y);
-        lng = Number(items[0].x);
-
-      } else if (items[0].point) {
-
-        lat = Number(items[0].point.y);
-        lng = Number(items[0].point.x);
-
-      } else {
-
-        alert("주소의 좌표를 확인할 수 없습니다.");
-        return;
-
-      }
-
-      if (!validateCoordinates(lat, lng)) {
-        alert("주소의 좌표가 올바르지 않습니다.");
-        return;
-      }
-
-      const item = addFireMarker(
-        lat,
-        lng,
-        "risk",
-        "주소 검색 위치",
-        address,
-        getToday()
-      );
-
-      if (!item) {
-        alert("지도 마커 등록에 실패했습니다.");
-        return;
-      }
-
-      map.setCenter(
-        new naver.maps.LatLng(lat, lng)
-      );
-
-      map.setZoom(17);
-
-      showMarkerInfo(item);
-
-      $("addressInput").value = "";
+      map.setCursor("auto");
 
     }
-  );
-
-});
-
-// ==========================================
-// 일반지도 / 위성지도 전환
-// ==========================================
-
-$("toggleMapTypeBtn").addEventListener("click", function() {
-
-  if (!map) {
-    alert("지도가 아직 준비되지 않았습니다.");
-    return;
-  }
-
-  if (!isSatellite) {
-
-    map.setMapTypeId(naver.maps.MapTypeId.SATELLITE);
-
-    this.textContent = "일반지도 전환";
-
-    isSatellite = true;
-
-  } else {
-
-    map.setMapTypeId(naver.maps.MapTypeId.NORMAL);
-
-    this.textContent = "위성지도 전환";
-
-    isSatellite = false;
 
   }
-
-});
+);
 
 // ==========================================
-// 네이버 지도 API 로딩 후 초기화
+// 9. 주소 검색
+// ==========================================
+
+$("addByAddressBtn").addEventListener(
+  "click",
+  function() {
+
+    const address = $("addressInput").value.trim();
+
+    if (!address) {
+      alert("주소를 입력하세요.");
+      return;
+    }
+
+    if (
+      !map ||
+      !isNaverReady() ||
+      !naver.maps.Service ||
+      typeof naver.maps.Service.geocode !== "function"
+    ) {
+
+      alert("네이버 Geocoder가 준비되지 않았습니다.");
+      return;
+
+    }
+
+    const btn = this;
+
+    btn.disabled = true;
+    btn.textContent = "주소 검색 중...";
+
+    naver.maps.Service.geocode(
+      {
+        query: address
+      },
+      function(status, response) {
+
+        btn.disabled = false;
+        btn.textContent = "⌖ 주소로 위치 표시";
+
+        if (
+          status !== naver.maps.Service.Status.OK ||
+          !response
+        ) {
+
+          alert("주소 검색에 실패했습니다.");
+          return;
+
+        }
+
+        const items = response.v2
+          ? response.v2.addresses
+          : response.result?.items;
+
+        if (!items || items.length === 0) {
+
+          alert("검색된 주소가 없습니다.");
+          return;
+
+        }
+
+        const first = items[0];
+
+        let lat;
+        let lng;
+
+        if (
+          first.y !== undefined &&
+          first.x !== undefined
+        ) {
+
+          lat = Number(first.y);
+          lng = Number(first.x);
+
+        } else if (first.point) {
+
+          lat = Number(first.point.y);
+          lng = Number(first.point.x);
+
+        }
+
+        if (!validateCoordinates(lat, lng)) {
+
+          alert("주소 좌표를 확인할 수 없습니다.");
+          return;
+
+        }
+
+        const item = addFireMarker(
+          lat,
+          lng,
+          "risk",
+          "주소 검색 위치",
+          address,
+          getToday()
+        );
+
+        if (!item) {
+
+          alert("지도 마커 등록에 실패했습니다.");
+          return;
+
+        }
+
+        map.setCenter(
+          new naver.maps.LatLng(lat, lng)
+        );
+
+        map.setZoom(17);
+
+        showMarkerInfo(item);
+
+        $("addressInput").value = "";
+
+      }
+    );
+
+  }
+);
+
+// ==========================================
+// 10-1. 일반지도 / 위성지도 전환
+// ==========================================
+
+$("toggleMapTypeBtn").addEventListener(
+  "click",
+  function() {
+
+    if (!map) {
+      alert("지도가 아직 준비되지 않았습니다.");
+      return;
+    }
+
+    isSatellite = !isSatellite;
+
+    map.setMapTypeId(
+      isSatellite
+        ? naver.maps.MapTypeId.SATELLITE
+        : naver.maps.MapTypeId.NORMAL
+    );
+
+    this.textContent = isSatellite
+      ? "일반지도 전환"
+      : "위성지도 전환";
+
+  }
+);
+
+// ==========================================
+// 10-2. 네이버 지도 API 초기화
 // ==========================================
 
 function startMap() {
 
-  if (
-    !window.naver ||
-    !window.naver.maps ||
-    typeof window.naver.maps.Map !== "function"
-  ) {
+  if (!isNaverReady()) {
 
-    console.error("네이버 지도 API를 사용할 수 없습니다.");
+    showMapError("네이버 지도 API 로딩 실패");
 
-    $("map").innerHTML =
-      '<div style="padding:20px;color:#fb5365;">' +
-      '네이버 지도 API 로딩 실패<br>' +
-      'Client ID와 서비스 URL을 확인하세요.' +
-      '</div>';
+    console.error(
+      "Client ID 및 서비스 URL을 확인하세요."
+    );
 
     return;
+
   }
-
-  if (map) return;
-
-  console.log("지도 초기화 시작");
 
   initMap();
 
 }
 
-window.addEventListener("resize", resizeMap);
+// ==========================================
+// 10-3. HTML 로딩 완료 후 실행
+// ==========================================
 
-if (window.ResizeObserver) {
+if (document.readyState === "loading") {
 
-  const observer = new ResizeObserver(() => {
-    resizeMap();
-  });
-
-  observer.observe(
-    document.getElementById("map-container")
+  document.addEventListener(
+    "DOMContentLoaded",
+    startMap,
+    { once: true }
   );
 
+} else {
+
+  startMap();
+
 }
-
-requestAnimationFrame(() => {
-  resizeMap();
-});
-
-setTimeout(resizeMap, 500);
-setTimeout(resizeMap, 1500);
 
 </script>
 
 </body>
-</html>
+</html>  
