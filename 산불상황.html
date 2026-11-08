@@ -628,6 +628,7 @@ const landslideData = [
 // 지도 초기화
 // ==========================================
 
+
 function initMap() {
 
   const mapElement = document.getElementById("map");
@@ -637,7 +638,12 @@ function initMap() {
     return;
   }
 
-  if (!window.naver || !window.naver.maps) {
+  // 네이버 지도 API 확인
+  if (
+    !window.naver ||
+    !window.naver.maps ||
+    !window.naver.maps.Map
+  ) {
     console.error("네이버 지도 API 로딩 실패");
 
     mapElement.innerHTML =
@@ -646,36 +652,134 @@ function initMap() {
     return;
   }
 
-  map = new naver.maps.Map("map", {
-    center: new naver.maps.LatLng(35.134167, 126.988889),
+  // 지도 생성
+  map = new window.naver.maps.Map("map", {
+
+    center: new window.naver.maps.LatLng(
+      35.134167,
+      126.988889
+    ),
+
     zoom: 14,
     minZoom: 8,
     maxZoom: 20,
-    mapTypeId: naver.maps.MapTypeId.NORMAL,
+
+    mapTypeId: window.naver.maps.MapTypeId.NORMAL,
+
     zoomControl: true,
+
     zoomControlOptions: {
-      position: naver.maps.Position.RIGHT_CENTER
+      position: window.naver.maps.Position.RIGHT_CENTER
     },
+
     scaleControl: true
+
   });
 
   console.log("네이버 지도 생성 성공");
 
-  // 기존 관리 지점 표시
+  // 지도 크기 조절
+  function resizeMap() {
+
+    const container = document.getElementById("map");
+
+    if (!container || !map) return;
+
+    if (
+      !window.naver ||
+      !window.naver.maps ||
+      !window.naver.maps.Size
+    ) {
+      console.error("네이버 지도 Size 객체 로딩 실패");
+      return;
+    }
+
+    map.setSize(
+      new window.naver.maps.Size(
+        container.clientWidth,
+        container.clientHeight
+      )
+    );
+
+    map.refresh();
+  }
+
+  // 화면 크기 변경 대응
+  window.addEventListener("resize", resizeMap);
+
+  // 컨테이너 크기 변경 대응
+  if (window.ResizeObserver) {
+
+    const observer = new ResizeObserver(function() {
+      resizeMap();
+    });
+
+    observer.observe(
+      document.getElementById("map-container")
+    );
+
+  }
+
+  setTimeout(resizeMap, 500);
+  setTimeout(resizeMap, 1500);
+  setTimeout(resizeMap, 2500);
+
+  // 기존 산불 및 관리 지점 표시
   landslideData.forEach(item => {
 
     addFireMarker(
       item.lat,
       item.lng,
       item.type,
-      item.type === "fire" ? "산불 발생 이력" : "산불 관리 지점",
+      item.type === "fire"
+        ? "산불 발생 이력"
+        : "산불 관리 지점",
       item.description,
       item.date
     );
 
   });
 
+  // 지도 클릭 등록 기능
+  window.naver.maps.Event.addListener(
+    map,
+    "click",
+    function(e) {
+
+      if (!clickMode) return;
+
+      const lat = e.coord.lat();
+      const lng = e.coord.lng();
+
+      const item = addFireMarker(
+        lat,
+        lng,
+        "risk",
+        "현장 위험지역",
+        "지도 클릭으로 등록한 위험·관리 지점",
+        getToday()
+      );
+
+      if (item) {
+        showMarkerInfo(item);
+      }
+
+      clickMode = false;
+
+      const btn = document.getElementById("addPointBtn");
+
+      btn.textContent = "＋ 지도에서 클릭하여 표시";
+      btn.style.background = "";
+
+      map.setCursor("auto");
+
+    }
+  );
+
+  console.log("무등산 산불 통합관제센터 지도 초기화 완료");
+
 }
+
 // ==========================================
 // 마커 등록
 // ==========================================
