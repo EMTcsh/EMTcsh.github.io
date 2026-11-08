@@ -694,7 +694,7 @@ function resizeMap() {
     !window.naver.maps ||
     typeof window.naver.maps.Size !== "function"
   ) {
-    console.error("네이버 지도 Size 객체를 사용할 수 없습니다.");
+    console.warn("네이버 지도 Size 객체 로딩 대기");
     return;
   }
 
@@ -707,30 +707,22 @@ function resizeMap() {
 
   if (width <= 0 || height <= 0) return;
 
-  const size = new window.naver.maps.Size(width, height);
-
-  map.setSize(size);
-  map.refresh();
-
-  console.log("지도 크기 변경 성공:", width, height);
-}
-
-// 브라우저 크기 변경
-window.addEventListener("resize", resizeMap);
-
-// 지도 영역 크기 변경 감지
-if (window.ResizeObserver) {
-
-  const observer = new ResizeObserver(function() {
-    resizeMap();
-  });
-
-  observer.observe(
-    document.getElementById("map-container")
+  const size = new window.naver.maps.Size(
+    width,
+    height
   );
 
-}
+  map.setSize(size);
 
+  map.refresh();
+
+  console.log(
+    "지도 크기 변경 성공:",
+    width,
+    height
+  );
+}
+  
 // 지도 초기 크기 설정
 requestAnimationFrame(resizeMap);
 
@@ -1292,15 +1284,26 @@ function startMap() {
 
 }
 
-window.addEventListener("load", function() {
+window.addEventListener("resize", resizeMap);
 
-  if (window.naver && window.naver.maps) {
-    startMap();
-  } else {
-    console.error("네이버 지도 API가 로딩되지 않았습니다.");
-  }
+if (window.ResizeObserver) {
 
+  const observer = new ResizeObserver(() => {
+    resizeMap();
+  });
+
+  observer.observe(
+    document.getElementById("map-container")
+  );
+
+}
+
+requestAnimationFrame(() => {
+  resizeMap();
 });
+
+setTimeout(resizeMap, 500);
+setTimeout(resizeMap, 1500);
 
 </script>
 
