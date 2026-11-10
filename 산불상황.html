@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -12,7 +11,6 @@
  rel="stylesheet"
  href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
 >
-
 <!-- Leaflet JavaScript -->
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
@@ -383,25 +381,31 @@ button:disabled {
 
   <div class="stats">
 
-    <div class="stat-card">
-      <div class="stat-label">산불 발생 이력</div>
-      <div class="stat-value red">04 <small>건</small></div>
-    </div>
+<div class="stat-card">
+  <div class="stat-label">산불위험 지역</div>
+  <div class="stat-value red">
+    <span id="riskCount">01</span>
+    <small>개소</small>
+  </div>
+</div>
+      
+<div class="stat-card">
+  <div class="stat-label">수관 보관함</div>
+  <div class="stat-value cyan">
+    <span id="fireCount">07</span>
+    <small>건</small>
+  </div>
+</div>
 
-    <div class="stat-card">
-      <div class="stat-label">관리 지점</div>
-      <div class="stat-value cyan">11 <small>개소</small></div>
-    </div>
+<div class="stat-card">
+    <div class="stat-label">진화 차량</div>
+    <div class="stat-value green">04 <small>대</small></div>
+  </div>
 
-    <div class="stat-card">
-      <div class="stat-label">진화 차량</div>
-      <div class="stat-value green">04 <small>대</small></div>
-    </div>
-
-    <div class="stat-card">
-      <div class="stat-label">통제 탐방로</div>
-      <div class="stat-value yellow">01 <small>구간</small></div>
-    </div>
+<div class="stat-card">
+    <div class="stat-label">통제 탐방로</div>
+    <div class="stat-value yellow">01 <small>구간</small></div>
+  </div>
 
   </div>
 
@@ -422,10 +426,10 @@ button:disabled {
       <div id="map"></div>
 
       <div class="map-legend">
-        <span><i class="dot red"></i>산불 발생 이력</span>
-        <span><i class="dot blue"></i>위험·관리 지점</span>
-        <span><i class="dot green"></i>진화 차량</span>
-      </div>
+  <span><i class="dot red"></i>산불·위험 지점</span>
+  <span><i class="dot blue"></i>수관 보관함</span>     
+  <span><i class="dot green"></i>진화 차량</span>
+</div>
 
     </div>
 
@@ -459,11 +463,11 @@ button:disabled {
 
 <aside class="right-area">
 
-  <!-- 산불 관리 현황 -->
+  <!-- 산불 자원 현황 -->
   <div class="section">
 
     <div class="section-title">
-      🚨 산불관리 현황
+      🚨 산불자원 현황
       <span style="color:#4ade80;font-size:11px">관리정보</span>
     </div>
 
@@ -553,7 +557,7 @@ button:disabled {
     </div>
   </div>
 
-  <!-- 진화 차량 관리 -->
+  <!-- 진화 차량 배치 -->
   <div class="section">
 
     <div class="section-title">
@@ -944,47 +948,15 @@ const mapTypes = {
 
 
 // ==========================================
-// ③ 무등산 산불 및 관리 지점 11개
+// ③ 무등산 산불 및 수관 보관함 7개
 // ==========================================
 
 const landslideData = [
 
   {
-    lat:35.1286067,
-    lng:126.9699645,
-    type:"fire",
-    date:"2024-09-29",
-    description:"광주광역시 동구 운림동 56 증심사 공양간 화재"
-  },
-
-  {
-    lat:35.1615699,
-    lng:126.9861449,
-    type:"fire",
-    date:"2025-03-22",
-    description:"광주광역시 북구 금곡동 산166-2 담배불씨"
-  },
-
-  {
-    lat:35.152931,
-    lng:126.964767,
-    type:"fire",
-    date:"2025-03-22",
-    description:"광주광역시 북구 화암동 335-4 쓰레기소각"
-  },
-
-  {
-    lat:35.117806,
-    lng:126.944922,
-    type:"fire",
-    date:"2025-02-21",
-    description:"광주광역시 동구 소태동 산184 쓰레기소각"
-  },
-
-  {
     lat:35.128633,
     lng:126.969805,
-    type:"normal",
+    type:"fire",
     date:"2025-02-14",
     description:"증심사 수관보관함 입구"
   },
@@ -992,7 +964,7 @@ const landslideData = [
   {
     lat:35.128917,
     lng:126.969963,
-    type:"normal",
+    type:"fire",
     date:"2025-02-14",
     description:"증심사 수관보관함 대웅전 좌측"
   },
@@ -1000,7 +972,7 @@ const landslideData = [
   {
     lat:35.128760,
     lng:126.970289,
-    type:"normal",
+    type:"fire",
     date:"2025-02-14",
     description:"증심사 수관보관함 대웅전 우측"
   },
@@ -1008,7 +980,7 @@ const landslideData = [
   {
     lat:35.122244,
     lng:126.972229,
-    type:"normal",
+    type:"fire",
     date:"2025-02-14",
     description:"약사사 수관보관함 입구"
   },
@@ -1016,7 +988,7 @@ const landslideData = [
   {
     lat:35.133144,
     lng:126.961055,
-    type:"normal",
+    type:"fire",
     date:"2025-02-14",
     description:"문빈정사 수관보관함 입구"
   },
@@ -1024,7 +996,7 @@ const landslideData = [
   {
     lat:35.14833232,
     lng:126.98574731,
-    type:"normal",
+    type:"fire",
     date:"2025-02-14",
     description:"원효사 수관보관함 입구"
   },
@@ -1032,13 +1004,52 @@ const landslideData = [
   {
     lat:35.14853961,
     lng:126.98554150,
-    type:"normal",
+    type:"fire",
     date:"2025-02-14",
     description:"원효사 수관보관함 대웅전 앞"
   }
 
 ];
 
+
+// ==========================================
+// 수관 보관함 개수 자동 표시
+// ==========================================
+
+function updateFireCount() {
+
+  const countElement = $("fireCount");
+
+  if (countElement) {
+
+    countElement.textContent =
+      String(landslideData.length).padStart(2, "0");
+
+  }
+
+}
+
+// ==========================================
+// 위험지역 개수 자동 표시
+// ==========================================
+
+function updateRiskCount() {
+
+  const countElement = $("riskCount");
+
+  if (countElement) {
+
+    const count = markers.filter(
+      item => item.type !== "fire"
+    ).length;
+
+    countElement.textContent =
+      String(count).padStart(2, "0");
+
+  }
+
+}
+ 
 
 // ==========================================
 // ④ 지도 초기화
@@ -1086,34 +1097,23 @@ function initMap() {
     imperial: false
 
   }).addTo(map);
-
-
-  // 기존 산불 및 관리 지점 표시
+ 
+  // 기존 산불 및 수관 보관함 표시
+ updateFireCount();
 landslideData.forEach(item => {
 
   addFireMarker(
-
     item.lat,
-
     item.lng,
-
     item.type,
-
-    item.type === "fire"
-      ? "산불 발생 이력"
-      : "산불 관리 지점",
-
+    "수관 보관함",
     item.description,
-
     item.date,
-
     false
-
   );
 
 });
-
-
+ 
   // 지도 클릭 등록
   map.on("click", function(e) {
 
@@ -1129,7 +1129,7 @@ landslideData.forEach(item => {
 
       "현장 위험지역",
 
-      "지도 클릭으로 등록한 위험·관리 지점",
+      "지도 클릭으로 등록한 산불·위험 지점",
 
       getToday()
 
@@ -1186,7 +1186,7 @@ landslideData.forEach(item => {
 }
 
 // ==========================================
-// ⑤ 산불 및 위험지역 마커 등록
+// ⑤ 산불 및 수관 보관 지역 마커 등록
 // ==========================================
 
 
@@ -1205,9 +1205,9 @@ function addFireMarker(
     return null;
   }
 
-  const color = type === "fire"
-    ? "#fb5365"
-    : "#38bdf8";
+const color = type === "fire"
+  ? "#38bdf8"  // 수관 보관함: 파란색
+  : "#fb5365"; // 산불 위험지역: 빨간색
 
   const circle = L.circle(
     [lat, lng],
@@ -1232,6 +1232,8 @@ function addFireMarker(
   };
 
   markers.push(item);
+
+ updateRiskCount();
 
   circle.on("click", function() {
     showMarkerInfo(item);
@@ -1276,12 +1278,12 @@ function showMarkerInfo(item) {
   }
 
   const typeName = item.type === "fire"
-    ? "산불 발생 이력"
-    : "위험·관리 지점";
+    ? "산불·위험 지점"
+    : "수관 보관함";
 
-  const color = item.type === "fire"
-    ? "#fb5365"
-    : "#38bdf8";
+const color = item.type === "fire"
+  ? "#38bdf8"
+  : "#fb5365";
 
 
   const content = `
@@ -1396,6 +1398,9 @@ function showMarkerInfo(item) {
       marker => marker !== item
     );
 
+     // 위험지역 통계 자동 갱신
+   updateRiskCount();
+   
     map.closePopup();
 
     currentPopup = null;
@@ -1437,17 +1442,21 @@ $("addByCoordBtn").addEventListener(
   "click",
   function() {
 
-    const lat = Number($("latInput").value.trim());
+const latText = $("latInput").value.trim();
+const lngText = $("lngInput").value.trim();
 
-    const lng = Number($("lngInput").value.trim());
+if (!latText || !lngText) {
+  alert("위도와 경도를 모두 입력하세요.");
+  return;
+}
 
-    if (!validateCoordinates(lat, lng)) {
+const lat = Number(latText);
+const lng = Number(lngText);
 
-      alert("올바른 위도와 경도를 입력하세요.");
-
-      return;
-
-    }
+if (!validateCoordinates(lat, lng)) {
+  alert("올바른 위도와 경도를 입력하세요.");
+  return;
+}
 
     const item = addFireMarker(
 
@@ -1455,7 +1464,7 @@ $("addByCoordBtn").addEventListener(
       lng,
       "risk",
       "좌표 등록 위험지역",
-      "사용자가 좌표로 등록한 위험·관리 지점",
+      "사용자가 좌표로 등록한 산불·위험 지점",
       getToday()
 
     );
@@ -1949,44 +1958,68 @@ if (addVehicleBtn) {
     function() {
 
       const name =
-        $("vehicleName")?.value.trim();
+        $("vehicleName").value.trim();
 
-      const lat =
-        Number($("vehicleLat")?.value);
+      const latText =
+        $("vehicleLat").value.trim();
 
-      const lng =
-        Number($("vehicleLng")?.value);
+      const lngText =
+        $("vehicleLng").value.trim();
 
+      // 차량명 검사
       if (!name) {
-
         alert("차량명을 입력하세요.");
-
         return;
-
       }
 
+      // 좌표 입력 검사
+      if (!latText || !lngText) {
+        alert("차량 위도와 경도를 모두 입력하세요.");
+        return;
+      }
+
+      const lat = Number(latText);
+      const lng = Number(lngText);
+
+      // 좌표 유효성 검사
       if (!validateCoordinates(lat, lng)) {
-
         alert("올바른 차량 좌표를 입력하세요.");
-
         return;
-
       }
 
-      const vehicle = addVehicle(
-        name,
-        lat,
-        lng
+      // 기존 차량 검색
+      const existing = vehicles.find(
+        item => item.name === name
       );
+
+      let vehicle;
+
+      if (existing) {
+
+        // 기존 차량 위치 갱신
+        updateVehicle(name, lat, lng);
+
+        vehicle = existing;
+
+      } else {
+
+        // 신규 차량 등록
+        vehicle = addVehicle(
+          name,
+          lat,
+          lng
+        );
+
+      }
 
       if (!vehicle) return;
 
+      // 지도 중심 이동
       map.setView([lat, lng], 16);
 
+      // 입력창 초기화
       $("vehicleName").value = "";
-
       $("vehicleLat").value = "";
-
       $("vehicleLng").value = "";
 
     }
@@ -1999,7 +2032,6 @@ if (addVehicleBtn) {
   );
 
 }
-
 
 // ==========================================
 // ⑮ GPS 현재 위치 등록
@@ -2096,88 +2128,78 @@ if (vehicleLocationBtn) {
 
 }
 
-
-
 function loadGasData() {
 
   if (!isGasAvailable()) {
-
-    console.warn(
-      "Google Apps Script 환경이 아닙니다."
-    );
-
+    console.warn("Google Apps Script 연결을 확인하세요.");
     return;
-
   }
 
   google.script.run
 
     .withSuccessHandler(function(data) {
 
-      // 위험지역 불러오기
-(data.risks || []).forEach(item => {
+      // ① 위험지역 불러오기
+      (data.risks || []).forEach(item => {
 
-  const lat = Number(item.lat);
-  const lng = Number(item.lng);
+        const lat = Number(item.lat);
+        const lng = Number(item.lng);
 
-  // 기존 정적 마커와 동일한 데이터 중복 방지
-  const duplicate = markers.some(marker =>
+        if (!validateCoordinates(lat, lng)) return;
 
-    marker.type === item.type &&
+        // 기존 마커 중복 방지
+        const duplicate = markers.some(marker =>
+          marker.type === item.type &&
+          Math.abs(marker.lat - lat) < 0.000001 &&
+          Math.abs(marker.lng - lng) < 0.000001 &&
+          marker.description === item.description
+        );
 
-    Math.abs(marker.lat - lat) < 0.000001 &&
+        if (duplicate) return;
 
-    Math.abs(marker.lng - lng) < 0.000001 &&
-
-    marker.description === item.description
-
-  );
-
-  if (duplicate) return;
-
-  addFireMarker(
-
-    lat,
-    lng,
-
-    item.type,
-
-    item.name,
-
-    item.description,
-
-    item.date,
-
-    false,
-
-    item.id
-
-  );
-
-});
-
-      // 진화 차량 불러오기
-      (data.vehicles || []).forEach(item => {
-
-        addVehicle(
-
-          item.name,
-
-          item.lat,
-
-          item.lng,
-
+        addFireMarker(
+          lat,
+          lng,
+          item.type,
+          item.title || item.name || "위험지역",
+          item.description || "",
+          item.date || "",
           false,
-
           item.id
-
         );
 
       });
 
-      console.log(
-        "Google Sheets 데이터 복원 완료"
-      );
+      // ② 진화 차량 불러오기
+      (data.vehicles || []).forEach(item => {
+
+        const lat = Number(item.lat);
+        const lng = Number(item.lng);
+
+        if (!validateCoordinates(lat, lng)) return;
+
+        const duplicate = vehicles.some(
+          vehicle => vehicle.name === item.name
+        );
+
+        if (duplicate) return;
+
+        addVehicle(
+          item.name,
+          lat,
+          lng,
+          false,
+          item.id
+        );
+
+      });
+
+      // ③ 통계 갱신
+      updateFireCount();
+      updateRiskCount();
+      updateVehicleInfo();
+
+      console.log("Google Sheets 데이터 복원 완료");
 
     })
 
@@ -2186,7 +2208,6 @@ function loadGasData() {
     .getDashboardData();
 
 }
- 
 
 // ==========================================
 // ⑯ 지도 실행
