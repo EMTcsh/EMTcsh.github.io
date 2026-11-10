@@ -3,22 +3,21 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#071321">
 
 <title>무등산 산불 통합관제센터</title>
 
-<!-- Leaflet CSS -->
-<link
- rel="stylesheet"
- href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
->
-<!-- Leaflet JavaScript -->
+<link rel="stylesheet"
+ href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 <style>
 :root {
   --bg:#07111f;
-  --panel:#101f31;
-  --line:#263c53;
+  --panel:#0e1c2d;
+  --panel2:#12243a;
+  --line:#263e56;
   --text:#e5edf7;
   --muted:#91a6bd;
   --cyan:#22d3ee;
@@ -27,9 +26,7 @@
   --yellow:#fbbf24;
 }
 
-* {
-  box-sizing:border-box;
-}
+* { box-sizing:border-box; }
 
 body {
   margin:0;
@@ -38,10 +35,56 @@ body {
   font-family:"Pretendard","Malgun Gothic",sans-serif;
 }
 
+button,input {
+  font-family:inherit;
+}
+
+button {
+  cursor:pointer;
+  border:0;
+  border-radius:5px;
+  padding:11px;
+  font-size:12px;
+  font-weight:700;
+  color:white;
+  transition:.2s;
+  margin-bottom:6px;
+}
+
+button:hover { filter:brightness(1.2); }
+button:disabled { opacity:.5;cursor:not-allowed; }
+
+.btn-blue { background:#075985; }
+.btn-green { background:#166534; }
+.btn-purple { background:#43318a; }
+.btn-red { background:#991b1b; }
+.btn-gray {
+  background:#24364a;
+  border:1px solid #3a5068;
+}
+
+input {
+  width:100%;
+  background:#081625;
+  color:white;
+  border:1px solid #30465d;
+  border-radius:5px;
+  padding:11px;
+  margin-bottom:8px;
+  font-size:13px;
+  outline:none;
+}
+
+input:focus {
+  border-color:var(--cyan);
+  box-shadow:0 0 0 2px #22d3ee20;
+}
+
 header {
-  background:#0b1929;
-  border-bottom:1px solid var(--line);
-  padding:18px 25px;
+  background:linear-gradient(110deg,#0b1929,#102b46);
+  border-bottom:1px solid #294660;
+  padding:17px 22px;
+  box-shadow:0 4px 20px #0005;
 }
 
 .header-inner {
@@ -53,33 +96,48 @@ header {
 }
 
 h1 {
-  font-size:25px;
+  font-size:23px;
   margin:0;
   font-weight:800;
 }
 
 .subtitle {
-  font-size:12px;
-  color:var(--muted);
+  color:#8da9c3;
+  font-size:11px;
   margin-top:6px;
+  letter-spacing:1px;
+}
+
+.header-right {
+  display:flex;
+  align-items:center;
+  gap:12px;
+  flex-wrap:wrap;
 }
 
 .system-status {
   color:var(--green);
-  border:1px solid #226348;
   background:#103527;
-  padding:8px 13px;
-  border-radius:6px;
-  font-size:12px;
+  border:1px solid #226348;
+  padding:8px 12px;
+  border-radius:5px;
+  font-size:11px;
   font-weight:bold;
+}
+
+.clock {
+  color:var(--cyan);
+  font-size:13px;
+  font-weight:700;
+  font-variant-numeric:tabular-nums;
 }
 
 main {
   display:grid;
-  grid-template-columns:minmax(0,1fr) 340px;
-  gap:14px;
-  padding:15px;
-  min-height:calc(100vh - 85px);
+  grid-template-columns:minmax(0,1fr) 350px;
+  gap:13px;
+  padding:13px;
+  align-items:start;
 }
 
 .left-area {
@@ -89,28 +147,48 @@ main {
   gap:12px;
 }
 
+.right-area {
+  min-width:0;
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+}
+
 .stats {
   display:grid;
   grid-template-columns:repeat(4,minmax(0,1fr));
-  gap:10px;
+  gap:9px;
 }
 
 .stat-card {
-  background:var(--panel);
-  border:1px solid var(--line);
-  padding:15px;
-  border-radius:9px;
+  background:linear-gradient(145deg,#13263c,#0d1929);
+  border:1px solid #29435d;
+  border-radius:7px;
+  padding:14px;
+  min-width:0;
+  transition:.2s;
+}
+
+.stat-card:hover {
+  border-color:var(--cyan);
+  transform:translateY(-2px);
 }
 
 .stat-label {
-  font-size:12px;
   color:var(--muted);
+  font-size:11px;
 }
 
 .stat-value {
-  font-size:25px;
+  font-size:26px;
   font-weight:800;
   margin-top:8px;
+  font-variant-numeric:tabular-nums;
+}
+
+.stat-value small {
+  font-size:12px;
+  font-weight:500;
 }
 
 .cyan {color:var(--cyan);}
@@ -121,50 +199,60 @@ main {
 .section {
   background:var(--panel);
   border:1px solid var(--line);
-  border-radius:9px;
+  border-radius:8px;
   overflow:hidden;
   min-width:0;
+  box-shadow:0 4px 15px #0002;
 }
 
 .section-title {
-  padding:13px 15px;
+  min-height:45px;
+  padding:12px 14px;
+  background:linear-gradient(90deg,#142b43,#0e1d30);
   border-bottom:1px solid var(--line);
-  font-size:14px;
-  font-weight:700;
   display:flex;
   justify-content:space-between;
   align-items:center;
   gap:10px;
+  font-size:13px;
+  font-weight:700;
 }
+
+.section-title button {
+  margin:0;
+  width:auto;
+  padding:8px 12px;
+}
+
+.panel-body { padding:13px; }
 
 #map-container {
   position:relative;
   width:100%;
   height:65vh;
-  min-height:420px;
+  min-height:430px;
 }
 
 #map {
   width:100%;
   height:100%;
-  min-height:420px;
+  min-height:430px;
   background:#17283a;
 }
 
 .map-legend {
   position:absolute;
   z-index:500;
-  bottom:15px;
+  bottom:14px;
   left:12px;
   display:flex;
   flex-wrap:wrap;
   gap:12px;
-  padding:10px 13px;
-  background:rgba(7,17,31,.92);
-  border:1px solid #263c53;
+  padding:10px 12px;
+  background:rgba(7,17,31,.94);
+  border:1px solid #34516c;
   border-radius:6px;
-  color:white;
-  font-size:11px;
+  font-size:10px;
   pointer-events:none;
 }
 
@@ -173,75 +261,13 @@ main {
   width:9px;
   height:9px;
   border-radius:50%;
-  margin-right:5px;
+  margin-right:4px;
 }
 
 .dot.red {background:var(--red);}
 .dot.blue {background:#38bdf8;}
 .dot.green {background:var(--green);}
-
-.right-area {
-  display:flex;
-  flex-direction:column;
-  gap:12px;
-  min-width:0;
-}
-
-.panel-body {
-  padding:14px;
-}
-
-h3 {
-  font-size:13px;
-  margin:0 0 12px;
-}
-
-input {
-  width:100%;
-  background:#091727;
-  color:white;
-  border:1px solid #30465d;
-  border-radius:6px;
-  padding:11px;
-  margin-bottom:7px;
-  outline:none;
-  font-size:14px;
-}
-
-input:focus {
-  border-color:var(--cyan);
-}
-
-button {
-  width:100%;
-  padding:11px;
-  border:1px solid transparent;
-  border-radius:6px;
-  font-size:13px;
-  font-weight:700;
-  cursor:pointer;
-  margin-bottom:7px;
-}
-
-button:hover {
-  filter:brightness(1.2);
-}
-
-button:disabled {
-  opacity:.5;
-  cursor:not-allowed;
-}
-
-.btn-blue {background:#075985;color:white;}
-.btn-green {background:#166534;color:white;}
-.btn-purple {background:#43318a;color:white;}
-.btn-red {background:#991b1b;color:white;}
-
-.btn-gray {
-  background:#24364a;
-  color:#dbeafe;
-  border-color:#3a5068;
-}
+.dot.yellow {background:var(--yellow);}
 
 .resource-item {
   display:flex;
@@ -249,16 +275,12 @@ button:disabled {
   gap:8px;
   padding:10px 0;
   border-bottom:1px solid var(--line);
-  font-size:12px;
+  font-size:11px;
 }
 
-.resource-item:last-child {
-  border:0;
-}
+.resource-item:last-child { border:0; }
 
-.resource-item span:first-child {
-  color:var(--muted);
-}
+.resource-item span:first-child { color:var(--muted); }
 
 .resource-item strong {
   color:#dceaf7;
@@ -266,20 +288,22 @@ button:disabled {
 }
 
 .info-panel {
-  max-height:240px;
+  max-height:260px;
   overflow:auto;
   white-space:pre-line;
-  background:#091727;
+  background:#081625;
   border:1px solid var(--line);
   border-radius:6px;
   padding:12px;
-  font-size:12px;
+  font-size:11px;
   line-height:1.8;
   color:#cbd5e1;
 }
 
 .info-panel h3 {
   color:var(--cyan);
+  font-size:13px;
+  margin:0 0 10px;
 }
 
 .quick-links {
@@ -289,17 +313,42 @@ button:disabled {
 }
 
 .quick-links button {
-  font-size:11px;
   margin:0;
-  padding:10px 5px;
+  font-size:10px;
+  padding:10px 4px;
+}
+
+.road-tools {
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px;
+}
+
+.road-tool-column {
+  min-width:0;
+  background:#081625;
+  border:1px solid var(--line);
+  border-radius:7px;
+  padding:12px;
+}
+
+.road-tool-column h3 {
+  color:var(--cyan);
+  font-size:12px;
+  margin:0 0 12px;
+}
+
+.road-tool-column button {
+  width:100%;
 }
 
 .footer {
   color:#71869d;
   text-align:center;
   font-size:10px;
-  padding:12px;
+  padding:15px;
   border-top:1px solid var(--line);
+  background:#081321;
 }
 
 .vehicle-marker {
@@ -310,58 +359,60 @@ button:disabled {
 .leaflet-popup-content-wrapper {
   background:#101f31;
   color:#e5edf7;
-  border:1px solid #22d3ee;
+  border:1px solid var(--cyan);
 }
 
-.leaflet-popup-tip {
-  background:#101f31;
-}
+.leaflet-popup-tip { background:#101f31; }
 
 .leaflet-popup-close-button {
-  color:white !important;
+  color:white!important;
+}
+
+.status-line {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:9px 0;
+  border-bottom:1px solid var(--line);
+  font-size:11px;
+}
+
+.status-indicator {
+  display:inline-block;
+  width:7px;
+  height:7px;
+  border-radius:50%;
+  background:var(--green);
+  margin-right:5px;
 }
 
 @media(max-width:1050px) {
-  main {
-    grid-template-columns:1fr;
-  }
-
-  #map-container {
-    height:60vh;
-  }
-
+  main { grid-template-columns:1fr; }
   .right-area {
     display:grid;
-    grid-template-columns:1fr 1fr;
+    grid-template-columns:repeat(2,minmax(0,1fr));
   }
+  #map-container { height:60vh; }
 }
 
 @media(max-width:650px) {
-  h1 {font-size:20px;}
-
-  main {padding:8px;}
-
-  .stats {
-    grid-template-columns:repeat(2,minmax(0,1fr));
-  }
-
-  .right-area {
-    display:flex;
-  }
-
+  header { padding:14px; }
+  h1 { font-size:19px; }
+  main { padding:8px; }
+  .stats { grid-template-columns:repeat(2,minmax(0,1fr)); }
+  .right-area { display:flex; }
+  .road-tools { grid-template-columns:1fr; }
   #map-container {
     height:55vh;
     min-height:380px;
   }
-
-  #map {
-    min-height:380px;
-  }
+  #map { min-height:380px; }
+  .stat-value { font-size:23px; }
 }
 </style>
 </head>
-<body>
 
+<body>
 
 <header>
   <div class="header-inner">
@@ -371,104 +422,193 @@ button:disabled {
         MUDEUNGSAN NATIONAL PARK · FOREST FIRE CONTROL SYSTEM
       </div>
     </div>
-    <div class="system-status">● SYSTEM ONLINE</div>
+
+    <div class="header-right">
+      <div class="clock" id="systemClock">0000-00-00 00:00:00</div>
+      <div class="system-status" id="systemStatus">
+        ● SYSTEM STARTING
+      </div>
+    </div>
   </div>
 </header>
 
 <main>
+<!-- =================================
+     좌측 메인 관제 영역
+================================= -->
 
 <div class="left-area">
 
+  <!-- 산불 통계 -->
   <div class="stats">
 
-<div class="stat-card">
-  <div class="stat-label">산불위험 지역</div>
-  <div class="stat-value red">
-    <span id="riskCount">01</span>
-    <small>개소</small>
-  </div>
-</div>
-      
-<div class="stat-card">
-  <div class="stat-label">수관 보관함</div>
-  <div class="stat-value cyan">
-    <span id="fireCount">07</span>
-    <small>건</small>
-  </div>
-</div>
+    <div class="stat-card">
+      <div class="stat-label">산불 위험지역</div>
+      <div class="stat-value red">
+        <span id="riskCount">00</span>
+        <small>개소</small>
+      </div>
+    </div>
 
-<div class="stat-card">
-    <div class="stat-label">진화 차량</div>
-    <div class="stat-value green">04 <small>대</small></div>
+    <div class="stat-card">
+      <div class="stat-label">수관 보관함</div>
+      <div class="stat-value cyan">
+        <span id="fireCount">07</span>
+        <small>개소</small>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-label">진화 차량</div>
+      <div class="stat-value green">
+        <span id="vehicleCount">00</span>
+        <small>대</small>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-label">통제 탐방로</div>
+      <div class="stat-value yellow">
+        <span id="trailCount">01</span>
+        <small>구간</small>
+      </div>
+    </div>
+
   </div>
 
-<div class="stat-card">
-    <div class="stat-label">통제 탐방로</div>
-    <div class="stat-value yellow">01 <small>구간</small></div>
-  </div>
+  <!-- 탐방로 및 시설 통계 -->
+  <div class="stats">
+
+    <div class="stat-card">
+      <div class="stat-label">총 탐방로</div>
+      <div class="stat-value cyan">
+        96.76<small> km</small>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-label">개방 탐방로</div>
+      <div class="stat-value green">
+        95.96<small> km</small>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-label">감시 카메라</div>
+      <div class="stat-value cyan">
+        03<small> 대</small>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-label">통제소</div>
+      <div class="stat-value yellow">
+        02<small> 개소</small>
+      </div>
+    </div>
 
   </div>
 
+  <!-- GIS 지도 -->
   <div class="section">
 
     <div class="section-title">
       <span>📡 무등산 산불 감시 GIS 지도</span>
 
-      <button id="toggleMapTypeBtn"
-        class="btn-gray"
-        style="width:auto;margin:0;padding:8px 13px">
+      <button id="toggleMapTypeBtn" class="btn-gray">
         위성영상 전환
       </button>
     </div>
 
     <div id="map-container">
-
       <div id="map"></div>
 
       <div class="map-legend">
-  <span><i class="dot red"></i>산불·위험 지점</span>
-  <span><i class="dot blue"></i>수관 보관함</span>     
-  <span><i class="dot green"></i>진화 차량</span>
-</div>
-
+        <span><i class="dot red"></i>산불 위험지역</span>
+        <span><i class="dot blue"></i>수관 보관함</span>
+        <span><i class="dot green"></i>진화 차량</span>
+        <span><i class="dot yellow"></i>도로 분석</span>
+      </div>
     </div>
 
   </div>
 
-  <div class="stats">
-
-    <div class="stat-card">
-      <div class="stat-label">총 탐방로</div>
-      <div class="stat-value cyan">96.76<small> km</small></div>
-    </div>
-
-    <div class="stat-card">
-      <div class="stat-label">개방 탐방로</div>
-      <div class="stat-value green">95.96<small> km</small></div>
-    </div>
-
-    <div class="stat-card">
-      <div class="stat-label">감시 카메라</div>
-      <div class="stat-value cyan">03<small> 대</small></div>
-    </div>
-
-    <div class="stat-card">
-      <div class="stat-label">통제소</div>
-      <div class="stat-value yellow">02<small> 개소</small></div>
-    </div>
-
-  </div>
-
-</div>
-
-<aside class="right-area">
-
-  <!-- 산불 자원 현황 -->
+  <!-- 도로 측정 -->
   <div class="section">
 
     <div class="section-title">
-      🚨 산불자원 현황
-      <span style="color:#4ade80;font-size:11px">관리정보</span>
+      <span>🛣 도로 폭·면적 GIS 분석</span>
+      <span style="color:#22d3ee;font-size:10px">
+        ROAD ANALYSIS
+      </span>
+    </div>
+
+    <div class="panel-body">
+
+      <div class="road-tools">
+
+        <div class="road-tool-column">
+          <h3>🛣 도로 자동 검색</h3>
+
+          <button id="roadSelectBtn" class="btn-blue">
+            지도에서 도로 선택
+          </button>
+
+          <button id="roadSatelliteBtn" class="btn-gray">
+            위성영상으로 도로 확인
+          </button>
+        </div>
+
+        <div class="road-tool-column">
+          <h3>↔ 도로 폭 직접 측정</h3>
+
+          <button id="roadWidthBtn" class="btn-green">
+            도로 양쪽 경계 측정 시작
+          </button>
+
+          <button id="roadClearBtn" class="btn-red">
+            측정 결과 지우기
+          </button>
+        </div>
+
+      </div>
+
+      <div id="roadInfo" class="info-panel" style="margin-top:12px">
+도로 선택 또는 직접 측정을 시작하세요.
+      </div>
+
+    </div>
+  </div>
+
+  <!-- 상세정보 -->
+  <div class="section">
+
+    <div class="section-title">
+      📋 상세 상황 정보
+    </div>
+
+    <div class="panel-body">
+      <div id="infoPanel" class="info-panel">
+마커를 선택하면 위치 및 등록 상세정보가 표시됩니다.
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+<!-- =================================
+     우측 상황관제 사이드바
+================================= -->
+
+<aside class="right-area">
+
+  <!-- 자원 현황 -->
+  <div class="section">
+
+    <div class="section-title">
+      🚨 산불 자원 현황
+      <span style="color:#4ade80;font-size:10px">RESOURCE</span>
     </div>
 
     <div class="panel-body">
@@ -500,7 +640,7 @@ button:disabled {
 
       <div class="resource-item">
         <span>진화 차량</span>
-        <strong>4 대</strong>
+        <strong id="resourceVehicleCount">0 대</strong>
       </div>
 
       <div class="resource-item">
@@ -520,19 +660,17 @@ button:disabled {
   <div class="section">
 
     <div class="section-title">
-      📍 위험지역 위치 등록
+      📍 산불 위험지역 등록
     </div>
 
     <div class="panel-body">
 
       <h3>좌표 검색</h3>
 
-      <input id="latInput"
-        type="number" step="any"
+      <input id="latInput" type="number" step="any"
         placeholder="위도 (예: 35.1286)">
 
-      <input id="lngInput"
-        type="number" step="any"
+      <input id="lngInput" type="number" step="any"
         placeholder="경도 (예: 126.9699)">
 
       <button id="addByCoordBtn" class="btn-green">
@@ -543,8 +681,7 @@ button:disabled {
 
       <h3>주소 검색</h3>
 
-      <input id="addressInput"
-        placeholder="주소 입력">
+      <input id="addressInput" placeholder="주소 입력">
 
       <button id="addByAddressBtn" class="btn-green">
         ⌖ 주소로 위치 표시
@@ -557,7 +694,7 @@ button:disabled {
     </div>
   </div>
 
-  <!-- 진화 차량 배치 -->
+  <!-- 차량 위치 관리 -->
   <div class="section">
 
     <div class="section-title">
@@ -571,12 +708,10 @@ button:disabled {
       <input id="vehicleName"
         placeholder="차량명 (예: 진화 차량 01)">
 
-      <input id="vehicleLat"
-        type="number" step="any"
+      <input id="vehicleLat" type="number" step="any"
         placeholder="위도">
 
-      <input id="vehicleLng"
-        type="number" step="any"
+      <input id="vehicleLng" type="number" step="any"
         placeholder="경도">
 
       <button id="addVehicleBtn" class="btn-green">
@@ -588,14 +723,13 @@ button:disabled {
       </button>
 
       <div id="vehicleInfo" class="info-panel">
-        등록된 진화 차량이 없습니다.
+등록된 진화 차량이 없습니다.
       </div>
 
     </div>
-
   </div>
 
-  <!-- 산불 대응 시스템 -->
+  <!-- 외부 대응 시스템 -->
   <div class="section">
 
     <div class="section-title">
@@ -605,59 +739,79 @@ button:disabled {
     <div class="panel-body quick-links">
 
       <button class="btn-purple"
-        onclick="window.open('https://mudeungsan1.iptime.org:8080','_blank','noopener')">
-        장불재 산불카메라
+        data-url="https://www.windy.com/?37.592,126.978,5">
+        바람 및 일기예보
       </button>
 
       <button class="btn-purple"
-        onclick="window.open('https://fd.forest.go.kr','_blank','noopener')">
+        data-url="https://fd.forest.go.kr">
         실시간 산불정보
       </button>
 
       <button class="btn-purple"
-        onclick="window.open('https://sanbul.forest.go.kr','_blank','noopener')">
-        산불상황관제
+        data-url="https://map.forest.go.kr/forest/">
+        산림공간정보서비스
       </button>
 
       <button class="btn-purple"
-        onclick="window.open('http://forestfire.nifos.go.kr','_blank','noopener')">
+        data-url="http://forestfire.nifos.go.kr">
         산불위험예보
       </button>
 
       <button class="btn-purple"
-        onclick="window.open('https://mudeung.github.io/rescue/searchems.html','_blank','noopener')">
+        data-url="https://mudeung.github.io/rescue/searchems.html">
         비상대응 상황판
       </button>
 
       <button class="btn-purple"
-        onclick="window.open('https://www.knps.or.kr/front/portal/safe/acsCtrList.do?menuNo=8000340','_blank','noopener')">
+        data-url="https://www.knps.or.kr/front/portal/safe/acsCtrList.do?menuNo=8000340">
         탐방로 통제정보
       </button>
 
     </div>
   </div>
 
-  <!-- 상세정보 -->
+  <!-- 시스템 통신 상태 -->
   <div class="section">
 
     <div class="section-title">
-      📋 상세 상황 정보
+      📡 시스템 연결 상태
     </div>
 
     <div class="panel-body">
 
-      <div id="infoPanel" class="info-panel">
-        마커를 선택하면 산불 발생 이력 및 위치 상세정보가 표시됩니다.
+      <div class="status-line">
+        <span>GIS 지도</span>
+        <strong id="mapConnectionStatus">
+          확인 중
+        </strong>
+      </div>
+
+      <div class="status-line">
+        <span>서버 상태</span>
+        <strong id="gasConnectionStatus">
+          확인 중
+        </strong>
+      </div>
+
+      <div class="status-line">
+        <span>GPS 지원</span>
+        <strong id="gpsConnectionStatus">
+          확인 중
+        </strong>
       </div>
 
     </div>
   </div>
 
 </aside>
+
 </main>
 
 <div class="footer">
-  MUDEUNGSAN FOREST FIRE CONTROL CENTER · 산불 예방 및 안전관리
+  MUDEUNGSAN FOREST FIRE CONTROL CENTER
+  · 산불 예방 및 안전관리
+  · GIS INTEGRATED MONITORING SYSTEM
 </div>
 
 <script>
@@ -681,6 +835,700 @@ let vehicles = [];
 let currentPopup = null;
 
 
+// ==========================================
+// 도로 측정 공통 변수
+// ==========================================
+
+let roadSelectMode = false;
+let roadWidthMode = false;
+
+let roadLayers = [];
+let roadMeasureLayers = [];
+
+let roadWidthPoints = [];
+
+let selectedRoad = null;
+
+// 소방차 진입 참고 기준 폭
+const FIRE_TRUCK_MIN_WIDTH = 3.0;
+
+const OVERPASS_URL =
+  "https://overpass-api.de/api/interpreter";
+
+
+// ==========================================
+// 거리 계산 (미터)
+// ==========================================
+
+function roadDistance(a, b) {
+
+  const R = 6371000;
+
+  const rad = v => v * Math.PI / 180;
+
+  const dLat = rad(b.lat - a.lat);
+  const dLng = rad(b.lng - a.lng);
+
+  const lat1 = rad(a.lat);
+  const lat2 = rad(b.lat);
+
+  const h =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos(lat1) *
+    Math.cos(lat2) *
+    Math.sin(dLng / 2) ** 2;
+
+  return 2 * R *
+    Math.atan2(Math.sqrt(h), Math.sqrt(1 - h));
+
+}
+
+
+// ==========================================
+// 도로 길이 계산
+// ==========================================
+
+function calculateRoadLength(points) {
+
+  let length = 0;
+
+  for (let i = 1; i < points.length; i++) {
+
+    length += roadDistance(
+      points[i - 1],
+      points[i]
+    );
+
+  }
+
+  return length;
+
+}
+
+
+// ==========================================
+// 도로 폭 데이터 읽기
+// ==========================================
+
+function getRoadWidth(tags) {
+
+  const value =
+    tags.width ||
+    tags.est_width ||
+    "";
+
+  if (!value) return null;
+
+  const match = String(value).match(
+    /^\s*(\d+(?:\.\d+)?)\s*(?:m|meter|meters)?\s*$/i
+  );
+
+  if (!match) return null;
+
+  const width = Number(match[1]);
+
+  return width > 0 && width < 100
+    ? width
+    : null;
+
+}
+
+
+// ==========================================
+// 도로 중심선과 클릭 위치의 거리
+// ==========================================
+
+function pointToSegmentDistance(
+  point,
+  a,
+  b
+) {
+
+  const latScale = 111320;
+
+  const lngScale =
+    111320 * Math.cos(point.lat * Math.PI / 180);
+
+  const ax = (a.lng - point.lng) * lngScale;
+  const ay = (a.lat - point.lat) * latScale;
+
+  const bx = (b.lng - point.lng) * lngScale;
+  const by = (b.lat - point.lat) * latScale;
+
+  const dx = bx - ax;
+  const dy = by - ay;
+
+  const denominator = dx * dx + dy * dy;
+
+  let t = denominator
+    ? -(ax * dx + ay * dy) / denominator
+    : 0;
+
+  t = Math.max(0, Math.min(1, t));
+
+  return Math.hypot(
+    ax + t * dx,
+    ay + t * dy
+  );
+
+}
+
+
+// ==========================================
+// 도로 자동 검색
+// OpenStreetMap Overpass API
+// ==========================================
+
+async function searchRoad(lat, lng) {
+
+  const panel = $("roadInfo");
+
+  // 이전 도로 검색 결과 제거
+  roadLayers.forEach(layer => {
+    map.removeLayer(layer);
+  });
+
+  roadLayers = [];
+  selectedRoad = null;
+
+  panel.textContent =
+    "주변 도로 데이터를 검색하고 있습니다...";
+
+  const query = `
+    [out:json][timeout:20];
+    way(around:35,${lat},${lng})
+      ["highway"]
+      ["highway"!~"footway|path|steps|cycleway|pedestrian"];
+    out tags geom;
+  `;
+
+  try {
+
+    const response = await fetch(
+      OVERPASS_URL,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type":
+            "application/x-www-form-urlencoded;charset=UTF-8"
+        },
+        body: "data=" + encodeURIComponent(query)
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error("도로 데이터 서버 응답 오류");
+    }
+
+    const data = await response.json();
+
+    if (!data.elements || !data.elements.length) {
+
+      panel.textContent =
+        "주변에서 등록된 도로를 찾지 못했습니다.\n" +
+        "위성영상 확인 또는 직접 폭 측정을 이용하세요.";
+
+      return;
+
+    }
+
+    // 클릭 위치에서 가장 가까운 도로 선택
+    let nearest = null;
+    let minDistance = Infinity;
+
+    data.elements.forEach(way => {
+
+      const points = (way.geometry || []).map(p => ({
+        lat: p.lat,
+        lng: p.lon
+      }));
+
+      for (let i = 1; i < points.length; i++) {
+
+        const distance = pointToSegmentDistance(
+          { lat, lng },
+          points[i - 1],
+          points[i]
+        );
+
+        if (distance < minDistance) {
+
+          minDistance = distance;
+
+          nearest = {
+            way,
+            points
+          };
+
+        }
+
+      }
+
+    });
+
+    if (!nearest || minDistance > 25) {
+
+      panel.textContent =
+        "클릭 위치에서 가까운 도로를 찾지 못했습니다.";
+
+      return;
+
+    }
+
+    showRoadResult(
+      nearest.way,
+      nearest.points,
+      minDistance
+    );
+
+  } catch (error) {
+
+    console.error("도로 검색 오류:", error);
+
+    panel.textContent =
+      "도로 검색에 실패했습니다.\n" +
+      "네트워크 또는 Overpass 서버 상태를 확인하세요.";
+
+  }
+
+}
+
+
+// ==========================================
+// 도로 검색 결과 표시
+// ==========================================
+
+function showRoadResult(way, points, distance) {
+
+  roadLayers.forEach(layer => map.removeLayer(layer));
+
+  roadLayers = [];
+
+  selectedRoad = {
+    id: way.id,
+    points,
+    tags: way.tags || {}
+  };
+
+  const tags = way.tags || {};
+
+  const length = calculateRoadLength(points);
+
+  const width = getRoadWidth(tags);
+
+  // 도로 중심선 표시
+  const line = L.polyline(
+    points.map(p => [p.lat, p.lng]),
+    {
+      color: "#fbbf24",
+      weight: 7,
+      opacity: 0.95
+    }
+  ).addTo(map);
+
+  roadLayers.push(line);
+
+  // 클릭 위치에서 도로까지 연결선
+  const info = $("roadInfo");
+
+  const area = width !== null
+    ? length * width
+    : null;
+
+  const roadName =
+    tags.name ||
+    tags.ref ||
+    tags.highway ||
+    "이름 없는 도로";
+
+  const widthText = width !== null
+    ? width.toFixed(2) + " m"
+    : "등록된 폭 정보 없음";
+
+  const areaText = area !== null
+    ? area.toFixed(2) + " ㎡ (추정)"
+    : "폭 정보 필요";
+
+  info.textContent = [
+    "도로명: " + roadName,
+    "도로 유형: " + (tags.highway || "-"),
+    "OSM 도로 ID: " + way.id,
+    "도로 길이: " + length.toFixed(2) + " m",
+    "도로 폭: " + widthText,
+    "도로 면적: " + areaText,
+    "선택 위치와 도로 거리: " +
+      distance.toFixed(2) + " m",
+    "",
+    width === null
+      ? "※ 도로 양쪽 경계를 직접 측정하세요."
+      : "※ 폭×길이로 계산한 추정 면적입니다."
+  ].join("\n");
+
+  line.bindPopup(
+    "<b>" + escapeHTML(roadName) + "</b><br>" +
+    "길이: " + length.toFixed(2) + "m<br>" +
+    "폭: " + widthText
+  ).openPopup();
+
+  map.fitBounds(line.getBounds(), {
+    padding: [30, 30]
+  });
+
+}
+
+
+// ==========================================
+// 도로 폭 직접 측정
+// ==========================================
+
+function measureRoadWidth(point) {
+
+  roadWidthPoints.push(point);
+
+  const marker = L.circleMarker(
+    [point.lat, point.lng],
+    {
+      radius: 7,
+      color: "#ffffff",
+      weight: 2,
+      fillColor: "#22d3ee",
+      fillOpacity: 1
+    }
+  ).addTo(map);
+
+  roadMeasureLayers.push(marker);
+
+  // 첫 번째 경계 선택
+  if (roadWidthPoints.length === 1) {
+
+    $("roadInfo").textContent =
+      "첫 번째 도로 경계를 선택했습니다.\n" +
+      "이제 도로 반대편 경계를 클릭하세요.";
+
+    return;
+  }
+
+  const first = roadWidthPoints[0];
+  const second = roadWidthPoints[1];
+
+  // 도로 폭 계산
+  const width = roadDistance(first, second);
+
+  // ==========================================
+  // 소방차 진입 가능 여부 판정
+  // ==========================================
+
+  let fireTruckStatus = "";
+  let fireTruckColor = "";
+
+  if (width >= FIRE_TRUCK_MIN_WIDTH) {
+
+    fireTruckStatus = "폭 기준 충족";
+    fireTruckColor = "🟢";
+
+  } else {
+
+    fireTruckStatus = "폭 기준 미충족";
+    fireTruckColor = "🔴";
+
+  }
+ 
+  // ==========================================
+  // 도로 길이 및 면적 계산
+  // ==========================================
+
+  const areaNote =
+    "※ 면적은 도로 길이 × 측정 폭으로 계산한 추정값입니다.";
+
+  let measuredArea = null;
+  let roadLength = null;
+
+  if (selectedRoad) {
+
+    roadLength = calculateRoadLength(
+      selectedRoad.points
+    );
+
+    measuredArea = roadLength * width;
+
+  }
+
+  // ==========================================
+  // 측정선 표시
+  // ==========================================
+
+  const line = L.polyline(
+    [
+      [first.lat, first.lng],
+      [second.lat, second.lng]
+    ],
+    {
+      color: "#22d3ee",
+      weight: 4,
+      dashArray: "7,5"
+    }
+  ).addTo(map);
+
+  roadMeasureLayers.push(line);
+
+  // ==========================================
+  // 측정 폭 지도 팝업
+  // ==========================================
+
+  const middle = [
+    (first.lat + second.lat) / 2,
+    (first.lng + second.lng) / 2
+  ];
+
+  const widthLabel = L.marker(middle)
+    .addTo(map)
+    .bindPopup(
+      "📏 측정 도로 폭: " +
+      width.toFixed(2) + " m<br>" +
+      "🚒 소방차 진입 폭 기준: " +
+      fireTruckColor + " " +
+      fireTruckStatus
+    )
+    .openPopup();
+
+  roadMeasureLayers.push(widthLabel);
+
+  // ==========================================
+  // 측정 결과 표시
+  // ==========================================
+
+  $("roadInfo").textContent = [
+
+    "도로 폭 직접 측정 완료",
+    "",
+
+    "📏 측정 도로 폭: " +
+      width.toFixed(2) + " m",
+
+    roadLength !== null
+      ? "도로 길이: " +
+        roadLength.toFixed(2) + " m"
+      : "도로 길이: 미확인",
+
+    measuredArea !== null
+      ? "도로 면적 추정: " +
+        measuredArea.toFixed(2) + " ㎡"
+      : "도로 면적: 길이 정보 필요",
+
+    "",
+
+    "🚒 소방차 진입 여부: " +
+      fireTruckColor + " " +
+      fireTruckStatus,
+
+    "판정 기준: 도로 폭 3.0m 이상",
+
+    "",
+
+    "※ 폭 기준에 따른 1차 참고 판정입니다.",
+    "※ 실제 진입 여부는 경사도, 회전 반경,",
+    "노면 상태 및 장애물 확인이 필요합니다.",
+
+    "",
+    areaNote
+
+  ].join("\n");
+
+  // ==========================================
+  // 측정 모드 종료
+  // ==========================================
+
+  roadWidthMode = false;
+
+  $("roadWidthBtn").textContent =
+    "↔ 도로 양쪽 경계 측정 시작";
+
+  map.getContainer().style.cursor = "";
+
+}
+
+// ==========================================
+// 지도 클릭 처리
+// ==========================================
+
+function handleRoadMapClick(e) {
+
+  if (roadSelectMode) {
+
+    roadSelectMode = false;
+
+    $("roadSelectBtn").textContent =
+      "🛣 지도에서 도로 선택";
+
+    map.getContainer().style.cursor = "";
+
+    searchRoad(
+      e.latlng.lat,
+      e.latlng.lng
+    );
+
+    return true;
+
+  }
+
+  if (roadWidthMode) {
+
+    measureRoadWidth({
+      lat: e.latlng.lat,
+      lng: e.latlng.lng
+    });
+
+    return true;
+
+  }
+
+  return false;
+
+}
+
+
+// ==========================================
+// 도로 측정 버튼 이벤트
+// ==========================================
+
+$("roadSelectBtn").addEventListener(
+  "click",
+  function() {
+
+    roadSelectMode = !roadSelectMode;
+
+    roadWidthMode = false;
+
+    roadWidthPoints = [];
+
+    this.textContent = roadSelectMode
+      ? "지도에서 도로를 클릭하세요"
+      : "🛣 지도에서 도로 선택";
+
+    map.getContainer().style.cursor =
+      roadSelectMode ? "crosshair" : "";
+
+    $("roadWidthBtn").textContent =
+      "↔ 도로 양쪽 경계 측정 시작";
+
+  }
+);
+
+
+$("roadWidthBtn").addEventListener(
+  "click",
+  function() {
+
+    roadSelectMode = false;
+
+    roadWidthMode = !roadWidthMode;
+
+    roadWidthPoints = [];
+
+    this.textContent = roadWidthMode
+      ? "도로 반대편 경계를 클릭하세요"
+      : "↔ 도로 양쪽 경계 측정 시작";
+
+    $("roadSelectBtn").textContent =
+      "🛣 지도에서 도로 선택";
+
+    map.getContainer().style.cursor =
+      roadWidthMode ? "crosshair" : "";
+
+    $("roadInfo").textContent =
+      roadWidthMode
+        ? "도로 한쪽 경계를 먼저 클릭하세요."
+        : "직접 측정이 취소되었습니다.";
+
+  }
+);
+
+// 기존 지도 클릭 등록 모드 종료
+clickMode = false;
+
+$("addPointBtn").textContent =
+  "＋ 지도에서 클릭하여 표시";
+
+$("addPointBtn").style.background = "";
+ 
+// ==========================================
+// 위성영상 확인
+// ==========================================
+
+$("roadSatelliteBtn").addEventListener(
+  "click",
+  function() {
+
+    if (!map) return;
+
+    if (currentMapType !== "satellite") {
+
+      const current = mapTypes[currentMapType];
+
+      map.removeLayer(current);
+
+      satelliteLayer.addTo(map);
+
+      currentMapType = "satellite";
+
+      $("toggleMapTypeBtn").textContent =
+        "지형도 전환";
+
+    }
+
+    map.invalidateSize();
+
+  }
+);
+
+ 
+// ==========================================
+// 측정 결과 삭제
+// ==========================================
+
+$("roadClearBtn").addEventListener(
+  "click",
+  function() {
+
+    roadLayers.forEach(
+      layer => map.removeLayer(layer)
+    );
+
+    roadMeasureLayers.forEach(
+      layer => map.removeLayer(layer)
+    );
+
+    roadLayers = [];
+    roadMeasureLayers = [];
+
+    roadWidthPoints = [];
+
+    selectedRoad = null;
+
+    roadSelectMode = false;
+    roadWidthMode = false;
+
+    map.getContainer().style.cursor = "";
+
+    $("roadSelectBtn").textContent =
+      "🛣 지도에서 도로 선택";
+
+    $("roadWidthBtn").textContent =
+      "↔ 도로 양쪽 경계 측정 시작";
+
+    $("roadInfo").textContent =
+      "측정 결과를 삭제했습니다.";
+
+  }
+);
+
+ // 기존 지도 클릭 등록 모드 종료
+clickMode = false;
+
+$("addPointBtn").textContent =
+  "＋ 지도에서 클릭하여 표시";
+
+$("addPointBtn").style.background = "";
 
  // ==========================================
  // GitHub Pages ↔ Google Apps Script 연결
@@ -1030,7 +1878,7 @@ function updateFireCount() {
 }
 
 // ==========================================
-// 위험지역 개수 자동 표시
+// 산불 위험지역 개수 자동 표시
 // ==========================================
 
 function updateRiskCount() {
@@ -1115,8 +1963,14 @@ landslideData.forEach(item => {
 });
  
   // 지도 클릭 등록
-  map.on("click", function(e) {
+ map.on("click", function(e) {
 
+    // 도로 측정 기능 우선 처리
+    if (handleRoadMapClick(e)) {
+        return;
+    }
+
+    // 기존 산불 위험지역 등록 기능
     if (!clickMode) return;
 
     const item = addFireMarker(
@@ -1127,7 +1981,7 @@ landslideData.forEach(item => {
 
       "risk",
 
-      "현장 위험지역",
+      "현장산불 위험지역",
 
       "지도 클릭으로 등록한 산불·위험 지점",
 
@@ -1277,9 +2131,10 @@ function showMarkerInfo(item) {
 
   }
 
-  const typeName = item.type === "fire"
-    ? "산불·위험 지점"
-    : "수관 보관함";
+// 마커 유형별 명칭과 색상
+const typeName = item.type === "fire"
+  ? "수관 보관함"
+  : "산불 위험지역";
 
 const color = item.type === "fire"
   ? "#38bdf8"
@@ -1501,6 +2356,18 @@ $("addPointBtn").addEventListener(
 
     clickMode = !clickMode;
 
+// 도로 측정 모드 종료
+roadSelectMode = false;
+roadWidthMode = false;
+
+roadWidthPoints = [];
+
+$("roadSelectBtn").textContent =
+  "🛣 지도에서 도로 선택";
+
+$("roadWidthBtn").textContent =
+  "↔ 도로 양쪽 경계 측정 시작";
+   
     if (clickMode) {
 
       this.textContent =
@@ -2073,11 +2940,23 @@ if (vehicleLocationBtn) {
             $("vehicleName")?.value.trim() ||
             "진화 차량 GPS";
 
-          const vehicle = addVehicle(
-            name,
-            lat,
-            lng
-          );
+// 동일 차량이 이미 등록되어 있으면 위치 갱신
+const existing = vehicles.find(
+  item => item.name === name
+);
+
+let vehicle;
+
+if (existing) {
+  updateVehicle(name, lat, lng);
+  vehicle = existing;
+} else {
+  vehicle = addVehicle(name, lat, lng);
+}
+
+if (vehicle) {
+  map.setView([lat, lng], 16);
+}
 
           if (vehicle) {
 
@@ -2250,7 +3129,131 @@ if (document.readyState === "loading") {
   startMap();
 
 }
+ 
+// =========================================================
+// PREVENT CONTEXT MENU
+// =========================================================
 
+document.addEventListener(
+
+    "contextmenu",
+
+    function(e){
+
+        e.preventDefault();
+
+        return false;
+
+    }
+
+);
+
+
+// =========================================================
+// KEYBOARD PROTECTION
+// =========================================================
+
+document.addEventListener(
+
+    "keydown",
+
+    function(e){
+
+        if(e.key === "F12"){
+
+            e.preventDefault();
+
+            return false;
+
+        }
+
+
+        if(
+            e.ctrlKey &&
+            e.key.toLowerCase() === "u"
+        ){
+
+            e.preventDefault();
+
+            return false;
+
+        }
+
+
+        if(
+            e.ctrlKey &&
+            e.shiftKey &&
+            e.key.toLowerCase() === "i"
+        ){
+
+            e.preventDefault();
+
+            return false;
+
+        }
+
+
+        if(
+            e.ctrlKey &&
+            e.shiftKey &&
+            e.key.toLowerCase() === "j"
+        ){
+
+            e.preventDefault();
+
+            return false;
+
+        }
+
+
+        if(
+            e.ctrlKey &&
+            e.shiftKey &&
+            e.key.toLowerCase() === "c"
+        ){
+
+            e.preventDefault();
+
+            return false;
+
+        }
+
+
+        if(
+            e.ctrlKey &&
+            e.key.toLowerCase() === "s"
+        ){
+
+            e.preventDefault();
+
+            return false;
+
+        }
+
+    }
+
+);
+
+// ==========================================
+// 산불 대응 시스템 외부 링크 연결
+// ==========================================
+
+document.querySelectorAll(
+  '.quick-links button[data-url]'
+).forEach(button => {
+
+  button.addEventListener('click', function() {
+
+    const url = this.dataset.url;
+
+    if (!url) return;
+
+    window.open(url, '_blank', 'noopener');
+
+  });
+
+}); 
+ 
 </script>
 
 </body>
