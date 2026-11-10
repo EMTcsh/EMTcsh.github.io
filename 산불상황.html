@@ -126,10 +126,17 @@ h1 {
 }
 
 .clock {
-  color:var(--cyan);
-  font-size:13px;
-  font-weight:700;
-  font-variant-numeric:tabular-nums;
+  color: #22d3ee;
+  font-size: 15px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 1px;
+  padding: 10px 14px;
+  background: #081625;
+  border: 1px solid #24516a;
+  border-radius: 6px;
+  box-shadow: 0 0 12px #22d3ee18;
+  white-space: nowrap;
 }
 
 main {
@@ -409,6 +416,74 @@ main {
   #map { min-height:380px; }
   .stat-value { font-size:23px; }
 }
+
+
+/* =====================================
+   모바일 화면 시계 최적화
+===================================== */
+
+.header-inner {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: nowrap;
+}
+
+.clock {
+  display: block;
+  white-space: nowrap;
+  font-size: 15px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
+/* 모바일 최적화 */
+@media (max-width: 650px) {
+
+  .header-inner {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  .header-right {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+    gap: 8px;
+  }
+
+  .clock {
+    display: block;
+    width: 100%;
+    text-align: center;
+    font-size: 16px;
+    padding: 12px 5px;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+  }
+
+  .system-status {
+    width: 100%;
+    text-align: center;
+  }
+
+  h1 {
+    font-size: 19px;
+  }
+
+}
+ 
+ 
 </style>
 </head>
 
@@ -835,6 +910,53 @@ let vehicles = [];
 let currentPopup = null;
 
 
+// ==========================================
+// 실시간 디지털 시계 (한국 표준시)
+// ==========================================
+
+
+function updateSystemClock() {
+
+  const clock = document.getElementById("systemClock");
+
+  if (!clock) return;
+
+  const now = new Date();
+
+  const formatter = new Intl.DateTimeFormat("ko-KR", {
+    timeZone: "Asia/Seoul",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    weekday: "short",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hourCycle: "h23"
+  });
+
+  const parts = {};
+
+  formatter.formatToParts(now).forEach(part => {
+    parts[part.type] = part.value;
+  });
+
+  clock.textContent =
+    `${parts.year}-${parts.month}-${parts.day} ` +
+    `${parts.weekday} ` +
+    `${parts.hour}:${parts.minute}:${parts.second}`;
+
+}
+
+updateSystemClock();
+
+if (window.clockTimer) {
+  clearInterval(window.clockTimer);
+}
+
+window.clockTimer = setInterval(updateSystemClock, 1000);
+
+ 
 // ==========================================
 // 도로 측정 공통 변수
 // ==========================================
@@ -2625,19 +2747,23 @@ function addVehicle(
     { icon: vehicleIcon }
   ).addTo(map);
 
-  const vehicle = {
+const vehicle = {
 
-    id: existingId,
+  id: existingId,
 
-    name,
+  name,
 
-    lat,
+  lat,
 
-    lng,
+  lng,
 
-    marker
+  marker,
 
-  };
+  registeredAt: new Date().toISOString(),
+
+  updatedAt: new Date().toISOString()
+
+};
 
   vehicles.push(vehicle);
 
@@ -2710,11 +2836,13 @@ function updateVehicle(name, lat, lng) {
 
   }
 
-  vehicle.lat = lat;
+vehicle.lat = lat;
 
-  vehicle.lng = lng;
+vehicle.lng = lng;
 
-  vehicle.marker.setLatLng([lat, lng]);
+vehicle.updatedAt = new Date().toISOString();
+
+vehicle.marker.setLatLng([lat, lng]);
 
   vehicle.marker.setPopupContent(`
 
@@ -2758,6 +2886,29 @@ function updateVehicle(name, lat, lng) {
 
 }
 
+// ==========================================
+// 차량 시각 변환 함수 (한국 표준시)
+// ==========================================
+
+function formatVehicleTime(value) {
+
+  if (!value) return "-";
+
+  return new Intl.DateTimeFormat("ko-KR", {
+
+    timeZone: "Asia/Seoul",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hourCycle: "h23"
+
+  }).format(new Date(value));
+
+}
+ 
 
 // ==========================================
 // ⑬ 차량 정보 표시
@@ -2767,13 +2918,7 @@ function updateVehicleInfo() {
 
   const panel = $("vehicleInfo");
 
-  if (!panel) {
-
-    console.warn("vehicleInfo HTML 요소가 없습니다.");
-
-    return;
-
-  }
+  if (!panel) return;
 
   panel.replaceChildren();
 
@@ -2792,25 +2937,47 @@ function updateVehicleInfo() {
 
     div.className = "resource-item";
 
+    const info = document.createElement("div");
+
     const name = document.createElement("strong");
 
     name.textContent = "🚒 " + vehicle.name;
 
-    const position = document.createElement("span");
+    const position = document.createElement("div");
 
     position.textContent =
+      "좌표: " +
       vehicle.lat.toFixed(6) +
       ", " +
       vehicle.lng.toFixed(6);
 
-    div.append(name, position);
+    const updated = document.createElement("div");
 
-    panel.appendChild(div);
+    updated.style.color = "#22d3ee";
+
+    updated.textContent =
+      "마지막 갱신: " +
+      formatVehicleTime(vehicle.updatedAt);
+
+    info.append(name, position, updated);
+
+    div.appendChild(info);
+
+        panel.appendChild(div);
 
   });
 
-}
+  // ==========================================
+  // 진화 차량 등록 대수 자동 갱신
+  // ==========================================
 
+  $("vehicleCount").textContent =
+    String(vehicles.length).padStart(2, "0");
+
+  $("resourceVehicleCount").textContent =
+    vehicles.length + " 대";
+
+}
 
 // ==========================================
 // ⑭ 차량 등록 버튼
