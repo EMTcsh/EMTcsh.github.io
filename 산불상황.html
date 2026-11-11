@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#071321">
 
-<title>무등산 산불 통합관제센터</title>
+<title>무등산 산불 통합관제</title>
 
 <link rel="stylesheet"
  href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
@@ -35,6 +35,12 @@ body {
   font-family:"Pretendard","Malgun Gothic",sans-serif;
 }
 
+/* 암호 확인 전 본문 숨김 */
+body:not(.password-verified):not(.link-expired) > :not(#passwordPanel):not(#expiredPanel) {
+  visibility: hidden;
+}
+
+ 
 button,input {
   font-family:inherit;
 }
@@ -483,16 +489,135 @@ main {
 
 }
  
+/* 암호 입력창 */
+.password-panel {
+  width: min(420px, calc(100% - 32px));
+  max-width: 420px;
+  padding: 26px;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: var(--surface);
+  color: #20242a;
+  box-shadow: 0 18px 60px #00000025;
+}
+
+.password-panel::backdrop {
+  background: #111827cc;
+  backdrop-filter: blur(3px);
+}
+
+.password-panel h2 {
+  margin: 0 0 10px;
+  color: #20242a;
+  font-size: 22px;
+  text-align: left;
+}
+
+.password-panel > p {
+  color: var(--muted);
+  line-height: 1.6;
+  text-align: left;
+}
+
+/* 암호 입력과 확인 버튼 한 줄 배치 */
+.password-input-row {
+  display: flex;
+  align-items: stretch;
+  gap: 10px;
+  width: 100%;
+  margin-top: 20px;
+}
+
+.password-input-row input {
+  flex: 1;
+  width: 0;
+  min-width: 0;
+  height: 46px;
+  padding: 0 12px;
+  border: 1px solid #aeb5be;
+  border-radius: 10px;
+  background: #fff;
+  color: #20242a;
+  font: inherit;
+}
+
+.password-input-row .button {
+  flex: 0 0 82px;
+  width: 82px;
+  height: 46px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 10px;
+  background: var(--primary);
+  color: #fff;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+#passwordStatus {
+  min-height: 24px;
+  margin: 8px 0 0;
+  color: var(--primary);
+  font-size: 14px;
+  text-align: left;
+}
+
+.password-input-row input:focus-visible,
+.password-input-row button:focus-visible {
+  outline: 3px solid #1769aa;
+  outline-offset: 3px;
+}
  
 </style>
 </head>
 
 <body>
+ 
+<!-- =========================================
+     암호 입력창
+========================================= -->
+<dialog id="passwordPanel"
+        class="password-panel"
+        aria-labelledby="passwordHeading"
+        aria-describedby="passwordDescription">
 
+  <h2 id="passwordHeading">암호 입력</h2>
+
+  <p id="passwordDescription">
+    접속하려면 접속 암호를 입력하세요.
+  </p>
+
+  <form id="passwordForm">
+    <div class="password-input-row">
+
+      <input
+        id="accessPassword"
+        name="accessPassword"
+        type="password"
+        placeholder="접속 암호"
+        autocomplete="current-password"
+        maxlength="128"
+        required
+      >
+
+      <button type="submit" class="button">
+        확인
+      </button>
+
+    </div>
+
+    <p id="passwordStatus"
+       role="status"
+       aria-live="polite"></p>
+  </form>
+</dialog>
+
+ 
 <header>
   <div class="header-inner">
     <div>
-      <h1>🛡 무등산 산불 통합관제센터</h1>
+      <h1>🛡 무등산 산불 통합관제</h1>
       <div class="subtitle">
         MUDEUNGSAN NATIONAL PARK · FOREST FIRE CONTROL SYSTEM
       </div>
@@ -518,7 +643,7 @@ main {
   <div class="stats">
 
     <div class="stat-card">
-      <div class="stat-label">산불 위험지역</div>
+      <div class="stat-label">산불 발생지역</div>
       <div class="stat-value red">
         <span id="riskCount">00</span>
         <small>개소</small>
@@ -599,7 +724,7 @@ main {
       <div id="map"></div>
 
       <div class="map-legend">
-        <span><i class="dot red"></i>산불 위험지역</span>
+        <span><i class="dot red"></i>산불 발생지역</span>
         <span><i class="dot blue"></i>수관 보관함</span>
         <span><i class="dot green"></i>진화 차량</span>
         <span><i class="dot yellow"></i>도로 분석</span>
@@ -731,16 +856,16 @@ main {
     </div>
   </div>
 
-  <!-- 위험지역 등록 -->
+  <!-- 산불 발생지역 등록 -->
   <div class="section">
 
     <div class="section-title">
-      📍 산불 위험지역 등록
+      🚨 산불 발생지역 등록
     </div>
 
     <div class="panel-body">
 
-      <h3>좌표 검색</h3>
+      <h3>📍 좌표 검색</h3>
 
       <input id="latInput" type="number" step="any"
         placeholder="위도 (예: 35.1286)">
@@ -749,12 +874,12 @@ main {
         placeholder="경도 (예: 126.9699)">
 
       <button id="addByCoordBtn" class="btn-green">
-        ＋ 좌표로 위험지역 등록
+        ＋ 좌표로 산불 발생지역 등록
       </button>
 
       <hr style="border-color:#263c53;margin:12px 0">
 
-      <h3>주소 검색</h3>
+      <h3>📍 주소 검색</h3>
 
       <input id="addressInput" placeholder="주소 입력">
 
@@ -891,6 +1016,48 @@ main {
 
 <script>
 
+/* =========================================
+   암호 확인
+========================================= */
+(function () {
+  // 만료된 링크는 암호 확인 절차를 실행하지 않음
+  if (window.MUDEUNG_LINK_EXPIRED) {
+    return;
+  }
+
+  const PASSWORD = "knps";
+
+  const panel = document.getElementById("passwordPanel");
+  const form = document.getElementById("passwordForm");
+  const input = document.getElementById("accessPassword");
+  const status = document.getElementById("passwordStatus");
+
+  // 암호창 표시
+  panel.showModal();
+  input.focus();
+
+  form.addEventListener("submit", function (event) {
+    event.preventDefault();
+
+    if (input.value === PASSWORD) {
+      document.body.classList.add("password-verified");
+
+      panel.close();
+      input.value = "";
+      status.textContent = "";
+    } else {
+      status.textContent = "암호가 올바르지 않습니다.";
+      input.value = "";
+      input.focus();
+    }
+  });
+
+  // ESC로 암호창 닫기 방지
+  panel.addEventListener("cancel", function (event) {
+    event.preventDefault();
+  });
+})();
+ 
 // ==========================================
 // ① 공통 변수 및 설정
 // ==========================================
@@ -2000,7 +2167,7 @@ function updateFireCount() {
 }
 
 // ==========================================
-// 산불 위험지역 개수 자동 표시
+// 산불 발생지역 개수 자동 표시
 // ==========================================
 
 function updateRiskCount() {
@@ -2092,7 +2259,7 @@ landslideData.forEach(item => {
         return;
     }
 
-    // 기존 산불 위험지역 등록 기능
+    // 기존 산불 발생지역 등록 기능
     if (!clickMode) return;
 
     const item = addFireMarker(
@@ -2103,7 +2270,7 @@ landslideData.forEach(item => {
 
       "risk",
 
-      "현장산불 위험지역",
+      "현장산불 발생지역",
 
       "지도 클릭으로 등록한 산불·위험 지점",
 
@@ -2183,7 +2350,7 @@ function addFireMarker(
 
 const color = type === "fire"
   ? "#38bdf8"  // 수관 보관함: 파란색
-  : "#fb5365"; // 산불 위험지역: 빨간색
+  : "#fb5365"; // 산불 발생지역: 빨간색
 
   const circle = L.circle(
     [lat, lng],
@@ -2220,7 +2387,7 @@ const color = type === "fire"
     google.script.run
       .withSuccessHandler(function(result) {
         item.id = result.id;
-        console.log("위험지역 저장 완료");
+        console.log("산불 발생지역 저장 완료");
       })
       .withFailureHandler(gasError)
       .saveRisk({
@@ -2256,7 +2423,7 @@ function showMarkerInfo(item) {
 // 마커 유형별 명칭과 색상
 const typeName = item.type === "fire"
   ? "수관 보관함"
-  : "산불 위험지역";
+  : "산불 발생지역";
 
 const color = item.type === "fire"
   ? "#38bdf8"
@@ -2375,7 +2542,7 @@ const color = item.type === "fire"
       marker => marker !== item
     );
 
-     // 위험지역 통계 자동 갱신
+     // 산불 발생지역 통계 자동 갱신
    updateRiskCount();
    
     map.closePopup();
@@ -2412,7 +2579,7 @@ const color = item.type === "fire"
 
 
 // ==========================================
-// ⑦ 좌표로 위험지역 등록
+// ⑦ 좌표로 산불 발생지역 등록
 // ==========================================
 
 $("addByCoordBtn").addEventListener(
@@ -2440,7 +2607,7 @@ if (!validateCoordinates(lat, lng)) {
       lat,
       lng,
       "risk",
-      "좌표 등록 위험지역",
+      "좌표 등록 산불 발생지역",
       "사용자가 좌표로 등록한 산불·위험 지점",
       getToday()
 
@@ -2461,7 +2628,7 @@ if (!validateCoordinates(lat, lng)) {
 
 
 // ==========================================
-// ⑧ 지도 클릭으로 위험지역 등록
+// ⑧ 지도 클릭으로 산불 발생지역 등록
 // ==========================================
 
 $("addPointBtn").addEventListener(
@@ -3185,7 +3352,7 @@ function loadGasData() {
 
     .withSuccessHandler(function(data) {
 
-      // ① 위험지역 불러오기
+      // ① 산불 발생지역 불러오기
       (data.risks || []).forEach(item => {
 
         const lat = Number(item.lat);
@@ -3207,7 +3374,7 @@ function loadGasData() {
           lat,
           lng,
           item.type,
-          item.title || item.name || "위험지역",
+          item.title || item.name || "산불 발생지역",
           item.description || "",
           item.date || "",
           false,
